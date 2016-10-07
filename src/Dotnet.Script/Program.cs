@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
-using Microsoft.DotNet.ProjectModel.Compilation;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script
@@ -93,7 +89,15 @@ namespace Dotnet.Script
 
             var script = CSharpScript.Create(code, opts, typeof(ScriptingHost));
             var c = script.GetCompilation();
+
             var scriptResult = script.RunAsync(new ScriptingHost()).Result;
+
+            if (scriptResult.Exception != null)
+            {
+                Console.Write("Script execution resulted in an exception.");
+                Console.WriteLine(scriptResult.Exception.Message);
+                Console.WriteLine(scriptResult.Exception.StackTrace);
+            }
         }
     }
 
