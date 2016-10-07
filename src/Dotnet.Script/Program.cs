@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
+using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script
@@ -30,25 +31,48 @@ namespace Dotnet.Script
 
         public static void Main(string[] args)
         {
-            if (args.Length == 0 || string.Equals(args[0], "-help", StringComparison.OrdinalIgnoreCase))
+            var commandLineApplication = new CommandLineApplication(throwOnUnexpectedArg: false);
+
+            var file = commandLineApplication.Argument("script", "Path to CSX script");
+            var config = commandLineApplication.Option("-c |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
+            var debugMode = commandLineApplication.Option("-d |--debug", "Enables debug output.", CommandOptionType.NoValue);
+
+            commandLineApplication.HelpOption("-? | -h | --help");
+            commandLineApplication.OnExecute(() =>
             {
-                Console.WriteLine("Usage: dotnet script {PATH}");
-                return;
+                if (!string.IsNullOrWhiteSpace(file.Value))
+                {
+                    RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue());
+                }
+                return 0;
+            });
+
+            commandLineApplication.Execute(args);
+        }
+
+        private static void RunScript(string file, string config, bool debugMode)
+        {
+            if (debugMode)
+            {
+                Console.WriteLine($"Using debug mode.");
+                Console.WriteLine($"Using configuration: {config}");
             }
 
-            var file = args[0];
             if (!File.Exists(file))
             {
                 Console.WriteLine($"Couldn't find file '{file}'");
                 return;
             }
 
-            var directory = Path.IsPathRooted(args[0]) ? Path.GetDirectoryName(file) : Directory.GetCurrentDirectory();
-
+            var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Directory.GetCurrentDirectory();
             var runtimeContext = ProjectContext.CreateContextForEachTarget(directory).First();
-            Console.WriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
 
-            var projectExporter = runtimeContext.CreateExporter("Debug");
+            if (debugMode)
+            {
+                Console.WriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
+            }
+
+            var projectExporter = runtimeContext.CreateExporter(config);
             var runtimeDependencies = new HashSet<string>();
             var projectDependencies = projectExporter.GetDependencies();
 
@@ -59,7 +83,10 @@ namespace Dotnet.Script
                 foreach (var runtimeAssembly in runtimeAssemblies.GetDefaultAssets())
                 {
                     var runtimeAssemblyPath = runtimeAssembly.ResolvedPath;
-                    Console.WriteLine($"Found runtime dependency at context for '{runtimeAssemblyPath}'");
+                    if (debugMode)
+                    {
+                        Console.WriteLine($"Discovered runtime dependency for '{runtimeAssemblyPath}'");
+                    }
                     runtimeDependencies.Add(runtimeAssemblyPath);
                 }
             }
@@ -76,14 +103,20 @@ namespace Dotnet.Script
 
             foreach (var assemblyName in assemblyNames)
             {
-                Console.WriteLine("Inherited from dotnet script => " + assemblyName.FullName);
+                if (debugMode)
+                {
+                    Console.WriteLine("Adding reference to a default dependency => " + assemblyName.FullName);
+                }
                 var assembly = Assembly.Load(assemblyName);
                 opts = opts.AddReferences(assembly);
             }
 
             foreach (var runtimeDep in runtimeDependencies)
             {
-                Console.WriteLine("Runtime dep => " + runtimeDep);
+                if (debugMode)
+                {
+                    Console.WriteLine("Adding reference to a runtime dependency => " + runtimeDep);
+                }
                 opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep));
             }
 
