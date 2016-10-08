@@ -33,7 +33,7 @@ In the above case we will pull in `Automapper` and `Newtonsoft.Json` from nuget 
 
 2> Run `dotnet restore`
 
-3> Now, create a C# script beside the `project.json`. You can use any types from the packages you listed in your dependencies. You can also use anything that is part of [Microsoft.NETCore.App]().
+3> Now, create a C# script beside the `project.json`. You can use any types from the packages you listed in your dependencies. You can also use anything that is part of [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App/). Your script will essentially be a `netcoreapp1.0` app.
 
 For example:
 
