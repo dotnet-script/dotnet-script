@@ -4,6 +4,10 @@ Run C# scripts from the .NET CLI.
 
 ## Usage
 
+> What do I need to install? 
+
+Nothing - everything is self contained from the `project.json` level.
+
 1> Create a `project.json` file with your dependencies and reference `Dotnet.Script` as a `tool`:
 
 ```
