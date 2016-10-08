@@ -18,6 +18,12 @@ namespace Dotnet.Script
         {
         }
 
+        public RemoteFileResolver(string baseDir): this(ImmutableArray.Create(new string[0]),
+            baseDir)
+        {
+            
+        }
+
         public RemoteFileResolver(ImmutableArray<string> searchPaths, string baseDirectory)
         {
             _fileBasedResolver = new SourceFileResolver(searchPaths, baseDirectory);
@@ -56,7 +62,7 @@ namespace Dotnet.Script
             if (response.IsSuccessStatusCode)
             {
                 var responseFile = response.Content.ReadAsStringAsync().Result;
-                if (!string.IsNullOrWhiteSpace(responseFile))
+                if (!string.IsNullOrWhiteSpace(responseFile) && !_remoteFiles.ContainsKey(path))
                 {
                     _remoteFiles.Add(path, responseFile);
                 }

@@ -98,7 +98,7 @@ namespace Dotnet.Script
                 AddImports(_namespaces).
                 AddReferences(_assemblies).
                 AddReferences(typeof(ScriptingHost).GetTypeInfo().Assembly).
-                WithSourceResolver(new RemoteFileResolver());
+                WithSourceResolver(new RemoteFileResolver(directory));
 
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
             var assemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x => x.FullName.ToLowerInvariant().StartsWith("system.") || x.FullName.ToLowerInvariant().StartsWith("mscorlib"));
