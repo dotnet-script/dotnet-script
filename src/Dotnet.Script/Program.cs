@@ -97,7 +97,8 @@ namespace Dotnet.Script
             var opts = ScriptOptions.Default.
                 AddImports(_namespaces).
                 AddReferences(_assemblies).
-                AddReferences(typeof(ScriptingHost).GetTypeInfo().Assembly);
+                AddReferences(typeof(ScriptingHost).GetTypeInfo().Assembly).
+                WithSourceResolver(new RemoteFileResolver());
 
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
             var assemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId);
@@ -122,20 +123,25 @@ namespace Dotnet.Script
             }
 
             var script = CSharpScript.Create(code, opts, typeof(ScriptingHost));
-            var c = script.GetCompilation();
-
-            var scriptResult = script.RunAsync(new ScriptingHost()).Result;
-
-            if (scriptResult.Exception != null)
+            var compilation = script.GetCompilation();
+            var diagnostics = compilation.GetDiagnostics();
+            if (diagnostics.Any())
             {
-                Console.Write("Script execution resulted in an exception.");
-                Console.WriteLine(scriptResult.Exception.Message);
-                Console.WriteLine(scriptResult.Exception.StackTrace);
+                foreach (var diagnostic in diagnostics)
+                {
+                    Console.WriteLine(diagnostic.GetMessage());
+                }
+            }
+            else
+            {
+                var scriptResult = script.RunAsync(new ScriptingHost()).Result;
+                if (scriptResult.Exception != null)
+                {
+                    Console.Write("Script execution resulted in an exception.");
+                    Console.WriteLine(scriptResult.Exception.Message);
+                    Console.WriteLine(scriptResult.Exception.StackTrace);
+                }
             }
         }
-    }
-
-    public class ScriptingHost
-    {
     }
 }

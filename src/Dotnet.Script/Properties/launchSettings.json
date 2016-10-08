@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Dotnet.Script": {
+      "commandName": "Project",
+      "commandLineArgs": "run"
+    }
+  }
+}
