@@ -101,7 +101,7 @@ namespace Dotnet.Script
                 WithSourceResolver(new RemoteFileResolver());
 
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var assemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId);
+            var assemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x => x.FullName.ToLowerInvariant().StartsWith("system.") || x.FullName.ToLowerInvariant().StartsWith("mscorlib"));
 
             foreach (var assemblyName in assemblyNames)
             {
