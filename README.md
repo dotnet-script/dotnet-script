@@ -108,3 +108,7 @@ Hello from foo.csx
 ![](http://lh6.ggpht.com/-z_BeRqTrtJE/T2sLYAo-WmI/AAAAAAAAAck/0Co6XilSmNU/WorksOnMyMachine_thumb%25255B4%25255D.png?imgmax=800)
 
 ![](http://i110.photobucket.com/albums/n86/MCRfreek92/i-have-no-idea-what-im-doing-dog.jpg)
+
+## License
+
+[MIT](https://github.com/filipw/dotnet-script/blob/master/LICENSE)
