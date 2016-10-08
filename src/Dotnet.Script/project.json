@@ -1,14 +1,30 @@
 ﻿{
-  "version": "0.1.0-*",
+  "version": "0.1.1-*",
+  "description": "Dotnet CLI tool allowing you to run C# (CSX) scripts.",
+  "authors": [ "filipw" ],
+  "packOptions": {
+    "summary": "Dotnet CLI tool allowing you to run C# (CSX) scripts.",
+    "tags": [ "dotnet", "cli", "script", "csx", "csharp", "roslyn" ],
+    "owners": [ "filipw" ],
+    "title": "Dotnet.Script",
+    "iconUrl": "https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png",
+    "projectUrl": "https://github.com/filipw/dotnet-script",
+    "licenseUrl": "https://github.com/filipw/dotnet-script/blob/master/LICENSE",
+    "requireLicenseAcceptance": false,
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/filipw/dotnet-script.git"
+    }
+  },
   "buildOptions": {
     "emitEntryPoint": true,
     "outputName": "dotnet-script",
-    "debugType": "portable" 
+    "debugType": "portable"
   },
 
   "dependencies": {
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc3-003121",
-    "Microsoft.CodeAnalysis.CSharp.Scripting": "2.0.0-beta3",   
+    "Microsoft.CodeAnalysis.CSharp.Scripting": "2.0.0-beta3",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.NETCore.App": {
       "type": "platform",
@@ -22,6 +38,6 @@
         "dotnet5.6",
         "portable-net45+win8"
       ]
-    } 
-  } 
+    }
+  }
 }
