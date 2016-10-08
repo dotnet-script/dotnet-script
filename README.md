@@ -19,7 +19,7 @@ Run C# scripts from the .NET CLI.
   },
   "tools": {
     "Dotnet.Script": {
-      "version": "0.1.0",
+      "version": "0.1.1-beta",
       "imports": [
         "portable-net45+win8",
         "dnxcore50"
