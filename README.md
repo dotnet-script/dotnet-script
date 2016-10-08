@@ -62,6 +62,47 @@ hello!
 AutoMapper.MapperConfiguration
 ```
 
+## Advanced usage
+
+You can also reference a script from a script - this is achieved via the `#load` directive.
+
+Imagine having the following 2 CSX files side by side - `bar.csx` and `foo.csx`:
+
+```csharp
+Console.WriteLine("Hello from bar.csx");
+```
+
+```csharp
+#load "bar.csx"
+Console.WriteLine("Hello from foo.csx");
+```
+
+Running `dotnet script foo.csx` will produce:
+
+```shell
+Hello from bar.csx
+Hello from foo.csx
+```
+
+Even better, `Dotnet.Script` supports loading CSX references over HTTP too. You could now modify the `foo.csx` accordingly:
+
+```csharp
+#load "https://gist.githubusercontent.com/filipw/9a79bb00e4905dfb1f48757a3ff12314/raw/adbfe5fade49c1b35e871c49491e17e6675dd43c/foo.csx"
+#load "bar.csx"
+
+Console.WriteLine("Hello from foo.csx");
+```
+
+In this case, the first dependency is loaded as `string` and parsed from an HTTP source - in this case a [gist](https://gist.githubusercontent.com/filipw/9a79bb00e4905dfb1f48757a3ff12314/raw/adbfe5fade49c1b35e871c49491e17e6675dd43c/foo.csx) I set up beforehand.
+
+Running `dotnet script foo.csx` now, will produce:
+
+```shell
+Hello from a gist
+Hello from bar.csx
+Hello from foo.csx
+```
+
 ## Issues and problems
 
 ![](http://lh6.ggpht.com/-z_BeRqTrtJE/T2sLYAo-WmI/AAAAAAAAAck/0Co6XilSmNU/WorksOnMyMachine_thumb%25255B4%25255D.png?imgmax=800)
