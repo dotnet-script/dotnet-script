@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 
 namespace Dotnet.Script
 {
@@ -6,8 +7,10 @@ namespace Dotnet.Script
     {
         public IReadOnlyList<string> ScriptArgs { get; internal set; }
 
-        public string CurrentDirectory { get; internal set; }
+        public string ScriptDirectory { get; internal set; }
 
-        public string CurrentScript { get; internal set; }
+        public string ScriptPath { get; internal set; }
+
+        public Assembly ScriptAssembly { get; internal set; }
     }
 }

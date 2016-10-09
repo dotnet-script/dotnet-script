@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.CommandLineUtils;
@@ -124,7 +127,8 @@ namespace Dotnet.Script
                 opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep));
             }
 
-            var script = CSharpScript.Create(code, opts, typeof(ScriptingHost));
+            var loader = new InteractiveAssemblyLoader();
+            var script = CSharpScript.Create(code, opts, typeof(ScriptingHost), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
             if (diagnostics.Any())
@@ -139,9 +143,10 @@ namespace Dotnet.Script
             {
                 var host = new ScriptingHost
                 {
-                    CurrentDirectory = directory,
-                    CurrentScript = file,
-                    ScriptArgs = scriptArgs
+                    ScriptDirectory = directory,
+                    ScriptPath = file,
+                    ScriptArgs = scriptArgs,
+                    ScriptAssembly = script.GetScriptAssembly(loader)
                 };
 
                 var scriptResult = script.RunAsync(host).Result;
@@ -154,4 +159,5 @@ namespace Dotnet.Script
             }
         }
     }
+
 }
