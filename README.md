@@ -2,6 +2,12 @@
 
 Run C# scripts from the .NET CLI.
 
+## Prerequisites
+
+> What do I need to install? 
+
+Nothing - everything is self contained from the `project.json` level. Just make sure you have .NET Core installed and `dotnet` available in your PATH.
+
 ## Usage
 
 1> Create a `project.json` file with your dependencies and reference `Dotnet.Script` as a `tool`:
@@ -19,7 +25,7 @@ Run C# scripts from the .NET CLI.
   },
   "tools": {
     "Dotnet.Script": {
-      "version": "0.1.0",
+      "version": "0.1.1-beta",
       "imports": [
         "portable-net45+win8",
         "dnxcore50"
