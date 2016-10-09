@@ -17,7 +17,7 @@ namespace Dotnet.Script
     public class Program
     {
         private static IEnumerable<Assembly> _assemblies = new[]
-{
+        {
             typeof(object).GetTypeInfo().Assembly,
             typeof(Enumerable).GetTypeInfo().Assembly
         };
@@ -35,6 +35,8 @@ namespace Dotnet.Script
             var commandLineApplication = new CommandLineApplication(throwOnUnexpectedArg: false);
 
             var file = commandLineApplication.Argument("script", "Path to CSX script");
+
+            var scriptArgs = commandLineApplication.Option("-a |--arg <args>", "Arguments to pass to a script. Multiple values supported", CommandOptionType.MultipleValue);
             var config = commandLineApplication.Option("-c |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
             var debugMode = commandLineApplication.Option("-d |--debug", "Enables debug output.", CommandOptionType.NoValue);
 
@@ -43,7 +45,7 @@ namespace Dotnet.Script
             {
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue());
+                    RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), scriptArgs.HasValue() ? scriptArgs.Values : new List<string>());
                 }
                 return 0;
             });
@@ -51,7 +53,7 @@ namespace Dotnet.Script
             commandLineApplication.Execute(args);
         }
 
-        private static void RunScript(string file, string config, bool debugMode)
+        private static void RunScript(string file, string config, bool debugMode, List<string> scriptArgs)
         {
             if (debugMode)
             {
@@ -129,12 +131,20 @@ namespace Dotnet.Script
             {
                 foreach (var diagnostic in diagnostics)
                 {
+                    Console.Write("There is an error in the script.");
                     Console.WriteLine(diagnostic.GetMessage());
                 }
             }
             else
             {
-                var scriptResult = script.RunAsync(new ScriptingHost()).Result;
+                var host = new ScriptingHost
+                {
+                    CurrentDirectory = directory,
+                    CurrentScript = file,
+                    ScriptArgs = scriptArgs
+                };
+
+                var scriptResult = script.RunAsync(host).Result;
                 if (scriptResult.Exception != null)
                 {
                     Console.Write("Script execution resulted in an exception.");
