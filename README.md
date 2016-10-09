@@ -70,6 +70,8 @@ AutoMapper.MapperConfiguration
 
 ## Advanced usage
 
+### Referencing local script from a script
+
 You can also reference a script from a script - this is achieved via the `#load` directive.
 
 Imagine having the following 2 CSX files side by side - `bar.csx` and `foo.csx`:
@@ -90,6 +92,8 @@ Hello from bar.csx
 Hello from foo.csx
 ```
 
+### Referencing an HTTP-based script from a script
+
 Even better, `Dotnet.Script` supports loading CSX references over HTTP too. You could now modify the `foo.csx` accordingly:
 
 ```csharp
@@ -107,6 +111,23 @@ Running `dotnet script foo.csx` now, will produce:
 Hello from a gist
 Hello from bar.csx
 Hello from foo.csx
+```
+
+### Passing arguments to scripts
+
+You can pass arguments to the script the following way:
+
+```
+dotnet script foo.csx -a arg1 -a arg2 -a arg3
+```
+
+Then you can access the arguments in the script context using a global `ScriptArgs` collection:
+
+```
+foreach (var arg in ScriptArgs)
+{
+    Console.WriteLine(arg);
+}
 ```
 
 ## Issues and problems
