@@ -10,6 +10,8 @@ namespace Dotnet.Script
         public static Assembly GetScriptAssembly(this Script<object> script, InteractiveAssemblyLoader loader)
         {
             // force creation of lazy evaluator
+            // this does not execute the script code but it will emit the assembly
+            // and load it via InteractiveAssemblyLoader
             var scriptDelegate = script.CreateDelegate();
 
             var loadedAssembliesBySimpleNameProperty = loader.GetType().GetField("_loadedAssembliesBySimpleName", BindingFlags.NonPublic | BindingFlags.Instance);
