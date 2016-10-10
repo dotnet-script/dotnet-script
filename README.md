@@ -1,6 +1,6 @@
 # dotnet-script
 
-Run C# scripts from the .NET CLI.
+Run C# scripts from the .NET CLI. [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script/)
 
 ## Prerequisites
 
