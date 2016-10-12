@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
@@ -30,40 +33,32 @@ namespace Dotnet.Script
             "System.Collections.Generic"
         };
 
-        readonly TextWriter _stderr;
+        private readonly TextWriter _stderr;
 
         public ScriptRunner(TextWriter stderr)
         {
             _stderr = stderr ?? TextWriter.Null;
         }
 
-        void Write(string s) => _stderr.Write(s);
-        void WriteLine(string s) => _stderr.WriteLine(s);
+        protected void Write(string s) => _stderr.Write(s);
+        protected void WriteLine(string s) => _stderr.WriteLine(s);
 
-        public async Task<TReturn> Execute<TReturn>(ScriptContext context)
+        protected virtual Action<string> VerboseWriteLine => s => { };
+
+        protected ScriptCompilationContext<TReturn> GetCompilationContext<TReturn>(ScriptContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            if (context.DebugMode)
-            {
-                WriteLine($"Using debug mode.");
-                WriteLine($"Using configuration: {context.Configuration}");
-            }
-
             if (!File.Exists(context.FilePath))
             {
-                // TODO throw an exception instead
                 WriteLine($"Couldn't find file '{context.FilePath}'");
-                return default(TReturn);
+                throw new Exception($"Couldn't find file '{context.FilePath}'");
             }
 
             var directory = Path.IsPathRooted(context.FilePath) ? Path.GetDirectoryName(context.FilePath) : Directory.GetCurrentDirectory();
             var runtimeContext = ProjectContext.CreateContextForEachTarget(directory).First();
 
-            if (context.DebugMode)
-            {
-                WriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
-            }
+            VerboseWriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
 
             var projectExporter = runtimeContext.CreateExporter(context.Configuration);
             var runtimeDependencies = new HashSet<string>();
@@ -76,17 +71,16 @@ namespace Dotnet.Script
                 foreach (var runtimeAssembly in runtimeAssemblies.GetDefaultAssets())
                 {
                     var runtimeAssemblyPath = runtimeAssembly.ResolvedPath;
-                    if (context.DebugMode)
-                    {
-                        WriteLine($"Discovered runtime dependency for '{runtimeAssemblyPath}'");
-                    }
+                    VerboseWriteLine($"Discovered runtime dependency for '{runtimeAssemblyPath}'");
                     runtimeDependencies.Add(runtimeAssemblyPath);
                 }
             }
 
-            var code = File.ReadAllText(context.FilePath);
+            //var code = File.ReadAllText(context.FilePath);
+            var sourceText = SourceText.From(new FileStream(context.FilePath, FileMode.Open), Encoding.UTF8);
 
             var opts = ScriptOptions.Default.
+                WithFilePath(context.FilePath).
                 AddImports(DefaultNamespaces).
                 AddReferences(DefaultAssemblies).
                 AddReferences(typeof(ScriptingHost).GetTypeInfo().Assembly).
@@ -97,41 +91,31 @@ namespace Dotnet.Script
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
-                if (context.DebugMode)
-                {
-                    WriteLine("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
-                }
+                VerboseWriteLine("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
                 var assembly = Assembly.Load(inheritedAssemblyName);
                 opts = opts.AddReferences(assembly);
             }
 
             foreach (var runtimeDep in runtimeDependencies)
             {
-                if (context.DebugMode)
-                {
-                    Console.WriteLine("Adding reference to a runtime dependency => " + runtimeDep);
-                }
+                VerboseWriteLine("Adding reference to a runtime dependency => " + runtimeDep);
                 opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep));
             }
 
             var loader = new InteractiveAssemblyLoader();
-            var script = CSharpScript.Create<TReturn>(code, opts, typeof(ScriptingHost), loader);
+            var script = CSharpScript.Create<TReturn>(sourceText.ToString(), opts, typeof(ScriptingHost), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
 
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 foreach (var diagnostic in diagnostics)
+                {
                     WriteLine(diagnostic.ToString());
+                }
 
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.",
                                                     diagnostics);
-            }
-
-            if (context.DebugMode)
-            {
-                foreach (var diagnostic in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning))
-                    WriteLine(diagnostic.ToString());
             }
 
             var host = new ScriptingHost
@@ -139,18 +123,30 @@ namespace Dotnet.Script
                 ScriptDirectory = directory,
                 ScriptPath = context.FilePath,
                 ScriptArgs = context.ScriptArgs,
-                ScriptAssembly = script.GetScriptAssembly(loader)
             };
 
-            var scriptResult = await script.RunAsync(host).ConfigureAwait(false);
-            if (scriptResult.Exception != null)
+            return new ScriptCompilationContext<TReturn>(compilation, script, host, sourceText, loader);
+        }
+
+        public virtual async Task<TReturn> Execute<TReturn>(ScriptContext context)
+        {
+            var compilationContext = GetCompilationContext<TReturn>(context);
+            compilationContext.Host.ScriptAssembly = compilationContext.Script.GetScriptAssembly(compilationContext.Loader);
+
+            var scriptResult = await compilationContext.Script.RunAsync(compilationContext.Host).ConfigureAwait(false);
+            return ProcessScriptState(scriptResult);
+        }
+
+        protected TReturn ProcessScriptState<TReturn>(ScriptState<TReturn> scriptState)
+        {
+            if (scriptState.Exception != null)
             {
                 Write("Script execution resulted in an exception.");
-                WriteLine(scriptResult.Exception.Message);
-                WriteLine(scriptResult.Exception.StackTrace);
+                WriteLine(scriptState.Exception.Message);
+                WriteLine(scriptState.Exception.StackTrace);
             }
 
-            return scriptResult.ReturnValue;
+            return scriptState.ReturnValue;
         }
     }
 }
