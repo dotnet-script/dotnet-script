@@ -118,42 +118,39 @@ namespace Dotnet.Script
             var script = CSharpScript.Create<TReturn>(code, opts, typeof(ScriptingHost), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
+
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 foreach (var diagnostic in diagnostics)
-                {
-                    Write("There is an error in the script.");
                     WriteLine(diagnostic.ToString());
-                }
+
+                throw new CompilationErrorException("Script compilation failed due to one or more errors.",
+                                                    diagnostics);
             }
-            else
+
+            if (context.DebugMode)
             {
-                if (context.DebugMode)
-                {
-                    foreach (var diagnostic in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning))
-                        WriteLine(diagnostic.ToString());
-                }
-
-                var host = new ScriptingHost
-                {
-                    ScriptDirectory = directory,
-                    ScriptPath = context.FilePath,
-                    ScriptArgs = context.ScriptArgs,
-                    ScriptAssembly = script.GetScriptAssembly(loader)
-                };
-
-                var scriptResult = await script.RunAsync(host).ConfigureAwait(false);
-                if (scriptResult.Exception != null)
-                {
-                    Write("Script execution resulted in an exception.");
-                    WriteLine(scriptResult.Exception.Message);
-                    WriteLine(scriptResult.Exception.StackTrace);
-                }
-
-                return scriptResult.ReturnValue;
+                foreach (var diagnostic in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning))
+                    WriteLine(diagnostic.ToString());
             }
 
-            return default(TReturn);
+            var host = new ScriptingHost
+            {
+                ScriptDirectory = directory,
+                ScriptPath = context.FilePath,
+                ScriptArgs = context.ScriptArgs,
+                ScriptAssembly = script.GetScriptAssembly(loader)
+            };
+
+            var scriptResult = await script.RunAsync(host).ConfigureAwait(false);
+            if (scriptResult.Exception != null)
+            {
+                Write("Script execution resulted in an exception.");
+                WriteLine(scriptResult.Exception.Message);
+                WriteLine(scriptResult.Exception.StackTrace);
+            }
+
+            return scriptResult.ReturnValue;
         }
     }
 }
