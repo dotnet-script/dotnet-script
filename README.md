@@ -148,6 +148,8 @@ foreach (var arg in ScriptArgs)
 
 ![](http://i110.photobucket.com/albums/n86/MCRfreek92/i-have-no-idea-what-im-doing-dog.jpg)
 
+Due to [this .NET CLI bug](https://github.com/dotnet/cli/issues/4198) in order to debug the cloned solution, comment out the `buildOptions > outputName` property in `project.json`.
+
 ## Credits
 
 Special thanks to [Bernhard Richter](https://twitter.com/bernhardrichter?lang=en) for his help with .NET Core debugging.
