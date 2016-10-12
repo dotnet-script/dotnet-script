@@ -24,7 +24,7 @@
 
   "dependencies": {
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc3-003121",
-    "Microsoft.CodeAnalysis.CSharp.Scripting": "2.0.0-beta3",
+    "Microsoft.CodeAnalysis.CSharp.Scripting": "1.3.2",
     "Microsoft.Extensions.CommandLineUtils": "1.0.0",
     "Microsoft.NETCore.App": {
       "type": "platform",
