@@ -14,7 +14,7 @@ namespace Dotnet.Script
         private readonly SourceFileResolver _fileBasedResolver;
 
         public RemoteFileResolver() :
-            this(ImmutableArray<string>.Empty, AppContext.BaseDirectory) {}
+            this(AppContext.BaseDirectory) {}
 
         public RemoteFileResolver(string baseDir) :
             this(ImmutableArray<string>.Empty, baseDir) {}
