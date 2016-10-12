@@ -70,6 +70,16 @@ hello!
 AutoMapper.MapperConfiguration
 ```
 
+## Debugging
+
+`dotnet-script` supports debugging scripts. To debug a script using Visual Studio Code, create a folder `.vscode` next to your script and put the following `launch.json` file inside:
+
+```
+{    "version": "0.2.0",    "configurations": [        {            "name": ".NET Script Debug",            "type": "coreclr",            "request": "launch",            "program": "<path-to>\\dotnet-script.dll",            "args": ["${workspaceRoot}\\<name of your script>.csx","-d"],            "cwd": "${workspaceRoot}",            "externalConsole": false,            "stopAtEntry": false,            "internalConsoleOptions": "openOnSessionStart"        },        {            "name": ".NET Core Attach",            "type": "coreclr",            "request": "attach",            "processId": "${command.pickProcess}"        }    ]}
+```
+
+You can now set breakpoints inside your CSX file and launch the debugger using F5.
+
 ## Advanced usage
 
 ### Referencing local script from a script
@@ -139,6 +149,10 @@ foreach (var arg in ScriptArgs)
 ![](http://i110.photobucket.com/albums/n86/MCRfreek92/i-have-no-idea-what-im-doing-dog.jpg)
 
 Due to [this .NET CLI bug](https://github.com/dotnet/cli/issues/4198) in order to debug the cloned solution, comment out the `buildOptions > outputName` property in `project.json`.
+
+## Credits
+
+Special thanks to [Bernhard Richter](https://twitter.com/bernhardrichter?lang=en) for his help with .NET Core debugging.
 
 ## License
 

@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "Automapper": "5.1.1",
+    "Newtonsoft.Json": "9.0.1"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+    }
+  },
+  "tools": {
+    "Dotnet.Script": {
+      "version": "0.1.0",
+      "imports": [
+        "portable-net45+win8",
+        "dnxcore50"
+      ]
+    }
+  }
+}
