@@ -7,14 +7,5 @@
   "frameworks": {
     "netcoreapp1.0": {
     }
-  },
-  "tools": {
-    "Dotnet.Script": {
-      "version": "0.1.0",
-      "imports": [
-        "portable-net45+win8",
-        "dnxcore50"
-      ]
-    }
   }
 }
