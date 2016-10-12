@@ -115,7 +115,7 @@ namespace Dotnet.Script
             }
 
             var loader = new InteractiveAssemblyLoader();
-            var script = CSharpScript.Create(code, opts, typeof(ScriptingHost), loader);
+            var script = CSharpScript.Create<TReturn>(code, opts, typeof(ScriptingHost), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
