@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -13,16 +13,11 @@ namespace Dotnet.Script
         private readonly Dictionary<string, string> _remoteFiles = new Dictionary<string, string>();
         private readonly SourceFileResolver _fileBasedResolver;
 
-        public RemoteFileResolver() : this(ImmutableArray.Create(new string[0]),
-            AppContext.BaseDirectory)
-        {
-        }
+        public RemoteFileResolver() :
+            this(AppContext.BaseDirectory) {}
 
-        public RemoteFileResolver(string baseDir): this(ImmutableArray.Create(new string[0]),
-            baseDir)
-        {
-            
-        }
+        public RemoteFileResolver(string baseDir) :
+            this(ImmutableArray<string>.Empty, baseDir) {}
 
         public RemoteFileResolver(ImmutableArray<string> searchPaths, string baseDirectory)
         {
