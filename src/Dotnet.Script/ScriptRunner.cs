@@ -122,7 +122,7 @@ namespace Dotnet.Script
             {
                 ScriptDirectory = directory,
                 ScriptPath = context.FilePath,
-                ScriptArgs = context.ScriptArgs,
+                Args = context.ScriptArgs,
             };
 
             return new ScriptCompilationContext<TReturn>(compilation, script, host, sourceText, loader);

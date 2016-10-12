@@ -5,7 +5,7 @@ namespace Dotnet.Script
 {
     public class ScriptingHost
     {
-        public IReadOnlyList<string> ScriptArgs { get; internal set; }
+        public IReadOnlyList<string> Args { get; internal set; }
 
         public string ScriptDirectory { get; internal set; }
 
