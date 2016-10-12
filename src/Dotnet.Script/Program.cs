@@ -1,38 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script
 {
     public class Program
     {
-        private static IEnumerable<Assembly> _assemblies = new[]
-        {
-            typeof(object).GetTypeInfo().Assembly,
-            typeof(Enumerable).GetTypeInfo().Assembly
-        };
-
-        private static IEnumerable<string> _namespaces = new[]
-        {
-            "System",
-            "System.IO",
-            "System.Linq",
-            "System.Collections.Generic"
-        };
-
         const string DebugFlagShort = "-d";
         const string DebugFlagLong = "--debug";
 
@@ -79,111 +53,10 @@ namespace Dotnet.Script
 
         private static void RunScript(string file, string config, bool debugMode, List<string> scriptArgs)
         {
-            if (debugMode)
-            {
-                Console.WriteLine($"Using debug mode.");
-                Console.WriteLine($"Using configuration: {config}");
-            }
+            var runner = new ScriptRunner();
+            var context = new ScriptContext(file, config, debugMode, scriptArgs);
 
-            if (!File.Exists(file))
-            {
-                Console.WriteLine($"Couldn't find file '{file}'");
-                return;
-            }
-
-            var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Directory.GetCurrentDirectory();
-            var runtimeContext = ProjectContext.CreateContextForEachTarget(directory).First();
-
-            if (debugMode)
-            {
-                Console.WriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
-            }
-
-            var projectExporter = runtimeContext.CreateExporter(config);
-            var runtimeDependencies = new HashSet<string>();
-            var projectDependencies = projectExporter.GetDependencies();
-
-            foreach (var projectDependency in projectDependencies)
-            {
-                var runtimeAssemblies = projectDependency.RuntimeAssemblyGroups;
-
-                foreach (var runtimeAssembly in runtimeAssemblies.GetDefaultAssets())
-                {
-                    var runtimeAssemblyPath = runtimeAssembly.ResolvedPath;
-                    if (debugMode)
-                    {
-                        Console.WriteLine($"Discovered runtime dependency for '{runtimeAssemblyPath}'");
-                    }
-                    runtimeDependencies.Add(runtimeAssemblyPath);
-                }
-            }
-
-            var code = File.ReadAllText(file);
-
-            var opts = ScriptOptions.Default.
-                AddImports(_namespaces).
-                AddReferences(_assemblies).
-                AddReferences(typeof(ScriptingHost).GetTypeInfo().Assembly).
-                WithSourceResolver(new RemoteFileResolver(directory));
-
-            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var assemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x => x.FullName.ToLowerInvariant().StartsWith("system.") || x.FullName.ToLowerInvariant().StartsWith("mscorlib"));
-
-            foreach (var assemblyName in assemblyNames)
-            {
-                if (debugMode)
-                {
-                    Console.WriteLine("Adding reference to a default dependency => " + assemblyName.FullName);
-                }
-                var assembly = Assembly.Load(assemblyName);
-                opts = opts.AddReferences(assembly);
-            }
-
-            foreach (var runtimeDep in runtimeDependencies)
-            {
-                if (debugMode)
-                {
-                    Console.WriteLine("Adding reference to a runtime dependency => " + runtimeDep);
-                }
-                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep));
-            }
-
-            var loader = new InteractiveAssemblyLoader();
-            var script = CSharpScript.Create(code, opts, typeof(ScriptingHost), loader);
-            var compilation = script.GetCompilation();
-            var diagnostics = compilation.GetDiagnostics();
-            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
-            {
-                foreach (var diagnostic in diagnostics)
-                {
-                    Console.Write("There is an error in the script.");
-                    Console.WriteLine(diagnostic.GetMessage());
-                }
-            }
-            else
-            {
-                if (debugMode)
-                {
-                    foreach (var diagnostic in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning))
-                        Console.Error.WriteLine(diagnostic);
-                }
-
-                var host = new ScriptingHost
-                {
-                    ScriptDirectory = directory,
-                    ScriptPath = file,
-                    ScriptArgs = scriptArgs,
-                    ScriptAssembly = script.GetScriptAssembly(loader)
-                };
-
-                var scriptResult = script.RunAsync(host).Result;
-                if (scriptResult.Exception != null)
-                {
-                    Console.Write("Script execution resulted in an exception.");
-                    Console.WriteLine(scriptResult.Exception.Message);
-                    Console.WriteLine(scriptResult.Exception.StackTrace);
-                }
-            }
+            runner.Execute<object>(context).GetAwaiter().GetResult();
         }
     }
 
