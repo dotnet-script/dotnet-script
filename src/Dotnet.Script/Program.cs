@@ -53,7 +53,7 @@ namespace Dotnet.Script
 
         private static void RunScript(string file, string config, bool debugMode, List<string> scriptArgs)
         {
-            var runner = new ScriptRunner();
+            var runner = new ScriptRunner(Console.Error);
             var context = new ScriptContext(file, config, debugMode, scriptArgs);
 
             runner.Execute<object>(context).GetAwaiter().GetResult();

@@ -30,19 +30,30 @@ namespace Dotnet.Script
             "System.Collections.Generic"
         };
 
+        readonly TextWriter _stderr;
+
+        public ScriptRunner(TextWriter stderr)
+        {
+            _stderr = stderr ?? TextWriter.Null;
+        }
+
+        void Write(string s) => _stderr.Write(s);
+        void WriteLine(string s) => _stderr.WriteLine(s);
+
         public async Task Execute<TReturn>(ScriptContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             if (context.DebugMode)
             {
-                Console.WriteLine($"Using debug mode.");
-                Console.WriteLine($"Using configuration: {context.Configuration}");
+                WriteLine($"Using debug mode.");
+                WriteLine($"Using configuration: {context.Configuration}");
             }
 
             if (!File.Exists(context.FilePath))
             {
-                Console.Error.WriteLine($"Couldn't find file '{context.FilePath}'");
+                // TODO throw an exception instead
+                WriteLine($"Couldn't find file '{context.FilePath}'");
                 return;
             }
 
@@ -51,7 +62,7 @@ namespace Dotnet.Script
 
             if (context.DebugMode)
             {
-                Console.WriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
+                WriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
             }
 
             var projectExporter = runtimeContext.CreateExporter(context.Configuration);
@@ -67,7 +78,7 @@ namespace Dotnet.Script
                     var runtimeAssemblyPath = runtimeAssembly.ResolvedPath;
                     if (context.DebugMode)
                     {
-                        Console.WriteLine($"Discovered runtime dependency for '{runtimeAssemblyPath}'");
+                        WriteLine($"Discovered runtime dependency for '{runtimeAssemblyPath}'");
                     }
                     runtimeDependencies.Add(runtimeAssemblyPath);
                 }
@@ -88,7 +99,7 @@ namespace Dotnet.Script
             {
                 if (context.DebugMode)
                 {
-                    Console.WriteLine("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
+                    WriteLine("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
                 }
                 var assembly = Assembly.Load(inheritedAssemblyName);
                 opts = opts.AddReferences(assembly);
@@ -111,8 +122,8 @@ namespace Dotnet.Script
             {
                 foreach (var diagnostic in diagnostics)
                 {
-                    Console.Write("There is an error in the script.");
-                    Console.WriteLine(diagnostic.GetMessage());
+                    Write("There is an error in the script.");
+                    WriteLine(diagnostic.ToString());
                 }
             }
             else
@@ -120,7 +131,7 @@ namespace Dotnet.Script
                 if (context.DebugMode)
                 {
                     foreach (var diagnostic in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning))
-                        Console.Error.WriteLine(diagnostic);
+                        WriteLine(diagnostic.ToString());
                 }
 
                 var host = new ScriptingHost
@@ -134,9 +145,9 @@ namespace Dotnet.Script
                 var scriptResult = await script.RunAsync(host).ConfigureAwait(false);
                 if (scriptResult.Exception != null)
                 {
-                    Console.Write("Script execution resulted in an exception.");
-                    Console.WriteLine(scriptResult.Exception.Message);
-                    Console.WriteLine(scriptResult.Exception.StackTrace);
+                    Write("Script execution resulted in an exception.");
+                    WriteLine(scriptResult.Exception.Message);
+                    WriteLine(scriptResult.Exception.StackTrace);
                 }
             }
         }
