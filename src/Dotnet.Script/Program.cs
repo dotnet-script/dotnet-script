@@ -152,7 +152,7 @@ namespace Dotnet.Script
             var script = CSharpScript.Create(code, opts, typeof(ScriptingHost), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
-            if (diagnostics.Any())
+            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 foreach (var diagnostic in diagnostics)
                 {
@@ -162,6 +162,12 @@ namespace Dotnet.Script
             }
             else
             {
+                if (debugMode)
+                {
+                    foreach (var diagnostic in diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warning))
+                        Console.Error.WriteLine(diagnostic);
+                }
+
                 var host = new ScriptingHost
                 {
                     ScriptDirectory = directory,
