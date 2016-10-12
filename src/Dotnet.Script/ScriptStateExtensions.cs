@@ -7,7 +7,7 @@ namespace Dotnet.Script
 {
     public static class ScriptAssemblyExtensions
     {
-        public static Assembly GetScriptAssembly(this Script<object> script, InteractiveAssemblyLoader loader)
+        public static Assembly GetScriptAssembly<TReturn>(this Script<TReturn> script, InteractiveAssemblyLoader loader)
         {
             // force creation of lazy evaluator
             // this does not execute the script code but it will emit the assembly

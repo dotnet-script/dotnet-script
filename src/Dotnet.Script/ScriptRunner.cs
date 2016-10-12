@@ -40,7 +40,7 @@ namespace Dotnet.Script
         void Write(string s) => _stderr.Write(s);
         void WriteLine(string s) => _stderr.WriteLine(s);
 
-        public async Task Execute<TReturn>(ScriptContext context)
+        public async Task<TReturn> Execute<TReturn>(ScriptContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -54,7 +54,7 @@ namespace Dotnet.Script
             {
                 // TODO throw an exception instead
                 WriteLine($"Couldn't find file '{context.FilePath}'");
-                return;
+                return default(TReturn);
             }
 
             var directory = Path.IsPathRooted(context.FilePath) ? Path.GetDirectoryName(context.FilePath) : Directory.GetCurrentDirectory();
@@ -115,7 +115,7 @@ namespace Dotnet.Script
             }
 
             var loader = new InteractiveAssemblyLoader();
-            var script = CSharpScript.Create(code, opts, typeof(ScriptingHost), loader);
+            var script = CSharpScript.Create<TReturn>(code, opts, typeof(ScriptingHost), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
             if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
@@ -149,7 +149,11 @@ namespace Dotnet.Script
                     WriteLine(scriptResult.Exception.Message);
                     WriteLine(scriptResult.Exception.StackTrace);
                 }
+
+                return scriptResult.ReturnValue;
             }
+
+            return default(TReturn);
         }
     }
 }
