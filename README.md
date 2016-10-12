@@ -138,6 +138,8 @@ foreach (var arg in ScriptArgs)
 
 ![](http://i110.photobucket.com/albums/n86/MCRfreek92/i-have-no-idea-what-im-doing-dog.jpg)
 
+Due to [this .NET CLI bug](https://github.com/dotnet/cli/issues/4198) in order to debug the cloned solution, comment out the `buildOptions > outputName` property in `project.json`.
+
 ## License
 
 [MIT](https://github.com/filipw/dotnet-script/blob/master/LICENSE)
