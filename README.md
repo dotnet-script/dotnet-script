@@ -72,7 +72,29 @@ AutoMapper.MapperConfiguration
 
 ## Debugging
 
-`dotnet-script` supports debugging scripts. To debug a script using Visual Studio Code, create a folder `.vscode` next to your script and put the following `launch.json` file inside:
+`dotnet-script` supports debugging C# scripts. In order to do that we'll need to be able to invoke `dotnet-script.dll` directly - rather than via `dotnet` CLI. To facilitate that, you will need to tweak one thing in the globally installed package though.
+
+Normally, the nuget package will be globally located on your machine (on Windows) in `C:\Users\{user}\.nuget\packages\` folder. Navigate there and locate the following file: `Dotnet.Script\<version>\lib\netcoreapp1.0\dotnet-script.runtimeconfig.json` file.
+
+Edit this file to include an `additionalProbingPath`.
+
+```
+{
+  "runtimeOptions": {
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "1.0.1"
+    },
+    "additionalProbingPaths": [
+      "C:\\Users\\{user}\\.nuget\\packages"
+    ]
+  }
+}
+```
+
+This is necessary to allows `dotnet-script.dll` to discover its dependencies. Normally it's not needed, as `dotnet` CLI takes care of that, but in case of debugging, we'll be invoking the `dotnet-script.dll` directly rather than via `dotnet` CLI.
+
+To debug a script using Visual Studio Code, create a folder `.vscode` next to your script and put the following `launch.json` file inside:
 
 ```
 {
@@ -82,7 +104,7 @@ AutoMapper.MapperConfiguration
             "name": ".NET Script Debug",
             "type": "coreclr",
             "request": "launch",
-            "program": "<path-to>\\dotnet-script.dll",
+            "program": "<path-to>\\dotnet-script.dll", //for example C:\\Users\\filip\\.nuget\\packages\\Dotnet.Script\\0.3.1-beta\\lib\\netcoreapp1.0\\dotnet-script.dll
             "args": ["${workspaceRoot}\\<name of your script>.csx","-d"],
             "cwd": "${workspaceRoot}",
             "externalConsole": false,
