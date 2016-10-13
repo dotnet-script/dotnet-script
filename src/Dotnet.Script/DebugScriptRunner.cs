@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.Scripting;
 
 namespace Dotnet.Script
 {
@@ -34,9 +33,11 @@ namespace Dotnet.Script
 
             foreach (var syntaxTree in compilationContext.Compilation.SyntaxTrees)
             {
+                // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/CSharp/Portable/Syntax/CSharpSyntaxTree.ParsedSyntaxTree.cs#L19
                 var encodingField = syntaxTree.GetType().GetField("_encodingOpt", BindingFlags.Instance | BindingFlags.NonPublic);
                 encodingField.SetValue(syntaxTree, Encoding.UTF8);
 
+                // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/CSharp/Portable/Syntax/CSharpSyntaxTree.ParsedSyntaxTree.cs#L21
                 var lazyTextField = syntaxTree.GetType().GetField("_lazyText", BindingFlags.Instance | BindingFlags.NonPublic);
                 lazyTextField.SetValue(syntaxTree, compilationContext.SourceText);
             }
@@ -49,11 +50,12 @@ namespace Dotnet.Script
 
                 if (emitResult.Success)
                 {
-                    var getBoundReferenceManagerMethod = compilationContext.Compilation.GetType().GetMethod("GetBoundReferenceManager", BindingFlags.Instance | BindingFlags.NonPublic);
-                    var referenceManager = getBoundReferenceManagerMethod.Invoke(compilationContext.Compilation, null);
+                    // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/Core/Portable/Compilation/Compilation.cs#L478
+                    var referenceManager = compilationContext.Compilation.Invoke<object>("GetBoundReferenceManager", BindingFlags.NonPublic);
 
-                    var getReferencedAssembliesMethod = referenceManager.GetType().GetMethod("GetReferencedAssemblies", BindingFlags.Instance | BindingFlags.NonPublic);
-                    var referencedAssemblies = getReferencedAssembliesMethod.Invoke(referenceManager, null) as IEnumerable<KeyValuePair<MetadataReference, IAssemblySymbol>>;
+                    var referencedAssemblies =
+                        // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/Core/Portable/ReferenceManager/CommonReferenceManager.State.cs#L34
+                        referenceManager.Invoke<IEnumerable<KeyValuePair<MetadataReference, IAssemblySymbol>>>("GetReferencedAssemblies", BindingFlags.NonPublic);
 
                     foreach (var referencedAssembly in referencedAssemblies)
                     {
@@ -67,15 +69,21 @@ namespace Dotnet.Script
                     peStream.Position = 0;
                     pdbStream.Position = 0;
 
-                    var loaderAseemblyLoadMethod = compilationContext.Loader.GetType().GetMethod("LoadAssemblyFromStream", BindingFlags.Instance | BindingFlags.NonPublic);
-                    var assembly = loaderAseemblyLoadMethod.Invoke(compilationContext.Loader, new[] { peStream, pdbStream }) as Assembly;
-                    compilationContext.Host.ScriptAssembly = assembly;
+                    var assembly = compilationContext.Host.ScriptAssembly =
+                        // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Scripting/Core/Hosting/AssemblyLoader/InteractiveAssemblyLoader.cs#L111
+                        compilationContext.Loader.Invoke<Stream, Stream, Assembly>(
+                            "LoadAssemblyFromStream", BindingFlags.NonPublic,
+                            peStream, pdbStream);
 
                     var entryPoint = compilationContext.Compilation.GetEntryPoint(default(CancellationToken));
                     var entryPointType = assembly.GetType(entryPoint.ContainingType.MetadataName, true, false).GetTypeInfo();
-                    var method = entryPointType.GetDeclaredMethod(entryPoint.MetadataName);
+                    var resultTask =
+                        entryPointType.
+                            GetDeclaredMethod(entryPoint.MetadataName).
+                            Invoke<object[], Task<TReturn>>(
+                                (object) null, // static invocation
+                                new object[] { compilationContext.Host, null });
 
-                    var resultTask = (Task<TReturn>)method.Invoke(null, new[] { new object[2] { compilationContext.Host, null } });
                     return resultTask;
                 }
             }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
@@ -14,49 +16,23 @@ namespace Dotnet.Script
             // and load it via InteractiveAssemblyLoader
             var scriptDelegate = script.CreateDelegate();
 
+            // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Scripting/Core/Hosting/AssemblyLoader/InteractiveAssemblyLoader.cs#L52
             var loadedAssembliesBySimpleNameProperty = loader.GetType().GetField("_loadedAssembliesBySimpleName", BindingFlags.NonPublic | BindingFlags.Instance);
-            var loadedAssembliesBySimpleName = loadedAssembliesBySimpleNameProperty?.GetValue(loader) as dynamic;
-
-            if (loadedAssembliesBySimpleName != null)
-            {
-                foreach (var loadedAssembly in loadedAssembliesBySimpleName)
-                {
-                    var loadedAssemblyValue = loadedAssembly.GetType().GetProperty("Value");
-                    var infoList = loadedAssemblyValue?.GetValue(loadedAssembly) as dynamic;
-
-                    if (infoList != null)
-                    {
-                        foreach (var infoObject in infoList)
-                        {
-                            var assemblyProperty = infoObject.GetType().GetField("Assembly");
-                            var assembly = assemblyProperty.GetValue(infoObject) as Assembly;
-                            if (assembly.FullName.StartsWith("\u211B*"))
-                            {
-                                return assembly;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        public static Assembly GetScriptAssembly(this ScriptState<object> scriptState)
-        {
-            var executionStateProperty = scriptState.GetType().GetProperty("ExecutionState", BindingFlags.NonPublic | BindingFlags.Instance);
-            var executionState = executionStateProperty?.GetValue(scriptState);
-            var submissionStatesField = executionState?.GetType().GetField("_submissionStates", BindingFlags.NonPublic | BindingFlags.Instance);
-            var submissions = submissionStatesField?.GetValue(executionState) as object[];
-
-            if (submissions == null || submissions.Length < 2)
-            {
+            var loadedAssembliesBySimpleName = loadedAssembliesBySimpleNameProperty?.GetValue(loader) as IDictionary;
+            if (loadedAssembliesBySimpleName == null)
                 return null;
-            }
 
-            // boohooo
-            var scriptAssembly = submissions[1].GetType().GetTypeInfo().Assembly;
-            return scriptAssembly;
+            var assemblies =
+                from entry in loadedAssembliesBySimpleName.GetEntries()
+                select entry.Value as IList into infoList
+                where infoList != null
+                from object infoObject in infoList
+                // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Scripting/Core/Hosting/AssemblyLoader/InteractiveAssemblyLoader.cs#L77
+                select (Assembly) infoObject.GetType().GetField("Assembly")?.GetValue(infoObject) into asm
+                where asm != null
+                select asm;
+
+            return assemblies.FirstOrDefault(asm => asm.FullName.StartsWith("\u211B*", StringComparison.Ordinal));
         }
     }
 }
