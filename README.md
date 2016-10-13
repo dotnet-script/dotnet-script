@@ -27,7 +27,7 @@ Nothing - everything is self contained from the `project.json` level. Just make 
   },
   "tools": {
     "Dotnet.Script": {
-      "version": "0.2.0-beta",
+      "version": "*",
       "imports": [
         "portable-net45+win8",
         "dnxcore50"
