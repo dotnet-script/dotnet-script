@@ -81,7 +81,7 @@ namespace Dotnet.Script
                 throw new Exception($"Couldn't find file '{file}'");
             }
 
-            var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Directory.GetCurrentDirectory();
+            var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Path.GetDirectoryName(Path.Combine(Directory.GetCurrentDirectory(), file));
             var sourceText = SourceText.From(new FileStream(file, FileMode.Open), Encoding.UTF8);
             var context = new ScriptContext(sourceText, directory, config, scriptArgs, file);
 
