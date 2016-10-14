@@ -61,10 +61,13 @@ namespace Dotnet.Script
             {
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), scriptArgs.HasValue() ? scriptArgs.Values : new List<string>());
+                    RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(),
+                        scriptArgs.HasValue() ? scriptArgs.Values : new List<string>());
                 }
-
-                app.ShowHelp();
+                else
+                {
+                    app.ShowHelp();
+                }
                 return 0;
             });
 
