@@ -50,14 +50,7 @@ namespace Dotnet.Script
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            if (!File.Exists(context.FilePath))
-            {
-                WriteLine($"Couldn't find file '{context.FilePath}'");
-                throw new Exception($"Couldn't find file '{context.FilePath}'");
-            }
-
-            var directory = Path.IsPathRooted(context.FilePath) ? Path.GetDirectoryName(context.FilePath) : Directory.GetCurrentDirectory();
-            var runtimeContext = ProjectContext.CreateContextForEachTarget(directory).First();
+            var runtimeContext = ProjectContext.CreateContextForEachTarget(context.WorkingDirectory).First();
 
             VerboseWriteLine($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
 
@@ -77,18 +70,22 @@ namespace Dotnet.Script
                 }
             }
 
-            //var code = File.ReadAllText(context.FilePath);
-            var sourceText = SourceText.From(new FileStream(context.FilePath, FileMode.Open), Encoding.UTF8);
-
             var opts = ScriptOptions.Default.
-                WithFilePath(context.FilePath).
                 AddImports(DefaultNamespaces).
                 AddReferences(DefaultAssemblies).
                 AddReferences(typeof(ScriptingHost).GetTypeInfo().Assembly).
-                WithSourceResolver(new RemoteFileResolver(directory));
+                WithSourceResolver(new RemoteFileResolver(context.WorkingDirectory));
+
+            if (!string.IsNullOrWhiteSpace(context.FilePath))
+            {
+                opts = opts.WithFilePath(context.FilePath);
+            }
 
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x => x.FullName.ToLowerInvariant().StartsWith("system.") || x.FullName.ToLowerInvariant().StartsWith("mscorlib"));
+            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x => 
+            x.FullName.ToLowerInvariant().StartsWith("system.") ||
+            x.FullName.ToLowerInvariant().StartsWith("microsoft.codeanalysis") ||
+            x.FullName.ToLowerInvariant().StartsWith("mscorlib"));
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
@@ -104,7 +101,7 @@ namespace Dotnet.Script
             }
 
             var loader = new InteractiveAssemblyLoader();
-            var script = CSharpScript.Create<TReturn>(sourceText.ToString(), opts, typeof(ScriptingHost), loader);
+            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(ScriptingHost), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
 
@@ -119,18 +116,13 @@ namespace Dotnet.Script
                                                     diagnostics);
             }
 
-            var host = new ScriptingHost(Console.Out, CSharpObjectFormatter.Instance)
-            {
-                ScriptDirectory = directory,
-                ScriptPath = context.FilePath,
-            };
-
+            var host = new ScriptingHost(Console.Out, CSharpObjectFormatter.Instance);
             foreach (var arg in context.ScriptArgs)
             {
                 host.Args.Add(arg);
             }
 
-            return new ScriptCompilationContext<TReturn>(compilation, script, host, sourceText, loader);
+            return new ScriptCompilationContext<TReturn>(compilation, script, host, context.Code, loader);
         }
 
         public virtual async Task<TReturn> Execute<TReturn>(ScriptContext context)
