@@ -82,7 +82,10 @@ namespace Dotnet.Script
             }
 
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x => x.FullName.ToLowerInvariant().StartsWith("system.") || x.FullName.ToLowerInvariant().StartsWith("mscorlib"));
+            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x => 
+            x.FullName.ToLowerInvariant().StartsWith("system.") ||
+            x.FullName.ToLowerInvariant().StartsWith("microsoft.codeanalysis") ||
+            x.FullName.ToLowerInvariant().StartsWith("mscorlib"));
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
@@ -113,12 +116,7 @@ namespace Dotnet.Script
                                                     diagnostics);
             }
 
-            var host = new ScriptingHost(Console.Out, CSharpObjectFormatter.Instance)
-            {
-                ScriptDirectory = context.WorkingDirectory,
-                ScriptPath = context.FilePath,
-            };
-
+            var host = new ScriptingHost(Console.Out, CSharpObjectFormatter.Instance);
             foreach (var arg in context.ScriptArgs)
             {
                 host.Args.Add(arg);

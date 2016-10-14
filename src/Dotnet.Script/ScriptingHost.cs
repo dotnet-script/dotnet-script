@@ -11,10 +11,6 @@ namespace Dotnet.Script
         {
         }
 
-        public string ScriptDirectory { get; internal set; }
-
-        public string ScriptPath { get; internal set; }
-
         public Assembly ScriptAssembly { get; internal set; }
     }
 }
