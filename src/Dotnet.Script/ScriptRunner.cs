@@ -76,8 +76,8 @@ namespace Dotnet.Script
                 }
             }
 
-            //var code = File.ReadAllText(context.FilePath);
-            var sourceText = SourceText.From(new FileStream(context.FilePath, FileMode.Open), Encoding.UTF8);
+            var code = File.ReadAllBytes(context.FilePath);
+            var sourceText = SourceText.From(code, code.Length, Encoding.UTF8);
 
             var opts = ScriptOptions.Default.
                 WithFilePath(context.FilePath).
