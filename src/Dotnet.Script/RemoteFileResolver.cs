@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using Microsoft.CodeAnalysis;
 
 namespace Dotnet.Script
 {
     public class RemoteFileResolver : SourceReferenceResolver
     {
-        private readonly Dictionary<string, string> _remoteFiles = new Dictionary<string, string>();
+        private readonly Dictionary<string, byte[]> _remoteFiles = new Dictionary<string, byte[]>();
         private readonly SourceFileResolver _fileBasedResolver;
 
         public RemoteFileResolver() :
@@ -37,13 +36,10 @@ namespace Dotnet.Script
             var uri = GetUri(resolvedPath);
             if (uri == null) return _fileBasedResolver.OpenRead(resolvedPath);
 
-            if (_remoteFiles.ContainsKey(resolvedPath))
-            {
-                var storedFile = _remoteFiles[resolvedPath];
-                return new MemoryStream(Encoding.UTF8.GetBytes(storedFile));
-            }
-
-            return Stream.Null;
+            byte[] storedFile;
+            return _remoteFiles.TryGetValue(resolvedPath, out storedFile)
+                 ? new MemoryStream(storedFile)
+                 : Stream.Null;
         }
 
         public override string ResolveReference(string path, string baseFilePath)
@@ -55,13 +51,8 @@ namespace Dotnet.Script
             var response = client.GetAsync(path).Result;
 
             if (response.IsSuccessStatusCode)
-            {
-                var responseFile = response.Content.ReadAsStringAsync().Result;
-                if (!string.IsNullOrWhiteSpace(responseFile) && !_remoteFiles.ContainsKey(path))
-                {
-                    _remoteFiles.Add(path, responseFile);
-                }
-            }
+                _remoteFiles[path] = response.Content.ReadAsByteArrayAsync().Result;
+
             return path;
         }
 
