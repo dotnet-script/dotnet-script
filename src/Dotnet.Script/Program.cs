@@ -41,7 +41,7 @@ namespace Dotnet.Script
 
             app.HelpOption("-? | -h | --help");
 
-            app.Command("code", c =>
+            app.Command("eval", c =>
             {
                 c.Description = "Execute CSX code.";
                 var code = c.Argument("code", "Code to execute.");
@@ -63,6 +63,8 @@ namespace Dotnet.Script
                 {
                     RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), scriptArgs.HasValue() ? scriptArgs.Values : new List<string>());
                 }
+
+                app.ShowHelp();
                 return 0;
             });
 
