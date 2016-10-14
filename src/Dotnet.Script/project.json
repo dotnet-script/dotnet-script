@@ -18,7 +18,7 @@
   },
   "buildOptions": {
     "emitEntryPoint": true,
-    "outputName": "dotnet-script",
+    //"outputName": "dotnet-script",
     "debugType": "portable"
   },
 

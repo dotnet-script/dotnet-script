@@ -1,20 +1,27 @@
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Dotnet.Script
 {
     public class ScriptContext
     {
-        public ScriptContext(string file, string config, List<string> scriptArgs)
+        public ScriptContext(SourceText code, string workingDirectory, string config, List<string> scriptArgs, string filePath = null)
         {
-            FilePath = file;
+            Code = code;
+            WorkingDirectory = workingDirectory;
             Configuration = config;
             ScriptArgs = scriptArgs;
+            FilePath = filePath;
         }
 
-        public string FilePath { get; }
+        public SourceText Code { get; }
+
+        public string WorkingDirectory { get; }
 
         public string Configuration { get; }
 
         public List<string> ScriptArgs { get; }
+
+        public string FilePath { get; }
     }
 }
