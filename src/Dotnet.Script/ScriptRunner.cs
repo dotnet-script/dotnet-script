@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Text;
@@ -118,12 +119,16 @@ namespace Dotnet.Script
                                                     diagnostics);
             }
 
-            var host = new ScriptingHost
+            var host = new ScriptingHost(Console.Out, CSharpObjectFormatter.Instance)
             {
                 ScriptDirectory = directory,
                 ScriptPath = context.FilePath,
-                Args = context.ScriptArgs,
             };
+
+            foreach (var arg in context.ScriptArgs)
+            {
+                host.Args.Add(arg);
+            }
 
             return new ScriptCompilationContext<TReturn>(compilation, script, host, sourceText, loader);
         }

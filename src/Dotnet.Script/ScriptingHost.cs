@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.IO;
 using System.Reflection;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
 
 namespace Dotnet.Script
 {
-    public class ScriptingHost
+    public class ScriptingHost : InteractiveScriptGlobals
     {
-        public IReadOnlyList<string> Args { get; internal set; }
+        public ScriptingHost(TextWriter outputWriter, ObjectFormatter objectFormatter)
+            : base(outputWriter, objectFormatter)
+        {
+        }
 
         public string ScriptDirectory { get; internal set; }
 
