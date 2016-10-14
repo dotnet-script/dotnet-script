@@ -35,7 +35,6 @@ namespace Dotnet.Script
         {
             var app = new CommandLineApplication(throwOnUnexpectedArg: false);
             var file = app.Argument("script", "Path to CSX script");
-            var scriptArgs = app.Option("-a |--arg <args>", "Arguments to pass to a script. Multiple values supported", CommandOptionType.MultipleValue);
             var config = app.Option("-conf |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
@@ -51,7 +50,7 @@ namespace Dotnet.Script
                 {
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), scriptArgs.HasValue() ? scriptArgs.Values : new List<string>(), cwd.Value());
+                        RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments, cwd.Value());
                     }
                     return 0;
                 });
@@ -62,7 +61,7 @@ namespace Dotnet.Script
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(),
-                        scriptArgs.HasValue() ? scriptArgs.Values : new List<string>());
+                        app.RemainingArguments);
                 }
                 else
                 {
