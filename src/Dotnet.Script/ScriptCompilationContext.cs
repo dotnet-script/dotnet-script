@@ -9,11 +9,11 @@ namespace Dotnet.Script
     {
         public Compilation Compilation { get; }
         public Script<TReturn> Script { get; }
-        public ScriptingHost Host { get; }
+        public InteractiveScriptGlobals Host { get; }
         public SourceText SourceText { get; }
         public InteractiveAssemblyLoader Loader { get; }
 
-        public ScriptCompilationContext(Compilation compilation, Script<TReturn> script, ScriptingHost host, SourceText sourceText, InteractiveAssemblyLoader loader)
+        public ScriptCompilationContext(Compilation compilation, Script<TReturn> script, InteractiveScriptGlobals host, SourceText sourceText, InteractiveAssemblyLoader loader)
         {
             Compilation = compilation;
             Script = script;
