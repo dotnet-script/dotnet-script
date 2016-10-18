@@ -69,7 +69,7 @@ namespace Dotnet.Script
                     peStream.Position = 0;
                     pdbStream.Position = 0;
 
-                    var assembly = compilationContext.Host.ScriptAssembly =
+                    var assembly =
                         // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Scripting/Core/Hosting/AssemblyLoader/InteractiveAssemblyLoader.cs#L111
                         compilationContext.Loader.Invoke<Stream, Stream, Assembly>(
                             "LoadAssemblyFromStream", BindingFlags.NonPublic,
@@ -81,7 +81,7 @@ namespace Dotnet.Script
                         entryPointType.
                             GetDeclaredMethod(entryPoint.MetadataName).
                             Invoke<object[], Task<TReturn>>(
-                                (object) null, // static invocation
+                                (object)null, // static invocation
                                 new object[] { compilationContext.Host, null });
 
                     return resultTask;

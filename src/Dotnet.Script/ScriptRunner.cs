@@ -73,7 +73,6 @@ namespace Dotnet.Script
             var opts = ScriptOptions.Default.
                 AddImports(DefaultNamespaces).
                 AddReferences(DefaultAssemblies).
-                AddReferences(typeof(ScriptingHost).GetTypeInfo().Assembly).
                 WithSourceResolver(new RemoteFileResolver(context.WorkingDirectory));
 
             if (!string.IsNullOrWhiteSpace(context.FilePath))
@@ -101,7 +100,7 @@ namespace Dotnet.Script
             }
 
             var loader = new InteractiveAssemblyLoader();
-            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(ScriptingHost), loader);
+            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(InteractiveScriptGlobals), loader);
             var compilation = script.GetCompilation();
             var diagnostics = compilation.GetDiagnostics();
 
@@ -116,7 +115,7 @@ namespace Dotnet.Script
                                                     diagnostics);
             }
 
-            var host = new ScriptingHost(Console.Out, CSharpObjectFormatter.Instance);
+            var host = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
             foreach (var arg in context.ScriptArgs)
             {
                 host.Args.Add(arg);
@@ -128,7 +127,6 @@ namespace Dotnet.Script
         public virtual async Task<TReturn> Execute<TReturn>(ScriptContext context)
         {
             var compilationContext = GetCompilationContext<TReturn>(context);
-            compilationContext.Host.ScriptAssembly = compilationContext.Script.GetScriptAssembly(compilationContext.Loader);
 
             var scriptResult = await compilationContext.Script.RunAsync(compilationContext.Host).ConfigureAwait(false);
             return ProcessScriptState(scriptResult);
