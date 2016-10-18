@@ -154,13 +154,13 @@ Hello from foo.csx
 
 ### Passing arguments to scripts
 
-You can pass arguments to the script the following way:
+All arguments after `--` are passed to the script in the following way:
 
 ```
-dotnet script foo.csx -a arg1 -a arg2 -a arg3
+dotnet script foo.csx -- arg1 arg2 arg3
 ```
 
-Then you can access the arguments in the script context using a global `ScriptArgs` collection:
+Then you can access the arguments in the script context using the global `ScriptArgs` collection:
 
 ```
 foreach (var arg in ScriptArgs)
@@ -168,6 +168,14 @@ foreach (var arg in ScriptArgs)
     Console.WriteLine(arg);
 }
 ```
+
+All arguments before `--` are processed by `dotnet script`. For example, the following command-line
+
+```
+dotnet script -d foo.csx -- -d
+```
+
+will pass the `-d` before `--` to `dotnet script` and enable the debug mode whereas the `-d` after `--` is passed to script for its own interpretation of the argument.
 
 ## Issues and problems
 
