@@ -160,10 +160,10 @@ All arguments after `--` are passed to the script in the following way:
 dotnet script foo.csx -- arg1 arg2 arg3
 ```
 
-Then you can access the arguments in the script context using the global `ScriptArgs` collection:
+Then you can access the arguments in the script context using the global `Args` collection:
 
 ```
-foreach (var arg in ScriptArgs)
+foreach (var arg in Args)
 {
     Console.WriteLine(arg);
 }
