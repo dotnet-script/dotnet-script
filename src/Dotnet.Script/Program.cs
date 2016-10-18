@@ -40,6 +40,10 @@ namespace Dotnet.Script
 
             app.HelpOption("-? | -h | --help");
 
+            var scriptArgsMarkerIndex = Array.FindIndex(args, arg => arg == "--");
+            var argCount = scriptArgsMarkerIndex >= 0 ? scriptArgsMarkerIndex : args.Length;
+            var scriptArgList = args.Skip(argCount + 1).ToList();
+
             app.Command("eval", c =>
             {
                 c.Description = "Execute CSX code.";
@@ -50,7 +54,7 @@ namespace Dotnet.Script
                 {
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments, cwd.Value());
+                        RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), scriptArgList, cwd.Value());
                     }
                     return 0;
                 });
@@ -61,7 +65,7 @@ namespace Dotnet.Script
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(),
-                        app.RemainingArguments);
+                        scriptArgList);
                 }
                 else
                 {
@@ -70,7 +74,7 @@ namespace Dotnet.Script
                 return 0;
             });
 
-            return app.Execute(args);
+            return app.Execute(args.Take(argCount).ToArray());
         }
 
         private static void RunScript(string file, string config, bool debugMode, List<string> scriptArgs)
