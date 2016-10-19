@@ -26,12 +26,13 @@ namespace Dotnet.Script
 
             var compilationContext = GetCompilationContext<TReturn>(context);
 
-            foreach (var diagnostic in compilationContext.Compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Warning))
+            var compilation = compilationContext.Script.GetCompilation();
+            foreach (var diagnostic in compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Warning))
             {
                 WriteLine(diagnostic.ToString());
             }
 
-            foreach (var syntaxTree in compilationContext.Compilation.SyntaxTrees)
+            foreach (var syntaxTree in compilation.SyntaxTrees)
             {
                 // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/CSharp/Portable/Syntax/CSharpSyntaxTree.ParsedSyntaxTree.cs#L19
                 var encodingField = syntaxTree.GetType().GetField("_encodingOpt", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -46,12 +47,12 @@ namespace Dotnet.Script
             using (var pdbStream = new MemoryStream())
             {
                 var emitOptions = new EmitOptions().WithDebugInformationFormat(DebugInformationFormat.PortablePdb);
-                var emitResult = compilationContext.Compilation.Emit(peStream, pdbStream, null, null, null, emitOptions);
+                var emitResult = compilation.Emit(peStream, pdbStream, null, null, null, emitOptions);
 
                 if (emitResult.Success)
                 {
                     // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/Core/Portable/Compilation/Compilation.cs#L478
-                    var referenceManager = compilationContext.Compilation.Invoke<object>("GetBoundReferenceManager", BindingFlags.NonPublic);
+                    var referenceManager = compilation.Invoke<object>("GetBoundReferenceManager", BindingFlags.NonPublic);
 
                     var referencedAssemblies =
                         // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/Core/Portable/ReferenceManager/CommonReferenceManager.State.cs#L34
@@ -75,7 +76,7 @@ namespace Dotnet.Script
                             "LoadAssemblyFromStream", BindingFlags.NonPublic,
                             peStream, pdbStream);
 
-                    var entryPoint = compilationContext.Compilation.GetEntryPoint(default(CancellationToken));
+                    var entryPoint = compilation.GetEntryPoint(default(CancellationToken));
                     var entryPointType = assembly.GetType(entryPoint.ContainingType.MetadataName, true, false).GetTypeInfo();
                     var resultTask =
                         entryPointType.

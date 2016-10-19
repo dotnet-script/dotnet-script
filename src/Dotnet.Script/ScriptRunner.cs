@@ -121,7 +121,7 @@ namespace Dotnet.Script
                 host.Args.Add(arg);
             }
 
-            return new ScriptCompilationContext<TReturn>(compilation, script, host, context.Code, loader);
+            return new ScriptCompilationContext<TReturn>(script, host, context.Code, loader);
         }
 
         public virtual async Task<TReturn> Execute<TReturn>(ScriptContext context)
