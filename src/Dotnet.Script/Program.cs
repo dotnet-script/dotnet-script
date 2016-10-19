@@ -42,7 +42,7 @@ namespace Dotnet.Script
 
             var scriptArgsMarkerIndex = Array.FindIndex(args, arg => arg == "--");
             var argCount = scriptArgsMarkerIndex >= 0 ? scriptArgsMarkerIndex : args.Length;
-            var scriptArgList = args.Skip(argCount + 1).ToList();
+            var scriptArgs = args.Skip(argCount + 1);
 
             app.Command("eval", c =>
             {
@@ -54,7 +54,7 @@ namespace Dotnet.Script
                 {
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), scriptArgList, cwd.Value());
+                        RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), scriptArgs, cwd.Value());
                     }
                     return 0;
                 });
@@ -65,7 +65,7 @@ namespace Dotnet.Script
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(),
-                        scriptArgList);
+                        scriptArgs);
                 }
                 else
                 {
@@ -77,7 +77,7 @@ namespace Dotnet.Script
             return app.Execute(args.Take(argCount).ToArray());
         }
 
-        private static void RunScript(string file, string config, bool debugMode, List<string> scriptArgs)
+        private static void RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
         {
             if (!File.Exists(file))
             {
@@ -86,15 +86,15 @@ namespace Dotnet.Script
 
             var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Path.GetDirectoryName(Path.Combine(Directory.GetCurrentDirectory(), file));
             var sourceText = SourceText.From(new FileStream(file, FileMode.Open), Encoding.UTF8);
-            var context = new ScriptContext(sourceText, directory, config, scriptArgs, file);
+            var context = new ScriptContext(sourceText, directory, config, args, file);
 
             Run(debugMode, context);
         }
 
-        private static void RunCode(string code, string config, bool debugMode, List<string> scriptArgs, string currentWorkingDirectory)
+        private static void RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code, Encoding.UTF8);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, scriptArgs);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args);
 
             Run(debugMode, context);
         }

@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.Text;
 
@@ -5,12 +7,12 @@ namespace Dotnet.Script
 {
     public class ScriptContext
     {
-        public ScriptContext(SourceText code, string workingDirectory, string config, List<string> scriptArgs, string filePath = null)
+        public ScriptContext(SourceText code, string workingDirectory, string config, IEnumerable<string> args, string filePath = null)
         {
             Code = code;
             WorkingDirectory = workingDirectory;
             Configuration = config;
-            ScriptArgs = scriptArgs;
+            Args = new ReadOnlyCollection<string>(args.ToArray());
             FilePath = filePath;
         }
 
@@ -20,7 +22,7 @@ namespace Dotnet.Script
 
         public string Configuration { get; }
 
-        public List<string> ScriptArgs { get; }
+        public IReadOnlyList<string> Args { get; }
 
         public string FilePath { get; }
     }

@@ -116,7 +116,7 @@ namespace Dotnet.Script
             }
 
             var host = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
-            foreach (var arg in context.ScriptArgs)
+            foreach (var arg in context.Args)
             {
                 host.Args.Add(arg);
             }
