@@ -13,23 +13,21 @@ namespace Dotnet.Script
 {
     public class DebugScriptRunner : ScriptRunner
     {
-        public DebugScriptRunner(TextWriter stderr) : base(stderr)
+        public DebugScriptRunner(ScriptCompiler scriptCompiler, ScriptLogger logger) : base(scriptCompiler, logger)
         {
         }
 
-        protected override Action<string> VerboseWriteLine => WriteLine;
-
-        public override Task<TReturn> Execute<TReturn>(ScriptContext context)
+        public override Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
         {
-            WriteLine($"Using debug mode.");
-            WriteLine($"Using configuration: {context.Configuration}");
+            Logger.Log("Using debug mode.");
+            Logger.Log($"Using configuration: {context.Configuration}");
 
-            var compilationContext = GetCompilationContext<TReturn>(context);
+            var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
 
             var compilation = compilationContext.Script.GetCompilation();
             foreach (var diagnostic in compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Warning))
             {
-                WriteLine(diagnostic.ToString());
+                Logger.Log(diagnostic.ToString());
             }
 
             foreach (var syntaxTree in compilation.SyntaxTrees)
@@ -83,7 +81,7 @@ namespace Dotnet.Script
                             GetDeclaredMethod(entryPoint.MetadataName).
                             Invoke<object[], Task<TReturn>>(
                                 (object)null, // static invocation
-                                new object[] { compilationContext.Host, null });
+                                new object[] { host, null });
 
                     return resultTask;
                 }
