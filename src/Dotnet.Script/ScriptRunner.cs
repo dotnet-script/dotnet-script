@@ -20,8 +20,14 @@ namespace Dotnet.Script
         public virtual async Task<TReturn> Execute<TReturn>(ScriptContext context)
         {
             var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, InteractiveScriptGlobals>(context);
+            var globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
 
-            var scriptResult = await compilationContext.Script.RunAsync(new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance)).ConfigureAwait(false);
+            foreach (var arg in context.Args)
+            {
+                globals.Args.Add(arg);
+            }
+
+            var scriptResult = await compilationContext.Script.RunAsync(globals).ConfigureAwait(false);
             return ProcessScriptState(scriptResult);
         }
 
