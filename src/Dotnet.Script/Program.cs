@@ -101,7 +101,9 @@ namespace Dotnet.Script
 
         private static void Run(bool debugMode, ScriptContext context)
         {
-            var runner = debugMode ? new DebugScriptRunner(Console.Error) : new ScriptRunner(Console.Error);
+            var logger = new ScriptLogger(Console.Error, debugMode);
+            var compiler = new ScriptCompiler(logger);
+            var runner = debugMode ? new DebugScriptRunner(compiler, logger) : new ScriptRunner(compiler, logger);
             runner.Execute<object>(context).GetAwaiter().GetResult();
         }
     }
