@@ -4,12 +4,12 @@ using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 
-namespace Dotnet.Script
+namespace Dotnet.Script.Core
 {
     public class ScriptRunner
     {
-        protected readonly ScriptLogger Logger;
-        protected readonly ScriptCompiler ScriptCompiler;
+        protected ScriptLogger Logger;
+        protected ScriptCompiler ScriptCompiler;
 
         public ScriptRunner(ScriptCompiler scriptCompiler, ScriptLogger logger)
         {

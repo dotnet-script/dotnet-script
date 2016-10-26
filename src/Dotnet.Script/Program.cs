@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Dotnet.Script.Core;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.CommandLineUtils;
 

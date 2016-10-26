@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Dotnet.Script
+namespace Dotnet.Script.Core
 {
     public class ScriptCompilationContext<TReturn>
     {
