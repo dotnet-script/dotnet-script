@@ -1,15 +1,14 @@
 using System;
 using System.Reflection;
-using static System.Reflection.BindingFlags;
 
-namespace Dotnet.Script
+namespace Dotnet.Script.Core
 {
     static class ReflectionExtensions
     {
         static MethodInfo RequireInstanceMethod(this TypeInfo typeInfo, string name, BindingFlags bindingFlags)
         {
             if (typeInfo == null) throw new ArgumentNullException(nameof(typeInfo));
-            var method = typeInfo.GetMethod(name, bindingFlags | Instance);
+            var method = typeInfo.GetMethod(name, bindingFlags | BindingFlags.Instance);
             if (method == null)
                 throw new MissingMemberException($"{typeInfo.FullName} has no instance method named {name}.");
             return method;

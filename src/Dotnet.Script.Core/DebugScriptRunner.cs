@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 
-namespace Dotnet.Script
+namespace Dotnet.Script.Core
 {
     public class DebugScriptRunner : ScriptRunner
     {

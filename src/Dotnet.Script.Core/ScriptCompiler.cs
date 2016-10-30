@@ -10,7 +10,7 @@ using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
 
-namespace Dotnet.Script
+namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
