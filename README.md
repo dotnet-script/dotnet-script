@@ -109,6 +109,41 @@ You can now set breakpoints inside your CSX file and launch the debugger using F
 
 ## Advanced usage
 
+### File watcher
+
+`dotnet script` is compatible with the official [dotnet CLI file watcher](https://www.nuget.org/packages/Microsoft.DotNet.Watcher.Tools/1.0.0-preview2-final) tool. To use the file watcher (re-run the script automatically upon each change) you will need to add the following `Microsoft.DotNet.Watcher.Tools` reference to your `project.json`:
+
+```json 
+  "tools": {
+    "Dotnet.Script": {
+      "version": "*",
+      "imports": [
+        "portable-net45+win8",
+        "dnxcore50"
+      ]
+    },
+    "Microsoft.DotNet.Watcher.Tools": {
+      "version": "1.0.0-preview2-final"
+    }
+  }
+```
+
+Additionally, you need to instruct the watcher to monitor `csx` files. This is done via `buildOptions` in `project.json`:
+
+```json
+  "buildOptions": {
+    "compile": "**/*.csx"
+  },
+```
+
+After restoring `Microsoft.DotNet.Watcher.Tools`, you can now run your script as follows:
+
+```
+dotnet watch script foo.csx
+```
+
+This will run `foo.csx` and watch for changes in it, automatically re-running it any time you make any changes.
+
 ### Referencing local script from a script
 
 You can also reference a script from a script - this is achieved via the `#load` directive.
