@@ -35,7 +35,22 @@ namespace Dotnet.Script.Core
             _logger = logger;
         }
 
-        public ScriptCompilationContext<TReturn> CreateCompilationContext<TReturn, THost>(ScriptContext context)
+        public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
+        {
+            var opts = ScriptOptions.Default.
+                AddImports(DefaultNamespaces).
+                AddReferences(DefaultAssemblies).
+                WithSourceResolver(new RemoteFileResolver(context.WorkingDirectory));
+
+            if (!string.IsNullOrWhiteSpace(context.FilePath))
+            {
+                opts = opts.WithFilePath(context.FilePath);
+            }
+
+            return opts;
+        }
+
+        public virtual ScriptCompilationContext<TReturn> CreateCompilationContext<TReturn, THost>(ScriptContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -59,15 +74,7 @@ namespace Dotnet.Script.Core
                 }
             }
 
-            var opts = ScriptOptions.Default.
-                AddImports(DefaultNamespaces).
-                AddReferences(DefaultAssemblies).
-                WithSourceResolver(new RemoteFileResolver(context.WorkingDirectory));
-
-            if (!string.IsNullOrWhiteSpace(context.FilePath))
-            {
-                opts = opts.WithFilePath(context.FilePath);
-            }
+            var opts = CreateScriptOptions(context);
 
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
             var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>

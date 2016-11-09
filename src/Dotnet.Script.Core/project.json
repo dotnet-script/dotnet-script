@@ -1,5 +1,5 @@
 ﻿{
-  "version": "0.6.0-*",
+  "version": "0.7.0-*",
   "description": "A cross platform library allowing you to run C# (CSX) scripts from a project.json dependency definition file and with support for debugging. Based on Roslyn.",
   "authors": [ "filipw" ],
   "packOptions": {
