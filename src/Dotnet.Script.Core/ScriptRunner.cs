@@ -20,15 +20,21 @@ namespace Dotnet.Script.Core
         public Task<TReturn> Execute<TReturn>(ScriptContext context)
         {
             var globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+
             foreach (var arg in context.Args)
                 globals.Args.Add(arg);
+
             return Execute<TReturn, InteractiveScriptGlobals>(context, globals);
         }
 
-        public virtual async Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
+        public virtual Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
         {
             var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
+            return Execute(compilationContext, host);
+        }
 
+        public virtual async Task<TReturn> Execute<TReturn, THost>(ScriptCompilationContext<TReturn> compilationContext, THost host)
+        {
             var scriptResult = await compilationContext.Script.RunAsync(host).ConfigureAwait(false);
             return ProcessScriptState(scriptResult);
         }
