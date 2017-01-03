@@ -27,7 +27,7 @@ Nothing - everything is self contained from the `project.json` level. Just make 
   },
   "tools": {
     "Dotnet.Script": {
-      "version": "*",
+      "version": "0.7.0-beta",
       "imports": [
         "portable-net45+win8",
         "dnxcore50"
@@ -87,7 +87,7 @@ To debug a script using Visual Studio Code, create a folder `.vscode` next to yo
             "type": "coreclr",
             "request": "launch",
             "program": "C:\\Program Files\\dotnet\\dotnet.exe", // path to your dotnet.exe installation
-            "args": ["exec", "--additionalprobingpath", "<NUGET_ROOT>", "--depsfile", "<NUGET_ROOT>\\Dotnet.Script\\0.3.1-beta\\lib\\netcoreapp1.0\\dotnet-script.deps.json", "<NUGET_ROOT>\\Dotnet.Script\\0.3.1-beta\\lib\\netcoreapp1.0\\dotnet-script.dll", "${workspaceRoot}\\foo.csx","-d"],
+            "args": ["exec", "--additionalprobingpath", "<NUGET_ROOT>", "--depsfile", "<NUGET_ROOT>\\Dotnet.Script\\0.7.0-beta\\lib\\netcoreapp1.0\\dotnet-script.deps.json", "<NUGET_ROOT>\\Dotnet.Script\\0.7.0-beta\\lib\\netcoreapp1.0\\dotnet-script.dll", "${workspaceRoot}\\foo.csx","-d"],
             "cwd": "${workspaceRoot}",
             "externalConsole": false,
             "stopAtEntry": true,
@@ -116,7 +116,7 @@ You can now set breakpoints inside your CSX file and launch the debugger using F
 ```json 
   "tools": {
     "Dotnet.Script": {
-      "version": "*",
+      "version": "0.7.0-beta",
       "imports": [
         "portable-net45+win8",
         "dnxcore50"
