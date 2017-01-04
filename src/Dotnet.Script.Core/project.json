@@ -19,7 +19,7 @@
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Microsoft.DotNet.ProjectModel": "1.0.0-rc3-003121",
-    "Microsoft.CodeAnalysis.CSharp.Scripting": "2.0.0-beta4"
+    "Microsoft.CodeAnalysis.CSharp.Scripting": "2.0.0-rc2"
   },
 
   "frameworks": {
