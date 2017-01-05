@@ -40,7 +40,8 @@ namespace Dotnet.Script.Core
             var opts = ScriptOptions.Default.
                 AddImports(DefaultNamespaces).
                 AddReferences(DefaultAssemblies).
-                WithSourceResolver(new RemoteFileResolver(context.WorkingDirectory));
+                WithSourceResolver(new RemoteFileResolver(context.WorkingDirectory)).
+                WithMetadataResolver(ScriptMetadataResolver.Default);
 
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
