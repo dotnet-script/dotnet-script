@@ -16,18 +16,24 @@ namespace Dotnet.Script.Core
     {
         private readonly ScriptLogger _logger;
 
-        private static readonly IEnumerable<Assembly> DefaultAssemblies = new[]
+        protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
             typeof(object).GetTypeInfo().Assembly,
             typeof(Enumerable).GetTypeInfo().Assembly
         };
 
-        private static readonly IEnumerable<string> DefaultNamespaces = new[]
+        protected virtual IEnumerable<string> ImportedNamespaces => new[]
         {
             "System",
             "System.IO",
+            "System.Collections.Generic",
+            "System.Console",
+            "System.Diagnostics",
+            "System.Dynamic",
             "System.Linq",
-            "System.Collections.Generic"
+            "System.Linq.Expressions",
+            "System.Text",
+            "System.Threading.Tasks"
         };
 
         public ScriptCompiler(ScriptLogger logger)
@@ -38,8 +44,8 @@ namespace Dotnet.Script.Core
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
         {
             var opts = ScriptOptions.Default.
-                AddImports(DefaultNamespaces).
-                AddReferences(DefaultAssemblies).
+                AddImports(ImportedNamespaces).
+                AddReferences(ReferencedAssemblies).
                 WithSourceResolver(new RemoteFileResolver(context.WorkingDirectory)).
                 WithMetadataResolver(ScriptMetadataResolver.Default);
 
