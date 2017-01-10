@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dotnet.Script.Core
+namespace Dotnet.Script.Core.Internal
 {
-    static class EnumerableExtensions
+    internal static class EnumerableExtensions
     {
         public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> source, Comparison<T> compare)
         {
