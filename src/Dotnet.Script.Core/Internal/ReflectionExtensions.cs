@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
 
-namespace Dotnet.Script.Core
+namespace Dotnet.Script.Core.Internal
 {
-    static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
         static MethodInfo RequireInstanceMethod(this TypeInfo typeInfo, string name, BindingFlags bindingFlags)
         {

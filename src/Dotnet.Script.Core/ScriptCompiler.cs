@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Dotnet.Script.Core.Internal;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -105,17 +107,23 @@ namespace Dotnet.Script.Core
             var loader = new InteractiveAssemblyLoader();
             var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
             var compilation = script.GetCompilation();
-            var diagnostics = compilation.GetDiagnostics();
 
-            if (diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+            var diagnostics = compilation.GetDiagnostics();
+            var orderedDiagnostics = diagnostics.OrderBy((d1, d2) => 
             {
-                foreach (var diagnostic in diagnostics)
+                var severityDiff = (int)d2.Severity - (int)d1.Severity;
+                return severityDiff != 0 ? severityDiff : d1.Location.SourceSpan.Start - d2.Location.SourceSpan.Start;
+            });
+
+            if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+            {
+                foreach (var diagnostic in orderedDiagnostics)
                 {
                     _logger.Log(diagnostic.ToString());
                 }
 
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.",
-                    diagnostics);
+                    orderedDiagnostics.ToImmutableArray());
             }
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
