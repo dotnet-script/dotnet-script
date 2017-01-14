@@ -107,6 +107,12 @@ You can now set breakpoints inside your CSX file and launch the debugger using F
 
 ![](http://i.imgur.com/YzBkVil.png)
 
+## Intellisense
+
+Intellisense and C# language services for `dotnet-script` are supported out of the box by OmniSharp.
+
+![](https://camo.githubusercontent.com/a1981f7da5de7ca6f181096b6c469f4c79f37d43/687474703a2f2f672e7265636f726469742e636f2f4b766f544336334869372e676966)
+
 ## Advanced usage
 
 ### File watcher
