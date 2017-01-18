@@ -34,7 +34,7 @@ namespace Dotnet.Script.Core
             {
                 // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/CSharp/Portable/Syntax/CSharpSyntaxTree.ParsedSyntaxTree.cs#L19
                 var encodingField = syntaxTree.GetType().GetField("_encodingOpt", BindingFlags.Instance | BindingFlags.NonPublic);
-                encodingField.SetValue(syntaxTree, Encoding.UTF8);
+                encodingField.SetValue(syntaxTree, context.Code.Encoding);
 
                 // https://github.com/dotnet/roslyn/blob/version-2.0.0-beta4/src/Compilers/CSharp/Portable/Syntax/CSharpSyntaxTree.ParsedSyntaxTree.cs#L21
                 var lazyTextField = syntaxTree.GetType().GetField("_lazyText", BindingFlags.Instance | BindingFlags.NonPublic);
