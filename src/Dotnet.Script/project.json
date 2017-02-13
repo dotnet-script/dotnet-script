@@ -25,18 +25,19 @@
   "dependencies": {
     "Dotnet.Script.Core": "*",
     "Microsoft.NETCore.App": {
-      "type": "platform",
-      "version": "1.0.1"
+      "version": "1.0.3",
+      "type": "platform"
     },
-    "Microsoft.Extensions.CommandLineUtils": "1.0.0"
+    "Microsoft.Extensions.CommandLineUtils": "1.1.0"
   },
 
   "frameworks": {
     "netcoreapp1.0": {
       "imports": [
         "dotnet5.6",
-        "portable-net45+win8"
+        "portable-net45+win8" 
       ]
     }
   }
 }
+ 
