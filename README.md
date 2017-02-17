@@ -18,7 +18,8 @@ Nothing - everything is self contained from the `project.json` level. Just make 
 {
   "dependencies": {
     "Automapper": "5.1.1",
-    "Newtonsoft.Json": "9.0.1"
+    "Newtonsoft.Json": "9.0.1",
+    "NetStandard.Library": "1.6.0"
   },
 
   "frameworks": {
