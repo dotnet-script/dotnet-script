@@ -77,7 +77,7 @@ AutoMapper.MapperConfiguration
 
 Normally, the nuget package with the `dotnet-script.dll` will be globally located on your machine (on Windows) in `C:\Users\{user}\.nuget\packages\` folder let's refer to that location as `<NUGET_ROOT>`. 
 
-To debug a script using Visual Studio Code, create a folder `.vscode` next to your script and put the following `launch.json` file inside (make sure to replace `<NUGET_ROOT>` with your global nuget packages path, ensure that the path to `dotnet.exe` is correct and that `dotnet-script` version matches the one you have got installed!).
+To debug a script using Visual Studio Code, create a folder `.vscode` next to your script and put the following `launch.json` file inside (make sure to replace `<NUGET_ROOT>` with your global nuget packages path, ensure that the path to `dotnet.exe` is correct and that `dotnet-script` version matches the one you have got installed!). This technique works on Windows, as well as on OS X and Linux (make sure to use Unix paths there).
 
 ```
 {
@@ -88,7 +88,13 @@ To debug a script using Visual Studio Code, create a folder `.vscode` next to yo
             "type": "coreclr",
             "request": "launch",
             "program": "C:\\Program Files\\dotnet\\dotnet.exe", // path to your dotnet.exe installation
-            "args": ["exec", "--additionalprobingpath", "<NUGET_ROOT>", "--depsfile", "<NUGET_ROOT>\\Dotnet.Script\\0.7.0-beta\\lib\\netcoreapp1.0\\dotnet-script.deps.json", "<NUGET_ROOT>\\Dotnet.Script\\0.7.0-beta\\lib\\netcoreapp1.0\\dotnet-script.dll", "${workspaceRoot}\\foo.csx","-d"],
+            "args": [
+              "exec", 
+              "--additionalprobingpath", "<NUGET_ROOT>", 
+              "--depsfile", "<NUGET_ROOT>\\.tools\\Dotnet.Script\\0.7.0-beta\\lib\\netcoreapp1.0\\Dotnet.Script.deps.json", 
+              "<NUGET_ROOT>\\Dotnet.Script\\0.7.0-beta\\lib\\netcoreapp1.0\\dotnet-script.dll", 
+              "${workspaceRoot}\\foo.csx",
+              "-d"],
             "cwd": "${workspaceRoot}",
             "externalConsole": false,
             "stopAtEntry": true,
