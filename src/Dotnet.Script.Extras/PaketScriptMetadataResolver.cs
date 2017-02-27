@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Scripting;
 
 namespace Dotnet.Script.Extras
@@ -15,26 +16,26 @@ namespace Dotnet.Script.Extras
     public class PaketScriptMetadataResolver : MetadataReferenceResolver
     {
         private readonly StringBuilder _paketDependencies = new StringBuilder().AppendLine("source https://api.nuget.org/v3/index.json");
-        private static readonly string Tfm = "netstandard16";
+        private static readonly string PaketDependencies = "paket.dependencies";
+        private static readonly string PaketLoadFolder = ".paket/load/";
         private static readonly string PaketPrefix = "paket: ";
         private readonly ScriptMetadataResolver _inner;
         private readonly HashSet<string> _resolvedReferences = new HashSet<string>();
-        private static readonly CSharpParseOptions _parseOptions = CSharpParseOptions.Default.WithKind(SourceCodeKind.Script);
 
-        public PaketScriptMetadataResolver(string code, string workingDirectory = null)
+        public PaketScriptMetadataResolver(string code, string workingDirectory = null, string paketPath = ".paket/paket.exe", string tfm = "netstandard16")
         {
             workingDirectory = workingDirectory ?? Directory.GetCurrentDirectory();
             _inner = ScriptMetadataResolver.Default;
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(code, _parseOptions);
-            var refs = syntaxTree.GetCompilationUnitRoot().GetReferenceDirectives().Select(x => x.File.ToString().Replace("\"", string.Empty)).Where(x => x.StartsWith(PaketPrefix));
-            foreach (var reference in refs)
+            var requiredReferences = GetReferenceDefinitions(code).Where(x => x.StartsWith(PaketPrefix));
+            foreach (var requiredReference in requiredReferences)
             {
-                _paketDependencies.AppendLine(reference.Replace(PaketPrefix, "nuget "));
+                _paketDependencies.AppendLine(requiredReference.Replace(PaketPrefix, "nuget "));
             }
 
-            File.WriteAllText(Path.Combine(workingDirectory, "paket.dependencies"), _paketDependencies.ToString());
-            var processStartInfo = new ProcessStartInfo(@".paket/paket.exe", $"install --generate-load-scripts load-script-framework {Tfm}")
+            File.WriteAllText(Path.Combine(workingDirectory, PaketDependencies), _paketDependencies.ToString());
+
+            var processStartInfo = new ProcessStartInfo(paketPath, $"install --generate-load-scripts load-script-framework {tfm}")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -42,6 +43,7 @@ namespace Dotnet.Script.Extras
                 UseShellExecute = false,
                 WorkingDirectory = _inner.BaseDirectory
             };
+
             using (var process = new Process() { StartInfo = processStartInfo })
             {
                 process.OutputDataReceived += (sender, e) =>
@@ -59,20 +61,30 @@ namespace Dotnet.Script.Extras
                 process.WaitForExit();
             }
 
-            var restoredDefs = File.ReadAllText(Path.Combine(workingDirectory, $".paket/load/{Tfm}/main.group.csx"));
-            var restoredDefsSyntaxTree = CSharpSyntaxTree.ParseText(restoredDefs, _parseOptions);
-            var restoredRefs = restoredDefsSyntaxTree.GetCompilationUnitRoot().GetReferenceDirectives().Select(x => x.File.ToString().Replace("\"", string.Empty));
-            foreach (var restoredRef in restoredRefs)
+            var restoredReferencesDefinition = Path.Combine(workingDirectory, $"{PaketLoadFolder}{tfm}/main.group.csx");
+            if (File.Exists(restoredReferencesDefinition))
             {
-                if (restoredRef.StartsWith(".."))
+                var fileContent = File.ReadAllText(restoredReferencesDefinition);
+                var restoredRefs = GetReferenceDefinitions(fileContent);
+                foreach (var restoredRef in restoredRefs)
                 {
-                    _resolvedReferences.Add(Path.Combine(workingDirectory, $".paket/load/{Tfm}", restoredRef));
-                }
-                else
-                {
-                    //skip GAC by design
+                    if (restoredRef.StartsWith(".."))
+                    {
+                        _resolvedReferences.Add(Path.Combine(workingDirectory, $"{PaketLoadFolder}{tfm}", restoredRef));
+                    }
+                    else
+                    {
+                        //skip GAC by design
+                    }
                 }
             }
+
+        }
+
+        private static IEnumerable<string> GetReferenceDefinitions(string fileContent)
+        {
+            var syntaxTree = CSharpSyntaxTree.ParseText(fileContent, CSharpParseOptions.Default.WithKind(SourceCodeKind.Script));
+            return syntaxTree.GetCompilationUnitRoot().GetReferenceDirectives().Select(x => x.File.ToString().Replace("\"", string.Empty));
         }
 
         public ScriptOptions CreateScriptOptions(ScriptOptions scriptOptions)
