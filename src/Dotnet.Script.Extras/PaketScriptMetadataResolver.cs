@@ -25,12 +25,12 @@ namespace Dotnet.Script.Extras
         public PaketScriptMetadataResolver(string code, string workingDirectory = null, string paketPath = ".paket/paket.exe", string tfm = "netstandard16")
         {
             workingDirectory = workingDirectory ?? Directory.GetCurrentDirectory();
-            _inner = ScriptMetadataResolver.Default;
+            _inner = ScriptMetadataResolver.Default.WithBaseDirectory(workingDirectory);
 
             var requiredReferences = GetReferenceDefinitions(code).Where(x => x.StartsWith(PaketPrefix));
             foreach (var requiredReference in requiredReferences)
             {
-                _paketDependencies.AppendLine(requiredReference.Replace(PaketPrefix, "nuget "));
+                _paketDependencies.AppendLine(requiredReference.Replace(PaketPrefix, string.Empty));
             }
 
             File.WriteAllText(Path.Combine(workingDirectory, PaketDependencies), _paketDependencies.ToString());
