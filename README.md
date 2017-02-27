@@ -179,27 +179,6 @@ Hello from bar.csx
 Hello from foo.csx
 ```
 
-### Referencing an HTTP-based script from a script
-
-Even better, `Dotnet.Script` supports loading CSX references over HTTP too. You could now modify the `foo.csx` accordingly:
-
-```csharp
-#load "https://gist.githubusercontent.com/filipw/9a79bb00e4905dfb1f48757a3ff12314/raw/adbfe5fade49c1b35e871c49491e17e6675dd43c/foo.csx"
-#load "bar.csx"
-
-Console.WriteLine("Hello from foo.csx");
-```
-
-In this case, the first dependency is loaded as `string` and parsed from an HTTP source - in this case a [gist](https://gist.githubusercontent.com/filipw/9a79bb00e4905dfb1f48757a3ff12314/raw/adbfe5fade49c1b35e871c49491e17e6675dd43c/foo.csx) I set up beforehand.
-
-Running `dotnet script foo.csx` now, will produce:
-
-```shell
-Hello from a gist
-Hello from bar.csx
-Hello from foo.csx
-```
-
 ### Passing arguments to scripts
 
 All arguments after `--` are passed to the script in the following way:
@@ -224,6 +203,31 @@ dotnet script -d foo.csx -- -d
 ```
 
 will pass the `-d` before `--` to `dotnet script` and enable the debug mode whereas the `-d` after `--` is passed to script for its own interpretation of the argument.
+
+## Extras
+
+Beyond the standard scripting dialect support (compatible with `csi.exe`), `Dotnet.Script` provides some extra features, located in the `Dotnet.Script.Extras` package.
+
+### Referencing an HTTP-based script from a script
+
+Even better, `Dotnet.Script` supports loading CSX references over HTTP too. You could now modify the `foo.csx` accordingly:
+
+```csharp
+#load "https://gist.githubusercontent.com/filipw/9a79bb00e4905dfb1f48757a3ff12314/raw/adbfe5fade49c1b35e871c49491e17e6675dd43c/foo.csx"
+#load "bar.csx"
+
+Console.WriteLine("Hello from foo.csx");
+```
+
+In this case, the first dependency is loaded as `string` and parsed from an HTTP source - in this case a [gist](https://gist.githubusercontent.com/filipw/9a79bb00e4905dfb1f48757a3ff12314/raw/adbfe5fade49c1b35e871c49491e17e6675dd43c/foo.csx) I set up beforehand.
+
+Running `dotnet script foo.csx` now, will produce:
+
+```shell
+Hello from a gist
+Hello from bar.csx
+Hello from foo.csx
+```
 
 ## Issues and problems
 

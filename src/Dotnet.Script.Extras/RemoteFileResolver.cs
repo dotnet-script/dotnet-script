@@ -5,7 +5,7 @@ using System.IO;
 using System.Net.Http;
 using Microsoft.CodeAnalysis;
 
-namespace Dotnet.Script.Core
+namespace Dotnet.Script.Extras
 {
     public class RemoteFileResolver : SourceReferenceResolver
     {
