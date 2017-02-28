@@ -86,12 +86,10 @@ namespace Dotnet.Script.Core
             var opts = CreateScriptOptions(context);
 
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var inheritedAssemblyNames =
-                from an in DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId)
-                where an.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase)
-                   || an.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase)
-                   || an.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase)
-                select an;
+            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
+                x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
+                x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
+                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
