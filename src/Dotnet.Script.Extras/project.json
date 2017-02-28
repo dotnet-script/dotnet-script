@@ -3,7 +3,8 @@
   "description": "Extensions and add ons to C# scripting",
   "dependencies": {
     "NETStandard.Library": "1.6.0",
-    "Microsoft.CodeAnalysis.CSharp.Scripting": "2.0.0-rc4"
+    "Microsoft.CodeAnalysis.CSharp.Scripting": "2.0.0-rc4",
+    "System.Diagnostics.Process": "4.3.0"  
   },
   "frameworks": {
     "netstandard1.6": {

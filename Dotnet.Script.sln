@@ -9,6 +9,10 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dotnet.Script.Core", "src\D
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dotnet.Script.Extras", "src\Dotnet.Script.Extras\Dotnet.Script.Extras.xproj", "{BCBB3155-4463-4748-8032-EF82AE297CE1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{61E3CEE0-3954-486F-AD1A-E5EE66DEED62}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dotnet.Script.Extras.Demos", "examples\Dotnet.Script.Extras.Demos\Dotnet.Script.Extras.Demos.xproj", "{522E8334-72C1-43F4-AFF3-3D504EE46DFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +31,15 @@ Global
 		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{522E8334-72C1-43F4-AFF3-3D504EE46DFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{522E8334-72C1-43F4-AFF3-3D504EE46DFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{522E8334-72C1-43F4-AFF3-3D504EE46DFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{522E8334-72C1-43F4-AFF3-3D504EE46DFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{522E8334-72C1-43F4-AFF3-3D504EE46DFE} = {61E3CEE0-3954-486F-AD1A-E5EE66DEED62}
 	EndGlobalSection
 EndGlobal

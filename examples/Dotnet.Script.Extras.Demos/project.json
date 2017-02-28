@@ -1,0 +1,22 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+  "publishOptions": {
+    "includeFiles": [ "test.csx", ".paket/paket.exe" ]
+  },
+  "dependencies": {
+    "Dotnet.Script.Extras": "0.1.0-*",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.3"
+    },
+    "System.Runtime.Serialization.Primitives": "4.3.0"
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
+    }
+  }
+}
