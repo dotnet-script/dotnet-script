@@ -1,32 +1,59 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26127.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dotnet.Script", "src\Dotnet.Script\Dotnet.Script.xproj", "{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script", "src\Dotnet.Script\Dotnet.Script.csproj", "{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dotnet.Script.Core", "src\Dotnet.Script.Core\Dotnet.Script.Core.xproj", "{684FEFEE-451B-4E68-B662-C16E3A7DA794}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.Core", "src\Dotnet.Script.Core\Dotnet.Script.Core.csproj", "{684FEFEE-451B-4E68-B662-C16E3A7DA794}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dotnet.Script.Extras", "src\Dotnet.Script.Extras\Dotnet.Script.Extras.xproj", "{BCBB3155-4463-4748-8032-EF82AE297CE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.Extras", "src\Dotnet.Script.Extras\Dotnet.Script.Extras.csproj", "{BCBB3155-4463-4748-8032-EF82AE297CE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Debug|x64.ActiveCfg = Debug|x64
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Debug|x64.Build.0 = Debug|x64
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Debug|x86.ActiveCfg = Debug|x86
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Debug|x86.Build.0 = Debug|x86
 		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Release|x64.ActiveCfg = Release|x64
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Release|x64.Build.0 = Release|x64
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Release|x86.ActiveCfg = Release|x86
+		{057F56AD-AF29-4ABD-B6DE-26E4DEE169F7}.Release|x86.Build.0 = Release|x86
 		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Debug|x64.ActiveCfg = Debug|x64
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Debug|x64.Build.0 = Debug|x64
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Debug|x86.ActiveCfg = Debug|x86
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Debug|x86.Build.0 = Debug|x86
 		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Release|Any CPU.Build.0 = Release|Any CPU
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Release|x64.ActiveCfg = Release|x64
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Release|x64.Build.0 = Release|x64
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Release|x86.ActiveCfg = Release|x86
+		{684FEFEE-451B-4E68-B662-C16E3A7DA794}.Release|x86.Build.0 = Release|x86
 		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Debug|x64.ActiveCfg = Debug|x64
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Debug|x64.Build.0 = Debug|x64
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Debug|x86.ActiveCfg = Debug|x86
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Debug|x86.Build.0 = Debug|x86
 		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|x64.ActiveCfg = Release|x64
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|x64.Build.0 = Release|x64
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|x86.ActiveCfg = Release|x86
+		{BCBB3155-4463-4748-8032-EF82AE297CE1}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

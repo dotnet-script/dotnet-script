@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>A cross platform library allowing you to run C# (CSX) scripts from a project.json dependency definition file and with support for debugging. Based on Roslyn.</Description>
+    <VersionPrefix>0.9.0</VersionPrefix>
+    <Authors>filipw</Authors>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <AssemblyName>Dotnet.Script.Core</AssemblyName>
+    <PackageId>Dotnet.Script.Core</PackageId>
+    <PackageTags>script;csx;csharp;roslyn</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.0.0-rc4" />
+  </ItemGroup>
+
+</Project>
