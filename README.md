@@ -229,6 +229,10 @@ Hello from bar.csx
 Hello from foo.csx
 ```
 
+## Contributing
+
+You will need Visual Studio 2017 or Visual Studio Code with C# extension 1.7.0+ to build the project. 
+
 ## Issues and problems
 
 ![](http://lh6.ggpht.com/-z_BeRqTrtJE/T2sLYAo-WmI/AAAAAAAAAck/0Co6XilSmNU/WorksOnMyMachine_thumb%25255B4%25255D.png?imgmax=800)
