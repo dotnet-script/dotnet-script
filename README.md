@@ -231,7 +231,7 @@ Hello from foo.csx
 
 ## Contributing
 
-You will need Visual Studio 2017 or Visual Studio Code with C# extension 1.7.0+ to build the project. 
+You will need Visual Studio 2017 or Visual Studio Code with C# extension 1.7.0+ to build the project, as well as .NET Core SDK 1.0.0.
 
 ## Issues and problems
 
