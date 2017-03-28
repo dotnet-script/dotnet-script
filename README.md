@@ -98,7 +98,8 @@ To debug a script using Visual Studio Code, create a folder `.vscode` next to yo
             "cwd": "${workspaceRoot}",
             "externalConsole": false,
             "stopAtEntry": true,
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "requireExactSource": false // required to step through the #loaded files
         },
         {
             "name": ".NET Core Attach",
