@@ -55,7 +55,7 @@ namespace Dotnet.Script.Core
 
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
-                opts = opts.WithFilePath(context.FilePath).WithFileEncoding(Encoding.UTF8);
+                opts = opts.WithFilePath(context.FilePath);
             }
 
             return opts;

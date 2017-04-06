@@ -81,7 +81,7 @@ namespace Dotnet.Script
             }
 
             var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Path.GetDirectoryName(Path.Combine(Directory.GetCurrentDirectory(), file));
-            var sourceText = SourceText.From(new FileStream(file, FileMode.Open),Encoding.UTF8);
+            var sourceText = SourceText.From(new FileStream(file, FileMode.Open));
             var context = new ScriptContext(sourceText, directory, config, args, file, debugMode);
 
             Run(debugMode, context);
