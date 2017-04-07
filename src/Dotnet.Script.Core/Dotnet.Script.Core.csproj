@@ -17,8 +17,7 @@
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>0.11.0</Version>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>    
   </PropertyGroup>
 
   <ItemGroup>
