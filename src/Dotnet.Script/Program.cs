@@ -82,7 +82,7 @@ namespace Dotnet.Script
 
             var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Path.GetDirectoryName(Path.Combine(Directory.GetCurrentDirectory(), file));
             var sourceText = SourceText.From(new FileStream(file, FileMode.Open));
-            var context = new ScriptContext(sourceText, directory, config, args, file);
+            var context = new ScriptContext(sourceText, directory, config, args, file, debugMode);
 
             Run(debugMode, context);
         }
@@ -90,7 +90,7 @@ namespace Dotnet.Script
         private static void RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args, null, debugMode);
 
             Run(debugMode, context);
         }
@@ -99,7 +99,7 @@ namespace Dotnet.Script
         {
             var logger = new ScriptLogger(Console.Error, debugMode);
             var compiler = new ScriptCompiler(logger);
-            var runner = debugMode ? new DebugScriptRunner(compiler, logger) : new ScriptRunner(compiler, logger);
+            var runner = new ScriptRunner(compiler, logger);
             runner.Execute<object>(context).GetAwaiter().GetResult();
         }
     }

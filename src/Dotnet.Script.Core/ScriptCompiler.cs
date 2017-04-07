@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.Core
 {
+    using System.Text;
+
     public class ScriptCompiler
     {
         private readonly ScriptLogger _logger;
@@ -45,11 +47,11 @@ namespace Dotnet.Script.Core
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
         {
-            var opts = ScriptOptions.Default.
-                AddImports(ImportedNamespaces).
-                AddReferences(ReferencedAssemblies).
-                WithSourceResolver(SourceFileResolver.Default).
-                WithMetadataResolver(ScriptMetadataResolver.Default);
+            var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
+                .AddReferences(ReferencedAssemblies)
+                .WithSourceResolver(SourceFileResolver.Default)
+                .WithMetadataResolver(ScriptMetadataResolver.Default)
+                .WithEmitDebugInformation(context.DebugMode);            
 
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
