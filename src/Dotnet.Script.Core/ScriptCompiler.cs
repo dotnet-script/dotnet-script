@@ -51,7 +51,8 @@ namespace Dotnet.Script.Core
                 .AddReferences(ReferencedAssemblies)
                 .WithSourceResolver(SourceFileResolver.Default)
                 .WithMetadataResolver(ScriptMetadataResolver.Default)
-                .WithEmitDebugInformation(context.DebugMode);            
+                .WithEmitDebugInformation(context.DebugMode)
+                .WithFileEncoding(context.Code.Encoding);
 
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
