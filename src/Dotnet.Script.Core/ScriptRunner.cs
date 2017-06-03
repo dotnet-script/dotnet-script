@@ -19,12 +19,12 @@ namespace Dotnet.Script.Core
 
         public Task<TReturn> Execute<TReturn>(ScriptContext context)
         {
-            var globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+            var globals = new CommandLineScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
 
             foreach (var arg in context.Args)
                 globals.Args.Add(arg);
 
-            return Execute<TReturn, InteractiveScriptGlobals>(context, globals);
+            return Execute<TReturn, CommandLineScriptGlobals>(context, globals);
         }
 
         public virtual Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
