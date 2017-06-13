@@ -27,13 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dotnet.Script.Core.RoslynDependencies" Version="0.1.0-beta" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.CodeAnalysis">
-      <HintPath>..\..\lib\Microsoft.CodeAnalysis.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
