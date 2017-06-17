@@ -81,10 +81,13 @@ namespace Dotnet.Script
             }
 
             var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Path.GetDirectoryName(Path.Combine(Directory.GetCurrentDirectory(), file));
-            var sourceText = SourceText.From(new FileStream(file, FileMode.Open));
-            var context = new ScriptContext(sourceText, directory, config, args, file, debugMode);
 
-            Run(debugMode, context);
+            using (var filestream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                var sourceText = SourceText.From(filestream);
+                var context = new ScriptContext(sourceText, directory, config, args, file, debugMode);
+                Run(debugMode, context);
+            }
         }
 
         private static void RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
