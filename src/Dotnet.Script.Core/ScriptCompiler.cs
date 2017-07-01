@@ -11,11 +11,10 @@ using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
+using System.Runtime.InteropServices;
 
 namespace Dotnet.Script.Core
 {
-    using System.Text;
-
     public class ScriptCompiler
     {
         private readonly ScriptLogger _logger;
@@ -67,22 +66,38 @@ namespace Dotnet.Script.Core
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var runtimeContext = ProjectContext.CreateContextForEachTarget(context.WorkingDirectory).First();
+            var runtimeIdentitfer = GetRuntimeIdentitifer();
 
-            _logger.Verbose($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'");
+            _logger.Verbose($"Current runtime is '{runtimeIdentitfer}'.");
+            _logger.Verbose($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'.");
 
             var projectExporter = runtimeContext.CreateExporter(context.Configuration);
+
             var runtimeDependencies = new HashSet<string>();
             var projectDependencies = projectExporter.GetDependencies();
 
             foreach (var projectDependency in projectDependencies)
             {
-                var runtimeAssemblies = projectDependency.RuntimeAssemblyGroups;
+                var runtimeAssemblyGroups = projectDependency.RuntimeAssemblyGroups;
 
-                foreach (var runtimeAssembly in runtimeAssemblies.GetDefaultAssets())
+                foreach (var libraryAsset in runtimeAssemblyGroups.GetDefaultAssets())
                 {
-                    var runtimeAssemblyPath = runtimeAssembly.ResolvedPath;
+                    var runtimeAssemblyPath = libraryAsset.ResolvedPath;
                     _logger.Verbose($"Discovered runtime dependency for '{runtimeAssemblyPath}'");
                     runtimeDependencies.Add(runtimeAssemblyPath);
+                }
+
+                foreach (var runtimeAssemblyGroup in runtimeAssemblyGroups)
+                {
+                    if (!string.IsNullOrWhiteSpace(runtimeAssemblyGroup.Runtime) && runtimeAssemblyGroup.Runtime == runtimeIdentitfer)
+                    {
+                        foreach (var runtimeAsset in runtimeAssemblyGroups.GetRuntimeAssets(GetRuntimeIdentitifer()))
+                        {
+                            var runtimeAssetPath = runtimeAsset.ResolvedPath;
+                            _logger.Verbose($"Discovered runtime asset dependency ('{runtimeIdentitfer}') for '{runtimeAssetPath}'");
+                            runtimeDependencies.Add(runtimeAssetPath);
+                        }
+                    }
                 }
             }
 
@@ -130,6 +145,14 @@ namespace Dotnet.Script.Core
             }
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
+        }
+
+        private static string GetRuntimeIdentitifer()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "unix";
+
+            return "win";
         }
     }
 }
