@@ -23,11 +23,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="dotnet-script.cmd" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="dotnet-script.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotnet-script.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
