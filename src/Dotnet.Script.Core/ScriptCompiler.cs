@@ -150,7 +150,7 @@ namespace Dotnet.Script.Core
         private static string GetRuntimeIdentitifer()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "unix";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "unix";
 
             return "win";
         }
