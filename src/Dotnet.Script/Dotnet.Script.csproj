@@ -21,6 +21,16 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>      
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="dotnet-script.cmd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="dotnet-script.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
      
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
