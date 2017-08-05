@@ -42,6 +42,9 @@ namespace Dotnet.Script.Core
             "System.Threading.Tasks"
         };
 
+        // see: https://github.com/dotnet/roslyn/issues/5501
+        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
+
         public ScriptCompiler(ScriptLogger logger)
         {
             _logger = logger;
@@ -136,7 +139,7 @@ namespace Dotnet.Script.Core
             var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
             var compilation = script.GetCompilation();
 
-            var diagnostics = compilation.GetDiagnostics();
+            var diagnostics = compilation.GetDiagnostics().Where(d => !SuppressedDiagnosticIds.Contains(d.Id));
             var orderedDiagnostics = diagnostics.OrderBy((d1, d2) => 
             {
                 var severityDiff = (int)d2.Severity - (int)d1.Severity;
