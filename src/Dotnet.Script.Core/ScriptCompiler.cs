@@ -12,6 +12,9 @@ using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
 using System.Runtime.InteropServices;
+using Dotnet.Script.NuGetMetadataResolver;
+using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace Dotnet.Script.Core
 {
@@ -49,7 +52,7 @@ namespace Dotnet.Script.Core
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
                 .AddReferences(ReferencedAssemblies)
                 .WithSourceResolver(SourceFileResolver.Default)
-                .WithMetadataResolver(ScriptMetadataResolver.Default)
+                .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default))
                 .WithEmitDebugInformation(context.DebugMode)
                 .WithFileEncoding(context.Code.Encoding);
 
@@ -65,12 +68,34 @@ namespace Dotnet.Script.Core
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var runtimeContext = ProjectContext.CreateContextForEachTarget(context.WorkingDirectory).First();
             var runtimeIdentitfer = GetRuntimeIdentitifer();
-
             _logger.Verbose($"Current runtime is '{runtimeIdentitfer}'.");
-            _logger.Verbose($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'.");
 
+            var opts = CreateScriptOptions(context);
+
+            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
+            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
+                x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
+                x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
+                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var inheritedAssemblyName in inheritedAssemblyNames)
+            {
+                _logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
+                var assembly = Assembly.Load(inheritedAssemblyName);
+                opts = opts.AddReferences(assembly);
+            }
+
+            var runtimeContext = File.Exists(Path.Combine(context.WorkingDirectory, Project.FileName)) ? ProjectContext.CreateContextForEachTarget(context.WorkingDirectory).FirstOrDefault() : null;
+            if (runtimeContext == null)
+            {
+                _logger.Verbose("Unable to find project context for CSX files. Will default to non-context usage.");
+                var scriptProjectProvider = ScriptProjectProvider.Create(new LoggerFactory());
+                var scriptProjectInfo = scriptProjectProvider.CreateProject(context.WorkingDirectory, "netcoreapp1.1");
+                runtimeContext = ProjectContext.CreateContextForEachTarget(scriptProjectInfo.PathToProjectJson).FirstOrDefault();
+            }
+
+            _logger.Verbose($"Found runtime context for '{runtimeContext.ProjectFile.ProjectFilePath}'.");
             var projectExporter = runtimeContext.CreateExporter(context.Configuration);
 
             var runtimeDependencies = new HashSet<string>();
@@ -99,21 +124,6 @@ namespace Dotnet.Script.Core
                         }
                     }
                 }
-            }
-
-            var opts = CreateScriptOptions(context);
-
-            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
-                x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
-
-            foreach (var inheritedAssemblyName in inheritedAssemblyNames)
-            {
-                _logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
-                var assembly = Assembly.Load(inheritedAssemblyName);
-                opts = opts.AddReferences(assembly);
             }
 
             foreach (var runtimeDep in runtimeDependencies)
@@ -150,7 +160,7 @@ namespace Dotnet.Script.Core
         private static string GetRuntimeIdentitifer()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "unix";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "unix";
 
             return "win";
         }
