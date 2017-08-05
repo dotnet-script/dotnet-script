@@ -54,7 +54,7 @@ namespace Dotnet.Script.Core
         {
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
                 .AddReferences(ReferencedAssemblies)
-                .WithSourceResolver(SourceFileResolver.Default)
+                .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default))
                 .WithEmitDebugInformation(context.DebugMode)
                 .WithFileEncoding(context.Code.Encoding);
@@ -63,7 +63,7 @@ namespace Dotnet.Script.Core
             {
                 opts = opts.WithFilePath(context.FilePath);
             }
-
+            
             return opts;
         }
 
@@ -94,7 +94,7 @@ namespace Dotnet.Script.Core
             {
                 _logger.Verbose("Unable to find project context for CSX files. Will default to non-context usage.");
                 var scriptProjectProvider = ScriptProjectProvider.Create(new LoggerFactory());
-                var scriptProjectInfo = scriptProjectProvider.CreateProject(context.WorkingDirectory, "netcoreapp1.1");
+                var scriptProjectInfo = scriptProjectProvider.CreateProject(context.WorkingDirectory, "netcoreapp1.0");
                 runtimeContext = ProjectContext.CreateContextForEachTarget(scriptProjectInfo.PathToProjectJson).FirstOrDefault();
             }
 
