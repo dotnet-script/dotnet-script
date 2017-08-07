@@ -80,12 +80,13 @@ namespace Dotnet.Script
                 throw new Exception($"Couldn't find file '{file}'");
             }
 
-            var directory = Path.IsPathRooted(file) ? Path.GetDirectoryName(file) : Path.GetDirectoryName(Path.Combine(Directory.GetCurrentDirectory(), file));
+            var absoluteFilePath = Path.IsPathRooted(file) ? file : Path.Combine(Directory.GetCurrentDirectory(), file);
+            var directory = Path.GetDirectoryName(absoluteFilePath);
 
-            using (var filestream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var filestream = new FileStream(absoluteFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 var sourceText = SourceText.From(filestream);
-                var context = new ScriptContext(sourceText, directory, config, args, file, debugMode);
+                var context = new ScriptContext(sourceText, directory, config, args, absoluteFilePath, debugMode);
                 Run(debugMode, context);
             }
         }
