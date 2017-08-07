@@ -94,7 +94,7 @@ namespace Dotnet.Script.Core
             {
                 _logger.Verbose("Unable to find project context for CSX files. Will default to non-context usage.");
                 var scriptProjectProvider = ScriptProjectProvider.Create(new LoggerFactory());
-                var scriptProjectInfo = scriptProjectProvider.CreateProject(context.WorkingDirectory, "netcoreapp1.0");
+                var scriptProjectInfo = scriptProjectProvider.CreateProject(context.WorkingDirectory, "netcoreapp1.1");
                 runtimeContext = ProjectContext.CreateContextForEachTarget(scriptProjectInfo.PathToProjectJson).FirstOrDefault();
             }
 

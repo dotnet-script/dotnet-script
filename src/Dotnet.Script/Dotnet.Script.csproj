@@ -4,7 +4,7 @@
     <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
     <VersionPrefix>0.11.0</VersionPrefix>
     <Authors>filipw</Authors>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>dotnet-script</AssemblyName>
     <OutputType>Exe</OutputType>
