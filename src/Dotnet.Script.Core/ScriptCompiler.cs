@@ -55,7 +55,7 @@ namespace Dotnet.Script.Core
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
                 .AddReferences(ReferencedAssemblies)
                 .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory))
-                .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default))
+                .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
                 .WithFileEncoding(context.Code.Encoding);
 
