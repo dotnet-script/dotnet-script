@@ -35,7 +35,7 @@ namespace Dotnet.Script.Core
 
         public virtual async Task<TReturn> Execute<TReturn, THost>(ScriptCompilationContext<TReturn> compilationContext, THost host)
         {
-            var scriptResult = await compilationContext.Script.RunAsync(host).ConfigureAwait(false);
+            var scriptResult = await compilationContext.Script.RunAsync(host, ex => true).ConfigureAwait(false);
             return ProcessScriptState(scriptResult);
         }
 
