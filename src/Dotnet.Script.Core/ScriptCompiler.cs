@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using Dotnet.Script.NuGetMetadataResolver;
 using Microsoft.Extensions.Logging;
 using System.IO;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Dotnet.Script.Core
 {
@@ -48,6 +49,12 @@ namespace Dotnet.Script.Core
         public ScriptCompiler(ScriptLogger logger)
         {
             _logger = logger;
+
+            // reset default scripting mode to latest language version to enable C# 7.1 features
+            // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
+            var csharpScriptCompilerType = typeof(CSharpScript).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScriptCompiler");
+            var parseOptionsField = csharpScriptCompilerType?.GetField("s_defaultOptions", BindingFlags.Static | BindingFlags.NonPublic);
+            parseOptionsField?.SetValue(null, new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script));
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
