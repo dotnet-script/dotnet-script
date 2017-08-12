@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace Dotnet.Script.Core.Tests
+namespace Dotnet.Script.Tests
 {
     public class ScriptExecutionTests
     {
