@@ -19,6 +19,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("AutoMapper.MapperConfiguration", result);
         }
 
+        [Fact]
+        public void ShouldIncludeExceptionLineNumberAndFile()
+        {
+            var result = Execute(Path.Combine("Exception", "Error.csx"));
+            Assert.Contains("Error.csx:line 1", result);
+        }
+
         private static string Execute(string fixture)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture)));
