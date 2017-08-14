@@ -13,7 +13,7 @@ namespace Dotnet.Script.Tests
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true,
-                //UseShellExecute = false,
+                UseShellExecute = false,
                 WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
             };
 
