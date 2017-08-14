@@ -30,7 +30,7 @@ namespace Dotnet.Script.Tests
         public void ShouldHandlePackageWithNativeLibraries()
         {
             var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
-            Assert.Contains("Connection Successful", result);
+            Assert.Contains("Connection successful", result);
         }
 
         private static string Execute(string fixture)

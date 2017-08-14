@@ -19,11 +19,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dotnet.Script.NuGetMetadataResolver" Version="2.0.3" />
+    <None Remove="Templates\csproj.template" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\csproj.template" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.3.1" />
     <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
   </ItemGroup>
 
