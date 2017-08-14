@@ -26,6 +26,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Error.csx:line 1", result);
         }
 
+        [Fact]
+        public void ShouldHandlePackageWithNativeLibraries()
+        {
+            var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
+            Assert.Contains("Connection Successful", result);
+        }
+
         private static string Execute(string fixture)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture)));
