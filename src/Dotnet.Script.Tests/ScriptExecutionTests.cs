@@ -1,3 +1,4 @@
+using System.IO;
 using Xunit;
 
 namespace Dotnet.Script.Tests
@@ -7,19 +8,33 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            Execute(@"..\..\..\TestFixtures\HelloWorld\HelloWorld.csx");
+            var result = Execute(Path.Combine("HelloWorld", "HelloWorld.csx"));
+            Assert.Contains("Hello World", result);
         }
 
         [Fact]
         public void ShouldExecuteScriptWithInlineNugetPackage()
         {
-            Execute(@"..\..\..\TestFixtures\InlineNugetPackage\InlineNugetPackage.csx");
+            var result = Execute(Path.Combine("InlineNugetPackage", "InlineNugetPackage.csx"));
+            Assert.Contains("AutoMapper.MapperConfiguration", result);
         }
 
-        private static void Execute(string fixture)
+        [Fact]
+        public void ShouldIncludeExceptionLineNumberAndFile()
         {
-            var exitCode = Program.Main(new[] { fixture });
-            Assert.Equal(0, exitCode);
+            var result = Execute(Path.Combine("Exception", "Error.csx"));
+            Assert.Contains("Error.csx:line 1", result);
+        }
+
+        private static string Execute(string fixture)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture)));
+            return result;
+        }
+
+        private static string[] GetDotnetScriptArguments(string fixture)
+        {
+            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", "Debug", "netcoreapp1.1", "dotnet-script.dll"), fixture };
         }
     }
 }

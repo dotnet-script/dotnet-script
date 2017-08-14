@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using Dotnet.Script.Core.Internal;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -12,10 +11,11 @@ using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
 using System.Runtime.InteropServices;
-using Dotnet.Script.NuGetMetadataResolver;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using Microsoft.CodeAnalysis.CSharp;
+using Dotnet.Script.Core.Internal;
+using Dotnet.Script.NuGetMetadataResolver;
 
 namespace Dotnet.Script.Core
 {
@@ -144,14 +144,7 @@ namespace Dotnet.Script.Core
 
             var loader = new InteractiveAssemblyLoader();
             var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
-            var compilation = script.GetCompilation();
-
-            var diagnostics = compilation.GetDiagnostics().Where(d => !SuppressedDiagnosticIds.Contains(d.Id));
-            var orderedDiagnostics = diagnostics.OrderBy((d1, d2) => 
-            {
-                var severityDiff = (int)d2.Severity - (int)d1.Severity;
-                return severityDiff != 0 ? severityDiff : d1.Location.SourceSpan.Start - d2.Location.SourceSpan.Start;
-            });
+            var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
             if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {

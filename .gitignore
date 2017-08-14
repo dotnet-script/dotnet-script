@@ -252,3 +252,4 @@ paket-files/
 *.sln.iml
 /*.DS_Store
 /src/.DS_Store
+project.json
