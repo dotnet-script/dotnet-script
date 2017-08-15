@@ -9,8 +9,8 @@ namespace Dotnet.Script.Core.Metadata
     /// </summary>
     public class CommandRunner 
     {        
-        private readonly StringBuilder lastStandardErrorOutput = new StringBuilder();
-        private readonly StringBuilder lastProcessOutput = new StringBuilder();
+        private readonly StringBuilder _lastStandardErrorOutput = new StringBuilder();
+        private readonly StringBuilder _lastProcessOutput = new StringBuilder();
         private readonly ScriptLogger _logger;
 
         /// <summary>
@@ -25,19 +25,19 @@ namespace Dotnet.Script.Core.Metadata
         /// <inheritdoc />
         public string Execute(string commandPath, string arguments)
         {
-            lastStandardErrorOutput.Clear();
+            _lastStandardErrorOutput.Clear();
 
             _logger.Verbose($"Executing {commandPath} {arguments}");
             var startInformation = CreateProcessStartInfo(commandPath, arguments);
             var process = CreateProcess(startInformation);
             RunAndWait(process);
-            _logger.Verbose(lastProcessOutput.ToString());
+            _logger.Verbose(_lastProcessOutput.ToString());
             if (process.ExitCode != 0)
             {
-                _logger.Log(lastStandardErrorOutput.ToString());
+                _logger.Log(_lastStandardErrorOutput.ToString());
                 throw new InvalidOperationException($"The command {commandPath} {arguments} failed to execute");
             }
-            return lastProcessOutput.ToString();
+            return _lastProcessOutput.ToString();
         }
 
         private static ProcessStartInfo CreateProcessStartInfo(string commandPath, string arguments)
@@ -59,13 +59,13 @@ namespace Dotnet.Script.Core.Metadata
             {
                 if (!string.IsNullOrWhiteSpace(a.Data))
                 {
-                    lastStandardErrorOutput.AppendLine(a.Data);
+                    _lastStandardErrorOutput.AppendLine(a.Data);
                 }
 
             };
             process.OutputDataReceived += (s, a) =>
             {
-                lastProcessOutput.AppendLine(a.Data);
+                _lastProcessOutput.AppendLine(a.Data);
             };
             return process;
         }

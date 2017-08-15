@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Dotnet.Script.Core.Internal;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.Core.Metadata
@@ -90,7 +91,15 @@ namespace Dotnet.Script.Core.Metadata
                     var fullPath = Path.Combine(pathToGlobalPackagesFolder, runtimeLibrary.Path,
                         assetPath);
                     _logger.Verbose($"Loading native library from {fullPath}");
-                    LoadLibrary(fullPath);
+                    if (RuntimeHelper.GetRuntimeIdentitifer() == "win")
+                    {
+                        LoadLibrary(fullPath);
+                    }
+                    else
+                    {
+                        // Maybe something like this?
+                        // https://stackoverflow.com/questions/13461989/p-invoke-to-dynamically-loaded-library-on-mono
+                    }
                 }
             }
         }
