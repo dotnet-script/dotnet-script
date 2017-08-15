@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dotnet.Script.Core.Internal;
+using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.Core.Metadata
@@ -22,6 +24,10 @@ namespace Dotnet.Script.Core.Metadata
         // Note: Windows only, Mac and Linux needs something else?
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
+
+        [DllImport("libdl.so")]
+        protected static extern IntPtr dlopen(string filename, int flags);
+
 
         public DependencyResolver(CommandRunner commandRunner, ScriptLogger logger)
         {
@@ -91,7 +97,7 @@ namespace Dotnet.Script.Core.Metadata
                     var fullPath = Path.Combine(pathToGlobalPackagesFolder, runtimeLibrary.Path,
                         assetPath);
                     _logger.Verbose($"Loading native library from {fullPath}");
-                    if (RuntimeHelper.GetRuntimeIdentitifer() == "win")
+                    if (RuntimeHelper.GetPlatformIdentifier() == "win")
                     {
                         LoadLibrary(fullPath);
                     }
@@ -106,14 +112,17 @@ namespace Dotnet.Script.Core.Metadata
 
         private void Restore(string pathToProjectFile)
         {
-            _commandRunner.Execute("DotNet", $"restore {pathToProjectFile} -r win7-x64");
+            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
+            _commandRunner.Execute("DotNet", $"restore {pathToProjectFile} -r {runtimeId}");
+            //_commandRunner.Execute("DotNet", $"restore {pathToProjectFile}");
         }
 
         private string GetPathToGlobalPackagesFolder()
-        {
+        {            
             var result = _commandRunner.Execute("dotnet", "nuget locals global-packages -l");
-            var match = Regex.Match(result, @"global-packages:\s*(.*)\r");
-            return match.Groups[1].Captures[0].ToString();
+            var match = Regex.Match(result, @"global-packages:\s*(.*)");
+            var pathToGlobalPackagesFolder = match.Groups[1].Captures[0].ToString();
+            return pathToGlobalPackagesFolder.Replace("\r", String.Empty);
         }
 
         public bool IsRelevantForCurrentRuntime(string runtime)

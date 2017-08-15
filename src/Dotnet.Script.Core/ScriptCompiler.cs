@@ -85,8 +85,8 @@ namespace Dotnet.Script.Core
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var runtimeIdentitfer = RuntimeHelper.GetRuntimeIdentitifer();
-            _logger.Verbose($"Current runtime is '{runtimeIdentitfer}'.");
+            var platformIdentifier = RuntimeHelper.GetPlatformIdentifier();
+            _logger.Verbose($"Current runtime is '{platformIdentifier}'.");
 
             var opts = CreateScriptOptions(context);
 

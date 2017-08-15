@@ -25,7 +25,7 @@ namespace Dotnet.Script.Core.Metadata
             var workingDirectory = Path.GetDirectoryName(projectFile);
             var runtimeContext = ProjectContext.CreateContextForEachTarget(workingDirectory).FirstOrDefault();
             var projectExporter = runtimeContext.CreateExporter("release");
-            var runtimeIdentifier = RuntimeHelper.GetRuntimeIdentitifer();
+            var runtimeIdentifier = RuntimeHelper.GetPlatformIdentifier();
 
             var runtimeDependencies = new HashSet<RuntimeDependency>();
             var projectDependencies = projectExporter.GetDependencies();

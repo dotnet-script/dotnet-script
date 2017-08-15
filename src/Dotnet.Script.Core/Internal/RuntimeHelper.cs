@@ -4,7 +4,7 @@ namespace Dotnet.Script.Core.Internal
 {
     internal static class RuntimeHelper
     {
-        internal static string GetRuntimeIdentitifer()
+        internal static string GetPlatformIdentifier()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "unix";
