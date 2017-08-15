@@ -29,9 +29,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            ExecuteInProcess(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
-            //var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
-            //Assert.Contains("Connection successful", result);
+            var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
+            Assert.Contains("Connection successful", result);
         }
 
         private static string Execute(string fixture)
