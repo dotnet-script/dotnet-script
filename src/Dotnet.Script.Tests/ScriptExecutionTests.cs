@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptExecutionTests
     {
         [Fact]
