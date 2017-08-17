@@ -253,3 +253,6 @@ paket-files/
 /*.DS_Store
 /src/.DS_Store
 project.json
+
+# Archive files
+*.zip
