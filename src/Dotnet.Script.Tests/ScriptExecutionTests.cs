@@ -34,7 +34,13 @@ namespace Dotnet.Script.Tests
 
         private static string[] GetDotnetScriptArguments(string fixture)
         {
-            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", "Debug", "netcoreapp1.1", "dotnet-script.dll"), fixture };
+            string configuration;
+#if DEBUG
+            configuration = "Debug";
+#else
+            configuration = "Release";
+#endif
+            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp1.1", "dotnet-script.dll"), fixture };
         }
     }
 }
