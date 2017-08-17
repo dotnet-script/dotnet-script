@@ -4,6 +4,13 @@ Run C# scripts from the .NET CLI.
 
 [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.svg?maxAge=3600)](https://www.nuget.org/packages/Dotnet.Script/)
 
+## Build status
+
+| Build server | Platform     | Build status                                                                                                                     
+|--------------|--------------|--------------
+| AppVeyor     | Windows      | [![](https://img.shields.io/appveyor/ci/filipw/dotnet-script/master.svg)](https://ci.appveyor.com/project/filipw/dotnet-script/branch/master)
+| Travis       | Linux / OS X | TBD
+
 ## Prerequisites
 
 > What do I need to install? 
