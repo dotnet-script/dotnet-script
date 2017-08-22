@@ -1,0 +1,13 @@
+language: csharp
+matrix:
+  include:
+    - os: osx      
+      sudo: required
+      dotnet: 1.0.4
+    
+install:
+  - cd build
+  - ulimit -n4096
+  - ./install-dotnet-script.sh  
+script:  
+  - dotnet dotnet-script/publish/dotnet-script.dll Build.csx

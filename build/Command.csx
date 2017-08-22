@@ -20,7 +20,7 @@ public static class Command
 
     private static ProcessStartInfo CreateProcessStartInfo(string commandPath, string arguments)
     {
-        var startInformation = new ProcessStartInfo($"\"{commandPath}\"");
+        var startInformation = new ProcessStartInfo($"{commandPath}");
         startInformation.CreateNoWindow = true;
         startInformation.Arguments =  arguments;
         startInformation.RedirectStandardOutput = true;
