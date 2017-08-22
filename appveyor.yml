@@ -1,0 +1,11 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+build_script:
+- ps: >-
+    cd .\build\
+
+    .\install-dotnet-script.ps1
+- cmd:
+    dotnet .\dotnet-script\publish\dotnet-script.dll build.csx
+
+test: off

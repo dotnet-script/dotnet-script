@@ -6,7 +6,7 @@ namespace Dotnet.Script.Tests
 {
     public static class ProcessHelper
     {
-        public static string RunAndCaptureOutput(string fileName, string[] arguments, string workingDirectory = null)
+        public static (string, int) RunAndCaptureOutput(string fileName, string[] arguments, string workingDirectory = null)
         {
             var startInfo = new ProcessStartInfo(fileName, string.Join(" ", arguments))
             {
@@ -29,7 +29,7 @@ namespace Dotnet.Script.Tests
             catch
             {
                 Console.WriteLine($"Failed to launch '{fileName}' with args, '{arguments}'");
-                return null;
+                return (null, -1);
             }
 
             var output = process.StandardOutput.ReadToEnd();
@@ -37,7 +37,7 @@ namespace Dotnet.Script.Tests
 
             process.WaitForExit();
 
-            return output.Trim();
+            return (output.Trim(), process.ExitCode);
         }
     }
 }

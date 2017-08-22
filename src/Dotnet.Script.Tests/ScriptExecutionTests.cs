@@ -10,21 +10,21 @@ namespace Dotnet.Script.Tests
         public void ShouldExecuteHelloWorld()
         {
             var result = Execute(Path.Combine("HelloWorld", "HelloWorld.csx"));
-            Assert.Contains("Hello World", result);
+            Assert.Contains("Hello World", result.output);
         }
 
         [Fact]
         public void ShouldExecuteScriptWithInlineNugetPackage()
         {
             var result = Execute(Path.Combine("InlineNugetPackage", "InlineNugetPackage.csx"));
-            Assert.Contains("AutoMapper.MapperConfiguration", result);
+            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
         }
 
         [Fact]
         public void ShouldIncludeExceptionLineNumberAndFile()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
-            Assert.Contains("Error.csx:line 1", result);
+            Assert.Contains("Error.csx:line 1", result.output);
         }
 
         [Fact]
@@ -33,8 +33,14 @@ namespace Dotnet.Script.Tests
             var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
             Assert.Contains("Connection successful", result);
         }
+        
+        public static void ShouldReturnNonZeroExitCodeWhenScriptFails()
+        {
+            var result = Execute(Path.Combine("Exception", "Error.csx"));
+            Assert.NotEqual(0, result.exitCode);
+        }
 
-        private static string Execute(string fixture)
+        private static (string output, int exitCode) Execute(string fixture)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture)));
             return result;

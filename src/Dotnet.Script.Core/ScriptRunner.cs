@@ -46,6 +46,7 @@ namespace Dotnet.Script.Core
                 Logger.Log("Script execution resulted in an exception.");
                 Logger.Log(scriptState.Exception.Message);
                 Logger.Log(scriptState.Exception.StackTrace);
+                throw scriptState.Exception;
             }
 
             return scriptState.ReturnValue;
