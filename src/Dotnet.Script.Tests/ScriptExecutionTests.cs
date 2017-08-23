@@ -31,7 +31,7 @@ namespace Dotnet.Script.Tests
         public void ShouldHandlePackageWithNativeLibraries()
         {
             var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
-            Assert.Contains("Connection successful", result);
+            Assert.Contains("Connection successful", result.output);
         }
         
         public static void ShouldReturnNonZeroExitCodeWhenScriptFails()
