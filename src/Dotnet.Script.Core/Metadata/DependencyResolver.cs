@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dotnet.Script.Core.Internal;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.Core.Metadata
@@ -52,27 +50,40 @@ namespace Dotnet.Script.Core.Metadata
 
         public IEnumerable<RuntimeDependency> GetRuntimeDependencies(string pathToProjectFile)
         {
-            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
+            string[] possibleNuGetRootLocations = ResolvePossibleNugetRootLocation();
+
+            
             var runtimeDepedencies = new HashSet<RuntimeDependency>();
 
             var context = ReadDependencyContext(pathToProjectFile);
 
             //Note: Scripting only releates to runtime libraries.
             var runtimeLibraries = context.RuntimeLibraries;
-
-            foreach (var runtimeLibrary in runtimeLibraries)
+            try
             {
-                ProcessNativeLibraries(runtimeLibrary, pathToGlobalPackagesFolder);
-                ProcessRuntimeAssemblies(runtimeLibrary, pathToGlobalPackagesFolder, runtimeDepedencies);
+                foreach (var runtimeLibrary in runtimeLibraries)
+                {
+                    ProcessNativeLibraries(runtimeLibrary, possibleNuGetRootLocations);
+                    ProcessRuntimeAssemblies(runtimeLibrary, possibleNuGetRootLocations, runtimeDepedencies);
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
 
             return runtimeDepedencies;
         }
 
-        private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary, string pathToGlobalPackagesFolder,
+        private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary, string[] possibleNuGetRootLocations,
             HashSet<RuntimeDependency> runtimeDepedencies)
         {
-
+            if (runtimeLibrary.Name.ToLower().Contains("sqlite"))
+            {
+                
+            }
             foreach (var runtimeAssemblyGroup in runtimeLibrary.RuntimeAssemblyGroups.Where(rag => IsRelevantForCurrentRuntime(rag.Runtime)))
             {
                 foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
@@ -80,7 +91,9 @@ namespace Dotnet.Script.Core.Metadata
                     var path = Path.Combine(runtimeLibrary.Path, assetPath);
                     if (!path.EndsWith("_._"))
                     {
-                        var fullPath = Path.Combine(pathToGlobalPackagesFolder, path);
+                        var fullPath = ResolveFullPathToDependency(path, possibleNuGetRootLocations);
+                            
+                        //var fullPath = Path.Combine(pathToGlobalPackagesFolder, path);
                         _logger.Verbose(fullPath);
                         runtimeDepedencies.Add(new RuntimeDependency(runtimeLibrary.Name, fullPath));
                     }
@@ -88,14 +101,31 @@ namespace Dotnet.Script.Core.Metadata
             }
         }
 
-        private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string pathToGlobalPackagesFolder)
+        private string ResolveFullPathToDependency(string path, string[] possibleLocations)
+        {
+            foreach (var possibleLocation in possibleLocations)
+            {
+                var fullPath = Path.Combine(possibleLocation, path);
+                if (File.Exists(fullPath))
+                {
+                    return fullPath;
+                }                
+            }
+            throw new InvalidOperationException("Not found");
+
+        }
+
+        private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] possibleNuGetRootLocations)
         {
             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(nlg => IsRelevantForCurrentRuntime(nlg.Runtime)))
             {
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
                 {
-                    var fullPath = Path.Combine(pathToGlobalPackagesFolder, runtimeLibrary.Path,
-                        assetPath);
+                    var path = Path.Combine(runtimeLibrary.Path, assetPath);
+                    var fullPath = ResolveFullPathToDependency(path,
+                        possibleNuGetRootLocations);
+
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
                     _logger.Verbose($"Loading native library from {fullPath}");
                     if (RuntimeHelper.GetPlatformIdentifier() == "win")
                     {
@@ -112,7 +142,7 @@ namespace Dotnet.Script.Core.Metadata
 
         private void Restore(string pathToProjectFile)
         {
-            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
+            var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
             _commandRunner.Execute("dotnet", $"restore {pathToProjectFile} -r {runtimeId}");
             //_commandRunner.Execute("DotNet", $"restore {pathToProjectFile}");
         }
@@ -127,15 +157,22 @@ namespace Dotnet.Script.Core.Metadata
 
         public bool IsRelevantForCurrentRuntime(string runtime)
         {
-            return string.IsNullOrWhiteSpace(runtime) || runtime == GetRuntimeIdentitifer();
+            return string.IsNullOrWhiteSpace(runtime) || runtime == RuntimeHelper.GetRuntimeIdentifier();
         }
 
-        private static string GetRuntimeIdentitifer()
+        private string[] ResolvePossibleNugetRootLocation()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "unix";
+            List<string> result = new List<string>(); 
+            result.Add(GetPathToGlobalPackagesFolder());
+            if (RuntimeHelper.GetPlatformIdentifier() == "win")
+            {
+                var programFilesFolder = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                var processArchitecture = RuntimeHelper.GetProcessArchitecture();                
+                var storePath = Path.Combine(programFilesFolder, "dotnet", "store", processArchitecture, "netcoreapp2.0");
 
-            return "win";
+                result.Add(storePath);
+            }
+            return result.ToArray();
         }
     }
 }

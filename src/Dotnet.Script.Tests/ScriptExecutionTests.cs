@@ -30,6 +30,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
+            //ExecuteInProcess(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
             var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
             Assert.Contains("Connection successful", result.output);
         }
@@ -63,7 +64,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp1.1", "dotnet-script.dll"), fixture };
+            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp2.0", "dotnet-script.dll"), fixture };
         }
     }
 }

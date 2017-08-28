@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>    
-    <TargetFramework>netcoreapp1.1</TargetFramework>
-    <RuntimeFrameworkVersion>1.0.3</RuntimeFrameworkVersion>  
+    <TargetFramework>netcoreapp2.0</TargetFramework>    
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,10 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script\Dotnet.Script.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
 </Project>

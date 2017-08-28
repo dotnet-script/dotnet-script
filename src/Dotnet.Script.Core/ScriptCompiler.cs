@@ -90,7 +90,7 @@ namespace Dotnet.Script.Core
 
             var opts = CreateScriptOptions(context);
 
-            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
+            var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
             var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
                 x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
                 x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||

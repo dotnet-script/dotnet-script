@@ -3,10 +3,9 @@
   <PropertyGroup>
     <Description>Extensions and add ons to C# scripting</Description>
     <VersionPrefix>0.2.0</VersionPrefix>
-    <TargetFramework>netstandard1.6</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dotnet.Script.Extras</AssemblyName>
-    <PackageId>Dotnet.Script.Extras</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <PackageId>Dotnet.Script.Extras</PackageId>    
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
