@@ -25,5 +25,11 @@ namespace Dotnet.Script.Core.Metadata
             var other = (RuntimeDependency)obj;
             return other.Name == Name && other.Path == Path;
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{nameof(Name)}: {Name}, {nameof(Path)}: {Path}";
+        }
     }
 }
