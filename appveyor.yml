@@ -6,6 +6,6 @@ build_script:
 
     .\install-dotnet-script.ps1
 - cmd:
-    dotnet .\dotnet-script\publish\dotnet-script.dll build.csx
+    dotnet .\dotnet-script\dotnet-script.dll build.csx
 
 test: off
