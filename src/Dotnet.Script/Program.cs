@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Dotnet.Script.Core;
+using Dotnet.Script.Core.ProjectSystem;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.CommandLineUtils;
 
@@ -102,7 +103,7 @@ namespace Dotnet.Script
         private static void Run(bool debugMode, ScriptContext context)
         {
             var logger = new ScriptLogger(Console.Error, debugMode);
-            var compiler = new ScriptCompiler(logger);
+            var compiler = new ScriptCompiler(logger, new ScriptProjectProvider(new ScriptParser(logger), logger));
             var runner = new ScriptRunner(compiler, logger);
             runner.Execute<object>(context).GetAwaiter().GetResult();
         }

@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptExecutionTests
     {
         [Fact]
@@ -27,6 +28,12 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandlePackageWithNativeLibraries()
+        {
+            var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
+            Assert.Contains("Connection successful", result.output);
+        }
+        
         public static void ShouldReturnNonZeroExitCodeWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
@@ -37,6 +44,15 @@ namespace Dotnet.Script.Tests
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture)));
             return result;
+        }
+
+        /// <summary>
+        /// Use this method if you need to debug 
+        /// </summary>        
+        private static int ExecuteInProcess(string fixture)
+        {
+            var pathToFixture = Path.Combine("..", "..", "..","TestFixtures", fixture);
+            return Program.Main(new []{ pathToFixture });
         }
 
         private static string[] GetDotnetScriptArguments(string fixture)
