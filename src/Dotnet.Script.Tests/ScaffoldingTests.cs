@@ -11,20 +11,19 @@ namespace Dotnet.Script.Tests
             var tempFolder = CreateTempFolder();
             var result = Execute("init", tempFolder);
             Assert.Equal(0, result.exitCode);
-            Assert.Contains(Path.Combine(tempFolder, "helloworld.csx"), Directory.GetFiles(tempFolder));
-            Assert.Contains(Path.Combine(tempFolder, "omnisharp.json"), Directory.GetFiles(tempFolder));
-            Assert.Contains(Path.Combine(tempFolder, ".vscode/launch.json"), Directory.GetFiles(tempFolder));
+            Assert.True(File.Exists(Path.Combine(tempFolder, "helloworld.csx")));
+            Assert.True(File.Exists(Path.Combine(tempFolder, "omnisharp.json")));
+            Assert.True(File.Exists(Path.Combine(tempFolder, ".vscode","launch.json")));            
             Directory.Delete(tempFolder,true);
         }
 
         [Fact]
         public void ShouldCreateNewScript()
         {
-            //var result = ExecuteInProcess("new", "script.csx");
             var tempFolder = CreateTempFolder();
             var result = Execute("new script.csx", tempFolder);
             Assert.Equal(0, result.exitCode);
-            Assert.Contains(Path.Combine(tempFolder, "script.csx"), Directory.GetFiles(tempFolder));            
+            Assert.True(File.Exists(Path.Combine(tempFolder, "script.csx")));
             Directory.Delete(tempFolder, true);
         }
 
