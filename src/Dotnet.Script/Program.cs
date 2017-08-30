@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Dotnet.Script.Core;
 using Dotnet.Script.Core.ProjectSystem;
@@ -41,6 +42,8 @@ namespace Dotnet.Script
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
             app.HelpOption("-? | -h | --help");
+
+            app.VersionOption("-v | --version", () => $"{typeof(Program).GetTypeInfo().Assembly.GetName().Version.ToString(3)}-beta");
 
             app.Command("eval", c =>
             {
