@@ -76,7 +76,7 @@ namespace Dotnet.Script
                 c.Description = "Creates a sample script along with the launch.json file needed to launch and debug the script.";
                 c.OnExecute(() =>
                 {
-                    var skaffolder = new Skaffolder();
+                    var skaffolder = new Scaffolder();
                     skaffolder.InitializerFolder();
                     return 0;
                 });
@@ -88,7 +88,7 @@ namespace Dotnet.Script
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 c.OnExecute(() =>
                 {
-                    var skaffolder = new Skaffolder();
+                    var skaffolder = new Scaffolder();
                     if (fileNameArgument.Value == null)
                     {
                         c.ShowHelp();

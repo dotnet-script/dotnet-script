@@ -5,7 +5,7 @@ using Dotnet.Script.Core.Templates;
 
 namespace Dotnet.Script.Core
 {
-    public class Skaffolder
+    public class Scaffolder
     {
         public void InitializerFolder()
         {
@@ -19,7 +19,7 @@ namespace Dotnet.Script.Core
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             if (!File.Exists(pathToLaunchFile))
             {
-                string baseDirectory = Path.GetDirectoryName(new Uri(typeof(Skaffolder).GetTypeInfo().Assembly.CodeBase).LocalPath);
+                string baseDirectory = Path.GetDirectoryName(new Uri(typeof(Scaffolder).GetTypeInfo().Assembly.CodeBase).LocalPath);
                 string csxPath = Path.Combine(baseDirectory, "dotnet-script.dll").Replace(@"\", "/");
                                 
                 string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
