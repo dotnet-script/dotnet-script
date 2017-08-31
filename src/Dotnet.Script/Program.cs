@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Dotnet.Script.Core;
 using Dotnet.Script.Core.ProjectSystem;
@@ -41,6 +42,8 @@ namespace Dotnet.Script
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
             app.HelpOption("-? | -h | --help");
+
+            app.VersionOption("-v | --version", GetVersionInfo);
 
             app.Command("eval", c =>
             {
@@ -134,6 +137,12 @@ namespace Dotnet.Script
             var compiler = new ScriptCompiler(logger, new ScriptProjectProvider(new ScriptParser(logger), logger));
             var runner = new ScriptRunner(compiler, logger);
             runner.Execute<object>(context).GetAwaiter().GetResult();
+        }
+
+        private static string GetVersionInfo()
+        {
+            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
+            return versionAttribute?.InformationalVersion;
         }
     }
 
