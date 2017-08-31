@@ -43,7 +43,7 @@ namespace Dotnet.Script
 
             app.HelpOption("-? | -h | --help");
 
-            app.VersionOption("-v | --version", () => $"{typeof(Program).GetTypeInfo().Assembly.GetName().Version.ToString(3)}-beta");
+            app.VersionOption("-v | --version", GetVersionInfo);
 
             app.Command("eval", c =>
             {
@@ -137,6 +137,12 @@ namespace Dotnet.Script
             var compiler = new ScriptCompiler(logger, new ScriptProjectProvider(new ScriptParser(logger), logger));
             var runner = new ScriptRunner(compiler, logger);
             runner.Execute<object>(context).GetAwaiter().GetResult();
+        }
+
+        private static string GetVersionInfo()
+        {
+            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
+            return versionAttribute?.InformationalVersion;
         }
     }
 
