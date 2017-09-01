@@ -12,11 +12,12 @@ test: off
 artifacts:
 - path: /**/Dotnet.Script*.nupkg
   name: Chocolatey Packages
-deploy:
-  provider: Chocolatey  
-  api_key:
-    secure: [Your API key goes here]
-  skip_symbols: false  
-  artifact: /.*\.nupkg/
-  on:
-    appveyor_repo_tag: true
+# Uncomment this to enable deploy on repo tagging
+# deploy:
+#   provider: Chocolatey  
+#   api_key:
+#     secure: [Your API key goes here]
+#   skip_symbols: false  
+#   artifact: /.*\.nupkg/
+#   on:
+#     appveyor_repo_tag: true
