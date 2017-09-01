@@ -9,3 +9,14 @@ build_script:
     dotnet .\dotnet-script\dotnet-script.dll build.csx
 
 test: off
+artifacts:
+- path: /**/Dotnet.Script*.nupkg
+  name: Chocolatey Packages
+deploy:
+  provider: Chocolatey  
+  api_key:
+    secure: [Your API key goes here]
+  skip_symbols: false  
+  artifact: /.*\.nupkg/
+  on:
+    appveyor_repo_tag: true
