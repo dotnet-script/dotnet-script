@@ -23,6 +23,13 @@ public static class DotNet
         Command.Execute("dotnet","build " + pathToProjectFile + " --configuration Release");   
     }
 
+    public static void Publish(string pathToProjectFolder)
+    {
+         string pathToProjectFile = FindProjectFile(pathToProjectFolder);
+         Command.Execute("dotnet","publish " + pathToProjectFile + " --configuration Release");   
+    }
+
+
     private static string FindProjectFile(string pathToProjectFolder)
     {
         return FileUtils.FindFile(pathToProjectFolder, "*.csproj");

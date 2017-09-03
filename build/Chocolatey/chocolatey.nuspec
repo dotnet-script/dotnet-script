@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>dotnet.script</id>
+    <version>0.13.0-beta</version>
+    <authors>filipw</authors>
+    <licenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/filipw/dotnet-script</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</iconUrl>
+    <description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</description>
+    <tags>https://github.com/filipw/dotnet-script.git</tags>
+  </metadata>
+  <files>
+    <file src="tools\*.*" target="Dotnet.Script\tools" />
+    <file src="..\..\src\Dotnet.Script\bin\Release\netcoreapp1.1\publish\**\*" target="Dotnet.Script" />
+  </files>
+</package>
