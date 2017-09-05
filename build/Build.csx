@@ -5,10 +5,12 @@
 
 using System.Runtime.InteropServices;
 
-DotNet.Build(@"../src/Dotnet.Script");
-DotNet.Build(@"../src/Dotnet.Script.Tests");
-DotNet.Test(@"../src/Dotnet.Script.Tests");
-DotNet.Publish(@"../src/Dotnet.Script");
+var root = Args.FirstOrDefault() ?? "..";
+
+DotNet.Build($"{root}/src/Dotnet.Script");
+DotNet.Build($"{root}/src/Dotnet.Script.Tests");
+DotNet.Test($"{root}/src/Dotnet.Script.Tests");
+DotNet.Publish($"{root}/src/Dotnet.Script");
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
