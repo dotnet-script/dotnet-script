@@ -14,5 +14,5 @@ DotNet.Publish($"{root}/src/Dotnet.Script");
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    Choco.Pack(@"../src/Dotnet.Script","Chocolatey");
+    Choco.Pack($"{root}/src/Dotnet.Script","Chocolatey");
 }
