@@ -22,7 +22,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 build/Chocolatey/*.nuspec
-build/Chocolatey/tools/*.TXT
+build/Chocolatey/tools/LICENSE.TXT
 build/.vscode
 
 # Visual Studio 2015 cache/options directory

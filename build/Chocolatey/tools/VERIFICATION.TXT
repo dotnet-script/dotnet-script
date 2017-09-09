@@ -1,0 +1,5 @@
+VERIFICATION
+Verification is intended to assist the Chocolatey moderators and community
+in verifying that this package's contents are trustworthy.
+ 
+dotnet-script.dll : 3BF42E83BE931AC98D02306DBC6FB319
