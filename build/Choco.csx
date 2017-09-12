@@ -26,7 +26,7 @@ public static class Choco
     {
         var projectFile = XDocument.Load(pathToProjectFile);
         var authors = projectFile.Descendants("Authors").SingleOrDefault()?.Value;
-        var packageId = projectFile.Descendants("PackageId").SingleOrDefault()?.Value;
+        var packageId = "dotnet-script";
         var description = projectFile.Descendants("Description").SingleOrDefault()?.Value;
         var versionPrefix = projectFile.Descendants("VersionPrefix").SingleOrDefault()?.Value;
         var versionSuffix = projectFile.Descendants("VersionSuffix").SingleOrDefault()?.Value;
