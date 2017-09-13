@@ -14,8 +14,9 @@ public static class Choco
     public static void Pack(string pathToProjectFolder, string outputFolder)
     {        
         DotNet.Publish(pathToProjectFolder);        
-        Directory.CreateDirectory(outputFolder);
+        Directory.CreateDirectory(outputFolder);        
         var pathToPublishFolder = FileUtils.FindDirectory(Path.Combine(pathToProjectFolder, @"bin\Release"),"publish");        
+        File.Copy(Path.Combine(pathToProjectFolder, "../../LICENSE"), Path.Combine("Chocolatey","tools","LICENSE.TXT"), true);
         string pathToProjectFile = FileUtils.FindFile(pathToProjectFolder, "*.csproj");
         CreateSpecificationFromProject(pathToProjectFile, pathToPublishFolder);        
         Command.Execute("choco.exe", $@"pack Chocolatey\chocolatey.nuspec  --outputdirectory {outputFolder}");      

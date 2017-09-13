@@ -9,10 +9,10 @@ var root = Args.FirstOrDefault() ?? "..";
 
 DotNet.Build($"{root}/src/Dotnet.Script");
 DotNet.Build($"{root}/src/Dotnet.Script.Tests");
-DotNet.Test($"{root}/src/Dotnet.Script.Tests");
+// DotNet.Test($"{root}/src/Dotnet.Script.Tests");
 DotNet.Publish($"{root}/src/Dotnet.Script");
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    Choco.Pack(@"../src/Dotnet.Script","Chocolatey");
+    Choco.Pack($"{root}/src/Dotnet.Script","Chocolatey");
 }
