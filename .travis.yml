@@ -10,4 +10,4 @@ install:
   - ulimit -n4096
   - ./install-dotnet-script.sh  
 script:  
-  - dotnet dotnet-script/publish/dotnet-script.dll Build.csx
+  - dotnet dotnet-script/dotnet-script.dll Build.csx

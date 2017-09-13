@@ -3,6 +3,12 @@
 using System.Text.RegularExpressions;
 
 
+public static string WithWindowsSlashes(this string path)
+{
+    return path.Replace("/", @"\");
+}
+
+
 public static class FileUtils
 {
     public static void ReplaceInFile(string pattern, string value, string pathToFile)
@@ -57,10 +63,17 @@ public static class FileUtils
         return pathsToFile[0];
     }
 
-    public static string FindDirectory(string path, string filePattern)
-    {
+    public static string ResolveDirectory(string path, string filePattern)
+    {                
         string pathToFile = FindFile(path, filePattern);
         return Path.GetDirectoryName(pathToFile);
+    }
+
+    
+
+    public static string FindDirectory(string path, string searchPattern)
+    {
+        return Directory.GetDirectories(path,searchPattern,SearchOption.AllDirectories).SingleOrDefault();
     }
 
     public static void RemoveDirectory(string path)

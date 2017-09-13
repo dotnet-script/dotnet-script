@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
-    <VersionPrefix>0.13.0</VersionPrefix>
+    <VersionPrefix>0.13.0</VersionPrefix>   
     <Authors>filipw</Authors>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DebugType>portable</DebugType>
@@ -18,7 +18,7 @@
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>      
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>    
   </PropertyGroup>
 
   <ItemGroup>

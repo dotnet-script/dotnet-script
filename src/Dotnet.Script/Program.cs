@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Dotnet.Script.Core;
 using Dotnet.Script.Core.ProjectSystem;
@@ -42,6 +43,8 @@ namespace Dotnet.Script
 
             app.HelpOption("-? | -h | --help");
 
+            app.VersionOption("-v | --version", GetVersionInfo);
+
             app.Command("eval", c =>
             {
                 c.Description = "Execute CSX code.";
@@ -69,6 +72,34 @@ namespace Dotnet.Script
                     app.ShowHelp();
                 }
                 return 0;
+            });
+
+            app.Command("init", c =>
+            {
+                c.Description = "Creates a sample script along with the launch.json file needed to launch and debug the script.";
+                c.OnExecute(() =>
+                {
+                    var skaffolder = new Scaffolder();
+                    skaffolder.InitializerFolder();
+                    return 0;
+                });
+            });
+
+            app.Command("new", c =>
+            {
+                c.Description = "Creates a new script file";
+                var fileNameArgument = c.Argument("filename", "The script file name");
+                c.OnExecute(() =>
+                {
+                    var skaffolder = new Scaffolder();
+                    if (fileNameArgument.Value == null)
+                    {
+                        c.ShowHelp();
+                        return 0;
+                    }
+                    skaffolder.CreateNewScriptFile(fileNameArgument.Value);
+                    return 0;
+                });
             });
 
             return app.Execute(args.Except(new[] { "--" }).ToArray());
@@ -106,6 +137,12 @@ namespace Dotnet.Script
             var compiler = new ScriptCompiler(logger, new ScriptProjectProvider(new ScriptParser(logger), logger));
             var runner = new ScriptRunner(compiler, logger);
             runner.Execute<object>(context).GetAwaiter().GetResult();
+        }
+
+        private static string GetVersionInfo()
+        {
+            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
+            return versionAttribute?.InformationalVersion;
         }
     }
 

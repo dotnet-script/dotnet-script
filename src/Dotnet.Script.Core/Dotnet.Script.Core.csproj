@@ -20,10 +20,16 @@
 
   <ItemGroup>
     <None Remove="Templates\csproj.template" />
+    <None Remove="Templates\helloworld.csx.template" />
+    <None Remove="Templates\launch.json.template" />
+    <None Remove="Templates\omnisharp.json.template" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Templates\csproj.template" />
+    <EmbeddedResource Include="Templates\helloworld.csx.template" />
+    <EmbeddedResource Include="Templates\launch.json.template" />
+    <EmbeddedResource Include="Templates\omnisharp.json.template" />
   </ItemGroup>
 
   <ItemGroup>
