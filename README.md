@@ -1,4 +1,4 @@
-## dotnet-script
+## dotnet script
 
 Run C# scripts from the .NET CLI.
 
@@ -18,7 +18,7 @@ The only thing we need to install is [.Net Core](https://www.microsoft.com/net/d
 #### Windows
 
 ```powershell
-choco install dotnet-script
+choco install dotnet.script
 ```
 
 #### Linux and Mac
@@ -93,7 +93,7 @@ will pass the `-d` before `--` to `dotnet script` and enable the debug mode wher
 
 #### NuGet Packages
 
-dotnet-script has built-in support for referencing NuGet packages directly from with the script.
+`dotnet script` has built-in support for referencing NuGet packages directly from within the script.
 
 ```c#
 #r "nuget: AutoMapper, 9.1.0"
@@ -107,7 +107,7 @@ dotnet-script has built-in support for referencing NuGet packages directly from 
 
 #### Debugging
 
-The days of debugging scripts using `Console.WriteLine` are over. One major feature of `dotnet-script` is the ability to debug scripts directly in VS Code. Just set a breakpoint anywhere in your script file(s) and hit F5(start debugging)
+The days of debugging scripts using `Console.WriteLine` are over. One major feature of `dotnet script` is the ability to debug scripts directly in VS Code. Just set a breakpoint anywhere in your script file(s) and hit F5(start debugging)
 
 
 
