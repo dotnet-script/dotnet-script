@@ -38,7 +38,7 @@ Console.WriteLine("Hello world!");
 
 Let us take a quick look at what is going on here.
 
-`#! "netcoreapp1.1"` simply tells OmniSharp to resolve metadata in the context of netcoreapp1.1.
+`#! "netcoreapp1.1"` tells OmniSharp to resolve metadata in the context of a`netcoreapp1.1` application.
 
 `#r "nuget:NetStandard.Library,1.6.1"` brings in the the [NetStandard.Library 1.6.1](https://www.nuget.org/packages/NETStandard.Library/1.6.1) from NuGet. 
 
@@ -103,7 +103,7 @@ will pass the `-d` before `--` to `dotnet script` and enable the debug mode wher
 
 ![package](https://user-images.githubusercontent.com/1034073/30176983-98a6b85e-9404-11e7-8855-4ae65a20d6b1.gif)
 
-
+> Note: Omnisharp needs to be restarted after adding a new package reference
 
 #### Debugging
 
