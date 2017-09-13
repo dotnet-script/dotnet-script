@@ -1,7 +1,8 @@
 language: csharp
 matrix:
   include:
-    - os: osx      
+    - os: osx
+      osx_image: xcode9      
       sudo: required
       dotnet: 2.0.0
     
