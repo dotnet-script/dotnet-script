@@ -3,7 +3,7 @@ matrix:
   include:
     - os: osx      
       sudo: required
-      dotnet: 1.0.4
+      dotnet: 2.0.0
     
 install:
   - cd build
