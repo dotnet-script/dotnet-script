@@ -6,7 +6,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dotnet.Script.Extras</AssemblyName>
     <PackageId>Dotnet.Script.Extras</PackageId>    
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>    
