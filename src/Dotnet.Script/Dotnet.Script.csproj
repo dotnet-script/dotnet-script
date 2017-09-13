@@ -14,8 +14,7 @@
     <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
-    <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
+    <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>    
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>    
