@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using NuGet.Packaging;
 
-namespace Dotnet.Script.Core.ProjectSystem
+namespace Dotnet.Script.DependencyModel.Parsing
 {
     /// <summary>
     /// Represents the result of parsing a set of script files.
@@ -11,7 +10,7 @@ namespace Dotnet.Script.Core.ProjectSystem
         /// <summary>
         /// Initializes a new instance of the <see cref="ParseResult"/> class.
         /// </summary>
-        /// <param name="packageReferences">A list of <see cref="PackageReference"/> instances that represents 
+        /// <param name="packageReferences">A list of <see cref="NuGet.Packaging.PackageReference"/> instances that represents 
         /// references to NuGet packages in a given set of script files.</param>
         /// <param name="targetFramework">The target framework inferred from the #! directive.</param>
         public ParseResult(IReadOnlyCollection<PackageReference> packageReferences, string targetFramework)

@@ -1,4 +1,4 @@
-﻿namespace Dotnet.Script.Core.ProjectSystem
+﻿namespace Dotnet.Script.DependencyModel.Parsing
 {
     /// <summary>
     /// Represents a NuGet package reference found in a script file.

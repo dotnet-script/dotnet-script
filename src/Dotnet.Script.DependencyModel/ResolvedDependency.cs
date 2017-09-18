@@ -1,13 +1,13 @@
-﻿using Microsoft.CodeAnalysis;
+﻿
 
-namespace Dotnet.Script.Core.Metadata
+namespace Dotnet.Script.DependencyModel
 {
-    public class RuntimeDependency
+    public class ResolvedDependency
     {
         public string Name { get; }
         public string Path { get; }
 
-        public RuntimeDependency(string name, string path)
+        public ResolvedDependency(string name, string path)
         {
             Name = name;
             Path = path;           
@@ -22,7 +22,7 @@ namespace Dotnet.Script.Core.Metadata
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            var other = (RuntimeDependency)obj;
+            var other = (ResolvedDependency)obj;
             return other.Name == Name && other.Path == Path;
         }
 

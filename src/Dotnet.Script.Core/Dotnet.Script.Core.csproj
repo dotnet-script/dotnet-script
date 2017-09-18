@@ -19,14 +19,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Templates\csproj.template" />
     <None Remove="Templates\helloworld.csx.template" />
     <None Remove="Templates\launch.json.template" />
     <None Remove="Templates\omnisharp.json.template" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Templates\csproj.template" />
     <EmbeddedResource Include="Templates\helloworld.csx.template" />
     <EmbeddedResource Include="Templates\launch.json.template" />
     <EmbeddedResource Include="Templates\omnisharp.json.template" />
@@ -34,12 +32,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.3.1" />
-    <PackageReference Include="Microsoft.DotNet.ProjectModel" Version="1.0.0-rc3-003121" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.ValueTuple" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dotnet.Script.DependencyModel.Nuget\Dotnet.Script.DependencyModel.NuGet.csproj" />
+    <ProjectReference Include="..\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj" />
   </ItemGroup>
 
 </Project>

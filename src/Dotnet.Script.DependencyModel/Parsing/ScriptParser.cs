@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dotnet.Script.DependencyModel.Logging;
 
-namespace Dotnet.Script.Core.ProjectSystem
+namespace Dotnet.Script.DependencyModel.Parsing
 {
     /// <summary>
     /// A class that is capable of parsing a set of script files 
@@ -11,12 +13,12 @@ namespace Dotnet.Script.Core.ProjectSystem
     /// </summary>
     public class ScriptParser 
     {
-        private readonly ScriptLogger _logger;
+        private readonly Action<bool, string> _logger;
 
         /// <summary>
-        /// Initializes a new insstance of the <see cref="ScriptParser"/> class.
+        /// Initializes a new instance of the <see cref="ScriptParser"/> class.
         /// </summary>        
-        public ScriptParser(ScriptLogger logger)
+        public ScriptParser(Action<bool, string> logger)
         {
             _logger = logger;
         }

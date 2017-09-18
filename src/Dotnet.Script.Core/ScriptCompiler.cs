@@ -7,19 +7,15 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.DotNet.InternalAbstractions;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
-using System.Runtime.InteropServices;
-
-using System.IO;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp;
 using Dotnet.Script.Core.Internal;
-using Dotnet.Script.Core.Metadata;
-using Dotnet.Script.Core.NuGet;
-using Dotnet.Script.Core.ProjectSystem;
-using Microsoft.DotNet.PlatformAbstractions;
+
+using Dotnet.Script.DependencyModel;
+using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.NuGet;
+
 
 
 namespace Dotnet.Script.Core
@@ -27,7 +23,7 @@ namespace Dotnet.Script.Core
     public class ScriptCompiler
     {
         private readonly ScriptLogger _logger;
-        private readonly ScriptProjectProvider _scriptProjectProvider;
+        private readonly IScriptDependencyResolver _scriptDependencyResolver;
 
         protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
@@ -52,10 +48,10 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
-        public ScriptCompiler(ScriptLogger logger, ScriptProjectProvider scriptProjectProvider)
+        public ScriptCompiler(ScriptLogger logger, IScriptDependencyResolver scriptProjectProvider)
         {
             _logger = logger;
-            _scriptProjectProvider = scriptProjectProvider;
+            _scriptDependencyResolver = scriptProjectProvider;
 
             // reset default scripting mode to latest language version to enable C# 7.1 features
             // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
@@ -103,22 +99,11 @@ namespace Dotnet.Script.Core
                 opts = opts.AddReferences(assembly);
             }
 
-            var pathToProjectJson = Path.Combine(context.WorkingDirectory, Project.FileName);
 
-            IList<RuntimeDependency> runtimeDependencies = new List<RuntimeDependency>();
-            if (!File.Exists(pathToProjectJson))
-            {
-                _logger.Verbose("Unable to find project context for CSX files. Will default to non-context usage.");
-                var pathToCsProj = _scriptProjectProvider.CreateProject(context.WorkingDirectory);
-                var dependencyResolver = new DependencyResolver(new CommandRunner(_logger), _logger);
-                runtimeDependencies = dependencyResolver.GetRuntimeDependencies(pathToCsProj).ToList();
-            }
-            else
-            {
-                _logger.Verbose($"Found runtime context for '{pathToProjectJson}'.");
-                var dependencyResolver = new LegacyDependencyResolver(_logger);
-                runtimeDependencies = dependencyResolver.GetRuntimeDependencies(pathToProjectJson).ToList();
-            }
+            IList<ResolvedDependency> runtimeDependencies =
+                _scriptDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+            
+
 
             AssemblyLoadContext.Default.Resolving +=
                 (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(runtimeDependencies.ToList(), assemblyLoadContext, assemblyName);
@@ -148,7 +133,7 @@ namespace Dotnet.Script.Core
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
         }
 
-        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<RuntimeDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<ResolvedDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
         {
             var runtimeDependency = runtimeDependencies.SingleOrDefault(r => r.Name == assemblyName.Name);
             if (runtimeDependency != null)

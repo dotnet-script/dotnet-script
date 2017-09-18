@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Dotnet.Script.Core;
-using Dotnet.Script.Core.ProjectSystem;
+
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.CommandLineUtils;
+using Dotnet.Script.Core;
+using Dotnet.Script.DependencyModel;
 
 namespace Dotnet.Script
 {
@@ -134,7 +135,19 @@ namespace Dotnet.Script
         private static void Run(bool debugMode, ScriptContext context)
         {
             var logger = new ScriptLogger(Console.Error, debugMode);
-            var compiler = new ScriptCompiler(logger, new ScriptProjectProvider(new ScriptParser(logger), logger));
+            var compiler = new ScriptCompiler(logger, ScriptDependencyResolver.CreateRuntimeResolver(
+                (verbose, message) =>
+                {
+                    if (verbose)
+                    {
+                        logger.Verbose(message);
+                    }
+                    else
+                    {
+                        logger.Log(message);
+                    }
+
+                }));
             var runner = new ScriptRunner(compiler, logger);
             runner.Execute<object>(context).GetAwaiter().GetResult();
         }

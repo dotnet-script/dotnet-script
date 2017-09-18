@@ -1,8 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
-using NuGet.Common;
+using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.Parsing;
 
-namespace Dotnet.Script.Core.ProjectSystem
+namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     public interface IScriptProjectProvider
     {
@@ -13,12 +16,12 @@ namespace Dotnet.Script.Core.ProjectSystem
     {
         private readonly ScriptParser scriptParser;
 
-        private readonly ScriptLogger _logger;
+        private readonly Action<bool, string> _logger;
         /// <summary>        
         /// Initializes a new instance of the <see cref="ScriptProjectProvider"/> class.
         /// </summary>        
         /// <param name="scriptParser">The <see cref="IScriptParser"/> that is responsible for parsing NuGet references from script files.</param>
-        public ScriptProjectProvider(ScriptParser scriptParser, ScriptLogger logger)
+        public ScriptProjectProvider(ScriptParser scriptParser, Action<bool, string > logger)
         {
             _logger = logger;
             this.scriptParser = scriptParser;
@@ -26,11 +29,20 @@ namespace Dotnet.Script.Core.ProjectSystem
 
         public string CreateProject(string targetDirectory)
         {
+            var pathToCsProj = Directory.GetFiles(targetDirectory, "*.csproj").FirstOrDefault();
+            if (pathToCsProj != null)
+            {
+                _logger.Verbose($"Found runtime context for '{pathToCsProj}'.");
+                return pathToCsProj;
+            }
+
+            _logger.Verbose("Unable to find project context for CSX files. Will default to non-context usage.");
+
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
             var parseresult = scriptParser.ParseFrom(csxFiles);
 
             var pathToProjectFile = GetPathToProjectFile(targetDirectory);
-            var projectFile = new ProjectFile();
+            var projectFile = new DependencyModel.ProjectSystem.ProjectFile();
 
             foreach (var packageReference in parseresult.PackageReferences)
             {
