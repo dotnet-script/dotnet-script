@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Reflection;
+using System.Runtime.Loader;
+using Microsoft.CodeAnalysis;
 
 namespace Dotnet.Script.Core.Metadata
 {
@@ -6,11 +8,13 @@ namespace Dotnet.Script.Core.Metadata
     {
         public string Name { get; }
         public string Path { get; }
+        public AssemblyName AssemblyName {get;}
 
         public RuntimeDependency(string name, string path)
         {
             Name = name;
-            Path = path;           
+            Path = path;
+            AssemblyName = AssemblyLoadContext.GetAssemblyName(path);
         }
 
         /// <inheritdoc />
