@@ -7,11 +7,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.DotNet.InternalAbstractions;
 using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
-using System.Runtime.InteropServices;
-
 using System.IO;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp;
@@ -127,10 +124,10 @@ namespace Dotnet.Script.Core
             foreach (var runtimeDep in runtimeDependencies)
             {
                 _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDep);
-                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep.Path));
+                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep.Path));                
             }
 
-            var loader = new InteractiveAssemblyLoader();
+            var loader = new InteractiveAssemblyLoader();            
             var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
             var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
@@ -147,14 +144,18 @@ namespace Dotnet.Script.Core
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
         }
-
+       
         private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<RuntimeDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
-        {
+        {                      
             var runtimeDependency = runtimeDependencies.SingleOrDefault(r => r.Name == assemblyName.Name);
             if (runtimeDependency != null)
             {
-                _logger.Verbose($"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
-                return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
+                if (runtimeDependency.AssemblyName.Version != assemblyName.Version)
+                {
+                    _logger.Verbose(
+                        $"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
+                    return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
+                }
             }
             return null;
         }       

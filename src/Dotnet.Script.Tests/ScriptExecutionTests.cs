@@ -34,10 +34,18 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Connection successful", result.output);
         }
         
+        [Fact]
         public static void ShouldReturnNonZeroExitCodeWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
             Assert.NotEqual(0, result.exitCode);
+        }
+
+        [Fact]
+        public static void ShouldHandleIssue129()
+        {
+            var result = Execute(Path.Combine("Issue129", "Issue129.csx"));    
+            Assert.Contains("Bad HTTP authentication header", result.output);
         }
 
         private static (string output, int exitCode) Execute(string fixture)
