@@ -25,6 +25,21 @@ choco install dotnet.script
 
 Download and unzip the latest [release](https://github.com/filipw/dotnet-script/releases) and make sure that `dotnet-script.sh` is in your PATH.
 
+#### Docker
+
+A Dockerfile for running dotnet-script in a Linux container is available. Build:
+
+```shell
+cd build
+docker build -t dotnet-script ..
+```
+
+And run:
+
+```
+docker run -it dotnet-script --version
+
+```
 ### Usage
 
 Our typical `helloworld.csx` might look like this
@@ -40,7 +55,7 @@ Let us take a quick look at what is going on here.
 
 `#! "netcoreapp1.1"` tells OmniSharp to resolve metadata in the context of a`netcoreapp1.1` application.
 
-`#r "nuget:NetStandard.Library,1.6.1"` brings in the the [NetStandard.Library 1.6.1](https://www.nuget.org/packages/NETStandard.Library/1.6.1) from NuGet. 
+`#r "nuget:NetStandard.Library,1.6.1"` brings in the the [NetStandard.Library 1.6.1](https://www.nuget.org/packages/NETStandard.Library/1.6.1) from NuGet.
 
 That is all it takes and we can execute the script
 
@@ -112,12 +127,3 @@ The days of debugging scripts using `Console.WriteLine` are over. One major feat
 
 
 ![debug](https://user-images.githubusercontent.com/1034073/30173509-2f31596c-93f8-11e7-9124-ca884cf6564e.gif)
-
-
-
-
-
-
-
-
-
