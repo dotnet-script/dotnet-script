@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.DependencyModel.Environment
 {
@@ -19,9 +22,71 @@ namespace Dotnet.Script.DependencyModel.Environment
             return GetPlatformIdentifier() == "win";
         }
 
+        public static string GetPathToGlobalPackagesFolder()
+        {
+            string basePath;
+
+            var packageDirectory = System.Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+
+            if (!string.IsNullOrEmpty(packageDirectory))
+            {
+                return packageDirectory;
+            }
+
+
+            if (IsWindows())
+            {
+                basePath = System.Environment.GetEnvironmentVariable("USERPROFILE");
+            }
+            else
+            {
+                basePath = System.Environment.GetEnvironmentVariable("HOME");
+            }
+
+            if (string.IsNullOrEmpty(basePath))
+            {
+                return string.Empty;
+            }
+
+            return Path.Combine(basePath, ".nuget", "packages");
+        }
+
+        public static string GetPathToNuGetExecutable()
+        {
+            var directory = Path.GetDirectoryName(new Uri(typeof(RuntimeHelper).GetTypeInfo().Assembly.CodeBase).LocalPath);
+            return Path.Combine(directory, "NuGet430.exe");
+        }
+
+        public static string GetDotnetBinaryPath()
+        {
+            string basePath;
+            if (IsWindows())
+            {
+                basePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
+            }
+            else
+            {
+                basePath = "usr/local/share";
+            }
+            return Path.Combine(basePath, "dotnet");
+        }
+
+        public static string GetPathToNuGetFallbackFolder()
+        {
+            return Path.Combine(GetDotnetBinaryPath(), "sdk", "NuGetFallbackFolder");
+        }
+
+        public static string GetPathToNuGetStoreFolder()
+        {            
+            var processArchitecture = GetProcessArchitecture();
+            var storePath = Path.Combine(GetDotnetBinaryPath(), "store", processArchitecture, "netcoreapp2.0");
+            return storePath;
+        }
+
+
         internal static string GetProcessArchitecture()
         {
-            return RuntimeInformation.ProcessArchitecture.ToString();
+            return RuntimeInformation.ProcessArchitecture.ToString();            
         }
 
         public static string GetRuntimeIdentifier()
@@ -41,5 +106,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             return string.IsNullOrWhiteSpace(runtime) || runtime == GetRuntimeIdentifier();
         }
+
+
     }
 }

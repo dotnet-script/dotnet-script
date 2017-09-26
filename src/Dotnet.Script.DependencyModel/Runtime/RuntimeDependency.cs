@@ -1,13 +1,13 @@
 ﻿
 
-namespace Dotnet.Script.DependencyModel
+namespace Dotnet.Script.DependencyModel.Runtime
 {
-    public class ResolvedDependency
+    public class RuntimeDependency
     {
         public string Name { get; }
         public string Path { get; }
 
-        public ResolvedDependency(string name, string path)
+        public RuntimeDependency(string name, string path)
         {
             Name = name;
             Path = path;           
@@ -22,7 +22,7 @@ namespace Dotnet.Script.DependencyModel
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            var other = (ResolvedDependency)obj;
+            var other = (RuntimeDependency)obj;
             return other.Name == Name && other.Path == Path;
         }
 

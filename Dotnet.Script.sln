@@ -10,9 +10,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.Extras", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.Tests", "src\Dotnet.Script.Tests\Dotnet.Script.Tests.csproj", "{ADA5A9A5-CBE9-48DA-8C71-318574C986C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Script.DependencyModel", "src\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj", "{EA963598-ED46-4530-9094-51F70FCCEDA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.DependencyModel", "src\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj", "{EA963598-ED46-4530-9094-51F70FCCEDA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Script.DependencyModel.NuGet", "src\Dotnet.Script.DependencyModel.Nuget\Dotnet.Script.DependencyModel.NuGet.csproj", "{E361528F-178A-4489-AF01-FFD3A7122D99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.DependencyModel.NuGet", "src\Dotnet.Script.DependencyModel.Nuget\Dotnet.Script.DependencyModel.NuGet.csproj", "{E361528F-178A-4489-AF01-FFD3A7122D99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Script.DependencyModel.Tests", "src\Dotnet.Script.DependencyModel.Tests\Dotnet.Script.DependencyModel.Tests.csproj", "{3834C1B9-C220-499B-B969-0B91F894FD98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,6 +98,18 @@ Global
 		{E361528F-178A-4489-AF01-FFD3A7122D99}.Release|x64.Build.0 = Release|Any CPU
 		{E361528F-178A-4489-AF01-FFD3A7122D99}.Release|x86.ActiveCfg = Release|Any CPU
 		{E361528F-178A-4489-AF01-FFD3A7122D99}.Release|x86.Build.0 = Release|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Debug|x64.Build.0 = Debug|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Debug|x86.Build.0 = Debug|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Release|x64.ActiveCfg = Release|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Release|x64.Build.0 = Release|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Release|x86.ActiveCfg = Release|Any CPU
+		{3834C1B9-C220-499B-B969-0B91F894FD98}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

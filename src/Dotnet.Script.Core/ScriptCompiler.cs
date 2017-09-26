@@ -15,7 +15,7 @@ using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.NuGet;
-
+using Dotnet.Script.DependencyModel.Runtime;
 
 
 namespace Dotnet.Script.Core
@@ -48,10 +48,10 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
-        public ScriptCompiler(ScriptLogger logger, IScriptDependencyResolver scriptProjectProvider)
+        public ScriptCompiler(ScriptLogger logger, IScriptDependencyResolver scriptDependencyResolver)
         {
             _logger = logger;
-            _scriptDependencyResolver = scriptProjectProvider;
+            _scriptDependencyResolver = scriptDependencyResolver;
 
             // reset default scripting mode to latest language version to enable C# 7.1 features
             // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
@@ -99,11 +99,9 @@ namespace Dotnet.Script.Core
                 opts = opts.AddReferences(assembly);
             }
 
-
-            IList<ResolvedDependency> runtimeDependencies =
-                _scriptDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
             
-
+            IList<RuntimeDependency> runtimeDependencies =
+                _scriptDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
 
             AssemblyLoadContext.Default.Resolving +=
                 (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(runtimeDependencies.ToList(), assemblyLoadContext, assemblyName);
@@ -133,7 +131,7 @@ namespace Dotnet.Script.Core
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
         }
 
-        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<ResolvedDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<RuntimeDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
         {
             var runtimeDependency = runtimeDependencies.SingleOrDefault(r => r.Name == assemblyName.Name);
             if (runtimeDependency != null)

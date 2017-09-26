@@ -7,47 +7,60 @@ using Dotnet.Script.DependencyModel.Parsing;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
+    /// <summary>
+    /// Represents a class that is capable of creating a 
+    /// project file (csproj) based upon one or more script files 
+    /// in a given directory.
+    /// </summary>
     public interface IScriptProjectProvider
     {
-        string CreateProject(string targetDirectory);
+        /// <summary>
+        /// Creates a project file (csproj) based upon the 
+        /// script files found in the <paramref name="targetDirectory"/>.
+        /// </summary>
+        /// <param name="targetDirectory">The directory containing script files.</param>
+        /// <param name="defaultTargetFramework">The default target framework.</param>
+        /// <returns></returns>
+        string CreateProject(string targetDirectory, string defaultTargetFramework = "net46");
     }
 
     public class ScriptProjectProvider : IScriptProjectProvider
     {
-        private readonly ScriptParser scriptParser;
+        private readonly ScriptParser _scriptParser;
 
-        private readonly Action<bool, string> _logger;
+        private readonly Action<bool, string> _logger;        
+
         /// <summary>        
         /// Initializes a new instance of the <see cref="ScriptProjectProvider"/> class.
         /// </summary>        
-        /// <param name="scriptParser">The <see cref="IScriptParser"/> that is responsible for parsing NuGet references from script files.</param>
-        public ScriptProjectProvider(ScriptParser scriptParser, Action<bool, string > logger)
+        /// <param name="scriptParser">The <see cref="ScriptParser"/> that is responsible for parsing NuGet references from script files.</param>
+        private ScriptProjectProvider(ScriptParser scriptParser, Action<bool, string > logger)
         {
-            _logger = logger;
-            this.scriptParser = scriptParser;
+            _logger = logger;            
+            this._scriptParser = scriptParser;
         }
 
-        public string CreateProject(string targetDirectory)
+        public static ScriptProjectProvider Create(Action<bool, string> logger)
         {
-            var pathToCsProj = Directory.GetFiles(targetDirectory, "*.csproj").FirstOrDefault();
-            if (pathToCsProj != null)
-            {
-                _logger.Verbose($"Found runtime context for '{pathToCsProj}'.");
-                return pathToCsProj;
-            }
+            return new ScriptProjectProvider(new ScriptParser(logger),logger);
+        }
 
-            _logger.Verbose("Unable to find project context for CSX files. Will default to non-context usage.");
+        public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46")
+        {            
+            _logger.Verbose($"Creating project file for *.csx files found in {targetDirectory}");
 
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
-            var parseresult = scriptParser.ParseFrom(csxFiles);
+            var parseresult = _scriptParser.ParseFrom(csxFiles);
 
             var pathToProjectFile = GetPathToProjectFile(targetDirectory);
-            var projectFile = new DependencyModel.ProjectSystem.ProjectFile();
+            var projectFile = new ProjectFile();
 
             foreach (var packageReference in parseresult.PackageReferences)
             {
                 projectFile.AddPackageReference(packageReference);
             }
+
+            projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
 
             projectFile.Save(pathToProjectFile);
             _logger.Verbose($"Project file saved to {pathToProjectFile}");

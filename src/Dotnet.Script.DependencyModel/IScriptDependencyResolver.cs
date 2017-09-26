@@ -2,40 +2,44 @@
 using System.Collections.Generic;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Parsing;
+using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
+using Dotnet.Script.DependencyModel.Runtime;
 
 namespace Dotnet.Script.DependencyModel
 {
     public interface IScriptDependencyResolver
     {
-        IEnumerable<ResolvedDependency> GetDependencies(string targetDirectory);
+        IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory);
     }
 
     public class ScriptDependencyResolver : IScriptDependencyResolver
     {
         private readonly IScriptProjectProvider _scriptProjectProvider;
         private readonly IDependencyContextProvider _dependencyContextProvider;
-        private readonly IDependencyResolver _dependencyResolver;
+        private readonly IRuntimeDependencyResolver _runtimeDependencyResolver;
 
-        public ScriptDependencyResolver(IScriptProjectProvider scriptProjectProvider, IDependencyContextProvider dependencyContextProvider, IDependencyResolver dependencyResolver)
+        private ScriptDependencyResolver(IScriptProjectProvider scriptProjectProvider, IDependencyContextProvider dependencyContextProvider, IRuntimeDependencyResolver runtimeDependencyResolver)
         {
             _scriptProjectProvider = scriptProjectProvider;
             _dependencyContextProvider = dependencyContextProvider;
-            _dependencyResolver = dependencyResolver;
+            _runtimeDependencyResolver = runtimeDependencyResolver;
         }
 
-        public IEnumerable<ResolvedDependency> GetDependencies(string targetDirectory)
+        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
         {
-            var projectFile = _scriptProjectProvider.CreateProject(targetDirectory);
+            var projectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0");
             var dependencyContext = _dependencyContextProvider.GetDependencyContext(projectFile);
-            return _dependencyResolver.GetDependencies(dependencyContext);
+            return _runtimeDependencyResolver.GetDependencies(dependencyContext);
         }
 
         public static ScriptDependencyResolver CreateRuntimeResolver(Action<bool, string> logAction)
         {
-            return new ScriptDependencyResolver(new ScriptProjectProvider(new ScriptParser(logAction), logAction),
-                new DependencyContextProvider(logAction),
+            var restorers = new IRestorer[] {new DotnetRestorer(new CommandRunner(logAction), logAction)};
+
+            return new ScriptDependencyResolver(ScriptProjectProvider.Create(logAction),
+                new DependencyContextProvider(restorers, logAction),
                 new RuntimeDependencyResolver(new DependencyPathResolver(logAction), logAction));
-        }
+        }       
     }
 }

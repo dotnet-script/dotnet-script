@@ -25,6 +25,13 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             itemGroupElement.Add(packageReferenceElement);
         }
 
+        public void SetTargetFramework(string targetFramework)
+        {
+            var targetFrameworkElement = _document.Descendants("TargetFramework").Single();
+            targetFrameworkElement.Value = targetFramework;
+        }
+
+
         public void Save(string pathToProjectFile)
         {
             using (var fileStream = new FileStream(pathToProjectFile, FileMode.Create, FileAccess.Write))

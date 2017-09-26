@@ -7,9 +7,9 @@ using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Microsoft.Extensions.DependencyModel;
 
-namespace Dotnet.Script.DependencyModel
+namespace Dotnet.Script.DependencyModel.Runtime
 {
-    public class RuntimeDependencyResolver : IDependencyResolver
+    public class RuntimeDependencyResolver : IRuntimeDependencyResolver
     {
         private readonly IDependencyPathResolver _dependencyPathResolver;
         private readonly Action<bool, string> _logger;
@@ -18,20 +18,20 @@ namespace Dotnet.Script.DependencyModel
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
 
-        public RuntimeDependencyResolver(IDependencyPathResolver dependencyPathResolver, Action<bool, string> logger)
+        public RuntimeDependencyResolver(IDependencyPathResolver dependencyPathResolver,  Action<bool, string> logger)
         {
             _dependencyPathResolver = dependencyPathResolver;
             _logger = logger;
         }
 
-        public IEnumerable<ResolvedDependency> GetDependencies(DependencyContext dependencyContext)
+        public IEnumerable<RuntimeDependency> GetDependencies(DependencyContext dependencyContext)
         {
-            var runtimeDepedencies = new HashSet<ResolvedDependency>();
+            var runtimeDepedencies = new HashSet<RuntimeDependency>();
 
             var runtimeLibraries = dependencyContext.RuntimeLibraries;
 
             foreach (var runtimeLibrary in runtimeLibraries)
-            {
+            {                
                 ProcessNativeLibraries(runtimeLibrary);
                 ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies);
             }
@@ -61,7 +61,7 @@ namespace Dotnet.Script.DependencyModel
             }
         }
         private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary,
-            HashSet<ResolvedDependency> resolvedDependencies)
+            HashSet<RuntimeDependency> resolvedDependencies)
         {            
             foreach (var runtimeAssemblyGroup in runtimeLibrary.RuntimeAssemblyGroups.Where(rag => RuntimeHelper.AppliesToCurrentRuntime(rag.Runtime)))
             {
@@ -73,7 +73,7 @@ namespace Dotnet.Script.DependencyModel
                         var fullPath = _dependencyPathResolver.GetFullPath(path);
                         
                         _logger.Verbose($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
-                        resolvedDependencies.Add(new ResolvedDependency(runtimeLibrary.Name, fullPath));
+                        resolvedDependencies.Add(new RuntimeDependency(runtimeLibrary.Name, fullPath));
                     }
                 }
             }
