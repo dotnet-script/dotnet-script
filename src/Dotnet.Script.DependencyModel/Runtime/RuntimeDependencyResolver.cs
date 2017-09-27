@@ -3,29 +3,57 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.Process;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Runtime
 {
-    public class RuntimeDependencyResolver : IRuntimeDependencyResolver
+
+    public class RuntimeDependencyResolver
     {
-        private readonly IDependencyPathResolver _dependencyPathResolver;
+        private readonly DependencyPathResolver _dependencyPathResolver;
+        private readonly ScriptProjectProvider _scriptProjectProvider;
+        private readonly DependencyContextProvider _dependencyContextProvider;
         private readonly Action<bool, string> _logger;
 
         // Note: Windows only, Mac and Linux needs something else?
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
 
-        public RuntimeDependencyResolver(IDependencyPathResolver dependencyPathResolver,  Action<bool, string> logger)
+        private RuntimeDependencyResolver(DependencyPathResolver dependencyPathResolver, ScriptProjectProvider scriptProjectProvider, DependencyContextProvider dependencyContextProvider,  Action<bool, string> logger)
         {
             _dependencyPathResolver = dependencyPathResolver;
+            _scriptProjectProvider = scriptProjectProvider;
+            _dependencyContextProvider = dependencyContextProvider;
             _logger = logger;
         }
 
-        public IEnumerable<RuntimeDependency> GetDependencies(DependencyContext dependencyContext)
+        public RuntimeDependencyResolver(Action<bool, string> logger) 
+            : this
+            (
+                  new DependencyPathResolver(logger),
+                  new ScriptProjectProvider(logger), 
+                  new DependencyContextProvider(CreateRestorers(logger),logger), 
+                  logger
+            )
+        {            
+        }
+
+        private static IRestorer[] CreateRestorers(Action<bool, string> logger)
         {
+            var commandRunner = new CommandRunner(logger);
+            return new IRestorer[] { new DotnetRestorer(commandRunner, logger)};
+        }
+
+        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
+        {
+            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp.20", true);
+            var dependencyContext = _dependencyContextProvider.GetDependencyContext(pathToProjectFile);
+
             var runtimeDepedencies = new HashSet<RuntimeDependency>();
 
             var runtimeLibraries = dependencyContext.RuntimeLibraries;

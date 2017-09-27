@@ -94,7 +94,7 @@ namespace Dotnet.Script.DependencyModel.Environment
             return Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
         }
 
-        internal static string ResolveTargetFramework()
+        public static string ResolveTargetFramework()
         {
             return Assembly.GetEntryAssembly().GetCustomAttributes()
                 .OfType<System.Runtime.Versioning.TargetFrameworkAttribute>()

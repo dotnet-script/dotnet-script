@@ -4,17 +4,26 @@ using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
-    public class DependencyContextProvider : IDependencyContextProvider
+    /// <summary>
+    /// Represents a class that is capable of providing 
+    /// the <see cref="DependencyContext"/> for a given project file (csproj).
+    /// </summary>
+    public class DependencyContextProvider 
     {
         private readonly IRestorer[] _restorers;
-        private readonly Action<bool, string> _logAction;
+        private readonly Action<bool, string> _logger;
 
-        public DependencyContextProvider(IRestorer[] restorers, Action<bool, string> logAction)
+        public DependencyContextProvider(IRestorer[] restorers, Action<bool, string> logger)
         {
             _restorers = restorers;
-            _logAction = logAction;
+            _logger = logger;
         }
 
+        /// <summary>
+        /// Gets the <see cref="DependencyContext"/> for the project file.
+        /// </summary>
+        /// <param name="pathToProjectFile">The path to the project file.</param>
+        /// <returns>The <see cref="DependencyContext"/> for a given project file (csproj).</returns>
         public DependencyContext GetDependencyContext(string pathToProjectFile)
         {
             Restore(pathToProjectFile);

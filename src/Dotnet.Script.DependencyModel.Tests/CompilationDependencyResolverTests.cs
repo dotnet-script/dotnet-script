@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using Dotnet.Script.DependencyModel.Compilation;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Xunit;
 using Xunit.Abstractions;
@@ -16,16 +18,37 @@ namespace Dotnet.Script.DependencyModel.Tests
 
         [Fact]
         public void ShouldGetCompilationDependenciesForPackageContainingInlineNuGetPackageReference()
+        {            
+            var resolver = CreateResolver();
+            var dependencies =  resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/InlineNuGetPackage", true, "netcoreapp2.0");
+            Assert.True(dependencies.Any(d => d.Contains("AutoMapper")));
+        }
+
+        [Fact]
+        public void ShouldGetCompilationDependenciesForPackageContainingNativeLibrary()
         {
-            var scriptProjectProvider = ScriptProjectProvider.Create((b, s) => _testOutputHelper.WriteLine(s));
-            var project =
-                scriptProjectProvider.CreateProject("../../../../Dotnet.Script.Tests/TestFixtures/InlineNuGetPackage",
-                    "netcoreapp2.0");
-            
-            //var resolver = ScriptDependencyResolver.CreateCompilationResolver((verbose, message) =>
-            //    _testOutputHelper.WriteLine(message ?? ""), enableScriptNuGetReferences:true);
-            //var dependencies = resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/InlineNuGetPackage");
-            //Assert.Contains("AutoMapper", dependencies.Select(d => d.Name));
+            var resolver = CreateResolver();
+            var dependencies = resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/NativeLibrary", true, "netcoreapp2.0");
+            Assert.True(dependencies.Any(d => d.Contains("Microsoft.Data.Sqlite")));
+        }
+
+        [Fact]
+        public void ShouldGetCompilationDependenciesForIssue129()
+        {
+            var resolver = CreateResolver();
+            var dependencies = resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/Issue129", true, "netcoreapp2.0");
+            Assert.True(dependencies.Any(d => d.Contains("Auth0.ManagementApi")));
+        }
+
+        private CompilationDependencyResolver CreateResolver()
+        {
+            _testOutputHelper.WriteLine(RuntimeHelper.ResolveTargetFramework());
+            var resolver = CompilationDependencyResolver.Create((verbose, message) =>
+            {                
+                string level = verbose ? "Debug" : "Info";
+                _testOutputHelper.WriteLine($"{level}:{message ?? ""}");
+            });
+            return resolver;
         }
     }
 }

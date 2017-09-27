@@ -23,7 +23,7 @@ namespace Dotnet.Script.Core
     public class ScriptCompiler
     {
         private readonly ScriptLogger _logger;
-        private readonly IScriptDependencyResolver _scriptDependencyResolver;
+        private readonly RuntimeDependencyResolver _runtimeDependencyResolver;
 
         protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
@@ -48,10 +48,10 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
-        public ScriptCompiler(ScriptLogger logger, IScriptDependencyResolver scriptDependencyResolver)
+        public ScriptCompiler(ScriptLogger logger, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logger;
-            _scriptDependencyResolver = scriptDependencyResolver;
+            _runtimeDependencyResolver = runtimeDependencyResolver;
 
             // reset default scripting mode to latest language version to enable C# 7.1 features
             // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
@@ -101,7 +101,7 @@ namespace Dotnet.Script.Core
 
 
             IList<RuntimeDependency> runtimeDependencies =
-                _scriptDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+                _runtimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
                                     
             AssemblyLoadContext.Default.Resolving +=
                 (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(runtimeDependencies.ToList(), assemblyLoadContext, assemblyName);

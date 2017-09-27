@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using Dotnet.Script.DependencyModel.Parsing;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {

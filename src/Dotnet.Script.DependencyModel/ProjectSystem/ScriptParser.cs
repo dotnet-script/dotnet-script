@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Logging;
 
-namespace Dotnet.Script.DependencyModel.Parsing
+namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     /// <summary>
     /// A class that is capable of parsing a set of script files 
@@ -23,14 +23,14 @@ namespace Dotnet.Script.DependencyModel.Parsing
             _logger = logger;
         }
 
-        /// <inheritdoc />
+        
         public ParseResult ParseFrom(IEnumerable<string> csxFiles)
         {
             HashSet<PackageReference> allPackageReferences = new HashSet<PackageReference>();
             string currentTargetFramework = null;
             foreach (var csxFile in csxFiles)
             {
-                _logger.Verbose($"Parsing {csxFile}");
+                LogActionExtensions.Verbose(_logger, $"Parsing {csxFile}");
                 var fileContent = ReadFile(csxFile);
                 var packageReferences = ReadPackageReferences(fileContent);
                 allPackageReferences.UnionWith(packageReferences);
@@ -39,7 +39,7 @@ namespace Dotnet.Script.DependencyModel.Parsing
                 {
                     if (currentTargetFramework != null && targetFramework != currentTargetFramework)
                     {
-                        _logger.Verbose($"Found multiple target frameworks. Using {currentTargetFramework}.");
+                        LogActionExtensions.Verbose(_logger, $"Found multiple target frameworks. Using {currentTargetFramework}.");
                     }
                     else
                     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Dotnet.Script.DependencyModel.Parsing
+namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     /// <summary>
     /// Represents the result of parsing a set of script files.

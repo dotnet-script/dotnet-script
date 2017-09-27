@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.CommandLineUtils;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel;
+using Dotnet.Script.DependencyModel.Runtime;
 
 namespace Dotnet.Script
 {
@@ -140,7 +141,7 @@ namespace Dotnet.Script
         private static Task Run(bool debugMode, ScriptContext context)
         {
             var logger = new ScriptLogger(Console.Error, debugMode);
-            var compiler = new ScriptCompiler(logger, ScriptDependencyResolver.CreateRuntimeResolver(
+            var compiler = new ScriptCompiler(logger, new RuntimeDependencyResolver(
                 (verbose, message) =>
                 {
                     if (verbose)

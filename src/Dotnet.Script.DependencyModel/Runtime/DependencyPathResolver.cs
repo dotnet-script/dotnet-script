@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using Dotnet.Script.DependencyModel.Environment;
 
-namespace Dotnet.Script.DependencyModel
+namespace Dotnet.Script.DependencyModel.Runtime
 {
-    public class DependencyPathResolver : IDependencyPathResolver
+    /// <summary>
+    /// Represents a class that is capable of resolving 
+    /// the full path to a dependency specified with a relative path.
+    /// </summary>
+    public class DependencyPathResolver
     {
         private readonly Action<bool, string> _logger;
         private readonly Lazy<string[]> _possibleNuGetRootLocations = new Lazy<string[]>();
@@ -15,7 +19,11 @@ namespace Dotnet.Script.DependencyModel
             _logger = logger;
             _possibleNuGetRootLocations = new Lazy<string[]>(ResolvePossibleNugetRootLocations);
         }
-
+        /// <summary>
+        /// Gets the full path of a dependency specified with a relative path.
+        /// </summary>
+        /// <param name="relativePath">The relative of the dependency to resolve.</param>
+        /// <returns>The full path of the dependency if resolvable, otherwise null.</returns>
         public string GetFullPath(string relativePath)
         {
             foreach (var possibleLocation in _possibleNuGetRootLocations.Value)
