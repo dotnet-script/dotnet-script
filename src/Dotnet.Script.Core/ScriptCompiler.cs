@@ -95,25 +95,30 @@ namespace Dotnet.Script.Core
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
                 _logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
-                var assembly = Assembly.Load(inheritedAssemblyName);
+                var assembly = Assembly.Load(inheritedAssemblyName);                
                 opts = opts.AddReferences(assembly);
             }
 
-            
+
             IList<RuntimeDependency> runtimeDependencies =
                 _scriptDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
-
+                                    
             AssemblyLoadContext.Default.Resolving +=
                 (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(runtimeDependencies.ToList(), assemblyLoadContext, assemblyName);
 
 
             foreach (var runtimeDep in runtimeDependencies)
             {
-                _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDep);
-                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep.Path));
+                var runTimeDepAssemblyName = AssemblyLoadContext.GetAssemblyName(runtimeDep.Path);
+                if (!inheritedAssemblyNames.Any(an => an.Name == runTimeDepAssemblyName.Name))
+                {
+                    _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDep);
+                    opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep.Path));
+                }
+
             }
 
-            var loader = new InteractiveAssemblyLoader();
+            var loader = new InteractiveAssemblyLoader();            
             var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
             var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
@@ -130,14 +135,18 @@ namespace Dotnet.Script.Core
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
         }
-
+       
         private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<RuntimeDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
-        {
+        {                      
             var runtimeDependency = runtimeDependencies.SingleOrDefault(r => r.Name == assemblyName.Name);
             if (runtimeDependency != null)
             {
-                _logger.Verbose($"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
-                return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
+                if (AssemblyLoadContext.GetAssemblyName(runtimeDependency.Path).Version != assemblyName.Version)
+                {
+                    _logger.Verbose(
+                        $"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
+                    return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
+                }
             }
             return null;
         }       

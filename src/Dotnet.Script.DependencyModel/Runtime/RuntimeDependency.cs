@@ -1,11 +1,9 @@
-﻿
-
-namespace Dotnet.Script.DependencyModel.Runtime
+﻿namespace Dotnet.Script.DependencyModel.Runtime
 {
     public class RuntimeDependency
     {
         public string Name { get; }
-        public string Path { get; }
+        public string Path { get; }       
 
         public RuntimeDependency(string name, string path)
         {

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.CommandLineUtils;
 using Dotnet.Script.Core;
@@ -25,6 +25,11 @@ namespace Dotnet.Script
             }
             catch (Exception e)
             {
+                if (e is AggregateException aggregateEx)
+                {
+                    e = aggregateEx.Flatten().InnerException;
+                }
+
                 // Be verbose (stack trace) in debug mode otherwise brief
                 var error = args.Any(arg => arg == DebugFlagShort
                                          || arg == DebugFlagLong)
@@ -52,21 +57,21 @@ namespace Dotnet.Script
                 var code = c.Argument("code", "Code to execute.");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
 
-                c.OnExecute(() =>
+                c.OnExecute(async () =>
                 {
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments, cwd.Value());
+                        await RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments, cwd.Value());
                     }
                     return 0;
                 });
             });
 
-            app.OnExecute(() =>
+            app.OnExecute(async () =>
             {
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments);
+                    await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments);
                 }
                 else
                 {
@@ -80,8 +85,8 @@ namespace Dotnet.Script
                 c.Description = "Creates a sample script along with the launch.json file needed to launch and debug the script.";
                 c.OnExecute(() =>
                 {
-                    var skaffolder = new Scaffolder();
-                    skaffolder.InitializerFolder();
+                    var scaffolder = new Scaffolder();
+                    scaffolder.InitializerFolder();
                     return 0;
                 });
             });
@@ -92,13 +97,13 @@ namespace Dotnet.Script
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 c.OnExecute(() =>
                 {
-                    var skaffolder = new Scaffolder();
+                    var scaffolder = new Scaffolder();
                     if (fileNameArgument.Value == null)
                     {
                         c.ShowHelp();
                         return 0;
                     }
-                    skaffolder.CreateNewScriptFile(fileNameArgument.Value);
+                    scaffolder.CreateNewScriptFile(fileNameArgument.Value);
                     return 0;
                 });
             });
@@ -106,7 +111,7 @@ namespace Dotnet.Script
             return app.Execute(args.Except(new[] { "--" }).ToArray());
         }
 
-        private static void RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
+        private static Task RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
         {
             if (!File.Exists(file))
             {
@@ -120,19 +125,19 @@ namespace Dotnet.Script
             {
                 var sourceText = SourceText.From(filestream);
                 var context = new ScriptContext(sourceText, directory, config, args, absoluteFilePath, debugMode);
-                Run(debugMode, context);
+                return Run(debugMode, context);
             }
         }
 
-        private static void RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
+        private static Task RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args, null, debugMode);
 
-            Run(debugMode, context);
+            return Run(debugMode, context);
         }
 
-        private static void Run(bool debugMode, ScriptContext context)
+        private static Task Run(bool debugMode, ScriptContext context)
         {
             var logger = new ScriptLogger(Console.Error, debugMode);
             var compiler = new ScriptCompiler(logger, ScriptDependencyResolver.CreateRuntimeResolver(
@@ -149,7 +154,7 @@ namespace Dotnet.Script
 
                 }));
             var runner = new ScriptRunner(compiler, logger);
-            runner.Execute<object>(context).GetAwaiter().GetResult();
+            return runner.Execute<object>(context);
         }
 
         private static string GetVersionInfo()
