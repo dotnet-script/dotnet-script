@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Text;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.Process
@@ -24,12 +23,14 @@ namespace Dotnet.Script.DependencyModel.Process
 
         private static ProcessStartInfo CreateProcessStartInfo(string commandPath, string arguments)
         {
-            var startInformation = new ProcessStartInfo($"{commandPath}");
-            startInformation.CreateNoWindow = true;
-            startInformation.Arguments = arguments;
-            startInformation.RedirectStandardOutput = true;
-            startInformation.RedirectStandardError = true;
-            startInformation.UseShellExecute = false;
+            var startInformation = new ProcessStartInfo($"{commandPath}")
+            {
+                CreateNoWindow = true,
+                Arguments = arguments,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
+            };
             return startInformation;
         }
 
@@ -42,8 +43,7 @@ namespace Dotnet.Script.DependencyModel.Process
         }
         private System.Diagnostics.Process CreateProcess(ProcessStartInfo startInformation)
         {
-            var process = new System.Diagnostics.Process();
-            process.StartInfo = startInformation;
+            var process = new System.Diagnostics.Process {StartInfo = startInformation};
             process.OutputDataReceived += (s, e) => _logger.Verbose(e.Data);
             process.ErrorDataReceived += (s, e) => _logger.Verbose(e.Data);
             return process;

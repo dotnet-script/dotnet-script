@@ -73,6 +73,9 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         public static string GetPathToNuGetFallbackFolder()
         {
+            // Note: Read the probing paths from contenttest.runtimeconfig.dev.json
+            // At least for the runtime resolver.
+
             return Path.Combine(GetDotnetBinaryPath(), "sdk", "NuGetFallbackFolder");
         }
 

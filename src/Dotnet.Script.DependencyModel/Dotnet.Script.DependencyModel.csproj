@@ -15,6 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="NuGet\NuGet430.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="NuGet\NuGet430.exe" />
     <EmbeddedResource Include="ProjectSystem\csproj.template" />
   </ItemGroup>
 

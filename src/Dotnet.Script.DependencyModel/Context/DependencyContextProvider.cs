@@ -48,6 +48,7 @@ namespace Dotnet.Script.DependencyModel.Context
 
             using (FileStream fs = new FileStream(pathToAssetsFiles, FileMode.Open, FileAccess.Read))
             {
+                // https://github.com/dotnet/core-setup/blob/master/src/managed/Microsoft.Extensions.DependencyModel/DependencyContextJsonReader.cs
                 using (var contextReader = new DependencyContextJsonReader())
                 {
                     return contextReader.Read(fs);
