@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Dotnet.Script.DependencyModel.Logging;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Context
@@ -27,9 +28,7 @@ namespace Dotnet.Script.DependencyModel.Context
         /// <param name="pathToProjectFile">The path to the project file.</param>
         /// <returns>The <see cref="DependencyContext"/> for a given project file (csproj).</returns>
         public ScriptDependencyInfo GetDependencyInfo(string pathToProjectFile)
-        {
-            // NOTE REFACTOR THIS SO THAT IT READS THE NUGET PROPS FILE 
-
+        {            
             Restore(pathToProjectFile);
             var context =  ReadDependencyContext(pathToProjectFile);
             var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);
@@ -48,8 +47,10 @@ namespace Dotnet.Script.DependencyModel.Context
             }
         }
 
-        private static DependencyContext ReadDependencyContext(string pathToProjectFile)
+        private DependencyContext ReadDependencyContext(string pathToProjectFile)
         {
+            _logger.Verbose($"Reading dependency context from {pathToProjectFile}");
+
             var pathToAssetsFiles = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
 
             using (FileStream fs = new FileStream(pathToAssetsFiles, FileMode.Open, FileAccess.Read))
@@ -62,12 +63,13 @@ namespace Dotnet.Script.DependencyModel.Context
             }
         }
 
-        private static string[] GetNuGetPackageFolders(string pathToProjectFile)
+        private string[] GetNuGetPackageFolders(string pathToProjectFile)
         {
             var pathToObjFolder = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj");
-            var pathToPropsFile = Directory.GetFiles(pathToObjFolder, "*.csproj.nuget.g.props").FirstOrDefault();
+            var pathToPropsFile = Directory.GetFiles(pathToObjFolder, "*.csproj.nuget.g.props").Single();
             var document = XDocument.Load(pathToPropsFile);
             var packageFolders = document.Descendants().Single(d => d.Name.LocalName == "NuGetPackageFolders").Value;
+            _logger.Verbose($"Resolved NuGet package folders: {packageFolders}");
             return packageFolders.Split(';');
         }
     }

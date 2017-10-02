@@ -1,9 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.DependencyModel.Environment
 {
@@ -21,8 +19,8 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             return GetPlatformIdentifier() == "win";
         }
-                   
-        public static string GetDotnetBinaryPath()
+
+        private static string GetDotnetBinaryPath()
         {
             string basePath;
             if (IsWindows())
@@ -44,7 +42,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         }
 
 
-        internal static string GetProcessArchitecture()
+        private static string GetProcessArchitecture()
         {
             return RuntimeInformation.ProcessArchitecture.ToString();            
         }
@@ -52,21 +50,11 @@ namespace Dotnet.Script.DependencyModel.Environment
         public static string GetRuntimeIdentifier()
         {
             return Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
-        }
-
-        public static string ResolveTargetFramework()
-        {
-            return Assembly.GetEntryAssembly().GetCustomAttributes()
-                .OfType<System.Runtime.Versioning.TargetFrameworkAttribute>()
-                .Select(x => x.FrameworkName)
-                .FirstOrDefault();
-        }
+        }       
 
         internal static bool AppliesToCurrentRuntime(string runtime)
         {
             return string.IsNullOrWhiteSpace(runtime) || runtime == GetRuntimeIdentifier();
         }
-
-
     }
 }

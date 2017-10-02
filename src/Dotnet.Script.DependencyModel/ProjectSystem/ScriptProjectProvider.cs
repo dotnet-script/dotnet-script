@@ -11,11 +11,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         private readonly ScriptParser _scriptParser;
 
         private readonly Action<bool, string> _logger;        
-
-        /// <summary>        
-        /// Initializes a new instance of the <see cref="ScriptProjectProvider"/> class.
-        /// </summary>        
-        /// <param name="scriptParser">The <see cref="ScriptParser"/> that is responsible for parsing NuGet references from script files.</param>
+        
         private ScriptProjectProvider(ScriptParser scriptParser, Action<bool, string > logger)
         {
             _logger = logger;            
@@ -23,14 +19,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         }
 
         public ScriptProjectProvider(Action<bool, string> logger) : this(new ScriptParser(logger), logger)
-        {
-            
-        }
-
-        public static ScriptProjectProvider Create(Action<bool, string> logger)
-        {
-            return new ScriptProjectProvider(new ScriptParser(logger),logger);
-        }
+        {            
+        }       
 
         public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
         {
@@ -39,7 +29,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             {
                 return null;
             }
-
 
             _logger.Verbose($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework." );
             

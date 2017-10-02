@@ -41,8 +41,7 @@ namespace Dotnet.Script.DependencyModel.Tests
         }
 
         private CompilationDependencyResolver CreateResolver()
-        {
-            _testOutputHelper.WriteLine(RuntimeHelper.ResolveTargetFramework());
+        {           
             var resolver = new CompilationDependencyResolver((verbose, message) =>
             {                
                 string level = verbose ? "Debug" : "Info";

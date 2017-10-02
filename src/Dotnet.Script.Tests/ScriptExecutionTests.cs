@@ -9,8 +9,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            var result = ExecuteInProcess(Path.Combine("HelloWorld", "HelloWorld.csx"));
-            //Assert.Contains("Hello World", result.output);
+            var result = Execute(Path.Combine("HelloWorld", "HelloWorld.csx"));
+            Assert.Contains("Hello World", result.output);
         }
 
         [Fact]
@@ -30,7 +30,6 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            //ExecuteInProcess(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
             var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
             Assert.Contains("Connection successful", result.output);
         }
@@ -45,7 +44,6 @@ namespace Dotnet.Script.Tests
         [Fact]
         public static void ShouldHandleIssue129()
         {
-            //ExecuteInProcess(Path.Combine("Issue129", "Issue129.csx"));
             var result = Execute(Path.Combine("Issue129", "Issue129.csx"));
             Assert.Contains("Bad HTTP authentication header", result.output);
         }

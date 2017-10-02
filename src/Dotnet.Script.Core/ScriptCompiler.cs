@@ -11,8 +11,6 @@ using Microsoft.Extensions.DependencyModel;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp;
 using Dotnet.Script.Core.Internal;
-
-using Dotnet.Script.DependencyModel;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.NuGet;
 using Dotnet.Script.DependencyModel.Runtime;
