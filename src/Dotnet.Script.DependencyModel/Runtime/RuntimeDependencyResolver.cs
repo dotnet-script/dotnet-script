@@ -14,30 +14,28 @@ namespace Dotnet.Script.DependencyModel.Runtime
 {
 
     public class RuntimeDependencyResolver
-    {
-        private readonly DependencyPathResolver _dependencyPathResolver;
+    {        
         private readonly ScriptProjectProvider _scriptProjectProvider;
-        private readonly DependencyContextProvider _dependencyContextProvider;
+        private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
         private readonly Action<bool, string> _logger;
+        
 
         // Note: Windows only, Mac and Linux needs something else?
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
 
-        private RuntimeDependencyResolver(DependencyPathResolver dependencyPathResolver, ScriptProjectProvider scriptProjectProvider, DependencyContextProvider dependencyContextProvider,  Action<bool, string> logger)
-        {
-            _dependencyPathResolver = dependencyPathResolver;
+        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider,  Action<bool, string> logger)
+        {            
             _scriptProjectProvider = scriptProjectProvider;
-            _dependencyContextProvider = dependencyContextProvider;
+            _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
             _logger = logger;
         }
 
         public RuntimeDependencyResolver(Action<bool, string> logger) 
             : this
-            (
-                  new DependencyPathResolver(logger),
+            (                  
                   new ScriptProjectProvider(logger), 
-                  new DependencyContextProvider(CreateRestorers(logger),logger), 
+                  new ScriptDependencyInfoProvider(CreateRestorers(logger),logger), 
                   logger
             )
         {            
@@ -51,8 +49,12 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
         {
-            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp.20", true);
-            var dependencyContext = _dependencyContextProvider.GetDependencyContext(pathToProjectFile);
+            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true);
+            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
+            
+            var dependencyContext = dependencyInfo.DependencyContext;
+            List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
+            nuGetPackageFolders.Add(RuntimeHelper.GetPathToNuGetStoreFolder());
 
             var runtimeDepedencies = new HashSet<RuntimeDependency>();
 
@@ -60,21 +62,21 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
             foreach (var runtimeLibrary in runtimeLibraries)
             {                
-                ProcessNativeLibraries(runtimeLibrary);
-                ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies);
+                ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray());
+                ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies, nuGetPackageFolders.ToArray());
             }
 
             return runtimeDepedencies;
         }
 
-        private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary)
+        private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(
                 nlg => RuntimeHelper.AppliesToCurrentRuntime(nlg.Runtime)))
             {
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
                 {
-                    var fullPath = _dependencyPathResolver.GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath));
+                    var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders);
                     _logger.Verbose($"Loading native library from {fullPath}");
                     if (RuntimeHelper.IsWindows())
                     {
@@ -89,7 +91,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             }
         }
         private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary,
-            HashSet<RuntimeDependency> resolvedDependencies)
+            HashSet<RuntimeDependency> resolvedDependencies, string[] nugetPackageFolders)
         {            
             foreach (var runtimeAssemblyGroup in runtimeLibrary.RuntimeAssemblyGroups.Where(rag => RuntimeHelper.AppliesToCurrentRuntime(rag.Runtime)))
             {
@@ -98,13 +100,26 @@ namespace Dotnet.Script.DependencyModel.Runtime
                     var path = Path.Combine(runtimeLibrary.Path, assetPath);
                     if (!path.EndsWith("_._"))
                     {
-                        var fullPath = _dependencyPathResolver.GetFullPath(path);
+                        var fullPath = GetFullPath(path, nugetPackageFolders);
                         
                         _logger.Verbose($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
                         resolvedDependencies.Add(new RuntimeDependency(runtimeLibrary.Name, fullPath));
                     }
                 }
             }
+        }
+
+        public string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)
+        {
+            foreach (var possibleLocation in nugetPackageFolders)
+            {
+                var fullPath = Path.Combine(possibleLocation, relativePath);
+                if (File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+            throw new InvalidOperationException("Not found");
         }
     }
 }

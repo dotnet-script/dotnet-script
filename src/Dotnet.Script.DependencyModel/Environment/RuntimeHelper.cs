@@ -21,42 +21,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             return GetPlatformIdentifier() == "win";
         }
-
-        public static string GetPathToGlobalPackagesFolder()
-        {
-            string basePath;
-
-            var packageDirectory = System.Environment.GetEnvironmentVariable("NUGET_PACKAGES");
-
-            if (!string.IsNullOrEmpty(packageDirectory))
-            {
-                return packageDirectory;
-            }
-
-
-            if (IsWindows())
-            {
-                basePath = System.Environment.GetEnvironmentVariable("USERPROFILE");
-            }
-            else
-            {
-                basePath = System.Environment.GetEnvironmentVariable("HOME");
-            }
-
-            if (string.IsNullOrEmpty(basePath))
-            {
-                return string.Empty;
-            }
-
-            return Path.Combine(basePath, ".nuget", "packages");
-        }
-
-        public static string GetPathToNuGetExecutable()
-        {
-            var directory = Path.GetDirectoryName(new Uri(typeof(RuntimeHelper).GetTypeInfo().Assembly.CodeBase).LocalPath);
-            return Path.Combine(directory, "NuGet430.exe");
-        }
-
+                   
         public static string GetDotnetBinaryPath()
         {
             string basePath;
@@ -70,15 +35,7 @@ namespace Dotnet.Script.DependencyModel.Environment
             }
             return Path.Combine(basePath, "dotnet");
         }
-
-        public static string GetPathToNuGetFallbackFolder()
-        {
-            // Note: Read the probing paths from contenttest.runtimeconfig.dev.json
-            // At least for the runtime resolver.
-
-            return Path.Combine(GetDotnetBinaryPath(), "sdk", "NuGetFallbackFolder");
-        }
-
+       
         public static string GetPathToNuGetStoreFolder()
         {            
             var processArchitecture = GetProcessArchitecture();

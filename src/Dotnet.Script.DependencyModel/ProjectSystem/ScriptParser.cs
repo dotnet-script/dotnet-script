@@ -30,7 +30,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             string currentTargetFramework = null;
             foreach (var csxFile in csxFiles)
             {
-                LogActionExtensions.Verbose(_logger, $"Parsing {csxFile}");
+                _logger.Verbose($"Parsing {csxFile}");
                 var fileContent = ReadFile(csxFile);
                 var packageReferences = ReadPackageReferences(fileContent);
                 allPackageReferences.UnionWith(packageReferences);
@@ -39,7 +39,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 {
                     if (currentTargetFramework != null && targetFramework != currentTargetFramework)
                     {
-                        LogActionExtensions.Verbose(_logger, $"Found multiple target frameworks. Using {currentTargetFramework}.");
+                        _logger.Verbose($"Found multiple target frameworks. Using {currentTargetFramework}.");
                     }
                     else
                     {
