@@ -30,7 +30,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             targetFrameworkElement.Value = targetFramework;
         }
 
-
         public void Save(string pathToProjectFile)
         {
             using (var fileStream = new FileStream(pathToProjectFile, FileMode.Create, FileAccess.Write))

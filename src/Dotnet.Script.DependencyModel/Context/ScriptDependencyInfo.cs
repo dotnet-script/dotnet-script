@@ -3,7 +3,7 @@
 namespace Dotnet.Script.DependencyModel.Context
 {
     public class ScriptDependencyInfo
-    {        
+    {
         public ScriptDependencyInfo(DependencyContext dependencyContext, string[] nugetPackageFolders)
         {
             DependencyContext = dependencyContext;

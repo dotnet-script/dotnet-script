@@ -11,14 +11,13 @@ namespace Dotnet.Script.DependencyModel.Context
     {
         private readonly CommandRunner _commandRunner;
         private readonly Action<bool, string> _logger;
-        private static readonly string PathToNuget;       
+        private static readonly string PathToNuget;
 
         static NuGetRestorer()
         {
             var directory = Path.GetDirectoryName(new Uri(typeof(NuGetRestorer).GetTypeInfo().Assembly.CodeBase).LocalPath);
             PathToNuget = Path.Combine(directory, "NuGet430.exe");
         }
-
 
         public NuGetRestorer(CommandRunner commandRunner, Action<bool, string> logger)
         {
@@ -65,12 +64,7 @@ namespace Dotnet.Script.DependencyModel.Context
             }
         }
 
-        /// <summary>
-        /// StreamToBytes - Converts a Stream to a byte array. Eg: Get a Stream from a file,url, or open file handle.
-        /// </summary>
-        /// <param name="input">input is the stream we are to return as a byte array</param>
-        /// <returns>byte[] The Array of bytes that represents the contents of the stream</returns>
-        static byte[] StreamToBytes(Stream input)
+        private static byte[] StreamToBytes(Stream input)
         {
 
             int capacity = input.CanSeek ? (int)input.Length : 0; //Bitwise operator - If can seek, Capacity becomes Length, else becomes 0.

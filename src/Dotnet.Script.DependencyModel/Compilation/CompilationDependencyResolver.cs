@@ -13,15 +13,14 @@ namespace Dotnet.Script.DependencyModel.Compilation
     public class CompilationDependencyResolver 
     {
         private readonly ScriptProjectProvider _scriptProjectProvider;
-        private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;        
+        private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
         private readonly Action<bool, string> _logger;
-
 
         private CompilationDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider,Action<bool, string> logger)
         {
             _scriptProjectProvider = scriptProjectProvider;
-            _scriptDependencyInfoProvider = scriptDependencyInfoProvider;            
-            _logger = logger;            
+            _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
+            _logger = logger;
         }
 
         public CompilationDependencyResolver(Action<bool, string> logger) 
@@ -31,9 +30,8 @@ namespace Dotnet.Script.DependencyModel.Compilation
                 new ScriptDependencyInfoProvider(CreateRestorers(logger), logger),
                 logger
             )
-        {            
-        }
-
+        { }
+        
         private static IRestorer[] CreateRestorers(Action<bool, string> logger)
         {
             var commandRunner = new CommandRunner(logger);
@@ -74,7 +72,6 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
         private IEnumerable<string> ResolveReferencePaths(CompilationLibrary compilationLibrary, ICompilationAssemblyResolver[] compilationAssemblyResolvers)
         {
-            
             if (compilationLibrary.Assemblies.Any(a => a.EndsWith("_._")))
             {
                 return Array.Empty<string>();
@@ -92,7 +89,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
         private ICompilationAssemblyResolver[] GetCompilationAssemblyResolvers(string[] nugetPackageFolders)
         {
-            List<ICompilationAssemblyResolver> resolvers = new List<ICompilationAssemblyResolver>
+            var resolvers = new List<ICompilationAssemblyResolver>
             {
                 new AppBaseCompilationAssemblyResolver(),
                 new ReferenceAssemblyPathResolver()
@@ -101,7 +98,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             foreach (var nugetPackageFolder in nugetPackageFolders)
             {
                 resolvers.Add(CreatePackageResolver(nugetPackageFolder));
-            }            
+            }
             return resolvers.ToArray();
         }
 

@@ -39,7 +39,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                   new ScriptDependencyInfoProvider(CreateRestorers(logger),logger), 
                   logger
             )
-        {            
+        {
         }
 
         private static IRestorer[] CreateRestorers(Action<bool, string> logger)
@@ -71,15 +71,10 @@ namespace Dotnet.Script.DependencyModel.Runtime
         }
 
         private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
-        {
-            if (runtimeLibrary.Name.ToLower().Contains("e_sqlite"))
-            {
-                
-            }
-
+        {           
             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(
                 nlg => RuntimeHelper.AppliesToCurrentRuntime(nlg.Runtime)))
-            {                
+            {
 
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
                 {
@@ -116,7 +111,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             }
         }
 
-        public string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)
+        private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)
         {
             foreach (var possibleLocation in nugetPackageFolders)
             {

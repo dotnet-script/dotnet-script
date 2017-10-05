@@ -34,7 +34,7 @@ namespace Dotnet.Script.DependencyModel.Process
             return startInformation;
         }
 
-        private void RunAndWait(System.Diagnostics.Process process)
+        private static void RunAndWait(System.Diagnostics.Process process)
         {
             process.Start();
             process.BeginErrorReadLine();

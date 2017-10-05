@@ -19,16 +19,14 @@ namespace Dotnet.Script.DependencyModel.NuGet
         /// <param name="metadataReferenceResolver">The target <see cref="MetadataReferenceResolver"/>.</param>                
         public NuGetMetadataReferenceResolver(MetadataReferenceResolver metadataReferenceResolver)
         {
-            this._metadataReferenceResolver = metadataReferenceResolver;
+            _metadataReferenceResolver = metadataReferenceResolver;
         }
-
-        /// <inheritdoc />
+        
         public override bool Equals(object other)
         {
             return _metadataReferenceResolver.Equals(other);
         }
 
-        /// <inheritdoc />
         public override int GetHashCode()
         {
             return _metadataReferenceResolver.GetHashCode();

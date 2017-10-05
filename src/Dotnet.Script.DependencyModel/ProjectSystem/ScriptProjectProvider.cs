@@ -10,17 +10,17 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     {
         private readonly ScriptParser _scriptParser;
 
-        private readonly Action<bool, string> _logger;        
+        private readonly Action<bool, string> _logger;
         
         private ScriptProjectProvider(ScriptParser scriptParser, Action<bool, string > logger)
         {
-            _logger = logger;            
+            _logger = logger;
             _scriptParser = scriptParser;
         }
 
         public ScriptProjectProvider(Action<bool, string> logger) : this(new ScriptParser(logger), logger)
-        {            
-        }       
+        {
+        }
 
         public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
         {
@@ -61,10 +61,12 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
             }
             var pathToProjectJsonDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
+
             if (!Directory.Exists(pathToProjectJsonDirectory))
             {
                 Directory.CreateDirectory(pathToProjectJsonDirectory);
             }
+
             var pathToProjectJson = Path.Combine(pathToProjectJsonDirectory, "script.csproj");
             return pathToProjectJson;
         }

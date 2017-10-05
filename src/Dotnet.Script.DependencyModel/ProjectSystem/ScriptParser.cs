@@ -6,27 +6,19 @@ using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
-{
-    /// <summary>
-    /// A class that is capable of parsing a set of script files 
-    /// and return information about NuGet references and the target framework.
-    /// </summary>
+{    
     public class ScriptParser 
     {
         private readonly Action<bool, string> _logger;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptParser"/> class.
-        /// </summary>        
+        
         public ScriptParser(Action<bool, string> logger)
         {
             _logger = logger;
         }
 
-        
         public ParseResult ParseFrom(IEnumerable<string> csxFiles)
         {
-            HashSet<PackageReference> allPackageReferences = new HashSet<PackageReference>();
+            var allPackageReferences = new HashSet<PackageReference>();
             string currentTargetFramework = null;
             foreach (var csxFile in csxFiles)
             {
