@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
@@ -55,7 +55,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             var tempDirectory = Path.GetTempPath();
             var pathRoot = Path.GetPathRoot(targetDirectory);
             var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
-            if (pathRoot.Length > 0 && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (pathRoot.Length > 0 && RuntimeHelper.IsWindows())
             {
                 var driveLetter = pathRoot.Substring(0, 1);
                 targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);

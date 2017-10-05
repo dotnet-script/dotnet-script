@@ -20,7 +20,8 @@ namespace Dotnet.Script.DependencyModel.Context
         {
             _logger.Verbose($"Restoring {pathToProjectFile} using the dotnet cli.");
             var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
-            _commandRunner.Execute("dotnet", $"restore {pathToProjectFile} -r {runtimeId}");            
+            _commandRunner.Execute("dotnet", $"restore {pathToProjectFile}");
+            //_commandRunner.Execute("dotnet", $"restore {pathToProjectFile} -r {runtimeId}");            
         }
 
         public bool CanRestore => _commandRunner.Execute("dotnet", "--version") == 0;

@@ -1,18 +1,21 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace Dotnet.Script.DependencyModel.Environment
 {
     public static class RuntimeHelper
     {
+        private static readonly Regex RuntimeMatcher =
+            new Regex($"{GetPlatformIdentifier()}.*-{GetProcessArchitecture()}");
+
         public static string GetPlatformIdentifier()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "osx";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "unix";
-
-            return "win";
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Darwin) return "osx";
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Linux) return "linux";
+            return "win";            
         }
 
         public static bool IsWindows()
@@ -44,17 +47,19 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private static string GetProcessArchitecture()
         {
-            return RuntimeInformation.ProcessArchitecture.ToString();            
+            return RuntimeEnvironment.RuntimeArchitecture;
+            
         }
 
         public static string GetRuntimeIdentifier()
-        {
-            return Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
+        {            
+            return RuntimeEnvironment.GetRuntimeIdentifier();            
         }       
 
         internal static bool AppliesToCurrentRuntime(string runtime)
         {
-            return string.IsNullOrWhiteSpace(runtime) || runtime == GetRuntimeIdentifier();
+            //var regex = new Regex("win.*-x64", RegexOptions.IgnoreCase);
+            return string.IsNullOrWhiteSpace(runtime) || RuntimeMatcher.IsMatch(runtime);
         }
     }
 }

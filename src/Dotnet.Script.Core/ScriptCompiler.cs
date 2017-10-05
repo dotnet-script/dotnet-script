@@ -65,8 +65,7 @@ namespace Dotnet.Script.Core
                 .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
-                .WithFileEncoding(context.Code.Encoding);
-
+                .WithFileEncoding(context.Code.Encoding);            
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
                 opts = opts.WithFilePath(context.FilePath);
@@ -105,19 +104,19 @@ namespace Dotnet.Script.Core
                 (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(runtimeDependencies.ToList(), assemblyLoadContext, assemblyName);
 
 
-            foreach (var runtimeDep in runtimeDependencies)
+            foreach (var runtimeDependency in runtimeDependencies)
             {
-                var runTimeDepAssemblyName = AssemblyLoadContext.GetAssemblyName(runtimeDep.Path);
-                if (!inheritedAssemblyNames.Any(an => an.Name == runTimeDepAssemblyName.Name))
+                var runtimeDependencyAssemblyName = runtimeDependency.Name;
+                if (!inheritedAssemblyNames.Any(an => an.Name == runtimeDependencyAssemblyName.Name))
                 {
-                    _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDep);
-                    opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep.Path));
+                    _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                    opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
                 }
-
             }
 
-            var loader = new InteractiveAssemblyLoader();            
-            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
+            var loader = new InteractiveAssemblyLoader();     
+            
+            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);            
             var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
             if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
@@ -135,17 +134,19 @@ namespace Dotnet.Script.Core
         }
        
         private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<RuntimeDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
-        {                      
-            var runtimeDependency = runtimeDependencies.SingleOrDefault(r => r.Name == assemblyName.Name);
-            if (runtimeDependency != null)
-            {
-                if (AssemblyLoadContext.GetAssemblyName(runtimeDependency.Path).Version != assemblyName.Version)
-                {
-                    _logger.Verbose(
-                        $"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
-                    return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
-                }
-            }
+        {
+            //var runtimeDependency = runtimeDependencies.SingleOrDefault(r => AssemblyLoadContext.GetAssemblyName(r.Path).Name == assemblyName.Name);
+            //if (runtimeDependency != null)
+            //{
+            //    AssemblyName an = AssemblyName.GetAssemblyName(runtimeDependency.Path);
+            //    var runtimeDependencyAssemblyName = AssemblyLoadContext.GetAssemblyName(runtimeDependency.Path);
+            //    if (runtimeDependencyAssemblyName.Version != assemblyName.Version)
+            //    {
+            //        _logger.Verbose(
+            //            $"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
+            //        return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
+            //    }
+            //}
             return null;
         }       
     }

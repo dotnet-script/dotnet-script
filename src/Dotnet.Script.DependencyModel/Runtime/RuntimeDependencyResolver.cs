@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
@@ -71,9 +72,15 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
+            if (runtimeLibrary.Name.ToLower().Contains("e_sqlite"))
+            {
+                
+            }
+
             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(
                 nlg => RuntimeHelper.AppliesToCurrentRuntime(nlg.Runtime)))
-            {
+            {                
+
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
                 {
                     var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders);
@@ -103,7 +110,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                         var fullPath = GetFullPath(path, nugetPackageFolders);
                         
                         _logger.Verbose($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
-                        resolvedDependencies.Add(new RuntimeDependency(runtimeLibrary.Name, fullPath));
+                        resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
                     }
                 }
             }

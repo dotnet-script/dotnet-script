@@ -1,11 +1,13 @@
-﻿namespace Dotnet.Script.DependencyModel.Runtime
+﻿using System.Reflection;
+
+namespace Dotnet.Script.DependencyModel.Runtime
 {
     public class RuntimeDependency
     {
-        public string Name { get; }
+        public AssemblyName Name { get; }
         public string Path { get; }       
 
-        public RuntimeDependency(string name, string path)
+        public RuntimeDependency(AssemblyName name, string path)
         {
             Name = name;
             Path = path;           
