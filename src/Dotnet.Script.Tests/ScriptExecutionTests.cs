@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
@@ -48,22 +49,48 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Bad HTTP authentication header", result.output);
         }
 
-        private static (string output, int exitCode) Execute(string fixture)
+        [Fact]
+        public static void ShouldPassUnknownArgumentToScript()
         {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture)));
+            var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "arg1");
+            Assert.Contains("arg1", result.output);
+        }
+
+        [Fact]
+        public static void ShouldPassKnownArgumentToScriptWhenEscapedByDoubleHyphen()
+        {
+            var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "--", "-v");
+            Assert.Contains("-v", result.output);
+        }
+
+        [Fact]
+        public static void ShouldNotPassUnEscapedKnownArgumentToScript()
+        {
+            var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "-v");
+            Assert.DoesNotContain("-v", result.output);            
+        }
+
+        private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
             return result;
         }
 
         /// <summary>
         /// Use this method if you need to debug 
         /// </summary>        
-        private static int ExecuteInProcess(string fixture)
+        private static int ExecuteInProcess(string fixture, params string[] arguments)
         {
             var pathToFixture = Path.Combine("..", "..", "..","TestFixtures", fixture);
-            return Program.Main(new []{ pathToFixture });
+            var allArguments = new List<string>(new[] {pathToFixture});
+            if (arguments != null)
+            {
+                allArguments.AddRange(arguments);
+            }
+            return Program.Main(allArguments.ToArray());
         }
 
-        private static string[] GetDotnetScriptArguments(string fixture)
+        private static string[] GetDotnetScriptArguments(string fixture, params string[] arguments)
         {
             string configuration;
 #if DEBUG
@@ -71,7 +98,12 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp1.1", "dotnet-script.dll"), fixture };
+            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp1.1", "dotnet-script.dll"), fixture });
+            if (arguments != null)
+            {
+                allArguments.AddRange(arguments);
+            }
+            return allArguments.ToArray();
         }
     }
 }

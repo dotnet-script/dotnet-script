@@ -40,11 +40,14 @@ namespace Dotnet.Script
         }
 
         private static int Wain(string[] args)
-        {
-            var app = new CommandLineApplication(throwOnUnexpectedArg: false);
-            var file = app.Argument("script", "Path to CSX script");
+        {            
+            var app = new CommandLineApplication(throwOnUnexpectedArg: false);           
+            var file = app.Argument("script", "Path to CSX script");            
             var config = app.Option("-conf |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
+
+            var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
+            var argsAfterDoubleHypen = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
             app.HelpOption("-? | -h | --help");
 
@@ -60,7 +63,7 @@ namespace Dotnet.Script
                 {
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        await RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments, cwd.Value());
+                        await RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());
                     }
                     return 0;
                 });
@@ -70,7 +73,7 @@ namespace Dotnet.Script
             {
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments);
+                    await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen));
                 }
                 else
                 {
@@ -107,7 +110,7 @@ namespace Dotnet.Script
                 });
             });
 
-            return app.Execute(args.Except(new[] { "--" }).ToArray());
+            return app.Execute(argsBeforeDoubleHyphen);            
         }
 
         private static Task RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
