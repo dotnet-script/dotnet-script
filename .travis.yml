@@ -6,7 +6,6 @@ matrix:
       sudo: required      
       dotnet: 2.0.0    
 install:
-  - cd build
   - ulimit -n4096  
 script:  
   - dotnet test src/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj
