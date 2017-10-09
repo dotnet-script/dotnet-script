@@ -6,11 +6,11 @@ namespace Dotnet.Script.DependencyModel.Process
 {
     public class CommandRunner
     {
-        private readonly Action<bool, string> _logger;
+        private readonly Logger _logger;
 
-        public CommandRunner(Action<bool, string> logger)
+        public CommandRunner(LogFactory logFactory)
         {
-            _logger = logger;
+            _logger = logFactory.CreateLogger<CommandRunner>();
         }
 
         public int Execute(string commandPath, string arguments = null)
@@ -44,8 +44,8 @@ namespace Dotnet.Script.DependencyModel.Process
         private System.Diagnostics.Process CreateProcess(ProcessStartInfo startInformation)
         {
             var process = new System.Diagnostics.Process {StartInfo = startInformation};
-            process.OutputDataReceived += (s, e) => _logger.Verbose(e.Data);
-            process.ErrorDataReceived += (s, e) => _logger.Verbose(e.Data);
+            process.OutputDataReceived += (s, e) => _logger.Debug(e.Data);
+            process.ErrorDataReceived += (s, e) => _logger.Debug(e.Data);
             return process;
         }
     }

@@ -14,28 +14,28 @@ namespace Dotnet.Script.DependencyModel.Compilation
     {
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
-        private readonly Action<bool, string> _logger;
+        private readonly Logger _logger;
 
-        private CompilationDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider,Action<bool, string> logger)
+        private CompilationDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, LogFactory logFactory)
         {
             _scriptProjectProvider = scriptProjectProvider;
             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
-            _logger = logger;
+            _logger = logFactory.CreateLogger<CompilationDependencyResolver>();
         }
 
-        public CompilationDependencyResolver(Action<bool, string> logger) 
+        public CompilationDependencyResolver(LogFactory logFactory) 
             : this
             (
-                new ScriptProjectProvider(logger), 
-                new ScriptDependencyInfoProvider(CreateRestorers(logger), logger),
-                logger
+                new ScriptProjectProvider(logFactory), 
+                new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
+                logFactory
             )
         { }
         
-        private static IRestorer[] CreateRestorers(Action<bool, string> logger)
+        private static IRestorer[] CreateRestorers(LogFactory logFactory)
         {
-            var commandRunner = new CommandRunner(logger);
-            return new IRestorer[] { new DotnetRestorer(commandRunner, logger), new NuGetRestorer(commandRunner, logger) };
+            var commandRunner = new CommandRunner(logFactory);
+            return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory), new NuGetRestorer(commandRunner, logFactory) };
         }
         
         public IEnumerable<string> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
@@ -60,7 +60,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
             foreach (var compilationLibrary in compileLibraries)
             {                
-                _logger.Verbose($"Resolving compilation reference paths for {compilationLibrary.Name}");
+                _logger.Debug($"Resolving compilation reference paths for {compilationLibrary.Name}");
                 var referencePaths = ResolveReferencePaths(compilationLibrary, compilationAssemblyResolvers);
                 foreach (var referencePath in referencePaths)
                 {
@@ -75,13 +75,12 @@ namespace Dotnet.Script.DependencyModel.Compilation
             if (compilationLibrary.Assemblies.Any(a => a.EndsWith("_._")))
             {
                 return Array.Empty<string>();
-            }
-
+            }            
             var referencePaths = compilationLibrary.ResolveReferencePaths(compilationAssemblyResolvers).ToArray();
 
             foreach (var referencePath in referencePaths)
             {
-                _logger.Verbose($"{compilationLibrary.Name} => {referencePath}");
+                _logger.Debug($"{compilationLibrary.Name} => {referencePath}");
             }
 
             return referencePaths;
@@ -89,11 +88,8 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
         private ICompilationAssemblyResolver[] GetCompilationAssemblyResolvers(string[] nugetPackageFolders)
         {
-            var resolvers = new List<ICompilationAssemblyResolver>
-            {
-                new AppBaseCompilationAssemblyResolver(),
-                new ReferenceAssemblyPathResolver()
-            };
+            var resolvers = new List<ICompilationAssemblyResolver>();
+            
 
             foreach (var nugetPackageFolder in nugetPackageFolders)
             {
@@ -104,7 +100,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
         private PackageCompilationAssemblyResolver CreatePackageResolver(string nugetGetPackageDirectory)
         {
-            _logger.Verbose($"Creating {nameof(PackageCompilationAssemblyResolver)} for target path: {nugetGetPackageDirectory}");
+            _logger.Debug($"Creating {nameof(PackageCompilationAssemblyResolver)} for target path: {nugetGetPackageDirectory}");
             return new PackageCompilationAssemblyResolver(nugetGetPackageDirectory);
         }
     }

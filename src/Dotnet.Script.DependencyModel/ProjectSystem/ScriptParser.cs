@@ -9,11 +9,11 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 {    
     public class ScriptParser 
     {
-        private readonly Action<bool, string> _logger;
+        private Logger _logger;
         
-        public ScriptParser(Action<bool, string> logger)
+        public ScriptParser(LogFactory logFactory)
         {
-            _logger = logger;
+            _logger = logFactory.CreateLogger<ScriptParser>();
         }
 
         public ParseResult ParseFrom(IEnumerable<string> csxFiles)
@@ -22,7 +22,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             string currentTargetFramework = null;
             foreach (var csxFile in csxFiles)
             {
-                _logger.Verbose($"Parsing {csxFile}");
+                _logger.Debug($"Parsing {csxFile}");
                 var fileContent = ReadFile(csxFile);
                 var packageReferences = ReadPackageReferences(fileContent);
                 allPackageReferences.UnionWith(packageReferences);
@@ -31,7 +31,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 {
                     if (currentTargetFramework != null && targetFramework != currentTargetFramework)
                     {
-                        _logger.Verbose($"Found multiple target frameworks. Using {currentTargetFramework}.");
+                        _logger.Debug($"Found multiple target frameworks. Using {currentTargetFramework}.");
                     }
                     else
                     {

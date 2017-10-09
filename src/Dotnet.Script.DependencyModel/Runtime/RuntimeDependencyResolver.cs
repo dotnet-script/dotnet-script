@@ -18,34 +18,34 @@ namespace Dotnet.Script.DependencyModel.Runtime
     {        
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
-        private readonly Action<bool, string> _logger;
+        private readonly Logger _logger;
         
 
         // Note: Windows only, Mac and Linux needs something else?
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
 
-        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider,  Action<bool, string> logger)
+        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, LogFactory logFactory)
         {            
             _scriptProjectProvider = scriptProjectProvider;
             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
-            _logger = logger;
+            _logger = logFactory.CreateLogger<RuntimeDependencyResolver>();
         }
 
-        public RuntimeDependencyResolver(Action<bool, string> logger) 
+        public RuntimeDependencyResolver(LogFactory logFactory) 
             : this
             (                  
-                  new ScriptProjectProvider(logger), 
-                  new ScriptDependencyInfoProvider(CreateRestorers(logger),logger), 
-                  logger
+                  new ScriptProjectProvider(logFactory), 
+                  new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
+                  logFactory
             )
         {
         }
 
-        private static IRestorer[] CreateRestorers(Action<bool, string> logger)
+        private static IRestorer[] CreateRestorers(LogFactory logFactory)
         {
-            var commandRunner = new CommandRunner(logger);
-            return new IRestorer[] { new DotnetRestorer(commandRunner, logger)};
+            var commandRunner = new CommandRunner(logFactory);
+            return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory)};
         }
 
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
@@ -79,7 +79,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
                 {
                     var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders);
-                    _logger.Verbose($"Loading native library from {fullPath}");
+                    _logger.Debug($"Loading native library from {fullPath}");
                     if (RuntimeHelper.IsWindows())
                     {
                         LoadLibrary(fullPath);
@@ -104,7 +104,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                     {
                         var fullPath = GetFullPath(path, nugetPackageFolders);
                         
-                        _logger.Verbose($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
+                        _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
                         resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
                     }
                 }

@@ -10,15 +10,15 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     {
         private readonly ScriptParser _scriptParser;
 
-        private readonly Action<bool, string> _logger;
+        private readonly Logger _logger;
         
-        private ScriptProjectProvider(ScriptParser scriptParser, Action<bool, string > logger)
+        private ScriptProjectProvider(ScriptParser scriptParser, LogFactory logFactory)
         {
-            _logger = logger;
+            _logger = logFactory.CreateLogger<ScriptProjectProvider>();
             _scriptParser = scriptParser;
         }
 
-        public ScriptProjectProvider(Action<bool, string> logger) : this(new ScriptParser(logger), logger)
+        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), logFactory)
         {
         }
 
@@ -30,7 +30,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 return null;
             }
 
-            _logger.Verbose($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework." );
+            _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework." );
             
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
             var parseresult = _scriptParser.ParseFrom(csxFiles);
@@ -46,7 +46,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
 
             projectFile.Save(pathToProjectFile);
-            _logger.Verbose($"Project file saved to {pathToProjectFile}");
+            _logger.Debug($"Project file saved to {pathToProjectFile}");
             return pathToProjectFile;
         }
 

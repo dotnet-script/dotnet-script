@@ -14,12 +14,12 @@ namespace Dotnet.Script.DependencyModel.Context
     public class ScriptDependencyInfoProvider 
     {
         private readonly IRestorer[] _restorers;
-        private readonly Action<bool, string> _logger;
+        private readonly Logger _logger;
 
-        public ScriptDependencyInfoProvider(IRestorer[] restorers, Action<bool, string> logger)
+        public ScriptDependencyInfoProvider(IRestorer[] restorers, LogFactory logFactory)
         {
             _restorers = restorers;
-            _logger = logger;
+            _logger = logFactory.CreateLogger<ScriptDependencyInfoProvider>();
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Dotnet.Script.DependencyModel.Context
 
         private DependencyContext ReadDependencyContext(string pathToProjectFile)
         {
-            _logger.Verbose($"Reading dependency context from {pathToProjectFile}");
+            _logger.Debug($"Reading dependency context from {pathToProjectFile}");
 
             var pathToAssetsFiles = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
 
@@ -69,7 +69,7 @@ namespace Dotnet.Script.DependencyModel.Context
             var pathToPropsFile = Directory.GetFiles(pathToObjFolder, "*.csproj.nuget.g.props").Single();
             var document = XDocument.Load(pathToPropsFile);
             var packageFolders = document.Descendants().Single(d => d.Name.LocalName == "NuGetPackageFolders").Value;
-            _logger.Verbose($"Resolved NuGet package folders: {packageFolders}");
+            _logger.Debug($"Resolved NuGet package folders: {packageFolders}");
             return packageFolders.Split(';');
         }
     }

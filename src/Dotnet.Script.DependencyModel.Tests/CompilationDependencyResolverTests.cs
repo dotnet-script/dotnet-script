@@ -42,12 +42,11 @@ namespace Dotnet.Script.DependencyModel.Tests
 
         private CompilationDependencyResolver CreateResolver()
         {           
-            var resolver = new CompilationDependencyResolver((verbose, message) =>
-            {                
-                string level = verbose ? "Debug" : "Info";
+            var resolver = new CompilationDependencyResolver(type => ((level, message) =>
+            {
                 _testOutputHelper.WriteLine($"{level}:{message ?? ""}");
-            });
-            return resolver;
+            }) );
+            return resolver;            
         }
     }
 }

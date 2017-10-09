@@ -10,7 +10,7 @@ namespace Dotnet.Script.DependencyModel.Context
     public class NuGetRestorer : IRestorer
     {
         private readonly CommandRunner _commandRunner;
-        private readonly Action<bool, string> _logger;
+        private readonly Logger _logger;
         private static readonly string PathToNuget;
 
         static NuGetRestorer()
@@ -19,10 +19,10 @@ namespace Dotnet.Script.DependencyModel.Context
             PathToNuget = Path.Combine(directory, "NuGet430.exe");
         }
 
-        public NuGetRestorer(CommandRunner commandRunner, Action<bool, string> logger)
+        public NuGetRestorer(CommandRunner commandRunner, LogFactory logFactory)
         {
             _commandRunner = commandRunner;
-            _logger = logger;
+            _logger = logFactory.CreateLogger<NuGetRestorer>();
         }
 
         public void Restore(string pathToProjectFile)
@@ -54,7 +54,7 @@ namespace Dotnet.Script.DependencyModel.Context
         {
             if (!File.Exists(PathToNuget))
             {
-                _logger.Verbose("Extracting NuGet executable");
+                _logger.Debug("Extracting NuGet executable");
                 using (Stream input = typeof(NuGetRestorer).GetTypeInfo().Assembly.GetManifestResourceStream("Dotnet.Script.NuGetMetadataResolver.NuGet.NuGet.exe"))
                 {
 
