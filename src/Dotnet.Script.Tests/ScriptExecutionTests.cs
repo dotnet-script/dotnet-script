@@ -103,7 +103,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp1.1", "dotnet-script.dll"), fixture });
+            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp2.0", "dotnet-script.dll"), fixture });
             if (arguments != null)
             {
                 allArguments.AddRange(arguments);
