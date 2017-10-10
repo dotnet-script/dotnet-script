@@ -5,6 +5,8 @@ matrix:
       osx_image: xcode9      
       sudo: required      
       dotnet: 2.0.0    
+before_install:
+  - brew update
 install:
   - ulimit -n4096  
 script:  
