@@ -22,7 +22,7 @@ DotNet.Pack(Path.Combine(root, "src" , "Dotnet.Script.DependencyModel.NuGet"), p
 
 DotNet.Publish($"{root}/src/Dotnet.Script");
 
-// if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-// {
-//     Choco.Pack($"{root}/src/Dotnet.Script","Chocolatey");
-// }
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    Choco.Pack($"{root}/src/Dotnet.Script","Chocolatey");
+}
