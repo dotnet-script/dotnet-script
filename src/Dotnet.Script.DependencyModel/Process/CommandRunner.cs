@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.Process
@@ -26,7 +25,7 @@ namespace Dotnet.Script.DependencyModel.Process
             var startInformation = new ProcessStartInfo($"{commandPath}")
             {
                 CreateNoWindow = true,
-                Arguments = arguments,
+                Arguments = arguments ?? "",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false
@@ -44,8 +43,20 @@ namespace Dotnet.Script.DependencyModel.Process
         private System.Diagnostics.Process CreateProcess(ProcessStartInfo startInformation)
         {
             var process = new System.Diagnostics.Process {StartInfo = startInformation};
-            process.OutputDataReceived += (s, e) => _logger.Debug(e.Data);
-            process.ErrorDataReceived += (s, e) => _logger.Debug(e.Data);
+            process.OutputDataReceived += (s, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    _logger.Debug(e.Data);
+                }
+            };
+            process.ErrorDataReceived += (s, e) =>
+            {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    _logger.Debug(e.Data);
+                }
+            };
             return process;
         }
     }
