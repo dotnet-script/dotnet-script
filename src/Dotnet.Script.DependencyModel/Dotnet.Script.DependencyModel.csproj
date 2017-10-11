@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
+    <Authors>dotnet-script</Authors>
+    <Company>dotnet-script</Company>
+    <Description>Provides runtime and compilation dependency resolution for dotnet-script based scripts.</Description>
+    <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>script;csx;csharp;roslyn;omnisharp</PackageTags>
+    <Version>0.1.0</Version>    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="NuGet\NuGet430.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="NuGet\NuGet430.exe" />
+    <EmbeddedResource Include="ProjectSystem\csproj.template" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />   
+  </ItemGroup>
+
+</Project>

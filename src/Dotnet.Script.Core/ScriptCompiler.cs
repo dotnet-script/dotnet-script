@@ -7,16 +7,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.DotNet.ProjectModel;
 using Microsoft.Extensions.DependencyModel;
-using System.IO;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp;
 using Dotnet.Script.Core.Internal;
-using Dotnet.Script.Core.Metadata;
-using Dotnet.Script.Core.NuGet;
-using Dotnet.Script.Core.ProjectSystem;
-using Microsoft.DotNet.PlatformAbstractions;
+using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.NuGet;
+using Dotnet.Script.DependencyModel.Runtime;
 
 
 namespace Dotnet.Script.Core
@@ -24,7 +21,7 @@ namespace Dotnet.Script.Core
     public class ScriptCompiler
     {
         private readonly ScriptLogger _logger;
-        private readonly ScriptProjectProvider _scriptProjectProvider;
+        private readonly RuntimeDependencyResolver _runtimeDependencyResolver;
 
         protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
@@ -49,10 +46,10 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
-        public ScriptCompiler(ScriptLogger logger, ScriptProjectProvider scriptProjectProvider)
+        public ScriptCompiler(ScriptLogger logger, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logger;
-            _scriptProjectProvider = scriptProjectProvider;
+            _runtimeDependencyResolver = runtimeDependencyResolver;
 
             // reset default scripting mode to latest language version to enable C# 7.1 features
             // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
@@ -68,8 +65,7 @@ namespace Dotnet.Script.Core
                 .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
-                .WithFileEncoding(context.Code.Encoding);
-
+                .WithFileEncoding(context.Code.Encoding);            
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
                 opts = opts.WithFilePath(context.FilePath);
@@ -87,7 +83,7 @@ namespace Dotnet.Script.Core
 
             var opts = CreateScriptOptions(context);
 
-            var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
+            var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
             var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
                 x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
                 x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
@@ -96,39 +92,27 @@ namespace Dotnet.Script.Core
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
                 _logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
-                var assembly = Assembly.Load(inheritedAssemblyName);
+                var assembly = Assembly.Load(inheritedAssemblyName);                
                 opts = opts.AddReferences(assembly);
             }
 
-            var pathToProjectJson = Path.Combine(context.WorkingDirectory, Project.FileName);
 
-            IList<RuntimeDependency> runtimeDependencies = new List<RuntimeDependency>();
-            if (!File.Exists(pathToProjectJson))
+            IList<RuntimeDependency> runtimeDependencies =
+                _runtimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+
+            foreach (var runtimeDependency in runtimeDependencies)
             {
-                _logger.Verbose("Unable to find project context for CSX files. Will default to non-context usage.");
-                var pathToCsProj = _scriptProjectProvider.CreateProject(context.WorkingDirectory);
-                var dependencyResolver = new DependencyResolver(new CommandRunner(_logger), _logger);
-                runtimeDependencies = dependencyResolver.GetRuntimeDependencies(pathToCsProj).ToList();
-            }
-            else
-            {
-                _logger.Verbose($"Found runtime context for '{pathToProjectJson}'.");
-                var dependencyResolver = new LegacyDependencyResolver(_logger);
-                runtimeDependencies = dependencyResolver.GetRuntimeDependencies(pathToProjectJson).ToList();
+                var runtimeDependencyAssemblyName = runtimeDependency.Name;
+                if (!inheritedAssemblyNames.Any(an => an.Name == runtimeDependencyAssemblyName.Name))
+                {
+                    _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                    opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
+                }
             }
 
-            AssemblyLoadContext.Default.Resolving +=
-                (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(runtimeDependencies.ToList(), assemblyLoadContext, assemblyName);
-
-
-            foreach (var runtimeDep in runtimeDependencies)
-            {
-                _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDep);
-                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDep.Path));                
-            }
-
-            var loader = new InteractiveAssemblyLoader();            
-            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
+            var loader = new InteractiveAssemblyLoader();     
+            
+            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);            
             var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
             if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
@@ -144,20 +128,5 @@ namespace Dotnet.Script.Core
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
         }
-       
-        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<RuntimeDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
-        {                      
-            var runtimeDependency = runtimeDependencies.SingleOrDefault(r => r.Name == assemblyName.Name);
-            if (runtimeDependency != null)
-            {
-                if (runtimeDependency.AssemblyName.Version != assemblyName.Version)
-                {
-                    _logger.Verbose(
-                        $"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
-                    return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
-                }
-            }
-            return null;
-        }       
     }
 }

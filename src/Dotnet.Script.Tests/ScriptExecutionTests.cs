@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using Dotnet.Script.DependencyModel.Environment;
 using Xunit;
 
 namespace Dotnet.Script.Tests
@@ -9,7 +10,7 @@ namespace Dotnet.Script.Tests
     {
         [Fact]
         public void ShouldExecuteHelloWorld()
-        {
+        {            
             var result = Execute(Path.Combine("HelloWorld", "HelloWorld.csx"));
             Assert.Contains("Hello World", result.output);
         }
@@ -31,8 +32,12 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
-            Assert.Contains("Connection successful", result.output);
+            // We have no story for this on *nix yet
+            if (RuntimeHelper.IsWindows())
+            {
+                var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
+                Assert.Contains("Connection successful", result.output);
+            }            
         }
         
         [Fact]
@@ -45,7 +50,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public static void ShouldHandleIssue129()
         {
-            var result = Execute(Path.Combine("Issue129", "Issue129.csx"));    
+            var result = Execute(Path.Combine("Issue129", "Issue129.csx"));
             Assert.Contains("Bad HTTP authentication header", result.output);
         }
 
@@ -98,7 +103,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp1.1", "dotnet-script.dll"), fixture });
+            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp2.0", "dotnet-script.dll"), fixture });
             if (arguments != null)
             {
                 allArguments.AddRange(arguments);

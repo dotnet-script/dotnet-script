@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
-using Dotnet.Script.Core;
-using Dotnet.Script.Core.ProjectSystem;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.CommandLineUtils;
+using Dotnet.Script.Core;
+using Dotnet.Script.DependencyModel;
+using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.Runtime;
 
 namespace Dotnet.Script
 {
@@ -142,7 +145,19 @@ namespace Dotnet.Script
         private static Task Run(bool debugMode, ScriptContext context)
         {
             var logger = new ScriptLogger(Console.Error, debugMode);
-            var compiler = new ScriptCompiler(logger, new ScriptProjectProvider(new ScriptParser(logger), logger));
+            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
+            {
+                if (level == LogLevel.Debug)
+                {
+                    logger.Verbose(message);
+                }
+                if (level == LogLevel.Info)
+                {
+                    logger.Log(message);
+                }
+            }));
+
+            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
             var runner = new ScriptRunner(compiler, logger);
             return runner.Execute<object>(context);
         }

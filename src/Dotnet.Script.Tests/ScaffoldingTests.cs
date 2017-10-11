@@ -7,13 +7,13 @@ namespace Dotnet.Script.Tests
     {
         [Fact]
         public void ShouldInitializeScriptFolder()
-        {            
-            var tempFolder = CreateTempFolder();
+        {
+            var tempFolder = CreateTempFolder();            
             var result = Execute("init", tempFolder);
             Assert.Equal(0, result.exitCode);
             Assert.True(File.Exists(Path.Combine(tempFolder, "helloworld.csx")));
             Assert.True(File.Exists(Path.Combine(tempFolder, "omnisharp.json")));
-            Assert.True(File.Exists(Path.Combine(tempFolder, ".vscode","launch.json")));            
+            Assert.True(File.Exists(Path.Combine(tempFolder, ".vscode", "launch.json")));
             Directory.Delete(tempFolder,true);
         }
 
@@ -59,7 +59,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp1.1", "dotnet-script.dll"), args };
+            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp2.0", "dotnet-script.dll"), args };
         }
     }
 

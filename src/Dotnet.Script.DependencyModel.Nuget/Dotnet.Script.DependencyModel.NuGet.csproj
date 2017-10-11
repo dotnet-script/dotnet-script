@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
+    <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>script;csx;csharp;roslyn;nuget</PackageTags>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.14.0.0</AssemblyVersion>
+    <FileVersion>0.14.0.0</FileVersion>
+    <Description>A MetadataReferenceResolver that allows inline nuget references to be specified in script(csx) files.</Description>
+    <Authors>dotnet-script</Authors>
+    <Company>dotnet-script</Company>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.3.1" />
+   </ItemGroup>
+</Project>
