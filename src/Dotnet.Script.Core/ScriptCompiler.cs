@@ -99,10 +99,6 @@ namespace Dotnet.Script.Core
 
             IList<RuntimeDependency> runtimeDependencies =
                 _runtimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
-                                    
-            AssemblyLoadContext.Default.Resolving +=
-                (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(runtimeDependencies.ToList(), assemblyLoadContext, assemblyName);
-
 
             foreach (var runtimeDependency in runtimeDependencies)
             {
@@ -132,22 +128,5 @@ namespace Dotnet.Script.Core
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
         }
-       
-        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IList<RuntimeDependency> runtimeDependencies, AssemblyLoadContext loadContext, AssemblyName assemblyName)
-        {
-            //var runtimeDependency = runtimeDependencies.SingleOrDefault(r => AssemblyLoadContext.GetAssemblyName(r.Path).Name == assemblyName.Name);
-            //if (runtimeDependency != null)
-            //{
-            //    AssemblyName an = AssemblyName.GetAssemblyName(runtimeDependency.Path);
-            //    var runtimeDependencyAssemblyName = AssemblyLoadContext.GetAssemblyName(runtimeDependency.Path);
-            //    if (runtimeDependencyAssemblyName.Version != assemblyName.Version)
-            //    {
-            //        _logger.Verbose(
-            //            $"Unresolved assembly {assemblyName}. Loading from resolved runtime dependencies at path: {runtimeDependency.Path}");
-            //        return loadContext.LoadFromAssemblyPath(runtimeDependency.Path);
-            //    }
-            //}
-            return null;
-        }       
     }
 }
