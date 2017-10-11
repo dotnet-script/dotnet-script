@@ -18,7 +18,7 @@ namespace Dotnet.Script.DependencyModel.Context
         public void Restore(string pathToProjectFile)
         {
             _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli.");            
-            _commandRunner.Execute("dotnet", $"restore {pathToProjectFile}");            
+            _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\"");            
         }
 
         public bool CanRestore => _commandRunner.Execute("dotnet", "--version") == 0;

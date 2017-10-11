@@ -34,7 +34,7 @@ namespace Dotnet.Script.DependencyModel.Context
             }
             else
             {
-                _commandRunner.Execute("mono", $"{PathToNuget} restore {pathToProjectFile}");
+                _commandRunner.Execute("mono", $"{PathToNuget} restore \"{pathToProjectFile}\"");
             }
         }
 
