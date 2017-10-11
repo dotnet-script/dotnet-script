@@ -60,15 +60,15 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 var driveLetter = pathRoot.Substring(0, 1);
                 targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
             }
-            var pathToProjectJsonDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
+            var pathToProjectDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
 
-            if (!Directory.Exists(pathToProjectJsonDirectory))
+            if (!Directory.Exists(pathToProjectDirectory))
             {
-                Directory.CreateDirectory(pathToProjectJsonDirectory);
+                Directory.CreateDirectory(pathToProjectDirectory);
             }
 
-            var pathToProjectJson = Path.Combine(pathToProjectJsonDirectory, "script.csproj");
-            return pathToProjectJson;
+            var pathToProjectFile = Path.Combine(pathToProjectDirectory, "script.csproj");
+            return pathToProjectFile;
         }
     }
 }
