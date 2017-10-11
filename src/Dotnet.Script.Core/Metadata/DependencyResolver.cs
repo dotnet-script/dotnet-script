@@ -113,7 +113,7 @@ namespace Dotnet.Script.Core.Metadata
         private void Restore(string pathToProjectFile)
         {
             var runtimeId = RuntimeEnvironment.GetRuntimeIdentifier();
-            _commandRunner.Execute("dotnet", $"restore {pathToProjectFile} -r {runtimeId}");
+            _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" -r {runtimeId}");
             //_commandRunner.Execute("DotNet", $"restore {pathToProjectFile}");
         }
 
