@@ -12,4 +12,6 @@ before_install:
 install:
   - ulimit -n4096  
 script:  
-  - ~/.dotnet/dotnet test src/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj
+  - chmod +x build.sh
+  - ./build.sh
+  
