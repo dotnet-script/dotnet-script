@@ -3,11 +3,13 @@ matrix:
   include:
     - os: osx
       osx_image: xcode9      
-      sudo: required      
-      dotnet: 2.0.0    
+      sudo: required        
 before_install:
   - brew update
+  - curl https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+  - chmod +x dotnet-install.sh
+  - ./dotnet-install.sh --channel 2.0
 install:
   - ulimit -n4096  
 script:  
-  - dotnet test src/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj
+  - ~/.dotnet/dotnet test src/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj
