@@ -10,6 +10,7 @@ $client.DownloadFile($url,$zipFile)
 
 $installationFolder = Join-Path $env:ProgramData "dotnet-script"
 Expand-Archive $zipFile -DestinationPath $installationFolder -Force
+Remove-Item $tempFolder -Recurse -Force
 
 $path = [System.Environment]::GetEnvironmentVariable("path", [System.EnvironmentVariableTarget]::User);
 # Get all paths except paths to old dotnet.script installations. 
