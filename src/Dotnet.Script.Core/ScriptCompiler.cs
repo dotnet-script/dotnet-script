@@ -8,13 +8,13 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Extensions.DependencyModel;
-using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp;
 using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.NuGet;
 using Dotnet.Script.DependencyModel.Runtime;
-
+using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
+using System.Threading.Tasks;
 
 namespace Dotnet.Script.Core
 {
@@ -28,6 +28,21 @@ namespace Dotnet.Script.Core
             typeof(object).GetTypeInfo().Assembly,
             typeof(Enumerable).GetTypeInfo().Assembly
         };
+
+        static ScriptCompiler()
+        {
+            // reset default scripting mode to latest language version to enable C# 7.1 features
+            // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
+            var csharpScriptCompilerType = typeof(CSharpScript).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScriptCompiler");
+            var parseOptionsField = csharpScriptCompilerType?.GetField("s_defaultOptions", BindingFlags.Static | BindingFlags.NonPublic);
+            parseOptionsField?.SetValue(null, new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script));
+
+            // force Roslyn to use ReferenceManager for the first time
+            Task.Run(() =>
+            {
+                CSharpScript.Create<object>("1", ScriptOptions.Default, typeof(CommandLineScriptGlobals), new InteractiveAssemblyLoader()).RunAsync(new CommandLineScriptGlobals(Console.Out, CSharpObjectFormatter.Instance)).GetAwaiter().GetResult();
+            });
+        }
 
         protected virtual IEnumerable<string> ImportedNamespaces => new[]
         {
@@ -50,12 +65,6 @@ namespace Dotnet.Script.Core
         {
             _logger = logger;
             _runtimeDependencyResolver = runtimeDependencyResolver;
-
-            // reset default scripting mode to latest language version to enable C# 7.1 features
-            // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
-            var csharpScriptCompilerType = typeof(CSharpScript).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScriptCompiler");
-            var parseOptionsField = csharpScriptCompilerType?.GetField("s_defaultOptions", BindingFlags.Static | BindingFlags.NonPublic);
-            parseOptionsField?.SetValue(null, new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script));
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
@@ -110,9 +119,8 @@ namespace Dotnet.Script.Core
                 }
             }
 
-            var loader = new InteractiveAssemblyLoader();     
-            
-            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);            
+            var loader = new InteractiveAssemblyLoader();
+            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
             var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
             if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
