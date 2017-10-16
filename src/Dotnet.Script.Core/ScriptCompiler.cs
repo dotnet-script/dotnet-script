@@ -8,16 +8,13 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.Extensions.DependencyModel;
-using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.CSharp;
 using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.NuGet;
 using Dotnet.Script.DependencyModel.Runtime;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using System.Threading.Tasks;
-using System.Threading;
 
 namespace Dotnet.Script.Core
 {
