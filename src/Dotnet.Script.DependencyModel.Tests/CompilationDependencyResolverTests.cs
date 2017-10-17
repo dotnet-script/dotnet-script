@@ -21,7 +21,7 @@ namespace Dotnet.Script.DependencyModel.Tests
         {            
             var resolver = CreateResolver();
             var dependencies =  resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/InlineNuGetPackage", true, "netcoreapp2.0");
-            Assert.True(dependencies.Any(d => d.Contains("AutoMapper")));
+            Assert.Contains(dependencies, d => d.Contains("AutoMapper"));
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Dotnet.Script.DependencyModel.Tests
         {
             var resolver = CreateResolver();
             var dependencies = resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/NativeLibrary", true, "netcoreapp2.0");
-            Assert.True(dependencies.Any(d => d.Contains("Microsoft.Data.Sqlite")));
+            Assert.Contains(dependencies, d => d.Contains("Microsoft.Data.Sqlite"));
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Dotnet.Script.DependencyModel.Tests
         {
             var resolver = CreateResolver();
             var dependencies = resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/Issue129", true, "netcoreapp2.0");
-            Assert.True(dependencies.Any(d => d.Contains("Auth0.ManagementApi")));
+            Assert.Contains(dependencies, d => d.Contains("Auth0.ManagementApi"));
         }
 
         private CompilationDependencyResolver CreateResolver()
