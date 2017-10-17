@@ -21,14 +21,3 @@ $paths += Join-Path $installationFolder "dotnet-script"
 $path = $paths -join ";"
 
 [System.Environment]::SetEnvironmentVariable("path", $path, [System.EnvironmentVariableTarget]::User)
-
-
-
-
-
-
-
-
-
-
-
