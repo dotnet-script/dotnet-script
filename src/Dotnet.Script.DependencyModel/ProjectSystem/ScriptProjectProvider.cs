@@ -58,6 +58,12 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             if (pathRoot.Length > 0 && RuntimeHelper.IsWindows())
             {
                 var driveLetter = pathRoot.Substring(0, 1);
+                if (driveLetter == "\\")
+                {
+                    targetDirectoryWithoutRoot = targetDirectoryWithoutRoot.TrimStart(new char[] { '\\' });
+                    driveLetter = "UNC";
+                }
+
                 targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
             }
             var pathToProjectDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
