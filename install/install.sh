@@ -1,5 +1,7 @@
 mkdir /tmp/dotnet-script
-curl -L https://github.com/filipw/dotnet-script/releases/download/0.14.0/dotnet-script.0.14.0.zip > /tmp/dotnet-script/dotnet-script.zip
+version=$(curl https://api.github.com/repos/filipw/dotnet-script/releases/latest | grep -Eo "\"tag_name\":\s*\"(.*)\"" | cut -d'"' -f4)
+echo "Installing $version..."
+curl -L https://github.com/filipw/dotnet-script/releases/download/$version/dotnet-script.$version.zip > /tmp/dotnet-script/dotnet-script.zip
 unzip -o /tmp/dotnet-script/dotnet-script.zip -d /usr/local/lib
 chmod +x /usr/local/lib/dotnet-script/dotnet-script.sh
 cd /usr/local/bin
