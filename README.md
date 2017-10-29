@@ -21,9 +21,23 @@ The only thing we need to install is [.Net Core](https://www.microsoft.com/net/d
 choco install dotnet.script
 ```
 
+We also provide a PowerShell script for installation.
+
+```powershell
+(new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.ps1") | iex
+```
+
 #### Linux and Mac
 
-Download and unzip the latest [release](https://github.com/filipw/dotnet-script/releases) and make sure that `dotnet-script.sh` is in your PATH.
+```shell
+curl -s https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.sh | bash
+```
+
+If permission is denied we can try with `sudo`
+
+```shell
+curl -s https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.sh | sudo bash
+```
 
 #### Docker
 
