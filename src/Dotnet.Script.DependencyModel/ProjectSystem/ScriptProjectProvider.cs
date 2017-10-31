@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 
@@ -47,7 +48,19 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             projectFile.Save(pathToProjectFile);
             _logger.Debug($"Project file saved to {pathToProjectFile}");
+            CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return pathToProjectFile;
+        }
+
+        private void CopyNuGetConfigFile(string targetDirectory, string pathToProjectFileFolder)
+        {
+            var pathToNuGetConfigFile = Path.Combine(targetDirectory, "NuGet.Config");
+            if (File.Exists(pathToNuGetConfigFile))
+            {
+                var pathToDestinationNuGetConfigFile = Path.Combine(pathToProjectFileFolder, "NuGet.Config");
+                _logger.Debug($"Copying {pathToNuGetConfigFile} to {pathToDestinationNuGetConfigFile}");
+                File.Copy(pathToNuGetConfigFile, Path.Combine(pathToProjectFileFolder, "NuGet.Config"), true);
+            }
         }
 
         private static string GetPathToProjectFile(string targetDirectory)
