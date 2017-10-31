@@ -41,10 +41,10 @@ namespace Dotnet.Script.Tests
         }
         
         [Fact]
-        public static void ShouldReturnNonZeroExitCodeWhenScriptFails()
+        public static void ShouldReturnExitCodeOneWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
-            Assert.NotEqual(0, result.exitCode);
+            Assert.Equal(1, result.exitCode);
         }
 
         [Fact]

@@ -38,7 +38,7 @@ namespace Dotnet.Script
                           ? e.ToString()
                           : e.GetBaseException().Message;
                 Console.Error.WriteLine(error);
-                return 0xbad;
+                return 0x1;
             }
         }
 
