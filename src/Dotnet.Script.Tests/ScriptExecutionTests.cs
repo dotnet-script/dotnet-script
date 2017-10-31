@@ -75,6 +75,15 @@ namespace Dotnet.Script.Tests
             Assert.DoesNotContain("-v", result.output);            
         }
 
+        [Fact]
+        public static void ShouldPropagateReturnValue()
+        {
+            var result = Execute($"{Path.Combine("ReturnValue", "ReturnValue.csx")}");
+            Assert.Equal(1,result.exitCode);
+        }
+
+
+
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
