@@ -48,6 +48,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public static void ShouldReturnExitCodeOneWhenScriptFailsToCompile()
+        {
+            var result = Execute(Path.Combine("CompilationError", "CompilationError.csx"));
+            Assert.Equal(1, result.exitCode);
+        }
+
+        [Fact]
         public static void ShouldHandleIssue129()
         {
             var result = Execute(Path.Combine("Issue129", "Issue129.csx"));
