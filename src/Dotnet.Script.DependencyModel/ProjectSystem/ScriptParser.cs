@@ -16,7 +16,29 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _logger = logFactory.CreateLogger<ScriptParser>();
         }
 
-        public ParseResult ParseFrom(IEnumerable<string> csxFiles)
+        public ParseResult ParseFromCode(string code)
+        {
+            string currentTargetFramework = null;
+            var allPackageReferences = new HashSet<PackageReference>();
+            var packageReferences = ReadPackageReferences(code);
+            allPackageReferences.UnionWith(packageReferences);
+            string targetFramework = ReadTargetFramework(code);
+            if (targetFramework != null)
+            {
+                if (currentTargetFramework != null && targetFramework != currentTargetFramework)
+                {
+                    _logger.Debug($"Found multiple target frameworks. Using {currentTargetFramework}.");
+                }
+                else
+                {
+                    currentTargetFramework = targetFramework;
+                }
+            }
+
+            return new ParseResult(allPackageReferences, currentTargetFramework);
+        }
+
+        public ParseResult ParseFromFiles(IEnumerable<string> csxFiles)
         {
             var allPackageReferences = new HashSet<PackageReference>();
             string currentTargetFramework = null;

@@ -34,7 +34,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework." );
             
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
-            var parseresult = _scriptParser.ParseFrom(csxFiles);
+            var parseresult = _scriptParser.ParseFromFiles(csxFiles);
 
             pathToProjectFile = GetPathToProjectFile(targetDirectory);
             var projectFile = new ProjectFile();
