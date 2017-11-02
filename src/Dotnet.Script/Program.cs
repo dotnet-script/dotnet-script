@@ -67,11 +67,7 @@ namespace Dotnet.Script
                     int exitCode = 0;
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        var returnValue = await RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());
-                        if (returnValue is int intReturnValue)
-                        {
-                            exitCode = intReturnValue;
-                        }
+                        exitCode = await RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
                     }
                     return exitCode;
                 });
@@ -81,12 +77,8 @@ namespace Dotnet.Script
             {
                 int exitCode = 0;
                 if (!string.IsNullOrWhiteSpace(file.Value))
-                {                    
-                    var returnValue = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen));
-                    if (returnValue is int intReturnValue)
-                    {
-                        exitCode = intReturnValue;
-                    }
+                {
+                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen));                    
                 }
                 else
                 {
@@ -126,7 +118,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);            
         }
 
-        private static Task<object> RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
+        private static Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
         {
             if (!File.Exists(file))
             {
@@ -144,7 +136,7 @@ namespace Dotnet.Script
             }
         }
 
-        private static Task<object> RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
+        private static Task<int> RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args, null, debugMode);
@@ -152,7 +144,7 @@ namespace Dotnet.Script
             return Run(debugMode, context);
         }
 
-        private static Task<object> Run(bool debugMode, ScriptContext context)
+        private static Task<int> Run(bool debugMode, ScriptContext context)
         {
             var logger = new ScriptLogger(Console.Error, debugMode);
             var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
@@ -169,7 +161,7 @@ namespace Dotnet.Script
 
             var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
             var runner = new ScriptRunner(compiler, logger);
-            return runner.Execute<object>(context);
+            return runner.Execute<int>(context);
         }
 
         private static string GetVersionInfo()
