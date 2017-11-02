@@ -86,7 +86,7 @@ namespace Dotnet.Script.Tests
         public static void ShouldPropagateReturnValue()
         {
             var result = Execute($"{Path.Combine("ReturnValue", "ReturnValue.csx")}");
-            Assert.Equal(1,result.exitCode);
+            Assert.Equal(42,result.exitCode);
         }
 
 
