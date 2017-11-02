@@ -41,10 +41,17 @@ namespace Dotnet.Script.Tests
         }
         
         [Fact]
-        public static void ShouldReturnNonZeroExitCodeWhenScriptFails()
+        public static void ShouldReturnExitCodeOneWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
-            Assert.NotEqual(0, result.exitCode);
+            Assert.Equal(1, result.exitCode);
+        }
+
+        [Fact]
+        public static void ShouldReturnExitCodeOneWhenScriptFailsToCompile()
+        {
+            var result = Execute(Path.Combine("CompilationError", "CompilationError.csx"));
+            Assert.Equal(1, result.exitCode);
         }
 
         [Fact]
@@ -74,6 +81,15 @@ namespace Dotnet.Script.Tests
             var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "-v");
             Assert.DoesNotContain("-v", result.output);            
         }
+
+        [Fact]
+        public static void ShouldPropagateReturnValue()
+        {
+            var result = Execute($"{Path.Combine("ReturnValue", "ReturnValue.csx")}");
+            Assert.Equal(42,result.exitCode);
+        }
+
+
 
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
