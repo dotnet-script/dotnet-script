@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Runtime
 {
-
     public class RuntimeDependencyResolver
     {        
         private readonly ScriptProjectProvider _scriptProjectProvider;
@@ -47,6 +46,29 @@ namespace Dotnet.Script.DependencyModel.Runtime
             var commandRunner = new CommandRunner(logFactory);
             return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory)};
         }
+
+        public IEnumerable<RuntimeDependency> GetDependenciesFromCode(string targetDirectory, string code)
+        {
+            var pathToProjectFile = _scriptProjectProvider.CreateProjectForRepl(code, targetDirectory, "netcoreapp2.0");
+            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
+
+            var dependencyContext = dependencyInfo.DependencyContext;
+            List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
+            nuGetPackageFolders.Add(RuntimeHelper.GetPathToNuGetStoreFolder());
+
+            var runtimeDepedencies = new HashSet<RuntimeDependency>();
+
+            var runtimeLibraries = dependencyContext.RuntimeLibraries;
+
+            foreach (var runtimeLibrary in runtimeLibraries)
+            {
+                ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray());
+                ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies, nuGetPackageFolders.ToArray());
+            }
+
+            return runtimeDepedencies;
+        }
+
 
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
         {

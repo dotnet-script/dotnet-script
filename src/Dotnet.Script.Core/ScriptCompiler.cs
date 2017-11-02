@@ -21,7 +21,6 @@ namespace Dotnet.Script.Core
     public class ScriptCompiler
     {
         private readonly ScriptLogger _logger;
-        private readonly RuntimeDependencyResolver _runtimeDependencyResolver;
 
         protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
@@ -61,10 +60,12 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
+        public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
+
         public ScriptCompiler(ScriptLogger logger, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logger;
-            _runtimeDependencyResolver = runtimeDependencyResolver;
+            RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
@@ -105,9 +106,8 @@ namespace Dotnet.Script.Core
                 opts = opts.AddReferences(assembly);
             }
 
-
             IList<RuntimeDependency> runtimeDependencies =
-                _runtimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+                RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
 
             foreach (var runtimeDependency in runtimeDependencies)
             {
@@ -134,7 +134,7 @@ namespace Dotnet.Script.Core
                     orderedDiagnostics.ToImmutableArray());
             }
 
-            return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
+            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, opts);
         }
     }
 }
