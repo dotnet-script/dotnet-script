@@ -35,7 +35,7 @@ namespace Dotnet.Script.Core
             _globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
         }
 
-        public virtual async Task RunLoop(string config, bool debugMode)
+        public virtual async Task RunLoop(bool debugMode)
         {
             while (true && !_shouldExit)
             {
@@ -48,18 +48,18 @@ namespace Dotnet.Script.Core
                     continue;
                 }
 
-                await Execute(input, config, debugMode);
+                await Execute(input, debugMode);
             }
         }
 
-        protected virtual async Task Execute(string input, string config, bool debugMode)
+        protected virtual async Task Execute(string input, bool debugMode)
         {
             try
             {
                 if (_scriptState == null)
                 {
                     var sourceText = SourceText.From(input);
-                    var context = new ScriptContext(sourceText, CurrentDirectory, config, Enumerable.Empty<string>(), debugMode: debugMode);
+                    var context = new ScriptContext(sourceText, CurrentDirectory, debugMode ? "Debug" : "Release", Enumerable.Empty<string>(), debugMode: debugMode);
 
                     var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(context);
                     _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);

@@ -80,7 +80,7 @@ namespace Dotnet.Script
                 }
                 else
                 {
-                    await RunInteractive(config.HasValue() ? config.Value() : "Release", debugMode.HasValue());
+                    await RunInteractive(debugMode.HasValue());
                 }
                 return exitCode;
             });
@@ -142,7 +142,7 @@ namespace Dotnet.Script
             return Run(debugMode, context);
         }
 
-        private static async Task RunInteractive(string config, bool debugMode)
+        private static async Task RunInteractive(bool debugMode)
         {
             var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
             var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
@@ -159,7 +159,7 @@ namespace Dotnet.Script
 
             var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
             var runner = new InteractiveRunner(compiler, logger, ScriptConsole.Default);
-            await runner.RunLoop(config, debugMode);
+            await runner.RunLoop(debugMode);
         }
 
         private static Task Run(bool debugMode, ScriptContext context)

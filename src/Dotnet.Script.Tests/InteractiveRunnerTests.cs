@@ -5,14 +5,31 @@ using System.Threading.Tasks;
 using Xunit;
 using System.IO;
 using System.Text;
+using System;
 
 namespace Dotnet.Script.Tests
 {
     public class InteractiveRunnerTests
     {
-        private InteractiveRunner GetRunner(TextReader writerIn, TextWriter writerOut, TextWriter writerErr)
+        private class InteractiveTestContext
         {
-            var console = new ScriptConsole(writerOut, writerIn, writerErr);
+            public InteractiveTestContext(ScriptConsole console, InteractiveRunner runner)
+            {
+                Console = console;
+                Runner = runner;
+            }
+
+            public ScriptConsole Console { get; }
+            public InteractiveRunner Runner { get; }
+        }
+
+        private InteractiveTestContext GetRunner(string[] commands)
+        {
+            var reader = new StringReader(string.Join(Environment.NewLine, commands));
+            var writer = new StringWriter();
+            var error = new StringWriter();
+
+            var console = new ScriptConsole(writer, reader, error);
             var logger = new ScriptLogger(console.Error, true);
             var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
             {
@@ -28,28 +45,102 @@ namespace Dotnet.Script.Tests
 
             var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
             var runner = new InteractiveRunner(compiler, logger, console);
-            return runner;
+            return new InteractiveTestContext(console, runner);
         }
 
         [Fact]
         public async Task SimpleOutput()
         {
-            var commands = new StringBuilder();
-            commands.AppendLine("var x = 1;");
-            commands.AppendLine();
-            commands.AppendLine("x+x");
-            commands.AppendLine();
-            commands.AppendLine("#exit");
+            var commands = new[]
+            {
+                "var x = 1;",
+                "x+x",
+                "#exit"
+            };
 
-            var reader = new StringReader(commands.ToString());
-            var writer = new StringWriter();
-            var error = new StringWriter();
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
 
-            var runner = GetRunner(reader, writer, error);
-            await runner.RunLoop("Debug", true);
-
-            var result = writer.ToString();
+            var result = ctx.Console.Out.ToString();
             Assert.Contains("2", result);
+        }
+
+        [Fact]
+        public async Task Multiline()
+        {
+            var commands = new[]
+            {
+                "class Foo {",
+                "}",
+                "var x = new Foo();",
+                "x",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("Submission#0.Foo", result);
+        }
+
+        [Fact]
+        public async Task ExtensionMethod()
+        {
+            var commands = new[]
+            {
+                @"var x = ""foo"";",
+                @"static string SayHi(this string txt) { return $""hi, {txt}""; }",
+                "x.SayHi()",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("hi, foo", result);
+        }
+
+        [Fact]
+        public async Task NugetPackageReference()
+        {
+            var commands = new[]
+            {
+                "var x = 1;",
+                @"#r ""nuget: Automapper, 6.1.1""",
+                "using AutoMapper;",
+                "typeof(MapperConfiguration)",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("[AutoMapper.MapperConfiguration]", result);
+        }
+
+        [Fact]
+        public async Task ResetCommand()
+        {
+            var commands = new[]
+            {
+                "var x = 1;",
+                "x+x",
+                "#reset",
+                "x",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("2", result);
+
+            var errResult = ctx.Console.Error.ToString();
+            Assert.Contains("error CS0103: The name 'x' does not exist in the current context", errResult);
         }
     }
 }
