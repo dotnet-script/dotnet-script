@@ -45,6 +45,8 @@ namespace Dotnet.Script
             var app = new CommandLineApplication(throwOnUnexpectedArg: false);           
             var file = app.Argument("script", "Path to CSX script");            
             var config = app.Option("-conf |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
+            var interactive = app.Option("-i |--interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
+
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
@@ -76,7 +78,7 @@ namespace Dotnet.Script
                 int exitCode = 0;
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen));                    
+                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue());
                 }
                 else
                 {
@@ -116,7 +118,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);            
         }
 
-        private static Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
+        private static Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args, bool interactive)
         {
             if (!File.Exists(file))
             {
