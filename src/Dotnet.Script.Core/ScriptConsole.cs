@@ -7,9 +7,11 @@ namespace Dotnet.Script.Core
     {
         public static readonly ScriptConsole Default = new ScriptConsole(Console.Out, Console.Error, Console.In);
 
-        public TextWriter Error { get; }
-        public TextWriter Out { get; }
-        public TextReader In { get; }
+        public virtual TextWriter Error { get; }
+        public virtual TextWriter Out { get; }
+        public virtual TextReader In { get; }
+
+        public virtual void Clear() => Console.Clear();
 
         public ScriptConsole(TextWriter output, TextWriter error, TextReader input)
         {
