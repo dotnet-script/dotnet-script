@@ -41,8 +41,10 @@ namespace Dotnet.Script
         }
 
         private static int Wain(string[] args)
-        {            
-            var app = new CommandLineApplication(throwOnUnexpectedArg: false);           
+        {
+            var app = new CommandLineApplication(throwOnUnexpectedArg: false);
+            app.Argument("<empty>", "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode.");
+
             var file = app.Argument("script", "Path to CSX script");            
             var config = app.Option("-conf |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
             var interactive = app.Option("-i |--interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
@@ -73,20 +75,6 @@ namespace Dotnet.Script
                 });
             });
 
-            app.OnExecute(async () =>
-            {
-                int exitCode = 0;
-                if (!string.IsNullOrWhiteSpace(file.Value))
-                {
-                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue());
-                }
-                else
-                {
-                    await RunInteractive(debugMode.HasValue());
-                }
-                return exitCode;
-            });
-
             app.Command("init", c =>
             {
                 c.Description = "Creates a sample script along with the launch.json file needed to launch and debug the script.";
@@ -113,6 +101,20 @@ namespace Dotnet.Script
                     scaffolder.CreateNewScriptFile(fileNameArgument.Value);
                     return 0;
                 });
+            });
+
+            app.OnExecute(async () =>
+            {
+                int exitCode = 0;
+                if (!string.IsNullOrWhiteSpace(file.Value))
+                {
+                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue());
+                }
+                else
+                {
+                    await RunInteractive(debugMode.HasValue());
+                }
+                return exitCode;
             });
 
             return app.Execute(argsBeforeDoubleHyphen);            
