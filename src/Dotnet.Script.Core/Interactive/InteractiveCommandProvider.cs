@@ -1,4 +1,6 @@
-﻿namespace Dotnet.Script.Core
+﻿using System.Linq;
+
+namespace Dotnet.Script.Core
 {
     public class InteractiveCommandProvider
     {

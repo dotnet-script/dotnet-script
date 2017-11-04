@@ -23,6 +23,7 @@ namespace Dotnet.Script.Core
         protected ScriptConsole Console;
         protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
         protected InteractiveCommandProvider InteractiveCommandParser = new InteractiveCommandProvider();
+        protected string CurrentDirectory = Directory.GetCurrentDirectory();
 
         public InteractiveRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole console)
         {
@@ -35,7 +36,6 @@ namespace Dotnet.Script.Core
 
         public virtual async Task RunLoop(string config, bool debugMode)
         {
-            var directory = Directory.GetCurrentDirectory();
             while (true)
             {
                 Console.Out.Write("> ");
@@ -47,10 +47,56 @@ namespace Dotnet.Script.Core
                     continue;
                 }
 
-                var sourceText = SourceText.From(input);
-                var context = new ScriptContext(sourceText, directory, config, Enumerable.Empty<string>(), debugMode: debugMode);
-                await Execute(context);
+                await Execute(input, config, debugMode);
             }
+        }
+
+        protected virtual async Task Execute(string input, string config, bool debugMode)
+        {
+            try
+            {
+                if (_scriptState == null)
+                {
+                    var sourceText = SourceText.From(input);
+                    var context = new ScriptContext(sourceText, CurrentDirectory, config, Enumerable.Empty<string>(), debugMode: debugMode);
+
+                    var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(context);
+                    _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
+                    _scriptOptions = compilationContext.ScriptOptions;
+                }
+                else
+                {
+                    var lineDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input);
+
+                    foreach (var runtimeDependency in lineDependencies)
+                    {
+                        Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                        _scriptOptions = _scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
+                    }
+
+                    _scriptState = await _scriptState.ContinueWithAsync(input, _scriptOptions, ex => true);
+                }
+
+                if (_scriptState?.Exception != null)
+                {
+                    Console.Error.Write(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                }
+
+                if (_scriptState?.ReturnValue != null)
+                {
+                    _globals.Print(_scriptState.ReturnValue);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.Write(CSharpObjectFormatter.Instance.FormatException(e));
+            }
+        }
+
+        public virtual void Reset()
+        {
+            _scriptState = null;
+            _scriptOptions = null;
         }
 
         private string ReadInput()
@@ -74,52 +120,6 @@ namespace Dotnet.Script.Core
             }
 
             return input.ToString();
-        }
-
-        public virtual void Reset()
-        {
-            _scriptState = null;
-            _scriptOptions = null;
-        }
-
-        public virtual async Task Execute(ScriptContext context)
-        {
-            try
-            {
-                if (_scriptState == null)
-                {
-                    var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(context);
-                    _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
-                    _scriptOptions = compilationContext.ScriptOptions;
-                }
-                else
-                {
-                    var code = context.Code.ToString();
-                    var lineDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(context.WorkingDirectory, code);
-
-                    foreach (var runtimeDependency in lineDependencies)
-                    {
-                        Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
-                        _scriptOptions = _scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
-                    }
-
-                    _scriptState = await _scriptState.ContinueWithAsync(code, _scriptOptions, ex => true);
-                }
-
-                if (_scriptState?.Exception != null)
-                {
-                    Console.Error.Write(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
-                }
-
-                if (_scriptState?.ReturnValue != null)
-                {
-                    _globals.Print(_scriptState.ReturnValue);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.Error.Write(CSharpObjectFormatter.Instance.FormatException(e));
-            }
         }
     }
 }
