@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Dotnet.Script": {
-      "commandName": "Project",
-      "commandLineArgs": "fixtures\\foo.csx -d"
+      "commandName": "Project"
     }
   }
 }
