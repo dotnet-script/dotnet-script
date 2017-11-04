@@ -164,7 +164,7 @@ namespace Dotnet.Script
             await runner.RunLoop(debugMode);
         }
 
-        private static Task Run(bool debugMode, ScriptContext context)
+        private static Task<int> Run(bool debugMode, ScriptContext context)
         {
             var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
             var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
