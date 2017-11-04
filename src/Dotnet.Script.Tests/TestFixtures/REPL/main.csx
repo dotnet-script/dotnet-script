@@ -1,0 +1,1 @@
+﻿var externalValue = 100;

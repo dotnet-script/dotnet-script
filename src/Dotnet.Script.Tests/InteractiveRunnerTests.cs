@@ -103,6 +103,23 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public async Task GlobalsObject()
+        {
+            var commands = new[]
+            {
+                @"var x = ""foo"";",
+                "Print(x);",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("foo", result);
+        }
+
+        [Fact]
         public async Task NugetPackageReference()
         {
             var commands = new[]
@@ -119,6 +136,25 @@ namespace Dotnet.Script.Tests
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("[AutoMapper.MapperConfiguration]", result);
+        }
+
+        [Fact]
+        public async Task LoadedFile()
+        {
+            var pathToFixture = Path.Combine("..", "..", "..", "TestFixtures", "REPL", "main.csx");
+            var commands = new[]
+            {
+                "var x = 5;",
+                $@"#load ""{pathToFixture}""",
+                "x * externalValue",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("500", result);
         }
 
         [Fact]
