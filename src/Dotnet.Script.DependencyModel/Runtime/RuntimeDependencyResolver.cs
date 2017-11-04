@@ -18,7 +18,6 @@ namespace Dotnet.Script.DependencyModel.Runtime
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
         private readonly Logger _logger;
-        
 
         // Note: Windows only, Mac and Linux needs something else?
         [DllImport("Kernel32.dll")]
@@ -50,6 +49,18 @@ namespace Dotnet.Script.DependencyModel.Runtime
         public IEnumerable<RuntimeDependency> GetDependenciesFromCode(string targetDirectory, string code)
         {
             var pathToProjectFile = _scriptProjectProvider.CreateProjectForRepl(code, targetDirectory, "netcoreapp2.0");
+            return GetDependenciesInternal(pathToProjectFile);
+        }
+
+
+        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
+        {
+            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true);
+            return GetDependenciesInternal(pathToProjectFile);
+        }
+
+        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile)
+        {
             var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
 
             var dependencyContext = dependencyInfo.DependencyContext;
@@ -62,29 +73,6 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
             foreach (var runtimeLibrary in runtimeLibraries)
             {
-                ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray());
-                ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies, nuGetPackageFolders.ToArray());
-            }
-
-            return runtimeDepedencies;
-        }
-
-
-        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
-        {
-            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true);
-            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
-            
-            var dependencyContext = dependencyInfo.DependencyContext;
-            List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
-            nuGetPackageFolders.Add(RuntimeHelper.GetPathToNuGetStoreFolder());
-
-            var runtimeDepedencies = new HashSet<RuntimeDependency>();
-
-            var runtimeLibraries = dependencyContext.RuntimeLibraries;
-
-            foreach (var runtimeLibrary in runtimeLibraries)
-            {                
                 ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray());
                 ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies, nuGetPackageFolders.ToArray());
             }
