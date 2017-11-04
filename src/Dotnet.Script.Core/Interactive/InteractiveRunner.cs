@@ -14,6 +14,7 @@ namespace Dotnet.Script.Core
 {
     public class InteractiveRunner
     {
+        private bool _shouldExit = false;
         private ScriptState<object> _scriptState;
         private ScriptOptions _scriptOptions;
         private InteractiveScriptGlobals _globals;
@@ -36,7 +37,7 @@ namespace Dotnet.Script.Core
 
         public virtual async Task RunLoop(string config, bool debugMode)
         {
-            while (true)
+            while (true && !_shouldExit)
             {
                 Console.Out.Write("> ");
                 var input = ReadInput();
@@ -97,6 +98,11 @@ namespace Dotnet.Script.Core
         {
             _scriptState = null;
             _scriptOptions = null;
+        }
+
+        public virtual void Exit()
+        {
+            _shouldExit = true;
         }
 
         private string ReadInput()

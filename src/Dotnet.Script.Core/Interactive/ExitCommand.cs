@@ -8,7 +8,7 @@ namespace Dotnet.Script.Core
 
         public void Execute(CommandContext commandContext)
         {
-            Environment.Exit(0);
+            commandContext.Runner.Exit();
         }
     }
 }
