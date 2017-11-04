@@ -118,7 +118,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);            
         }
 
-        private static Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args, bool interactive)
+        private static async Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args, bool interactive)
         {
             if (!File.Exists(file))
             {
@@ -132,55 +132,38 @@ namespace Dotnet.Script
             {
                 var sourceText = SourceText.From(filestream);
                 var context = new ScriptContext(sourceText, directory, config, args, absoluteFilePath, debugMode);
-                return Run(debugMode, context);
+
+                if (interactive)
+                {
+                    var compiler = GetScriptCompiler(debugMode);
+                    var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+                    await runner.RunSeedScript(context);
+                    await runner.RunLoop(debugMode);
+                    return 0;
+                }
+
+                return await Run(debugMode, context);
             }
+        }
+
+        private static async Task RunInteractive(bool debugMode)
+        {
+            var compiler = GetScriptCompiler(debugMode);
+            var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+            await runner.RunLoop(debugMode);
         }
 
         private static Task<int> RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args, null, debugMode);
-
             return Run(debugMode, context);
-        }
-
-        private static async Task RunInteractive(bool debugMode)
-        {
-            var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
-            {
-                if (level == LogLevel.Debug)
-                {
-                    logger.Verbose(message);
-                }
-                if (level == LogLevel.Info)
-                {
-                    logger.Log(message);
-                }
-            }));
-
-            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
-            var runner = new InteractiveRunner(compiler, logger, ScriptConsole.Default);
-            await runner.RunLoop(debugMode);
         }
 
         private static Task<int> Run(bool debugMode, ScriptContext context)
         {
-            var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
-            {
-                if (level == LogLevel.Debug)
-                {
-                    logger.Verbose(message);
-                }
-                if (level == LogLevel.Info)
-                {
-                    logger.Log(message);
-                }
-            }));
-
-            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
-            var runner = new ScriptRunner(compiler, logger);
+            var compiler = GetScriptCompiler(debugMode);
+            var runner = new ScriptRunner(compiler, compiler.Logger);
             return runner.Execute<int>(context);
         }
 
@@ -189,6 +172,24 @@ namespace Dotnet.Script
             var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
             return versionAttribute?.InformationalVersion;
         }
-    }
 
+        private static ScriptCompiler GetScriptCompiler(bool debugMode)
+        {
+            var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
+            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
+            {
+                if (level == LogLevel.Debug)
+                {
+                    logger.Verbose(message);
+                }
+                if (level == LogLevel.Info)
+                {
+                    logger.Log(message);
+                }
+            }));
+
+            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
+            return compiler;
+        }
+    }
 }

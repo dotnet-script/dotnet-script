@@ -20,8 +20,6 @@ namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
-        private readonly ScriptLogger _logger;
-
         protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
             typeof(object).GetTypeInfo().Assembly,
@@ -62,9 +60,11 @@ namespace Dotnet.Script.Core
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
+        public ScriptLogger Logger { get; }
+
         public ScriptCompiler(ScriptLogger logger, RuntimeDependencyResolver runtimeDependencyResolver)
         {
-            _logger = logger;
+            Logger = logger;
             RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
@@ -89,7 +89,7 @@ namespace Dotnet.Script.Core
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var platformIdentifier = RuntimeHelper.GetPlatformIdentifier();
-            _logger.Verbose($"Current runtime is '{platformIdentifier}'.");
+            Logger.Verbose($"Current runtime is '{platformIdentifier}'.");
 
             var opts = CreateScriptOptions(context);
 
@@ -101,7 +101,7 @@ namespace Dotnet.Script.Core
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
-                _logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
+                Logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
                 var assembly = Assembly.Load(inheritedAssemblyName);                
                 opts = opts.AddReferences(assembly);
             }
@@ -114,7 +114,7 @@ namespace Dotnet.Script.Core
                 var runtimeDependencyAssemblyName = runtimeDependency.Name;
                 if (!inheritedAssemblyNames.Any(an => an.Name == runtimeDependencyAssemblyName.Name))
                 {
-                    _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                    Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
                     opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
                 }
             }
@@ -127,7 +127,7 @@ namespace Dotnet.Script.Core
             {
                 foreach (var diagnostic in orderedDiagnostics)
                 {
-                    _logger.Log(diagnostic.ToString());
+                    Logger.Log(diagnostic.ToString());
                 }
 
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.",
