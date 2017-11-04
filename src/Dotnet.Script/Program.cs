@@ -137,8 +137,7 @@ namespace Dotnet.Script
                 {
                     var compiler = GetScriptCompiler(debugMode);
                     var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
-                    await runner.RunSeedScript(context);
-                    await runner.RunLoop(debugMode);
+                    await runner.RunLoopWithSeed(debugMode, context);
                     return 0;
                 }
 
