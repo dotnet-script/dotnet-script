@@ -23,6 +23,27 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
         }
 
+        public string CreateProjectForRepl(string code, string targetDirectory, string defaultTargetFramework = "net46")
+        {
+            var parseresult = _scriptParser.ParseFromCode(code);
+
+            targetDirectory = Path.Combine(targetDirectory, "REPL");
+            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
+            var projectFile = new ProjectFile();
+
+            foreach (var packageReference in parseresult.PackageReferences)
+            {
+                projectFile.AddPackageReference(packageReference);
+            }
+
+            projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
+
+            projectFile.Save(pathToProjectFile);
+            _logger.Debug($"Project file saved to {pathToProjectFile}");
+            CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
+            return pathToProjectFile;
+        }
+
         public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
         {
             var pathToProjectFile = Directory.GetFiles(targetDirectory, "*.csproj").FirstOrDefault();
@@ -34,7 +55,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework." );
             
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
-            var parseresult = _scriptParser.ParseFrom(csxFiles);
+            var parseresult = _scriptParser.ParseFromFiles(csxFiles);
 
             pathToProjectFile = GetPathToProjectFile(targetDirectory);
             var projectFile = new ProjectFile();

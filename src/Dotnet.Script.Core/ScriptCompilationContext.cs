@@ -12,10 +12,13 @@ namespace Dotnet.Script.Core
 
         public InteractiveAssemblyLoader Loader { get; }
 
-        public ScriptCompilationContext(Script<TReturn> script, SourceText sourceText, InteractiveAssemblyLoader loader)
+        public ScriptOptions ScriptOptions { get; }
+
+        public ScriptCompilationContext(Script<TReturn> script, SourceText sourceText, InteractiveAssemblyLoader loader, ScriptOptions scriptOptions)
         {
             Script = script;
             SourceText = sourceText;
+            ScriptOptions = scriptOptions;
             Loader = loader;
         }
     }

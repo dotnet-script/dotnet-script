@@ -20,9 +20,6 @@ namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
-        private readonly ScriptLogger _logger;
-        private readonly RuntimeDependencyResolver _runtimeDependencyResolver;
-
         protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
             typeof(object).GetTypeInfo().Assembly,
@@ -61,10 +58,14 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
+        public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
+
+        public ScriptLogger Logger { get; }
+
         public ScriptCompiler(ScriptLogger logger, RuntimeDependencyResolver runtimeDependencyResolver)
         {
-            _logger = logger;
-            _runtimeDependencyResolver = runtimeDependencyResolver;
+            Logger = logger;
+            RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
@@ -88,7 +89,7 @@ namespace Dotnet.Script.Core
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var platformIdentifier = RuntimeHelper.GetPlatformIdentifier();
-            _logger.Verbose($"Current runtime is '{platformIdentifier}'.");
+            Logger.Verbose($"Current runtime is '{platformIdentifier}'.");
 
             var opts = CreateScriptOptions(context);
 
@@ -100,21 +101,20 @@ namespace Dotnet.Script.Core
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
-                _logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
+                Logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
                 var assembly = Assembly.Load(inheritedAssemblyName);                
                 opts = opts.AddReferences(assembly);
             }
 
-
             IList<RuntimeDependency> runtimeDependencies =
-                _runtimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+                RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
 
             foreach (var runtimeDependency in runtimeDependencies)
             {
                 var runtimeDependencyAssemblyName = runtimeDependency.Name;
                 if (!inheritedAssemblyNames.Any(an => an.Name == runtimeDependencyAssemblyName.Name))
                 {
-                    _logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                    Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
                     opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
                 }
             }
@@ -127,14 +127,14 @@ namespace Dotnet.Script.Core
             {
                 foreach (var diagnostic in orderedDiagnostics)
                 {
-                    _logger.Log(diagnostic.ToString());
+                    Logger.Log(diagnostic.ToString());
                 }
 
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.",
                     orderedDiagnostics.ToImmutableArray());
             }
 
-            return new ScriptCompilationContext<TReturn>(script, context.Code, loader);
+            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, opts);
         }
     }
 }

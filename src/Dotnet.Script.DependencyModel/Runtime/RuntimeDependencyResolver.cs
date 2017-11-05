@@ -13,13 +13,11 @@ using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Runtime
 {
-
     public class RuntimeDependencyResolver
     {        
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
         private readonly Logger _logger;
-        
 
         // Note: Windows only, Mac and Linux needs something else?
         [DllImport("Kernel32.dll")]
@@ -48,11 +46,23 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory)};
         }
 
+        public IEnumerable<RuntimeDependency> GetDependenciesFromCode(string targetDirectory, string code)
+        {
+            var pathToProjectFile = _scriptProjectProvider.CreateProjectForRepl(code, targetDirectory, "netcoreapp2.0");
+            return GetDependenciesInternal(pathToProjectFile);
+        }
+
+
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
         {
             var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true);
+            return GetDependenciesInternal(pathToProjectFile);
+        }
+
+        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile)
+        {
             var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
-            
+
             var dependencyContext = dependencyInfo.DependencyContext;
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
             nuGetPackageFolders.Add(RuntimeHelper.GetPathToNuGetStoreFolder());
@@ -62,7 +72,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             var runtimeLibraries = dependencyContext.RuntimeLibraries;
 
             foreach (var runtimeLibrary in runtimeLibraries)
-            {                
+            {
                 ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray());
                 ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies, nuGetPackageFolders.ToArray());
             }

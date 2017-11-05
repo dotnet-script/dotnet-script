@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.CommandLineUtils;
 using Dotnet.Script.Core;
-using Dotnet.Script.DependencyModel;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
 
@@ -47,6 +45,8 @@ namespace Dotnet.Script
             var app = new CommandLineApplication(throwOnUnexpectedArg: false);           
             var file = app.Argument("script", "Path to CSX script");            
             var config = app.Option("-conf |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
+            var interactive = app.Option("-i |--interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
+
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
@@ -78,11 +78,11 @@ namespace Dotnet.Script
                 int exitCode = 0;
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen));                    
+                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue());
                 }
                 else
                 {
-                    app.ShowHelp();
+                    await RunInteractive(debugMode.HasValue());
                 }
                 return exitCode;
             });
@@ -118,7 +118,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);            
         }
 
-        private static Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args)
+        private static async Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args, bool interactive)
         {
             if (!File.Exists(file))
             {
@@ -132,21 +132,50 @@ namespace Dotnet.Script
             {
                 var sourceText = SourceText.From(filestream);
                 var context = new ScriptContext(sourceText, directory, config, args, absoluteFilePath, debugMode);
-                return Run(debugMode, context);
+
+                if (interactive)
+                {
+                    var compiler = GetScriptCompiler(debugMode);
+                    var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+                    await runner.RunSeedScript(context);
+                    await runner.RunLoop(debugMode);
+                    return 0;
+                }
+
+                return await Run(debugMode, context);
             }
+        }
+
+        private static async Task RunInteractive(bool debugMode)
+        {
+            var compiler = GetScriptCompiler(debugMode);
+            var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+            await runner.RunLoop(debugMode);
         }
 
         private static Task<int> RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args, null, debugMode);
-
             return Run(debugMode, context);
         }
 
         private static Task<int> Run(bool debugMode, ScriptContext context)
         {
-            var logger = new ScriptLogger(Console.Error, debugMode);
+            var compiler = GetScriptCompiler(debugMode);
+            var runner = new ScriptRunner(compiler, compiler.Logger);
+            return runner.Execute<int>(context);
+        }
+
+        private static string GetVersionInfo()
+        {
+            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
+            return versionAttribute?.InformationalVersion;
+        }
+
+        private static ScriptCompiler GetScriptCompiler(bool debugMode)
+        {
+            var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
             var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
             {
                 if (level == LogLevel.Debug)
@@ -160,15 +189,7 @@ namespace Dotnet.Script
             }));
 
             var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
-            var runner = new ScriptRunner(compiler, logger);
-            return runner.Execute<int>(context);
-        }
-
-        private static string GetVersionInfo()
-        {
-            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
-            return versionAttribute?.InformationalVersion;
+            return compiler;
         }
     }
-
 }
