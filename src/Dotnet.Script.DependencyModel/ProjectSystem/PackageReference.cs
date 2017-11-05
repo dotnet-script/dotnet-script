@@ -46,10 +46,4 @@
             return other.Id == Id && other.Version == Version && other.Origin == Origin;
         }
     }
-
-    public enum PackageOrigin
-    {
-        ReferenceDirective,
-        LoadDirective
-    }
 }
