@@ -28,6 +28,18 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldResolveSinglePackageFromLoadDirective()
+        {
+            var parser = CreateParser();
+
+            var result = parser.ParseFromCode("#r \"load:Package, 1.2.3\"");
+
+            Assert.Equal(1, result.PackageReferences.Count);
+            Assert.Equal("Package", result.PackageReferences.Single().Id);
+            Assert.Equal("1.2.3", result.PackageReferences.Single().Version);
+        }
+
+        [Fact]
         public void ShouldResolveMultiplePackages()
         {
             var parser = CreateParser();
