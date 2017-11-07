@@ -35,8 +35,8 @@ namespace Dotnet.Script.Tests
             // We have no story for this on *nix yet
             if (RuntimeHelper.IsWindows())
             {
-                var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
-                Assert.Contains("Connection successful", result.output);
+                var result = ExecuteInProcess(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
+                //Assert.Contains("Connection successful", result.output);
             }            
         }
         
@@ -59,6 +59,13 @@ namespace Dotnet.Script.Tests
         {
             var result = Execute(Path.Combine("Issue129", "Issue129.csx"));
             Assert.Contains("Bad HTTP authentication header", result.output);
+        }
+
+        [Fact]
+        public static void ShouldHandleIssue166()
+        {
+            var result = Execute(Path.Combine("Issue166", "Issue166.csx"));
+            Assert.Contains("Connection successful", result.output);
         }
 
         [Fact]

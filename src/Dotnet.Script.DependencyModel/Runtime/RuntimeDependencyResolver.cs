@@ -55,7 +55,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
         {
-            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true);
+            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp1.1", true);
             return GetDependenciesInternal(pathToProjectFile);
         }
 
@@ -104,9 +104,24 @@ namespace Dotnet.Script.DependencyModel.Runtime
         }
         private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary,
             HashSet<RuntimeDependency> resolvedDependencies, string[] nugetPackageFolders)
-        {            
-            foreach (var runtimeAssemblyGroup in runtimeLibrary.RuntimeAssemblyGroups.Where(rag => RuntimeHelper.AppliesToCurrentRuntime(rag.Runtime)))
+        {
+            var runtimeAssemblyGroup =
+                runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag =>
+                    rag.Runtime == RuntimeHelper.GetPlatformIdentifier());
+
+            if (runtimeAssemblyGroup == null)
             {
+                runtimeAssemblyGroup =
+                    runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag => string.IsNullOrWhiteSpace(rag.Runtime));
+            }
+            if (runtimeAssemblyGroup == null)
+            {
+                return;
+            }
+            //var runtimeAssemblyGroups = runtimeLibrary.RuntimeAssemblyGroups.Where(rag =>
+            //    string.IsNullOrWhiteSpace(rag.Runtime) || rag.Runtime == RuntimeHelper.GetPlatformIdentifier()).ToArray();
+            //foreach (var runtimeAssemblyGroup in runtimeAssemblyGroups)
+            //{
                 foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
                 {
                     var path = Path.Combine(runtimeLibrary.Path, assetPath);
@@ -118,7 +133,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                         resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
                     }
                 }
-            }
+            //}
         }
 
         private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)
