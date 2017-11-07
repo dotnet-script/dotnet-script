@@ -117,23 +117,18 @@ namespace Dotnet.Script.DependencyModel.Runtime
             if (runtimeAssemblyGroup == null)
             {
                 return;
-            }
-            //var runtimeAssemblyGroups = runtimeLibrary.RuntimeAssemblyGroups.Where(rag =>
-            //    string.IsNullOrWhiteSpace(rag.Runtime) || rag.Runtime == RuntimeHelper.GetPlatformIdentifier()).ToArray();
-            //foreach (var runtimeAssemblyGroup in runtimeAssemblyGroups)
-            //{
-                foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
+            }            
+            foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
+            {
+                var path = Path.Combine(runtimeLibrary.Path, assetPath);
+                if (!path.EndsWith("_._"))
                 {
-                    var path = Path.Combine(runtimeLibrary.Path, assetPath);
-                    if (!path.EndsWith("_._"))
-                    {
-                        var fullPath = GetFullPath(path, nugetPackageFolders);
+                    var fullPath = GetFullPath(path, nugetPackageFolders);
                         
-                        _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
-                        resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
-                    }
+                    _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
+                    resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
                 }
-            //}
+            }
         }
 
         private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)
