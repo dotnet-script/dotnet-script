@@ -35,8 +35,8 @@ namespace Dotnet.Script.Tests
             // We have no story for this on *nix yet
             if (RuntimeHelper.IsWindows())
             {
-                var result = ExecuteInProcess(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
-                //Assert.Contains("Connection successful", result.output);
+                var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
+                Assert.Contains("Connection successful", result.output);
             }            
         }
         
@@ -64,8 +64,13 @@ namespace Dotnet.Script.Tests
         [Fact]
         public static void ShouldHandleIssue166()
         {
-            var result = Execute(Path.Combine("Issue166", "Issue166.csx"));
-            Assert.Contains("Connection successful", result.output);
+            // System.Data.SqlClient loads native assets
+            // No story on *nix yet.
+            if (RuntimeHelper.IsWindows())
+            {
+                var result = Execute(Path.Combine("Issue166", "Issue166.csx"));
+                Assert.Contains("Connection successful", result.output);
+            }                
         }
 
         [Fact]

@@ -1,4 +1,4 @@
-﻿#! "netcoreapp1.1"
+﻿#! "netcoreapp2.0"
 #r "nuget:NetStandard.Library,2.0.0"
 #r "nuget:System.Data.SqlClient, 4.4.0"
 
