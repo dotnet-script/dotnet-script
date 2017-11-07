@@ -80,7 +80,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromLoadDirective(string fileContent)
         {
-            const string pattern = @"^\s*#r\s*""load:\s*(.+)\s*,\s*(.*)""";
+            const string pattern = @"^\s*#load\s*""nuget:\s*(.+)\s*,\s*(.*)""";
             var matches = Regex.Matches(fileContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
             foreach (var match in matches.Cast<Match>())

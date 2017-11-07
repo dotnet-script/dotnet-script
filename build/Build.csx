@@ -2,11 +2,14 @@
 #r "nuget:NetStandard.Library,1.6.1"
 #load "DotNet.csx"
 #load "Choco.csx"
+#load "NuGet.csx"
 
 using System.Runtime.InteropServices;
 
 var rootArg = Args.FirstOrDefault() ?? "..";
 var root = Path.GetFullPath(rootArg);
+
+BuildScriptPackages(root);
 
 DotNet.Build(Path.Combine(root, "src","Dotnet.Script"));
 
@@ -24,4 +27,15 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     DotNet.Pack(Path.Combine(root, "src" , "Dotnet.Script.DependencyModel.NuGet"), packagesOutputFolder);
     DotNet.Publish($"{root}/src/Dotnet.Script");
     Choco.Pack($"{root}/src/Dotnet.Script","Chocolatey");
+}
+
+
+private void BuildScriptPackages(string root)
+{
+    var pathToScriptPackages = Path.Combine(root,"src/Dotnet.Script.Tests/ScriptPackages");
+    var specFiles = Directory.GetFiles(pathToScriptPackages,"*.nuspec",SearchOption.AllDirectories);
+    foreach(var specFile in specFiles)
+    {
+        NuGet.Pack(specFile, Path.Combine(pathToScriptPackages,"packages"));
+    }
 }

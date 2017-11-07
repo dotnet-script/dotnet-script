@@ -32,7 +32,7 @@ namespace Dotnet.Script.Tests
         {
             var parser = CreateParser();
 
-            var result = parser.ParseFromCode("#r \"load:Package, 1.2.3\"");
+            var result = parser.ParseFromCode("#load \"nuget:Package, 1.2.3\"");
 
             Assert.Equal(1, result.PackageReferences.Count);
             Assert.Equal("Package", result.PackageReferences.Single().Id);
