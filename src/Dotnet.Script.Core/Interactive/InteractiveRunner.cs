@@ -83,7 +83,7 @@ namespace Dotnet.Script.Core
 
                 if (_scriptState?.Exception != null)
                 {
-                    Console.WriteError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                    Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
                 }
 
                 if (_scriptState?.ReturnValue != null)
@@ -93,7 +93,7 @@ namespace Dotnet.Script.Core
             }
             catch (Exception e)
             {
-                Console.WriteError(CSharpObjectFormatter.Instance.FormatException(e));
+                Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));
             }
         }
 
