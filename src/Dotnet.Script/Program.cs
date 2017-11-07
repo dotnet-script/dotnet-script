@@ -42,9 +42,10 @@ namespace Dotnet.Script
 
         private static int Wain(string[] args)
         {
-            var app = new CommandLineApplication(throwOnUnexpectedArg: false);
-            app.Argument("<empty>", "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode.");
-
+            var app = new CommandLineApplication(throwOnUnexpectedArg: false)
+            {
+                ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
+            };
             var file = app.Argument("script", "Path to CSX script");            
             var config = app.Option("-conf |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
             var interactive = app.Option("-i |--interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
