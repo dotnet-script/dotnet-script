@@ -35,13 +35,6 @@ namespace Dotnet.Script.Core
             _globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
         }
 
-        public virtual async Task RunSeedScript(ScriptContext scriptContext)
-        {
-            var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
-            _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
-            _scriptOptions = compilationContext.ScriptOptions;
-        }
-
         public virtual async Task RunLoop(bool debugMode)
         {
             while (true && !_shouldExit)
@@ -59,6 +52,12 @@ namespace Dotnet.Script.Core
             }
         }
 
+        public virtual async Task RunLoopWithSeed(bool debugMode, ScriptContext scriptContext)
+        {
+            await RunFirstScript(scriptContext);
+            await RunLoop(debugMode);
+        }
+
         protected virtual async Task Execute(string input, bool debugMode)
         {
             try
@@ -67,7 +66,7 @@ namespace Dotnet.Script.Core
                 {
                     var sourceText = SourceText.From(input);
                     var context = new ScriptContext(sourceText, CurrentDirectory, debugMode ? "Debug" : "Release", Enumerable.Empty<string>(), debugMode: debugMode);
-                    await RunSeedScript(context);
+                    await RunFirstScript(context);
                 }
                 else
                 {
@@ -84,7 +83,7 @@ namespace Dotnet.Script.Core
 
                 if (_scriptState?.Exception != null)
                 {
-                    Console.Error.Write(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                    Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
                 }
 
                 if (_scriptState?.ReturnValue != null)
@@ -94,7 +93,7 @@ namespace Dotnet.Script.Core
             }
             catch (Exception e)
             {
-                Console.Error.Write(CSharpObjectFormatter.Instance.FormatException(e));
+                Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));
             }
         }
 
@@ -107,6 +106,13 @@ namespace Dotnet.Script.Core
         public virtual void Exit()
         {
             _shouldExit = true;
+        }
+
+        private async Task RunFirstScript(ScriptContext scriptContext)
+        {
+            var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
+            _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
+            _scriptOptions = compilationContext.ScriptOptions;
         }
 
         private string ReadInput()
