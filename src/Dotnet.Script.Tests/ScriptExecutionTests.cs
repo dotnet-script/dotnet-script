@@ -62,6 +62,18 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public static void ShouldHandleIssue166()
+        {
+            // System.Data.SqlClient loads native assets
+            // No story on *nix yet.
+            if (RuntimeHelper.IsWindows())
+            {
+                var result = Execute(Path.Combine("Issue166", "Issue166.csx"));
+                Assert.Contains("Connection successful", result.output);
+            }                
+        }
+
+        [Fact]
         public static void ShouldPassUnknownArgumentToScript()
         {
             var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "arg1");

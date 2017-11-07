@@ -104,19 +104,29 @@ namespace Dotnet.Script.DependencyModel.Runtime
         }
         private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary,
             HashSet<RuntimeDependency> resolvedDependencies, string[] nugetPackageFolders)
-        {            
-            foreach (var runtimeAssemblyGroup in runtimeLibrary.RuntimeAssemblyGroups.Where(rag => RuntimeHelper.AppliesToCurrentRuntime(rag.Runtime)))
+        {
+            var runtimeAssemblyGroup =
+                runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag =>
+                    rag.Runtime == RuntimeHelper.GetPlatformIdentifier());
+
+            if (runtimeAssemblyGroup == null)
             {
-                foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
+                runtimeAssemblyGroup =
+                    runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag => string.IsNullOrWhiteSpace(rag.Runtime));
+            }
+            if (runtimeAssemblyGroup == null)
+            {
+                return;
+            }            
+            foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
+            {
+                var path = Path.Combine(runtimeLibrary.Path, assetPath);
+                if (!path.EndsWith("_._"))
                 {
-                    var path = Path.Combine(runtimeLibrary.Path, assetPath);
-                    if (!path.EndsWith("_._"))
-                    {
-                        var fullPath = GetFullPath(path, nugetPackageFolders);
+                    var fullPath = GetFullPath(path, nugetPackageFolders);
                         
-                        _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
-                        resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
-                    }
+                    _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
+                    resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
                 }
             }
         }

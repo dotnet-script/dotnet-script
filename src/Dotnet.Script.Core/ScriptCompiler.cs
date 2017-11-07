@@ -97,26 +97,27 @@ namespace Dotnet.Script.Core
             var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
                 x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
                 x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase));
-
-            foreach (var inheritedAssemblyName in inheritedAssemblyNames)
-            {
-                Logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
-                var assembly = Assembly.Load(inheritedAssemblyName);                
-                opts = opts.AddReferences(assembly);
-            }
-
+                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase)).ToArray();
+            
             IList<RuntimeDependency> runtimeDependencies =
                 RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
 
             foreach (var runtimeDependency in runtimeDependencies)
+            {                                
+                Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
+                
+            }
+
+            foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
-                var runtimeDependencyAssemblyName = runtimeDependency.Name;
-                if (!inheritedAssemblyNames.Any(an => an.Name == runtimeDependencyAssemblyName.Name))
+                Logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
+                // Always prefer the resolved runtime dependency rather than the inherited assembly.
+                if (runtimeDependencies.All(rd => rd.Name.Name != inheritedAssemblyName.Name))
                 {
-                    Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
-                    opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
-                }
+                    var assembly = Assembly.Load(inheritedAssemblyName);
+                    opts = opts.AddReferences(assembly);
+                }                
             }
 
             var loader = new InteractiveAssemblyLoader();

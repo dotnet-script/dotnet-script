@@ -45,8 +45,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private static string GetProcessArchitecture()
         {
-            return RuntimeEnvironment.RuntimeArchitecture;
-            
+            return RuntimeEnvironment.RuntimeArchitecture;            
         }
 
         public static string GetRuntimeIdentifier()
@@ -55,8 +54,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         }       
 
         internal static bool AppliesToCurrentRuntime(string runtime)
-        {
-            //var regex = new Regex("win.*-x64", RegexOptions.IgnoreCase);
+        {            
             return string.IsNullOrWhiteSpace(runtime) || RuntimeMatcher.IsMatch(runtime);
         }
     }

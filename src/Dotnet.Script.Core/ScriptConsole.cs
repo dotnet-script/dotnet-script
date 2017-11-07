@@ -13,6 +13,13 @@ namespace Dotnet.Script.Core
 
         public virtual void Clear() => Console.Clear();
 
+        public virtual void WritePrettyError(string value)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Error.Write(value);
+            Console.ResetColor();
+        }
+
         public ScriptConsole(TextWriter output, TextReader input, TextWriter error)
         {
             Out = output;
