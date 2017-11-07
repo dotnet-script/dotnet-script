@@ -55,7 +55,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
         {
-            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp1.1", true);
+            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true);
             return GetDependenciesInternal(pathToProjectFile);
         }
 
