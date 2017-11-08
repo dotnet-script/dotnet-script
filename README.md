@@ -45,7 +45,7 @@ A Dockerfile for running dotnet-script in a Linux container is available. Build:
 
 ```shell
 cd build
-docker build -t dotnet-script ..
+docker build -t dotnet-script -f Dockerfile ..
 ```
 
 And run:
