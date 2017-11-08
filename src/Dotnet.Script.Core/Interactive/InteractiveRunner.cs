@@ -103,6 +103,13 @@ namespace Dotnet.Script.Core
                     _globals.Print(_scriptState.ReturnValue);
                 }
             }
+            catch (CompilationErrorException e)
+            {
+                foreach (var diagnostic in e.Diagnostics)
+                {
+                    Console.WritePrettyError(diagnostic.ToString());
+                }
+            }
             catch (Exception e)
             {
                 Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));

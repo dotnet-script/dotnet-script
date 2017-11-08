@@ -10,16 +10,19 @@ namespace Dotnet.Script.Core
     {
         protected ScriptLogger Logger;
         protected ScriptCompiler ScriptCompiler;
+        protected ScriptConsole ScriptConsole;
 
-        public ScriptRunner(ScriptCompiler scriptCompiler, ScriptLogger logger)
+
+        public ScriptRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole scriptConsole)
         {
             Logger = logger;
             ScriptCompiler = scriptCompiler;
+            ScriptConsole = scriptConsole;
         }
 
         public Task<TReturn> Execute<TReturn>(ScriptContext context)
         {
-            var globals = new CommandLineScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+            var globals = new CommandLineScriptGlobals(ScriptConsole.Out, CSharpObjectFormatter.Instance);
 
             foreach (var arg in context.Args)
                 globals.Args.Add(arg);
@@ -29,8 +32,20 @@ namespace Dotnet.Script.Core
 
         public virtual Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
         {
-            var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
-            return Execute(compilationContext, host);
+            try
+            {
+                var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
+                return Execute(compilationContext, host);
+            }
+            catch (CompilationErrorException e)
+            {
+                foreach (var diagnostic in e.Diagnostics)
+                {
+                    ScriptConsole.WritePrettyError(diagnostic.ToString());
+                }
+
+                throw;
+            }
         }
 
         public virtual async Task<TReturn> Execute<TReturn, THost>(ScriptCompilationContext<TReturn> compilationContext, THost host)

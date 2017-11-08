@@ -164,7 +164,7 @@ namespace Dotnet.Script
         private static Task<int> Run(bool debugMode, ScriptContext context)
         {
             var compiler = GetScriptCompiler(debugMode);
-            var runner = new ScriptRunner(compiler, compiler.Logger);
+            var runner = new ScriptRunner(compiler, compiler.Logger, ScriptConsole.Default);
             return runner.Execute<int>(context);
         }
 

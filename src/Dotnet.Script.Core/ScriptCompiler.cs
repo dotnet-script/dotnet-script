@@ -143,11 +143,6 @@ namespace Dotnet.Script.Core
 
             if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
             {
-                foreach (var diagnostic in orderedDiagnostics)
-                {
-                    Logger.Log(diagnostic.ToString());
-                }
-
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.",
                     orderedDiagnostics.ToImmutableArray());
             }
