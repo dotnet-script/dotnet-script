@@ -65,7 +65,7 @@ namespace Dotnet.Script.Core
                 if (_scriptState == null)
                 {
                     var sourceText = SourceText.From(input);
-                    var context = new ScriptContext(sourceText, CurrentDirectory, debugMode ? "Debug" : "Release", Enumerable.Empty<string>(), debugMode: debugMode);
+                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(), debugMode: debugMode);
                     await RunFirstScript(context);
                 }
                 else
