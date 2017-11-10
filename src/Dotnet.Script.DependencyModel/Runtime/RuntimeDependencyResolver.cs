@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
@@ -18,11 +19,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
         private readonly Logger _logger;
-
-        // Note: Windows only, Mac and Linux needs something else?
-        [DllImport("Kernel32.dll")]
-        private static extern IntPtr LoadLibrary(string path);
-
+      
         private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, LogFactory logFactory)
         {            
             _scriptProjectProvider = scriptProjectProvider;
@@ -67,21 +64,69 @@ namespace Dotnet.Script.DependencyModel.Runtime
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
             nuGetPackageFolders.Add(RuntimeHelper.GetPathToNuGetStoreFolder());
 
-            var runtimeDepedencies = new HashSet<RuntimeDependency>();
+            var runtimeDepedencies = new List<RuntimeDependency>();
 
             var runtimeLibraries = dependencyContext.RuntimeLibraries;
 
+            
             foreach (var runtimeLibrary in runtimeLibraries)
             {
-                ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray());
-                ProcessRuntimeAssemblies(runtimeLibrary, runtimeDepedencies, nuGetPackageFolders.ToArray());
+                var runtimeDependency = new RuntimeDependency(runtimeLibrary.Name, runtimeLibrary.Version,
+                    ProcessRuntimeAssemblies(runtimeLibrary, nuGetPackageFolders.ToArray()),
+                    ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray()),
+                    ProcessScriptFiles(runtimeLibrary, nuGetPackageFolders.ToArray()));
+
+                runtimeDepedencies.Add(runtimeDependency);
             }
 
             return runtimeDepedencies;
         }
 
-        private void ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
-        {           
+        private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
+        {
+            var result = new List<string>();
+            var packagePath = GetPackagePath(runtimeLibrary, nugetPackageFolders);            
+            var scriptFiles = Directory.GetFiles(packagePath, "*.csx", SearchOption.AllDirectories);
+            
+            
+            if (scriptFiles.Length > 0)
+            {
+                var netstandard20ScriptFiles = scriptFiles.Where(IsNetStandard20).ToArray();
+                var rootPath = GetRootPath(netstandard20ScriptFiles[0]);
+                var mainCsx = Directory.GetFiles(rootPath, "*.csx")
+                    .FirstOrDefault(f => Path.GetFileName(f).ToLower() == "main.csx");
+                if (mainCsx != null)
+                {
+                    //Note: Also allow single root file.
+                    result.Add(mainCsx);
+                }
+                else
+                {
+                    result.AddRange(netstandard20ScriptFiles);
+                }                
+            }
+            return result.ToArray();
+        }
+
+        private string GetRootPath(string pathToScriptFile)
+        {
+            string pattern = @"(^.*contentFiles[\/,\\]cs[\/,\\]netstandard2.0[\/,\\]).*$";
+            var match = Regex.Match(pathToScriptFile, pattern);
+            return match.Groups[1].Value;
+        }
+      
+
+        private bool IsNetStandard20(string pathToScriptFile)
+        {
+            // We keep it simple for now accepting only "netstandard" scripts.
+            var pattern = @"^.*contentFiles[\/,\\]cs[\/,\\]netstandard2.0.*$";
+            return Regex.IsMatch(pathToScriptFile, pattern, RegexOptions.IgnoreCase);
+        }
+
+
+        private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
+        {
+            List<string> result = new List<string>();
             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(
                 nlg => RuntimeHelper.AppliesToCurrentRuntime(nlg.Runtime)))
             {
@@ -90,21 +135,15 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 {
                     var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders);
                     _logger.Debug($"Loading native library from {fullPath}");
-                    if (RuntimeHelper.IsWindows())
-                    {
-                        LoadLibrary(fullPath);
-                    }
-                    else
-                    {
-                        // Maybe something like this?
-                        // https://stackoverflow.com/questions/13461989/p-invoke-to-dynamically-loaded-library-on-mono
-                    }
+                    result.Add(fullPath);
                 }
             }
+            return result.ToArray();
         }
-        private void ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary,
-            HashSet<RuntimeDependency> resolvedDependencies, string[] nugetPackageFolders)
+        private RuntimeAssembly[] ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
+            var result = new List<RuntimeAssembly>();
+
             var runtimeAssemblyGroup =
                 runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag =>
                     rag.Runtime == RuntimeHelper.GetPlatformIdentifier());
@@ -116,7 +155,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             }
             if (runtimeAssemblyGroup == null)
             {
-                return;
+                return Array.Empty<RuntimeAssembly>();
             }            
             foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
             {
@@ -126,9 +165,25 @@ namespace Dotnet.Script.DependencyModel.Runtime
                     var fullPath = GetFullPath(path, nugetPackageFolders);
                         
                     _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
-                    resolvedDependencies.Add(new RuntimeDependency(AssemblyName.GetAssemblyName(fullPath), fullPath));
+                    result.Add(new RuntimeAssembly(AssemblyName.GetAssemblyName(fullPath),fullPath));                    
                 }
             }
+            return result.ToArray();
+        }
+
+
+        private string GetPackagePath(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
+        {
+            foreach (var nugetPackageFolder in nugetPackageFolders)
+            {
+                var packagePath = Path.Combine(nugetPackageFolder, runtimeLibrary.Path);
+                if (Directory.Exists(packagePath))
+                {
+                    return packagePath;
+                }
+            }
+
+            throw new InvalidOperationException("Not found");
         }
 
         private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)

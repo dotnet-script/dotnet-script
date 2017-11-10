@@ -10,13 +10,12 @@ var rootArg = Args.FirstOrDefault() ?? "..";
 var root = Path.GetFullPath(rootArg);
 
 BuildScriptPackages(root);
-
 DotNet.Build(Path.Combine(root, "src","Dotnet.Script"));
 
 DotNet.Test($"{root}/src/Dotnet.Script.Tests");
 
 
-// We only publish packages from Windows/AppVeyor
+//We only publish packages from Windows/AppVeyor
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     string packagesOutputFolder = Path.Combine(root, "build", "NuGet"); 

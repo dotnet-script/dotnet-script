@@ -70,7 +70,7 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    var lineDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input);
+                    var lineDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).SelectMany(rtd => rtd.Assemblies).Distinct();
 
                     foreach (var runtimeDependency in lineDependencies)
                     {
