@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dotnet.Script.Core;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
@@ -11,69 +13,121 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
-    public class ScriptPackagesTests
+    [Collection("ScriptPackagesTests")]
+    public class ScriptPackagesTests : IClassFixture<ScriptPackagesFixture>
     {
-        public ScriptPackagesTests(ITestOutputHelper testOutputHelper)
-        {
-            testOutputHelper.Capture();
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var pathToScriptPackages = Path.Combine(baseDir, "..", "..", "..", "ScriptPackages", "packages");            
-            Environment.SetEnvironmentVariable("ScriptPackagesSource", pathToScriptPackages, EnvironmentVariableTarget.User);
-        }
-
-        private async Task<int> Execute(string scriptFileName)
-        {
-            ScriptLogger scriptLogger = new ScriptLogger(new TestOutputTextWriter(), true);
-            ScriptCompiler compiler = new ScriptCompiler(scriptLogger, new RuntimeDependencyResolver(type => ((level, message) => TestOutputHelper.Current.WriteLine(message))));
-            ScriptRunner scriptRunner = new ScriptRunner(compiler, scriptLogger);
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-            var scriptContext = CreateScriptContext(fullPathToScriptFile, "debug",true, Array.Empty<string>(), false);
-            return await scriptRunner.Execute<int>(scriptContext);
-        }
-
-
-        private static ScriptContext CreateScriptContext(string file, string config, bool debugMode, IEnumerable<string> args, bool interactive)
-        {           
-            var absoluteFilePath = Path.IsPathRooted(file) ? file : Path.Combine(Directory.GetCurrentDirectory(), file);
-            var directory = Path.GetDirectoryName(absoluteFilePath);
-
-            using (var filestream = new FileStream(absoluteFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                var sourceText = SourceText.From(filestream);
-                return new ScriptContext(sourceText, directory, config, args, absoluteFilePath, debugMode);                               
-            }
-        }
-
+                   
         [Fact]
-        public async Task ShouldHandleScriptPackageWithMainCsx()
-        {
-            var result = await Execute("WithMainCsx/WithMainCsx.csx");
-            Assert.Equal(0,result);
-            //Assert.Equal("Hello from netstandard2.0", result.output);
+        public void ShouldHandleScriptPackageWithMainCsx()
+        {            
+            var result = Execute("WithMainCsx/WithMainCsx.csx");           
+            Assert.StartsWith("Hello from netstandard2.0", result);            
         }
 
-        private static int ExecuteInProcess(string fixture, params string[] arguments)
+             
+        private string Execute(string scriptFileName)
         {
-            var pathToFixture = Path.Combine("..", "..", "..", "TestFixtures", fixture);
-            var allArguments = new List<string>(new[] { pathToFixture });
-            if (arguments != null)
+            var output = new StringBuilder();
+            var stringWriter = new StringWriter(output);
+            var oldOut = Console.Out;
+            try
             {
-                allArguments.AddRange(arguments);
+                Console.SetOut(stringWriter);                                
+                var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
+                Program.Main(new[] {fullPathToScriptFile});                
+                return output.ToString();
+                
             }
-            return Program.Main(allArguments.ToArray());
+            finally 
+            {
+                Console.SetOut(oldOut);
+            }
         }
     }
 
-    public class TestOutputTextWriter : TextWriter
+    public class ScriptPackagesFixture
     {
-        public override Encoding Encoding { get; }
-
-        public override void WriteLine(string value)
+        public ScriptPackagesFixture()
         {
-            TestOutputHelper.Current.WriteLine(value);
+            ClearGlobalPackagesFolder();
+            BuildScriptPackages();
+        }
+
+        private void ClearGlobalPackagesFolder()
+        {            
+            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
+            var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder, "ScriptPackage*");
+            foreach (var scriptPackageFolder in scriptPackageFolders)
+            {
+                RemoveDirectory(scriptPackageFolder);
+            }
+        }
+
+        private static void BuildScriptPackages()
+        {
+            var tempPath = Path.GetTempPath();
+            string pathToPackagesOutputFolder;
+            if (RuntimeHelper.IsWindows())
+            {
+                var driveLetter = tempPath.Substring(0, 1);
+                pathToPackagesOutputFolder = Path.Combine(tempPath, "scripts", driveLetter, "packages");
+            }
+            else
+            {
+                pathToPackagesOutputFolder = Path.Combine(tempPath, "scripts", "packages");
+            }
+
+            RemoveDirectory(pathToPackagesOutputFolder);
+            Directory.CreateDirectory(pathToPackagesOutputFolder);
+            var specFiles = GetSpecFiles();
+            foreach (var specFile in specFiles)
+            {
+                var command = RuntimeHelper.IsWindows() ? "nuget" : "mono nuget";
+                ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
+            }
+        }
+
+        private static void RemoveDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                return;
+            }
+
+            // http://stackoverflow.com/questions/329355/cannot-delete-directory-with-directory-deletepath-true
+            foreach (string directory in Directory.GetDirectories(path))
+            {
+                RemoveDirectory(directory);
+            }
+
+            try
+            {
+                Directory.Delete(path, true);
+            }
+            catch (IOException)
+            {
+                Directory.Delete(path, true);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Directory.Delete(path, true);
+            }
+        }
+
+
+        private string GetPathToGlobalPackagesFolder()
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "nuget", "locals", "global-packages", "--list" });
+            var match = Regex.Match(result.output, @"^.*global-packages:\s*(.*)$");
+            return match.Groups[1].Value;
+        }
+
+        private static IReadOnlyList<string> GetSpecFiles()
+        {
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var pathToScriptPackages = Path.Combine(baseDirectory, "..", "..", "..", "ScriptPackages");
+            return Directory.GetFiles(pathToScriptPackages, "*.nuspec", SearchOption.AllDirectories);
         }
     }
-    
-
 }
