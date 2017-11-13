@@ -91,7 +91,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             
             if (scriptFiles.Length > 0)
             {
-                var netstandard20ScriptFiles = scriptFiles.Where(IsNetStandard20).ToArray();
+                var netstandard20ScriptFiles = scriptFiles.Where(sf => IsNetStandard20(sf) || IsAny(sf)).ToArray();
                 var rootPath = GetRootPath(netstandard20ScriptFiles[0]);
                 var mainCsx = Directory.GetFiles(rootPath, "*.csx")
                     .FirstOrDefault(f => Path.GetFileName(f).ToLower() == "main.csx");
@@ -110,16 +110,21 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         private string GetRootPath(string pathToScriptFile)
         {
-            string pattern = @"(^.*contentFiles[\/,\\]cs[\/,\\]netstandard2.0[\/,\\]).*$";
+            string pattern = @"(^.*contentFiles[\/,\\]csx[\/,\\].*[\/,\\]).*$";
             var match = Regex.Match(pathToScriptFile, pattern);
             return match.Groups[1].Value;
         }
       
 
         private bool IsNetStandard20(string pathToScriptFile)
-        {
-            // We keep it simple for now accepting only "netstandard" scripts.
-            var pattern = @"^.*contentFiles[\/,\\]cs[\/,\\]netstandard2.0.*$";
+        {          
+            var pattern = @"^.*contentFiles[\/,\\]csx[\/,\\]netstandard2.0.*$";
+            return Regex.IsMatch(pathToScriptFile, pattern, RegexOptions.IgnoreCase);
+        }
+
+        private bool IsAny(string pathToScriptFile)
+        {            
+            var pattern = @"^.*contentFiles[\/,\\]csx[\/,\\]any.*$";
             return Regex.IsMatch(pathToScriptFile, pattern, RegexOptions.IgnoreCase);
         }
 

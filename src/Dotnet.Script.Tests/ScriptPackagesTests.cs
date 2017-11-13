@@ -3,13 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Environment;
-using Dotnet.Script.DependencyModel.Runtime;
-using Microsoft.CodeAnalysis.Text;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
@@ -24,7 +19,14 @@ namespace Dotnet.Script.Tests
             Assert.StartsWith("Hello from netstandard2.0", result);            
         }
 
-             
+        [Fact]
+        public void ShouldHandleScriptWithAnyTargetFramework()
+        {
+            var result = Execute("WithAnyTargetFramework/WithAnyTargetFramework.csx");
+            Assert.StartsWith("Hello from any target framework", result);
+        }
+
+
         private string Execute(string scriptFileName)
         {
             var output = new StringBuilder();
