@@ -54,6 +54,7 @@ namespace Dotnet.Script.Tests
         {
             ClearGlobalPackagesFolder();
             BuildScriptPackages();
+            Console.WriteLine("TEST");
         }
 
         private void ClearGlobalPackagesFolder()
@@ -67,19 +68,8 @@ namespace Dotnet.Script.Tests
         }
 
         private static void BuildScriptPackages()
-        {
-            var tempPath = Path.GetTempPath();
-            string pathToPackagesOutputFolder;
-            if (RuntimeHelper.IsWindows())
-            {
-                var driveLetter = tempPath.Substring(0, 1);
-                pathToPackagesOutputFolder = Path.Combine(tempPath, "scripts", driveLetter, "packages");
-            }
-            else
-            {
-                pathToPackagesOutputFolder = Path.Combine(tempPath, "scripts", "packages");
-            }
-
+        {           
+            string pathToPackagesOutputFolder = GetPathToPackagesFolder();           
             RemoveDirectory(pathToPackagesOutputFolder);
             Directory.CreateDirectory(pathToPackagesOutputFolder);
             var specFiles = GetSpecFiles();
@@ -98,7 +88,38 @@ namespace Dotnet.Script.Tests
             }
         }
 
-        private static void RemoveDirectory(string path)
+        private static string GetPathToPackagesFolder()
+        {
+            var targetDirectory =
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "TestFixtures","ScriptPackage","packages");
+
+            var tempDirectory = Path.GetTempPath();
+            var pathRoot = Path.GetPathRoot(targetDirectory);
+            var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
+            if (pathRoot.Length > 0 && RuntimeHelper.IsWindows())
+            {
+                var driveLetter = pathRoot.Substring(0, 1);
+                if (driveLetter == "\\")
+                {
+                    targetDirectoryWithoutRoot = targetDirectoryWithoutRoot.TrimStart(new char[] { '\\' });
+                    driveLetter = "UNC";
+                }
+
+                targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
+            }
+            var pathToProjectDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
+
+            if (!Directory.Exists(pathToProjectDirectory))
+            {
+                Directory.CreateDirectory(pathToProjectDirectory);
+            }
+
+            return pathToProjectDirectory;            
+        }
+    
+
+
+    private static void RemoveDirectory(string path)
         {
             if (!Directory.Exists(path))
             {
