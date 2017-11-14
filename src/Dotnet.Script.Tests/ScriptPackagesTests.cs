@@ -37,7 +37,7 @@ namespace Dotnet.Script.Tests
                 Console.SetOut(stringWriter);                                
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-                Program.Main(new[] {fullPathToScriptFile});                
+                var exitCode = Program.Main(new[] {fullPathToScriptFile});                
                 return output.ToString();
                 
             }
@@ -85,8 +85,16 @@ namespace Dotnet.Script.Tests
             var specFiles = GetSpecFiles();
             foreach (var specFile in specFiles)
             {
-                var command = RuntimeHelper.IsWindows() ? "nuget" : "mono nuget";
-                ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
+                string command;
+                if (RuntimeHelper.IsWindows())
+                {
+                    command = "nuget";                    
+                }
+                else
+                {
+                    command = ProcessHelper.RunAndCaptureOutput("which", new string[]{"nuget"}).output;                
+                }
+                var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });                                        
             }
         }
 
