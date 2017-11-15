@@ -5,6 +5,7 @@ using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
+using Dotnet.Script.DependencyModel.ScriptPackage;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 
@@ -14,12 +15,14 @@ namespace Dotnet.Script.DependencyModel.Compilation
     {
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
+        private readonly ScriptFilesDependencyResolver _scriptFilesDependencyResolver;
         private readonly Logger _logger;
 
-        private CompilationDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, LogFactory logFactory)
+        private CompilationDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver,  LogFactory logFactory)
         {
             _scriptProjectProvider = scriptProjectProvider;
             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
+            _scriptFilesDependencyResolver = scriptFilesDependencyResolver;
             _logger = logFactory.CreateLogger<CompilationDependencyResolver>();
         }
 
@@ -28,6 +31,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             (
                 new ScriptProjectProvider(logFactory), 
                 new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
+                new ScriptFilesDependencyResolver(logFactory), 
                 logFactory
             )
         { }
@@ -38,14 +42,14 @@ namespace Dotnet.Script.DependencyModel.Compilation
             return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory), new NuGetRestorer(commandRunner, logFactory) };
         }
         
-        public IEnumerable<string> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
+        public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
         {
             var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, defaultTargetFramework,
                 enableScriptNugetReferences);
 
             if (pathToProjectFile == null)
             {
-                return Array.Empty<string>();
+                return Array.Empty<CompilationDependency>();
             }
 
             var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
@@ -54,20 +58,30 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
             var compilationAssemblyResolvers = GetCompilationAssemblyResolvers(dependencyInfo.NugetPackageFolders);
            
-            var resolvedReferencePaths = new HashSet<string>();
             
+            List<CompilationDependency> result = new List<CompilationDependency>();            
             var compileLibraries = dependencyContext.CompileLibraries;
 
             foreach (var compilationLibrary in compileLibraries)
-            {                
+            {
+                var resolvedReferencePaths = new HashSet<string>();
                 _logger.Debug($"Resolving compilation reference paths for {compilationLibrary.Name}");
                 var referencePaths = ResolveReferencePaths(compilationLibrary, compilationAssemblyResolvers);
+                var scripts =
+                    _scriptFilesDependencyResolver.Process(compilationLibrary.Path, dependencyInfo.NugetPackageFolders);
                 foreach (var referencePath in referencePaths)
                 {
                     resolvedReferencePaths.Add(referencePath);
                 }
+                var compilationDependency = new CompilationDependency(
+                    compilationLibrary.Name,
+                    compilationLibrary.Version, 
+                    resolvedReferencePaths.ToList(), 
+                    scripts);
+
+                result.Add(compilationDependency);
             }
-            return resolvedReferencePaths;
+            return result;
         }
 
         private IEnumerable<string> ResolveReferencePaths(CompilationLibrary compilationLibrary, ICompilationAssemblyResolver[] compilationAssemblyResolvers)
@@ -102,6 +116,30 @@ namespace Dotnet.Script.DependencyModel.Compilation
         {
             _logger.Debug($"Creating {nameof(PackageCompilationAssemblyResolver)} for target path: {nugetGetPackageDirectory}");
             return new PackageCompilationAssemblyResolver(nugetGetPackageDirectory);
+        }
+    }
+
+    public class CompilationDependency
+    {
+        public CompilationDependency(string name, string version, IReadOnlyList<string> assemblyPaths, IReadOnlyList<string> scripts)
+        {
+            Name = name;
+            Version = version;
+            AssemblyPaths = assemblyPaths;
+            Scripts = scripts;
+        }
+
+        public string Name { get; }
+
+        public string Version { get; }
+
+        public IReadOnlyList<string> AssemblyPaths { get; }
+        
+        public IReadOnlyList<string> Scripts { get; }
+
+        public override string ToString()
+        {
+            return $"Name: {Name} , Version: {Version}";
         }
     }
 }

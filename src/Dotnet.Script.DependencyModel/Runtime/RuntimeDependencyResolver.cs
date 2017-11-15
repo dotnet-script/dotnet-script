@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
+using Dotnet.Script.DependencyModel.ScriptPackage;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Runtime
@@ -18,12 +17,14 @@ namespace Dotnet.Script.DependencyModel.Runtime
     {        
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
+        private readonly ScriptFilesDependencyResolver _scriptFilesDependencyResolver;
         private readonly Logger _logger;
       
-        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, LogFactory logFactory)
+        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver, LogFactory logFactory)
         {            
             _scriptProjectProvider = scriptProjectProvider;
             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
+            _scriptFilesDependencyResolver = scriptFilesDependencyResolver;
             _logger = logFactory.CreateLogger<RuntimeDependencyResolver>();
         }
 
@@ -32,6 +33,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             (                  
                   new ScriptProjectProvider(logFactory), 
                   new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
+                  new ScriptFilesDependencyResolver(logFactory), 
                   logFactory
             )
         {
@@ -84,51 +86,9 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
-            var result = new List<string>();
-            var packagePath = GetPackagePath(runtimeLibrary, nugetPackageFolders);            
-            var scriptFiles = Directory.GetFiles(packagePath, "*.csx", SearchOption.AllDirectories);
-            
-            
-            if (scriptFiles.Length > 0)
-            {
-                var netstandard20ScriptFiles = scriptFiles.Where(sf => IsNetStandard20(sf) || IsAny(sf)).ToArray();
-                var rootPath = GetRootPath(netstandard20ScriptFiles[0]);
-                var mainCsx = Directory.GetFiles(rootPath, "*.csx")
-                    .FirstOrDefault(f => Path.GetFileName(f).ToLower() == "main.csx");
-                if (mainCsx != null)
-                {
-                    //Note: Also allow single root file.
-                    result.Add(mainCsx);
-                }
-                else
-                {
-                    result.AddRange(netstandard20ScriptFiles);
-                }                
-            }
-            return result.ToArray();
+            return _scriptFilesDependencyResolver.Process(runtimeLibrary.Path, nugetPackageFolders);           
         }
-
-        private string GetRootPath(string pathToScriptFile)
-        {
-            string pattern = @"(^.*contentFiles[\/,\\]csx[\/,\\].*[\/,\\]).*$";
-            var match = Regex.Match(pathToScriptFile, pattern);
-            return match.Groups[1].Value;
-        }
-      
-
-        private bool IsNetStandard20(string pathToScriptFile)
-        {          
-            var pattern = @"^.*contentFiles[\/,\\]csx[\/,\\]netstandard2.0.*$";
-            return Regex.IsMatch(pathToScriptFile, pattern, RegexOptions.IgnoreCase);
-        }
-
-        private bool IsAny(string pathToScriptFile)
-        {            
-            var pattern = @"^.*contentFiles[\/,\\]csx[\/,\\]any.*$";
-            return Regex.IsMatch(pathToScriptFile, pattern, RegexOptions.IgnoreCase);
-        }
-
-
+       
         private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
             List<string> result = new List<string>();
@@ -174,21 +134,6 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 }
             }
             return result.ToArray();
-        }
-
-
-        private string GetPackagePath(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
-        {
-            foreach (var nugetPackageFolder in nugetPackageFolders)
-            {
-                var packagePath = Path.Combine(nugetPackageFolder, runtimeLibrary.Path);
-                if (Directory.Exists(packagePath))
-                {
-                    return packagePath;
-                }
-            }
-
-            throw new InvalidOperationException("Not found");
         }
 
         private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dotnet.Script.DependencyModel.Compilation;
 using Dotnet.Script.DependencyModel.Environment;
 using Xunit;
 
@@ -11,12 +13,12 @@ namespace Dotnet.Script.Tests
     [Collection("ScriptPackagesTests")]
     public class ScriptPackagesTests : IClassFixture<ScriptPackagesFixture>
     {
-                   
+
         [Fact]
         public void ShouldHandleScriptPackageWithMainCsx()
-        {            
-            var result = Execute("WithMainCsx/WithMainCsx.csx");           
-            Assert.StartsWith("Hello from netstandard2.0", result);            
+        {
+            var result = Execute("WithMainCsx/WithMainCsx.csx");
+            Assert.StartsWith("Hello from netstandard2.0", result);
         }
 
         [Fact]
@@ -26,6 +28,31 @@ namespace Dotnet.Script.Tests
             Assert.StartsWith("Hello from any target framework", result);
         }
 
+        [Fact]
+        public void ShouldGetScriptFilesFromScriptPackage()
+        {
+            var resolver = CreateResolverCompilationDependencyResolver();
+            var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
+            var dependencies = resolver.GetDependencies(fixture, true, "netcoreapp2.0");
+            var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
+            Assert.NotEmpty(scriptFiles);
+        }
+
+        private static string GetFullPathToTestFixture(string path)
+        {
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            return Path.Combine(baseDirectory, "..", "..", "..", "TestFixtures", path);
+        }
+
+
+        private CompilationDependencyResolver CreateResolverCompilationDependencyResolver()
+        {
+            var resolver = new CompilationDependencyResolver(type => ((level, message) =>
+            {
+
+            }));
+            return resolver;
+        }
 
         private string Execute(string scriptFileName)
         {
@@ -34,14 +61,14 @@ namespace Dotnet.Script.Tests
             var oldOut = Console.Out;
             try
             {
-                Console.SetOut(stringWriter);                                
+                Console.SetOut(stringWriter);
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-                var exitCode = Program.Main(new[] {fullPathToScriptFile});                
+                Program.Main(new[] { fullPathToScriptFile });
                 return output.ToString();
-                
+
             }
-            finally 
+            finally
             {
                 Console.SetOut(oldOut);
             }
@@ -54,11 +81,10 @@ namespace Dotnet.Script.Tests
         {
             ClearGlobalPackagesFolder();
             BuildScriptPackages();
-            Console.WriteLine("TEST");
         }
 
         private void ClearGlobalPackagesFolder()
-        {            
+        {
             var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
             var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder, "ScriptPackage*");
             foreach (var scriptPackageFolder in scriptPackageFolders)
@@ -68,8 +94,8 @@ namespace Dotnet.Script.Tests
         }
 
         private static void BuildScriptPackages()
-        {           
-            string pathToPackagesOutputFolder = GetPathToPackagesFolder();           
+        {
+            string pathToPackagesOutputFolder = GetPathToPackagesFolder();
             RemoveDirectory(pathToPackagesOutputFolder);
             Directory.CreateDirectory(pathToPackagesOutputFolder);
             var specFiles = GetSpecFiles();
@@ -78,48 +104,23 @@ namespace Dotnet.Script.Tests
                 string command;
                 if (RuntimeHelper.IsWindows())
                 {
-                    command = "nuget";                    
+                    command = "nuget";
                 }
                 else
                 {
-                    command = ProcessHelper.RunAndCaptureOutput("which", new string[]{"nuget"}).output;                
+                    command = ProcessHelper.RunAndCaptureOutput("which", new string[] { "nuget" }).output;
                 }
-                var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });                                        
+                var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
             }
         }
 
         private static string GetPathToPackagesFolder()
         {
-            var targetDirectory =
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "TestFixtures","ScriptPackage","packages");
-
-            var tempDirectory = Path.GetTempPath();
-            var pathRoot = Path.GetPathRoot(targetDirectory);
-            var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
-            if (pathRoot.Length > 0 && RuntimeHelper.IsWindows())
-            {
-                var driveLetter = pathRoot.Substring(0, 1);
-                if (driveLetter == "\\")
-                {
-                    targetDirectoryWithoutRoot = targetDirectoryWithoutRoot.TrimStart(new char[] { '\\' });
-                    driveLetter = "UNC";
-                }
-
-                targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
-            }
-            var pathToProjectDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
-
-            if (!Directory.Exists(pathToProjectDirectory))
-            {
-                Directory.CreateDirectory(pathToProjectDirectory);
-            }
-
-            return pathToProjectDirectory;            
+            var targetDirectory = TestPathUtils.GetFullPathToTestFixture(Path.Combine("ScriptPackage", "packages"));
+            return RuntimeHelper.CreateTempFolder(targetDirectory);
         }
-    
 
-
-    private static void RemoveDirectory(string path)
+        private static void RemoveDirectory(string path)
         {
             if (!Directory.Exists(path))
             {
