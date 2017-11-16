@@ -29,6 +29,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleScriptPackageWithNoEntryPointFile()
+        {
+            var result = Execute("WithNoEntryPointFile/WithNoEntryPointFile.csx");
+            Assert.Contains("Hello from Foo.csx", result);
+            Assert.Contains("Hello from Bar.csx", result);
+        }
+
+        [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
         {
             var resolver = CreateResolverCompilationDependencyResolver();

@@ -24,7 +24,7 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
             _logger = logFactory.CreateLogger<ScriptFilesDependencyResolver>();
         }
 
-        public string[] Process(string path, string[] nugetPackageFolders)
+        public string[] GetScriptFileDependencies(string path, string[] nugetPackageFolders)
         {
             var result = new List<string>();
             var packagePath = GetPackageFullPath(path, nugetPackageFolders);

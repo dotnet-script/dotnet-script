@@ -86,7 +86,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
-            return _scriptFilesDependencyResolver.Process(runtimeLibrary.Path, nugetPackageFolders);           
+            return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);           
         }
        
         private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
