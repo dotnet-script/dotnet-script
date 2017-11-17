@@ -46,11 +46,9 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowExceptionWhenReferencingUnknownPackage()
         {
-
             var result = Execute("WithInvalidPackageReference/WithInvalidPackageReference.csx");
             Assert.StartsWith("Unable to restore packages from", result);
         }
-
 
         [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
