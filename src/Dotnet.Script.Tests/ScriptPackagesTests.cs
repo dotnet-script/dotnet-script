@@ -37,6 +37,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleScriptPackageWithScriptPackageDependency()
+        {
+            var result = Execute("WithScriptPackageDependency/WithScriptPackageDependency.csx");
+            Assert.StartsWith("Hello from netstandard2.0", result);
+        }
+
+
+        [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
         {
             var resolver = CreateResolverCompilationDependencyResolver();
