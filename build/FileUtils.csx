@@ -1,7 +1,9 @@
 #load "Logger.csx"
 #load "Command.csx"
 using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
 
+static string GetScriptPath([CallerFilePath] string path = null) => path;
 
 public static string WithWindowsSlashes(this string path)
 {
