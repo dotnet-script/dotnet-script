@@ -43,6 +43,14 @@ namespace Dotnet.Script.Tests
             Assert.StartsWith("Hello from netstandard2.0", result);
         }
 
+        [Fact]
+        public void ShouldThrowExceptionWhenReferencingUnknownPackage()
+        {
+
+            var result = Execute("WithInvalidPackageReference/WithInvalidPackageReference.csx");
+            Assert.StartsWith("Unable to restore packages from", result);
+        }
+
 
         [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
@@ -75,9 +83,11 @@ namespace Dotnet.Script.Tests
             var output = new StringBuilder();
             var stringWriter = new StringWriter(output);
             var oldOut = Console.Out;
+            var oldErrorOut = Console.Error;
             try
             {
                 Console.SetOut(stringWriter);
+                Console.SetError(stringWriter);
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
                 Program.Main(new[] { fullPathToScriptFile });
@@ -87,6 +97,7 @@ namespace Dotnet.Script.Tests
             finally
             {
                 Console.SetOut(oldOut);
+                Console.SetError(oldErrorOut);
             }
         }
     }

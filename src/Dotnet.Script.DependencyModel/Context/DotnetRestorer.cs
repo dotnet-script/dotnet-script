@@ -21,7 +21,8 @@ namespace Dotnet.Script.DependencyModel.Context
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\"");
             if (exitcode != 0)
             {
-                throw new Exception("Command failed");
+                // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'
+                throw new Exception($"Unable to restore packages from '{pathToProjectFile}'. Make sure that all script files contains valid NuGet references");
             }
         }
 
