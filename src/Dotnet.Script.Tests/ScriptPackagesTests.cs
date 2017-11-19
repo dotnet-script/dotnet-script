@@ -51,6 +51,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleScriptPackageWithSubFolder()
+        {
+            var result = Execute("WithSubFolder/WithSubFolder.csx");
+            Assert.StartsWith("Hello from Bar.csx", result);
+        }
+
+        [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
         {
             var resolver = CreateResolverCompilationDependencyResolver();
