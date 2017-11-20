@@ -141,3 +141,60 @@ The days of debugging scripts using `Console.WriteLine` are over. One major feat
 
 
 ![debug](https://user-images.githubusercontent.com/1034073/30173509-2f31596c-93f8-11e7-9124-ca884cf6564e.gif)
+
+
+
+### Script Packages
+
+Script packages are a way of organizing reusable scripts into NuGet packages that can be consumed by other scripts. This means that we now can leverage scripting infrastructure without the need for any kind of bootstrapping. 
+
+#### Creating a script package
+
+A script package is just a regular NuGet package that contains script files inside the `content` or `contentFiles` folder.
+
+The following example shows how the scripts are laid out inside the NuGet package according to the [standard convention](https://docs.microsoft.com/en-us/nuget/schema/nuspec#including-content-files) .
+
+```shell
+└── contentFiles
+    └── csx
+        └── netstandard2.0
+            └── main.csx
+```
+
+This example contains just the `main.csx` file in the root folder, but packages may have multiple script files either in the root folder or in subfolders below the root folder. 
+
+When loading a script package we will look for an entry point script to be loaded. This entry point script is identified by one of the following.
+
+- A script called `main.csx` in the root folder  
+- A single script file in the root folder
+
+If the entry point script cannot be determined, we will simply load all the scripts files in the package.
+
+> The advantage with using an entry point script is that we can control loading other scripts from the package. 
+
+#### Consuming a script package
+
+To consume a script package all we need to do specify the NuGet package in the `#load `directive.
+
+The following example loads the [simple-targets](https://www.nuget.org/packages/simple-targets-csx) package that contains script files to be included in our script.
+
+```C#
+#! "netcoreapp2.0"
+#load "nuget:simple-targets-csx, 6.0.0"
+
+using static SimpleTargets;
+var targets = new TargetDictionary();
+
+targets.Add("default", () => Console.WriteLine("Hello, world!"));
+
+Run(Args, targets);
+```
+
+> Note: Debugging also works for script packages so that we can easily step into the scripts that are brought in using the `#load` directive. 
+
+ 
+
+
+
+
+
