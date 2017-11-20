@@ -78,6 +78,8 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
 
         private string[] GetScriptFilesMatchingCurrentRuntime(IDictionary<string, List<string>> filesPerTargetFramework)
         {
+            //We keep this super simple for now
+           
             if (filesPerTargetFramework.TryGetValue("any", out var files))
             {                
                 return files.ToArray();
