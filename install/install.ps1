@@ -16,7 +16,7 @@ $zipFile = Join-Path $tempFolder "dotnet-script.zip"
 $client.DownloadFile($url,$zipFile)
 
 $installationFolder = Join-Path $env:ProgramData "dotnet-script"
-Expand-Archive $zipFile -DestinationPath $installationFolder -Force
+Microsoft.PowerShell.Archive\Expand-Archive $zipFile -DestinationPath $installationFolder -Force
 Remove-Item $tempFolder -Recurse -Force
 
 $path = [System.Environment]::GetEnvironmentVariable("path", [System.EnvironmentVariableTarget]::User);
