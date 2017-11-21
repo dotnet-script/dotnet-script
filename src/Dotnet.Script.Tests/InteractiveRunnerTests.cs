@@ -139,6 +139,24 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public async Task ScriptPackageReference()
+        {            
+            var commands = new[]
+            {
+                "var x = 1;",
+                @"#load ""nuget: simple-targets-csx, 6.0.0""",
+                "using static SimpleTargets;",
+                "typeof(TargetDictionary)",                
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);           
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("[Submission#1+SimpleTargets+TargetDictionary]", result);
+        }
+
+        [Fact]
         public async Task LoadedFile()
         {
             var pathToFixture = Path.Combine("..", "..", "..", "TestFixtures", "REPL", "main.csx");
