@@ -77,9 +77,13 @@ namespace Dotnet.Script.Core
                     var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
                     var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
-                    _scriptOptions =
-                        _scriptOptions.WithSourceResolver(
-                            new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, CurrentDirectory), scriptMap));
+                    if (scriptMap.Count > 0)
+                    {
+                        _scriptOptions =
+                            _scriptOptions.WithSourceResolver(
+                                new NuGetSourceReferenceResolver(
+                                    new SourceFileResolver(ImmutableArray<string>.Empty, CurrentDirectory), scriptMap));
+                    }
                     foreach (var runtimeDependency in lineDependencies)
                     {
                         Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
