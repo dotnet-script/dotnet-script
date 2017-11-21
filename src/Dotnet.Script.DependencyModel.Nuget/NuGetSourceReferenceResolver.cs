@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
@@ -37,7 +38,7 @@ namespace Dotnet.Script.DependencyModel.NuGet
 
         public override string NormalizePath(string path, string baseFilePath)
         {
-            if (path.StartsWith("nuget", StringComparison.OrdinalIgnoreCase))
+            if (path.StartsWith("nuget:", StringComparison.OrdinalIgnoreCase))
             {
                 return path;
             }
@@ -47,8 +48,9 @@ namespace Dotnet.Script.DependencyModel.NuGet
 
         public override string ResolveReference(string path, string baseFilePath)
         {
-            if (path.StartsWith("nuget", StringComparison.OrdinalIgnoreCase))
+            if (path.StartsWith("nuget:", StringComparison.OrdinalIgnoreCase))
             {
+                Debugger.Launch();
                 var packageName = PackageNameMatcher.Match(path).Groups[1].Value;
                 var scripts = _scriptMap[packageName];
                 if (scripts.Count == 1)
@@ -63,7 +65,7 @@ namespace Dotnet.Script.DependencyModel.NuGet
 
         public override Stream OpenRead(string resolvedPath)
         {
-            if (resolvedPath.StartsWith("nuget", StringComparison.OrdinalIgnoreCase))
+            if (resolvedPath.StartsWith("nuget:", StringComparison.OrdinalIgnoreCase))
             {
                 var packageName = PackageNameMatcher.Match(resolvedPath).Groups[1].Value;
                 var scripts = _scriptMap[packageName];
