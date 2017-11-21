@@ -66,7 +66,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
             nuGetPackageFolders.Add(RuntimeHelper.GetPathToNuGetStoreFolder());
 
-            var runtimeDepedencies = new List<RuntimeDependency>();
+            var runtimeDependencies = new List<RuntimeDependency>();
 
             var runtimeLibraries = dependencyContext.RuntimeLibraries;
 
@@ -78,10 +78,10 @@ namespace Dotnet.Script.DependencyModel.Runtime
                     ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray()),
                     ProcessScriptFiles(runtimeLibrary, nuGetPackageFolders.ToArray()));
 
-                runtimeDepedencies.Add(runtimeDependency);
+                runtimeDependencies.Add(runtimeDependency);
             }
 
-            return runtimeDepedencies;
+            return runtimeDependencies;
         }
 
         private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
