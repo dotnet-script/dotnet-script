@@ -75,7 +75,7 @@ namespace Dotnet.Script.Core
             RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
-        private ScriptOptions CreateScriptOptions(ScriptContext context, IDictionary<string, IReadOnlyList<string>> scriptMap)
+        public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IDictionary<string, IReadOnlyList<string>> scriptMap)
         {            
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
                 .AddReferences(ReferencedAssemblies)
