@@ -10,10 +10,11 @@
         /// </summary>
         /// <param name="id">The id of the NuGet package.</param>
         /// <param name="version">The version of the NuGet package.</param>
-        public PackageReference(string id, string version)
+        public PackageReference(string id, string version, PackageOrigin packageOrigin)
         {
             Id = id;
             Version = version;
+            Origin = packageOrigin;
         }
 
         /// <summary>
@@ -26,18 +27,23 @@
         /// </summary>
         public string Version { get; }
 
+        /// <summary>
+        /// Gets the <see cref="PackageOrigin"/> that describes where this reference originated from.
+        /// </summary>
+        public PackageOrigin Origin { get; }
+
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return Id.GetHashCode() ^ Version.GetHashCode();
+            return Id.GetHashCode() ^ Version.GetHashCode() ^ Origin.GetHashCode();
         }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
             var other = (PackageReference)obj;
-            return other.Id == Id && other.Version == Version;
+            return other.Id == Id && other.Version == Version && other.Origin == Origin;
         }
     }
 }

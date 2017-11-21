@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,7 +8,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 {    
     public class ScriptParser 
     {
-        private Logger _logger;
+        private readonly Logger _logger;
         
         public ScriptParser(LogFactory logFactory)
         {
@@ -19,9 +18,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         public ParseResult ParseFromCode(string code)
         {
             string currentTargetFramework = null;
-            var allPackageReferences = new HashSet<PackageReference>();
-            var packageReferences = ReadPackageReferences(code);
-            allPackageReferences.UnionWith(packageReferences);
+            var allPackageReferences = new HashSet<PackageReference>();            
+            allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(code));
+            allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(code));
             string targetFramework = ReadTargetFramework(code);
             if (targetFramework != null)
             {
@@ -46,8 +45,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             {
                 _logger.Debug($"Parsing {csxFile}");
                 var fileContent = ReadFile(csxFile);
-                var packageReferences = ReadPackageReferences(fileContent);
-                allPackageReferences.UnionWith(packageReferences);
+                allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(fileContent));
+                allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(fileContent));
                 string targetFramework = ReadTargetFramework(fileContent);
                 if (targetFramework != null)
                 {
@@ -65,7 +64,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return new ParseResult(allPackageReferences, currentTargetFramework);
         }
 
-        private IEnumerable<PackageReference> ReadPackageReferences(string fileContent)
+        private static IEnumerable<PackageReference> ReadPackageReferencesFromReferenceDirective(string fileContent)
         {
             const string pattern = @"^\s*#r\s*""nuget:\s*(.+)\s*,\s*(.*)""";
             var matches = Regex.Matches(fileContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
@@ -74,12 +73,26 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             {
                 var id = match.Groups[1].Value;
                 var version = match.Groups[2].Value;
-                var packageReference = new PackageReference(id, version);
+                var packageReference = new PackageReference(id, version, PackageOrigin.ReferenceDirective);
                 yield return packageReference;
             }
         }
 
-        private string ReadTargetFramework(string fileContent)
+        private static IEnumerable<PackageReference> ReadPackageReferencesFromLoadDirective(string fileContent)
+        {
+            const string pattern = @"^\s*#load\s*""nuget:\s*(.+)\s*,\s*(.*)""";
+            var matches = Regex.Matches(fileContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+            foreach (var match in matches.Cast<Match>())
+            {
+                var id = match.Groups[1].Value;
+                var version = match.Groups[2].Value;
+                var packageReference = new PackageReference(id, version, PackageOrigin.LoadDirective);
+                yield return packageReference;
+            }
+        }
+
+        private static string ReadTargetFramework(string fileContent)
         {
             const string pattern = @"^\s*#!\s*""(.*)""";
             var match = Regex.Match(fileContent, pattern);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -15,11 +16,17 @@ using Dotnet.Script.DependencyModel.NuGet;
 using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RuntimeAssembly = Dotnet.Script.DependencyModel.Runtime.RuntimeAssembly;
 
 namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
+        // Note: Windows only, Mac and Linux needs something else?
+        [DllImport("Kernel32.dll")]
+        private static extern IntPtr LoadLibrary(string path);
+
         protected virtual IEnumerable<Assembly> ReferencedAssemblies => new[]
         {
             typeof(object).GetTypeInfo().Assembly,
@@ -68,11 +75,12 @@ namespace Dotnet.Script.Core
             RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
-        public virtual ScriptOptions CreateScriptOptions(ScriptContext context)
+        public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
         {
+            var scriptMap = runtimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
                 .AddReferences(ReferencedAssemblies)
-                .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory))
+                .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
                 .WithFileEncoding(context.Code.Encoding);            
@@ -91,7 +99,11 @@ namespace Dotnet.Script.Core
             var platformIdentifier = RuntimeHelper.GetPlatformIdentifier();
             Logger.Verbose($"Current runtime is '{platformIdentifier}'.");
 
-            var opts = CreateScriptOptions(context);
+            IList<RuntimeDependency> runtimeDependencies =
+                RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+
+
+            var opts = CreateScriptOptions(context, runtimeDependencies);
 
             var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
             var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
@@ -99,21 +111,30 @@ namespace Dotnet.Script.Core
                 x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
                 x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase)).ToArray();
             
-            IList<RuntimeDependency> runtimeDependencies =
-                RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+            
 
-            foreach (var runtimeDependency in runtimeDependencies)
+            IList<RuntimeAssembly> runtimeAssemblies =
+                runtimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct().ToList();
+
+            foreach (var runtimeAssembly in runtimeAssemblies)
             {                                
-                Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
-                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
-                
+                Logger.Verbose("Adding reference to a runtime dependency => " + runtimeAssembly);
+                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeAssembly.Path));                
+            }
+
+            foreach (var nativeAsset in runtimeDependencies.SelectMany(rtd => rtd.NativeAssets).Distinct())
+            {
+                if (RuntimeHelper.IsWindows())
+                {
+                    LoadLibrary(nativeAsset);
+                }
             }
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
                 Logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
                 // Always prefer the resolved runtime dependency rather than the inherited assembly.
-                if (runtimeDependencies.All(rd => rd.Name.Name != inheritedAssemblyName.Name))
+                if (runtimeAssemblies.All(rd => rd.Name.Name != inheritedAssemblyName.Name))
                 {
                     var assembly = Assembly.Load(inheritedAssemblyName);
                     opts = opts.AddReferences(assembly);

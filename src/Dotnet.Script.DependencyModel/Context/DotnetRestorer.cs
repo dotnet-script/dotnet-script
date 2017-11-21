@@ -18,7 +18,12 @@ namespace Dotnet.Script.DependencyModel.Context
         public void Restore(string pathToProjectFile)
         {
             _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli.");            
-            _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\"");            
+            var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\"");
+            if (exitcode != 0)
+            {
+                // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'
+                throw new Exception($"Unable to restore packages from '{pathToProjectFile}'. Make sure that all script files contains valid NuGet references");
+            }
         }
 
         public bool CanRestore => _commandRunner.Execute("dotnet", "--version") == 0;

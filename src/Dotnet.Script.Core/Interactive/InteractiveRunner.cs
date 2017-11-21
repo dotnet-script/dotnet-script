@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using System.Text;
 using System;
+using System.Collections.Immutable;
+using Dotnet.Script.DependencyModel.NuGet;
 
 namespace Dotnet.Script.Core
 {
@@ -70,8 +72,18 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    var lineDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input);
+                    var lineRuntimeDependencies =
+                        ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
+                    var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
+                    var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
+                    if (scriptMap.Count > 0)
+                    {
+                        _scriptOptions =
+                            _scriptOptions.WithSourceResolver(
+                                new NuGetSourceReferenceResolver(
+                                    new SourceFileResolver(ImmutableArray<string>.Empty, CurrentDirectory), scriptMap));
+                    }
                     foreach (var runtimeDependency in lineDependencies)
                     {
                         Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);

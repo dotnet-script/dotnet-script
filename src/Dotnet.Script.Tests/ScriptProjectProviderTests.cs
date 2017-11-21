@@ -1,10 +1,9 @@
 ﻿using System.IO;
-using System.Runtime.Serialization;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet.Script.DependencyModel.Tests
+namespace Dotnet.Script.Tests
 {
     public class ScriptProjectProviderTests
     {
@@ -19,7 +18,7 @@ namespace Dotnet.Script.DependencyModel.Tests
         public void ShouldCopyLocalNuGetConfig()
         {
             var provider = CreateProvider();
-            var pathToProjectFile = provider.CreateProject("../../../../Dotnet.Script.Tests/TestFixtures/LocalNuGetConfig", "netcoreapp2.0", true);
+            var pathToProjectFile = provider.CreateProject(TestPathUtils.GetFullPathToTestFixture("LocalNuGetConfig"), "netcoreapp2.0", true);
             var pathToProjectFileFolder = Path.GetDirectoryName(pathToProjectFile);
             Assert.True(File.Exists(Path.Combine(pathToProjectFileFolder,"NuGet.Config")));
         }

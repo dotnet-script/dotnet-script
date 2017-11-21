@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ScriptPackageWithAnyTargetFramework</id>
+    <version>1.0.0</version>
+    <description>ScriptPackageWithAnyTargetFramework</description>
+    <authors>dotnet-script</authors>
+    <owners>dotnet-script</owners>    
+  </metadata>
+</package>

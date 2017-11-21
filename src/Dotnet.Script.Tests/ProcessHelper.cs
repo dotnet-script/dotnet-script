@@ -6,7 +6,7 @@ namespace Dotnet.Script.Tests
 {
     public static class ProcessHelper
     {
-        public static (string, int) RunAndCaptureOutput(string fileName, string[] arguments, string workingDirectory = null)
+        public static (string output, int exitcode) RunAndCaptureOutput(string fileName, string[] arguments, string workingDirectory = null)
         {
             var startInfo = new ProcessStartInfo(fileName, string.Join(" ", arguments))
             {
