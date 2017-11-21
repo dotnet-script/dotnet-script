@@ -75,8 +75,9 @@ namespace Dotnet.Script.Core
             RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
-        public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IDictionary<string, IReadOnlyList<string>> scriptMap)
-        {            
+        public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
+        {
+            var scriptMap = runtimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
                 .AddReferences(ReferencedAssemblies)
                 .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
@@ -101,9 +102,8 @@ namespace Dotnet.Script.Core
             IList<RuntimeDependency> runtimeDependencies =
                 RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
 
-            var scriptMap = runtimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
 
-            var opts = CreateScriptOptions(context, scriptMap);
+            var opts = CreateScriptOptions(context, runtimeDependencies);
 
             var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
             var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
