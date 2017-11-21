@@ -1,4 +1,3 @@
-#! "netcoreapp1.1"
 #load "FileUtils.csx"
 #load "DotNet.csx"
 #load "Command.csx"
