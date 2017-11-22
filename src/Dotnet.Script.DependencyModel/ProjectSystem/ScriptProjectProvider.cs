@@ -37,9 +37,18 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
 
             projectFile.Save(pathToProjectFile);
-            _logger.Debug($"Project file saved to {pathToProjectFile}");
+
+            LogProjectFileInfo(pathToProjectFile);
+
             CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return pathToProjectFile;
+        }
+
+        private void LogProjectFileInfo(string pathToProjectFile)
+        {
+            _logger.Debug($"Project file saved to {pathToProjectFile}");
+            var content = File.ReadAllText(pathToProjectFile);
+            _logger.Debug(content);
         }
 
         public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
@@ -66,7 +75,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
 
             projectFile.Save(pathToProjectFile);
-            _logger.Debug($"Project file saved to {pathToProjectFile}");
+
+            LogProjectFileInfo(pathToProjectFile);
+
             CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return pathToProjectFile;
         }
