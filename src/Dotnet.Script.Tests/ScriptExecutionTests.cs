@@ -100,7 +100,15 @@ namespace Dotnet.Script.Tests
             var result = Execute($"{Path.Combine("ReturnValue", "ReturnValue.csx")}");
             Assert.Equal(42,result.exitCode);
         }
-        
+
+        [Fact]
+        public static void ShouldHandleIssue181()
+        {
+            var result = Execute(Path.Combine("Issue181", "Issue181.csx"));
+            Assert.Contains("42", result.output);
+        }
+
+
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));

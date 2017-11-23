@@ -106,12 +106,8 @@ namespace Dotnet.Script.Core
             var opts = CreateScriptOptions(context, runtimeDependencies);
 
             var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
-            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
-                x.FullName.StartsWith("system.", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase) ||
-                x.FullName.StartsWith("mscorlib", StringComparison.OrdinalIgnoreCase)).ToArray();
-            
-            
+            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>                
+                    x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase)).ToArray();
 
             IList<RuntimeAssembly> runtimeAssemblies =
                 runtimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct().ToList();
@@ -132,10 +128,10 @@ namespace Dotnet.Script.Core
 
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
-                Logger.Verbose("Adding reference to an inherited dependency => " + inheritedAssemblyName.FullName);
                 // Always prefer the resolved runtime dependency rather than the inherited assembly.
                 if (runtimeAssemblies.All(rd => rd.Name.Name != inheritedAssemblyName.Name))
                 {
+                    Logger.Verbose($"Adding reference to an inherited dependency => {inheritedAssemblyName.FullName}");
                     var assembly = Assembly.Load(inheritedAssemblyName);
                     opts = opts.AddReferences(assembly);
                 }                
