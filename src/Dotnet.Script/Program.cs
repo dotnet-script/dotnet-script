@@ -24,22 +24,24 @@ namespace Dotnet.Script
             {
                 return Wain(args);
             }
-            catch (CompilationErrorException)
-            {
-                // no need to write out anything as the upstream services will report that
-                return 0x1;
-            }
-            catch (ScriptRuntimeException scriptRuntimeEx)
-            {
-                // no need to write out anything as the upstream services will report that
-                // also, CSI return exception HResult for script runtime exceptions
-                return scriptRuntimeEx.HResult;
-            }
             catch (Exception e)
             {
                 if (e is AggregateException aggregateEx)
                 {
                     e = aggregateEx.Flatten().InnerException;
+                }
+
+                if (e is CompilationErrorException)
+                {
+                    // no need to write out anything as the upstream services will report that
+                    return 0x1;
+                }
+
+                if (e is ScriptRuntimeException)
+                {
+                    // no need to write out anything as the upstream services will report that
+                    // also, CSI return exception HResult for script runtime exceptions
+                    return e.HResult;
                 }
 
                 // Be verbose (stack trace) in debug mode otherwise brief

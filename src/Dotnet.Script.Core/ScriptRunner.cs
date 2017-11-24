@@ -11,7 +11,6 @@ namespace Dotnet.Script.Core
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole ScriptConsole;
 
-
         public ScriptRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole scriptConsole)
         {
             Logger = logger;
@@ -57,7 +56,9 @@ namespace Dotnet.Script.Core
         {
             if (scriptState.Exception != null)
             {
-                ScriptConsole.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(scriptState.Exception));
+                // once Roslyn ships with this, we can format he exception using CSharpObjectFormatter
+                // https://github.com/dotnet/roslyn/blob/4175350b87f928e136cbb14c2668b7cb3338d5a1/src/Scripting/Core/Hosting/CommonMemberFilter.cs#L18
+                ScriptConsole.WritePrettyError(scriptState.Exception.ToString());
                 throw new ScriptRuntimeException("Script execution resulted in an exception.", scriptState.Exception);
             }
 
