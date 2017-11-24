@@ -31,17 +31,10 @@ namespace Dotnet.Script
                     e = aggregateEx.Flatten().InnerException;
                 }
 
-                if (e is CompilationErrorException)
+                if (e is CompilationErrorException || e is ScriptRuntimeException)
                 {
                     // no need to write out anything as the upstream services will report that
                     return 0x1;
-                }
-
-                if (e is ScriptRuntimeException)
-                {
-                    // no need to write out anything as the upstream services will report that
-                    // also, CSI return exception HResult for script runtime exceptions
-                    return e.HResult;
                 }
 
                 // Be verbose (stack trace) in debug mode otherwise brief
