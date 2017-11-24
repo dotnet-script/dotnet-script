@@ -9,6 +9,7 @@ using Microsoft.Extensions.CommandLineUtils;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace Dotnet.Script
 {
@@ -28,6 +29,12 @@ namespace Dotnet.Script
                 if (e is AggregateException aggregateEx)
                 {
                     e = aggregateEx.Flatten().InnerException;
+                }
+
+                if (e is CompilationErrorException || e is ScriptRuntimeException)
+                {
+                    // no need to write out anything as the upstream services will report that
+                    return 0x1;
                 }
 
                 // Be verbose (stack trace) in debug mode otherwise brief
@@ -164,7 +171,7 @@ namespace Dotnet.Script
         private static Task<int> Run(bool debugMode, ScriptContext context)
         {
             var compiler = GetScriptCompiler(debugMode);
-            var runner = new ScriptRunner(compiler, compiler.Logger);
+            var runner = new ScriptRunner(compiler, compiler.Logger, ScriptConsole.Default);
             return runner.Execute<int>(context);
         }
 

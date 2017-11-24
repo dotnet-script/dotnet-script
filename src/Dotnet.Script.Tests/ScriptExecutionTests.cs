@@ -41,10 +41,18 @@ namespace Dotnet.Script.Tests
         }
         
         [Fact]
-        public static void ShouldReturnExitCodeOneWhenScriptFails()
+        public static void ShouldReturnExitCodeOnenWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
             Assert.Equal(1, result.exitCode);
+        }
+
+        [Fact]
+        public static void ShouldReturnStackTraceInformationWhenScriptFails()
+        {
+            var result = Execute(Path.Combine("Exception", "Error.csx"));
+            Assert.Contains("die!", result.output);
+            Assert.Contains("Error.csx:line 1", result.output);
         }
 
         [Fact]

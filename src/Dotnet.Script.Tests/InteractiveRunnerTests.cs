@@ -66,6 +66,22 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public async Task Exception()
+        {
+            var commands = new[]
+            {
+                "foo",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Error.ToString();
+            Assert.Contains("(1,1): error CS0103: The name 'foo' does not exist in the current context", result);
+        }
+
+        [Fact]
         public async Task Multiline()
         {
             var commands = new[]
