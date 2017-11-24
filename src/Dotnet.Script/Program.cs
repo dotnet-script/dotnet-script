@@ -9,6 +9,7 @@ using Microsoft.Extensions.CommandLineUtils;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace Dotnet.Script
 {
@@ -22,6 +23,17 @@ namespace Dotnet.Script
             try
             {
                 return Wain(args);
+            }
+            catch (CompilationErrorException)
+            {
+                // no need to write out anything as the upstream services will report that
+                return 0x1;
+            }
+            catch (ScriptRuntimeException scriptRuntimeEx)
+            {
+                // no need to write out anything as the upstream services will report that
+                // also, CSI return exception HResult for script runtime exceptions
+                return scriptRuntimeEx.HResult;
             }
             catch (Exception e)
             {

@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -58,10 +57,8 @@ namespace Dotnet.Script.Core
         {
             if (scriptState.Exception != null)
             {
-                Logger.Log("Script execution resulted in an exception.");
-                Logger.Log(scriptState.Exception.Message);
-                Logger.Log(scriptState.Exception.StackTrace);
-                throw scriptState.Exception;
+                ScriptConsole.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(scriptState.Exception));
+                throw new ScriptRuntimeException("Script execution resulted in an exception.", scriptState.Exception);
             }
 
             return scriptState.ReturnValue;
