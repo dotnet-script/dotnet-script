@@ -44,7 +44,7 @@ namespace Dotnet.Script.Tests
         public static void ShouldReturnExitCodeOneWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
-            Assert.Equal(1, result.exitCode);
+            Assert.Equal(-2146233088, result.exitCode);
         }
 
         [Fact]
