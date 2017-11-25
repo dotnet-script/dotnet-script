@@ -194,6 +194,89 @@ Run(Args, targets);
 
  
 
+### Piping 
+
+The following example shows how we can pipe data in and out of a script.
+
+The `UpperCase.csx` script simply converts the standard input to upper case and writes it back out to standard output.
+
+```csharp
+#! "netcoreapp2.0"
+#r "nuget: NetStandard.Library, 2.0.0"
+
+using (var streamReader = new StreamReader(Console.OpenStandardInput()))
+{    
+    Write(streamReader.ReadToEnd().ToUpper()); 
+}
+```
+
+We can now simply pipe the output from one command into our script like this.
+
+```shell
+echo "This is some text" | dotnet script UpperCase.csx 
+THIS IS SOME TEXT
+```
+
+#### Debugging
+
+The first thing we need to do add the following to the `launch.config` file that allows VS Code to debug a running process.
+
+```JSON
+{
+    "name": ".NET Core Attach",
+    "type": "coreclr",
+    "request": "attach",
+    "processId": "${command:pickProcess}"
+}
+```
+
+To debug this script we need a way to attach the debugger in VS Code and to the simplest thing we can do here is to wait for the debugger to attach by adding this method somewhere.
+
+```c#
+public static void WaitForDebugger()
+{
+    Console.WriteLine("Attach Debugger (VS Code)");
+    while(!Debugger.IsAttached)
+    {
+    }
+}
+```
+
+To debug the script when executing it from the command line we can do something like 
+
+````c#
+#! "netcoreapp2.0"
+#r "nuget: NetStandard.Library, 2.0.0"
+WaitForDebugger();
+using (var streamReader = new StreamReader(Console.OpenStandardInput()))
+{    
+    Write(streamReader.ReadToEnd().ToUpper()); // <- SET BREAKPOINT HERE
+}
+````
+
+
+
+Now when we run the script from the command line we will get 
+
+```shell
+$ echo "This is some text" | dotnet script UpperCase.csx
+Attach Debugger (VS Code)
+```
+
+This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the  `.NET Core Attach` debugger and pick the process that represents the executing script. 
+
+Once that is done we should see out breakpoint being hit.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
