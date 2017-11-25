@@ -1,5 +1,6 @@
 #! "netcoreapp2.0"
 #r "nuget:NetStandard.Library,2.0.0"
+#r "nuget:Microsoft.DotNet.PlatformAbstractions, 2.0.3"
 #load "DotNet.csx"
 #load "Choco.csx"
 #load "NuGet.csx"
