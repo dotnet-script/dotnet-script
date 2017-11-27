@@ -99,11 +99,11 @@ namespace Dotnet.Script.Core
             var platformIdentifier = RuntimeHelper.GetPlatformIdentifier();
             Logger.Verbose($"Current runtime is '{platformIdentifier}'.");
 
-            IList<RuntimeDependency> runtimeDependencies =
-                RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToList();
+            var runtimeDependencies = context.FilePath != null
+                ? RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory)
+                : RuntimeDependencyResolver.GetDependenciesFromCode(context.WorkingDirectory, context.Code.ToString());
 
-
-            var opts = CreateScriptOptions(context, runtimeDependencies);
+            var opts = CreateScriptOptions(context, runtimeDependencies.ToList());
 
             var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
             var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>                

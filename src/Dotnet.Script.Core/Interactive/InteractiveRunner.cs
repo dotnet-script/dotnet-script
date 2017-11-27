@@ -56,13 +56,13 @@ namespace Dotnet.Script.Core
 
         public virtual async Task RunLoopWithSeed(bool debugMode, ScriptContext scriptContext)
         {
-            await RunFirstScript(scriptContext);
+            await HandleScriptErrors(async () => await RunFirstScript(scriptContext));
             await RunLoop(debugMode);
         }
 
         protected virtual async Task Execute(string input, bool debugMode)
         {
-            try
+            await HandleScriptErrors(async () =>
             {
                 if (_scriptState == null)
                 {
@@ -72,8 +72,7 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    var lineRuntimeDependencies =
-                        ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
+                    var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
                     var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
                     var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
@@ -92,28 +91,7 @@ namespace Dotnet.Script.Core
 
                     _scriptState = await _scriptState.ContinueWithAsync(input, _scriptOptions, ex => true);
                 }
-
-                if (_scriptState?.Exception != null)
-                {
-                    Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
-                }
-
-                if (_scriptState?.ReturnValue != null)
-                {
-                    _globals.Print(_scriptState.ReturnValue);
-                }
-            }
-            catch (CompilationErrorException e)
-            {
-                foreach (var diagnostic in e.Diagnostics)
-                {
-                    Console.WritePrettyError(diagnostic.ToString());
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));
-            }
+            });
         }
 
         public virtual void Reset()
@@ -129,6 +107,9 @@ namespace Dotnet.Script.Core
 
         private async Task RunFirstScript(ScriptContext scriptContext)
         {
+            foreach (var arg in scriptContext.Args)
+                _globals.Args.Add(arg);
+
             var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
             _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
             _scriptOptions = compilationContext.ScriptOptions;
@@ -155,6 +136,34 @@ namespace Dotnet.Script.Core
             }
 
             return input.ToString();
+        }
+
+        private async Task HandleScriptErrors(Func<Task> doWork)
+        {
+            try
+            {
+                await doWork();
+                if (_scriptState?.Exception != null)
+                {
+                    Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                }
+
+                if (_scriptState?.ReturnValue != null)
+                {
+                    _globals.Print(_scriptState.ReturnValue);
+                }
+            }
+            catch (CompilationErrorException e)
+            {
+                foreach (var diagnostic in e.Diagnostics)
+                {
+                    Console.WritePrettyError(diagnostic.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));
+            }
         }
     }
 }

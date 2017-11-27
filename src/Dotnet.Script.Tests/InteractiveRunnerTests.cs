@@ -6,6 +6,7 @@ using Xunit;
 using System.IO;
 using System.Text;
 using System;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Dotnet.Script.Tests
 {
@@ -66,7 +67,7 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
-        public async Task Exception()
+        public async Task RuntimeException()
         {
             var commands = new[]
             {
@@ -79,6 +80,41 @@ namespace Dotnet.Script.Tests
 
             var result = ctx.Console.Error.ToString();
             Assert.Contains("(1,1): error CS0103: The name 'foo' does not exist in the current context", result);
+        }
+
+        [Fact]
+        public async Task ValueFromSeededFile()
+        {
+            var commands = new[]
+            {
+                "x+x",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoopWithSeed(false, new ScriptContext(SourceText.From(@"var x = 1;"), Directory.GetCurrentDirectory(), new string[0]));
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("2", result);
+        }
+
+        [Fact]
+        public async Task RuntimeExceptionFromSeededFile()
+        {
+            var commands = new[]
+            {
+                "var x = 1;",
+                "x+x",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoopWithSeed(false, new ScriptContext(SourceText.From(@"throw new Exception(""die!"");"), Directory.GetCurrentDirectory(), new string[0]));
+
+            var errorResult = ctx.Console.Error.ToString();
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("2", result);
+            Assert.Contains("die!", errorResult);
         }
 
         [Fact]
@@ -211,6 +247,41 @@ namespace Dotnet.Script.Tests
 
             var errResult = ctx.Console.Error.ToString();
             Assert.Contains("error CS0103: The name 'x' does not exist in the current context", errResult);
+        }
+
+        [Fact]
+        public async Task NugetPackageReferenceAsTheFirstLine()
+        {
+            var commands = new[]
+            {
+                @"#r ""nuget: Automapper, 6.1.1""",
+                "using AutoMapper;",
+                "typeof(MapperConfiguration)",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("[AutoMapper.MapperConfiguration]", result);
+        }
+
+        [Fact]
+        public async Task ScriptPackageReferenceAsTheFirstLine()
+        {
+            var commands = new[]
+            {
+                @"#load ""nuget: simple-targets-csx, 6.0.0""",
+                "using static SimpleTargets;",
+                "typeof(TargetDictionary)",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("[Submission#0+SimpleTargets+TargetDictionary]", result);
         }
     }
 }
