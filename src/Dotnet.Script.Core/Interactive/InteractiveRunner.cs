@@ -72,8 +72,7 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    var lineRuntimeDependencies =
-                        ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
+                    var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
                     var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
                     var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);

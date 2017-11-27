@@ -248,5 +248,40 @@ namespace Dotnet.Script.Tests
             var errResult = ctx.Console.Error.ToString();
             Assert.Contains("error CS0103: The name 'x' does not exist in the current context", errResult);
         }
+
+        [Fact]
+        public async Task NugetPackageReferenceAsTheFirstLine()
+        {
+            var commands = new[]
+            {
+                @"#r ""nuget: Automapper, 6.1.1""",
+                "using AutoMapper;",
+                "typeof(MapperConfiguration)",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("[AutoMapper.MapperConfiguration]", result);
+        }
+
+        [Fact]
+        public async Task ScriptPackageReferenceAsTheFirstLine()
+        {
+            var commands = new[]
+            {
+                @"#load ""nuget: simple-targets-csx, 6.0.0""",
+                "using static SimpleTargets;",
+                "typeof(TargetDictionary)",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop(false);
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("[Submission#0+SimpleTargets+TargetDictionary]", result);
+        }
     }
 }
