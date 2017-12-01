@@ -356,3 +356,12 @@ Attach Debugger (VS Code)
 This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the  `.NET Core Attach` debugger and pick the process that represents the executing script. 
 
 Once that is done we should see out breakpoint being hit.
+
+## Team
+
+* [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
+* [Filip W](https://github.com/filipw) ([@filip_woj](https://twitter.com/filip_woj))
+ 
+ ## License 
+
+[MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE)
