@@ -362,6 +362,6 @@ Once that is done we should see out breakpoint being hit.
 * [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
 * [Filip W](https://github.com/filipw) ([@filip_woj](https://twitter.com/filip_woj))
  
- ## License 
+## License 
 
 [MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE)
