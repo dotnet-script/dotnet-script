@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -100,22 +101,25 @@ namespace Dotnet.Script.Core
             Logger.Verbose($"Current runtime is '{platformIdentifier}'.");
 
             var runtimeDependencies = context.FilePath != null
-                ? RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory)
-                : RuntimeDependencyResolver.GetDependenciesFromCode(context.WorkingDirectory, context.Code.ToString());
+                ? RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToArray()
+                : RuntimeDependencyResolver.GetDependenciesFromCode(context.WorkingDirectory, context.Code.ToString()).ToArray();
 
             var opts = CreateScriptOptions(context, runtimeDependencies.ToList());
 
             var runtimeId = RuntimeHelper.GetRuntimeIdentifier();
-            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>                
+            var inheritedAssemblyNames = DependencyContext.Default.GetRuntimeAssemblyNames(runtimeId).Where(x =>
                     x.FullName.StartsWith("microsoft.codeanalysis", StringComparison.OrdinalIgnoreCase)).ToArray();
 
-            IList<RuntimeAssembly> runtimeAssemblies =
-                runtimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct().ToList();
+            // Build up a dependency map that picks runtime assembly with the highest version.
+            // This aligns with the CoreCLR that uses the highest version strategy.
+            var dependencyMap = runtimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct().GroupBy(rdt => rdt.Name.Name, rdt => rdt)
+                .Select(gr => new { Name = gr.Key, ResolvedRuntimeAssembly = gr.OrderBy(rdt => rdt.Name.Version).Last() })
+                .ToDictionary(f => f.Name, f => f.ResolvedRuntimeAssembly, StringComparer.OrdinalIgnoreCase);
 
-            foreach (var runtimeAssembly in runtimeAssemblies)
+            foreach (var runtimeAssembly in dependencyMap.Values)
             {                                
                 Logger.Verbose("Adding reference to a runtime dependency => " + runtimeAssembly);
-                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeAssembly.Path));                
+                opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeAssembly.Path));
             }
 
             foreach (var nativeAsset in runtimeDependencies.SelectMany(rtd => rtd.NativeAssets).Distinct())
@@ -129,13 +133,16 @@ namespace Dotnet.Script.Core
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
                 // Always prefer the resolved runtime dependency rather than the inherited assembly.
-                if (runtimeAssemblies.All(rd => rd.Name.Name != inheritedAssemblyName.Name))
+                if(!dependencyMap.ContainsKey(inheritedAssemblyName.Name))                
                 {
                     Logger.Verbose($"Adding reference to an inherited dependency => {inheritedAssemblyName.FullName}");
                     var assembly = Assembly.Load(inheritedAssemblyName);
                     opts = opts.AddReferences(assembly);
-                }                
+                }
             }
+
+            AssemblyLoadContext.Default.Resolving +=
+                (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(dependencyMap, assemblyLoadContext, assemblyName);
 
             var loader = new InteractiveAssemblyLoader();
             var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
@@ -148,6 +155,20 @@ namespace Dotnet.Script.Core
             }
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader, opts);
+        }
+
+        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IDictionary<string, RuntimeAssembly> dependencyMap, AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        {
+            if (dependencyMap.TryGetValue(assemblyName.Name, out var runtimeAssembly))
+            {
+                if (runtimeAssembly.Name.Version > assemblyName.Version)
+                {
+                    Logger.Log($"Redirecting {assemblyName} to {runtimeAssembly.Name}");                    
+                    return loadContext.LoadFromAssemblyPath(runtimeAssembly.Path);
+                }
+            }
+
+            return null;
         }
     }
 }
