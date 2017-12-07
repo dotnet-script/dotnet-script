@@ -116,6 +116,12 @@ namespace Dotnet.Script.Tests
             Assert.Contains("42", result.output);
         }
 
+        [Fact]
+        public static void ShouldHandleIssue198()
+        {         
+            var result = Execute(Path.Combine("Issue198", "Issue198.csx"));
+            Assert.Contains("NuGet.Client", result.output);
+        }
 
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
