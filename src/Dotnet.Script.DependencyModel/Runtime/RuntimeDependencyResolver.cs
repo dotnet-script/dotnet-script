@@ -110,7 +110,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
             var runtimeAssemblyGroup =
                 runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag =>
-                    rag.Runtime == RuntimeHelper.GetPlatformIdentifier());
+                    rag.Runtime == RuntimeHelper.GetRuntimeIdentifier());
 
             if (runtimeAssemblyGroup == null)
             {

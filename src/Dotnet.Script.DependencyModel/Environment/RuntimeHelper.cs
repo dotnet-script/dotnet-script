@@ -51,6 +51,11 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         public static string GetRuntimeIdentifier()
         {            
+            var platformIdentifier = GetPlatformIdentifier();
+            if (platformIdentifier == "osx")
+            {
+                return $"{platformIdentifier}-{GetProcessArchitecture()}";
+            }
             return RuntimeEnvironment.GetRuntimeIdentifier();            
         }
 
