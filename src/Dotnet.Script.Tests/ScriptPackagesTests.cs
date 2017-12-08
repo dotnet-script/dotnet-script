@@ -131,18 +131,22 @@ namespace Dotnet.Script.Tests
             RemoveDirectory(pathToPackagesOutputFolder);
             Directory.CreateDirectory(pathToPackagesOutputFolder);
             var specFiles = GetSpecFiles();
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var pathtoNuget430 = Path.Combine("../../../../Dotnet.Script.DependencyModel/NuGet/NuGet430.exe");
             foreach (var specFile in specFiles)
             {
                 string command;
                 if (RuntimeHelper.IsWindows())
-                {
-                    command = "nuget";
+                {                    
+                    command = pathtoNuget430;
+                    var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
                 }
                 else
                 {
-                    command = ProcessHelper.RunAndCaptureOutput("which", new string[] { "nuget" }).output;
+                    command = "mono"; 
+                    var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"{pathtoNuget430} pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
                 }
-                var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
+                
             }
         }
 
