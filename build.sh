@@ -11,4 +11,4 @@ if [ ! -d "$DOTNET_SCRIPT" ]; then
         exit 1
     fi
 fi
-dotnet "$DOTNET_SCRIPT/dotnet-script.dll" "$SCRIPT_DIR/build/build.csx" -- "$SCRIPT_DIR"
+dotnet "$DOTNET_SCRIPT/dotnet-script.dll" "$SCRIPT_DIR/build/Build.csx" -- "$SCRIPT_DIR"
