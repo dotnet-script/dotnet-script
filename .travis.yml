@@ -10,7 +10,7 @@ before_install:
   - chmod +x dotnet-install.sh
   - ./dotnet-install.sh --channel 2.0
 install:
-  - ulimit -n4096  
+  - ulimit -n8192  
 script:  
   - chmod +x build.sh
   - ./build.sh
