@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using Dotnet.Script.DependencyModel.Environment;
 using Xunit;
 
@@ -122,6 +123,15 @@ namespace Dotnet.Script.Tests
             var result = Execute(Path.Combine("Issue198", "Issue198.csx"));
             Assert.Contains("NuGet.Client", result.output);
         }
+
+
+        [Fact]
+        public static void ShouldHandleIssue204()
+        {            
+            var result = Execute(Path.Combine("Issue204", "Issue204.csx"));
+            Assert.Contains("System.Net.WebProxy", result.output);
+        }
+
 
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {

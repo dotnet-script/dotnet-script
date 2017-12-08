@@ -59,17 +59,15 @@ docker run -it dotnet-script --version
 Our typical `helloworld.csx` might look like this
 
 ```
-#! "netcoreapp1.1"
-#r "nuget:NetStandard.Library,1.6.1"
-
+#! "netcoreapp2.0"
 Console.WriteLine("Hello world!");
 ```
 
 Let us take a quick look at what is going on here.
 
-`#! "netcoreapp1.1"` tells OmniSharp to resolve metadata in the context of a`netcoreapp1.1` application.
+`#! "netcoreapp2.0"` tells OmniSharp to resolve metadata in the context of a`netcoreapp2.0` application.
 
-`#r "nuget:NetStandard.Library,1.6.1"` brings in the the [NetStandard.Library 1.6.1](https://www.nuget.org/packages/NETStandard.Library/1.6.1) from NuGet.
+This will bring in all assemblies from [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App/2.0.0) and should cover most scripting needs. 
 
 That is all it takes and we can execute the script
 
@@ -250,13 +248,13 @@ Using Roslyn syntax parsing, we also support multiline REPL mode. This means tha
 
 Aside from the regular C# script code, you can invoke the following commands (directives) from within the REPL:
 
-Command | Description
------------|-------------
-`#load`| Load a script into the REPL (same as `#load` usage in CSX)
-`#r`| Load an assembly into the REPL (same as `#r` usage in CSX)
-`#reset`| Reset the REPL back to initial state (without restarting it)
-`#cls`| Clear the console screen without resetting the REPL state
-`#exit`| Exits the REPL
+| Command  | Description                              |
+| -------- | ---------------------------------------- |
+| `#load`  | Load a script into the REPL (same as `#load` usage in CSX) |
+| `#r`     | Load an assembly into the REPL (same as `#r` usage in CSX) |
+| `#reset` | Reset the REPL back to initial state (without restarting it) |
+| `#cls`   | Clear the console screen without resetting the REPL state |
+| `#exit`  | Exits the REPL                           |
 
 ### Seeding REPL with a script
 
@@ -361,7 +359,7 @@ Once that is done we should see out breakpoint being hit.
 
 * [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
 * [Filip W](https://github.com/filipw) ([@filip_woj](https://twitter.com/filip_woj))
- 
+
 ## License 
 
 [MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE)

@@ -117,8 +117,8 @@ namespace Dotnet.Script.Tests
 
         private void ClearGlobalPackagesFolder()
         {
-            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
-            var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder, "ScriptPackage*");
+            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();            
+            var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder).Select(f => f.ToLower()).Where(f => f.Contains("scriptpackage"));            
             foreach (var scriptPackageFolder in scriptPackageFolders)
             {
                 RemoveDirectory(scriptPackageFolder);
@@ -131,18 +131,22 @@ namespace Dotnet.Script.Tests
             RemoveDirectory(pathToPackagesOutputFolder);
             Directory.CreateDirectory(pathToPackagesOutputFolder);
             var specFiles = GetSpecFiles();
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var pathtoNuget430 = Path.Combine("../../../../Dotnet.Script.DependencyModel/NuGet/NuGet430.exe");
             foreach (var specFile in specFiles)
             {
                 string command;
                 if (RuntimeHelper.IsWindows())
-                {
-                    command = "nuget";
+                {                    
+                    command = pathtoNuget430;
+                    var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
                 }
                 else
                 {
-                    command = ProcessHelper.RunAndCaptureOutput("which", new string[] { "nuget" }).output;
+                    command = "mono"; 
+                    var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"{pathtoNuget430} pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
                 }
-                var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
+                
             }
         }
 
