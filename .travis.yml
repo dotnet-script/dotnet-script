@@ -1,5 +1,7 @@
 language: csharp
 dotnet: 2.0.0
+mono:
+ -latest
 matrix:
   include:
     - os: linux

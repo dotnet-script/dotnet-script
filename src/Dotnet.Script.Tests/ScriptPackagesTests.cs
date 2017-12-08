@@ -117,8 +117,8 @@ namespace Dotnet.Script.Tests
 
         private void ClearGlobalPackagesFolder()
         {
-            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
-            var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder, "ScriptPackage*");
+            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();            
+            var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder).Select(f => f.ToLower()).Where(f => f.Contains("scriptpackage"));            
             foreach (var scriptPackageFolder in scriptPackageFolders)
             {
                 RemoveDirectory(scriptPackageFolder);

@@ -30,7 +30,7 @@ namespace Dotnet.Script.Tests
             StringBuilder log = new StringBuilder();            
             var provider = new ScriptProjectProvider(type => ((level, message) => log.AppendLine(message)));
 
-            provider.CreateProject(TestPathUtils.GetFullPathToTestFixture("Helloworld"), "netcoreapp2.0", true);
+            provider.CreateProject(TestPathUtils.GetFullPathToTestFixture("HelloWorld"), "netcoreapp2.0", true);
             var output = log.ToString();
 
             Assert.Contains("<Project Sdk=\"Microsoft.NET.Sdk\">",output);

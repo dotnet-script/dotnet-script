@@ -1,3 +1,3 @@
-﻿#load "SubFolder/Bar.csx"
+﻿#load "SubFolder/bar.csx"
 
 SayHelloFromBar();
