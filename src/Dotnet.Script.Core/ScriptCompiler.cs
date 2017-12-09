@@ -36,12 +36,6 @@ namespace Dotnet.Script.Core
 
         static ScriptCompiler()
         {
-            // reset default scripting mode to latest language version to enable C# 7.1 features
-            // this is not needed once https://github.com/dotnet/roslyn/pull/21331 ships
-            var csharpScriptCompilerType = typeof(CSharpScript).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScriptCompiler");
-            var parseOptionsField = csharpScriptCompilerType?.GetField("s_defaultOptions", BindingFlags.Static | BindingFlags.NonPublic);
-            parseOptionsField?.SetValue(null, new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script));
-
             // force Roslyn to use ReferenceManager for the first time
             Task.Run(() =>
             {
