@@ -132,6 +132,12 @@ namespace Dotnet.Script.Tests
             Assert.Contains("System.Net.WebProxy", result.output);
         }
 
+        [Fact]
+        public void ShouldHandleCSharp72()
+        {
+            var result = Execute(Path.Combine("CSharp72", "CSharp72.csx"));
+            Assert.Contains("hi", result.output);
+        }
 
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
