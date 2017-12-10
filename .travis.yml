@@ -1,17 +1,16 @@
 language: csharp
+dotnet: 2.0.0
+mono:
+ - latest
 matrix:
   include:
+    - os: linux
+      dist: trusty      
+      sudo: false
     - os: osx
       osx_image: xcode9      
-      sudo: required        
-before_install:
-  - brew update
-  - curl https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
-  - chmod +x dotnet-install.sh
-  - ./dotnet-install.sh --channel 2.0
-install:
-  - ulimit -n4096  
+      sudo: required               
 script:  
+  - ulimit -n8192  
   - chmod +x build.sh
   - ./build.sh
-  

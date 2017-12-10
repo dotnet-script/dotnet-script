@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
-    <VersionPrefix>0.16.0</VersionPrefix>   
+    <VersionPrefix>0.17.0</VersionPrefix>   
     <Authors>filipw</Authors>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DebugType>portable</DebugType>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.6.0" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
   </ItemGroup>
 

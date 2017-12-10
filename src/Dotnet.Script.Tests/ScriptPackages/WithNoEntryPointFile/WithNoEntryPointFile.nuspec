@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ScriptPackageWithNoEntryPointFile</id>
+    <version>1.0.0</version>
+    <description>ScriptPackageWithNoEntryPointFile</description>
+    <authors>dotnet-script</authors>
+    <owners>dotnet-script</owners>    
+  </metadata>
+</package>

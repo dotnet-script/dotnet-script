@@ -7,11 +7,10 @@ namespace Dotnet.Script.Core
 {
     public class ScriptContext
     {
-        public ScriptContext(SourceText code, string workingDirectory, string config, IEnumerable<string> args, string filePath = null, bool debugMode = false)
+        public ScriptContext(SourceText code, string workingDirectory, IEnumerable<string> args, string filePath = null, bool debugMode = false)
         {
             Code = code;
             WorkingDirectory = workingDirectory;
-            Configuration = config;
             Args = new ReadOnlyCollection<string>(args.ToArray());
             FilePath = filePath;
             DebugMode = debugMode;
@@ -20,8 +19,6 @@ namespace Dotnet.Script.Core
         public SourceText Code { get; }
 
         public string WorkingDirectory { get; }
-
-        public string Configuration { get; }
 
         public IReadOnlyList<string> Args { get; }
 

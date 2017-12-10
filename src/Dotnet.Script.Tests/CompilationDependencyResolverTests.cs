@@ -1,11 +1,8 @@
-﻿using System.Linq;
-using Dotnet.Script.DependencyModel.Compilation;
-using Dotnet.Script.DependencyModel.Environment;
-using Dotnet.Script.DependencyModel.ProjectSystem;
+﻿using Dotnet.Script.DependencyModel.Compilation;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Dotnet.Script.DependencyModel.Tests
+namespace Dotnet.Script.Tests
 {
     public class CompilationDependencyResolverTests
     {
@@ -20,25 +17,27 @@ namespace Dotnet.Script.DependencyModel.Tests
         public void ShouldGetCompilationDependenciesForPackageContainingInlineNuGetPackageReference()
         {            
             var resolver = CreateResolver();
-            var dependencies =  resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/InlineNuGetPackage", true, "netcoreapp2.0");
-            Assert.Contains(dependencies, d => d.Contains("AutoMapper"));
+            var dependencies =  resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("InlineNugetPackage"), true, "netcoreapp2.0");
+            Assert.Contains(dependencies, d => d.Name == "AutoMapper");
         }
 
         [Fact]
         public void ShouldGetCompilationDependenciesForPackageContainingNativeLibrary()
         {
             var resolver = CreateResolver();
-            var dependencies = resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/NativeLibrary", true, "netcoreapp2.0");
-            Assert.Contains(dependencies, d => d.Contains("Microsoft.Data.Sqlite"));
+            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("NativeLibrary"), true, "netcoreapp2.0");
+            Assert.Contains(dependencies, d => d.Name == "Microsoft.Data.Sqlite");
         }
 
         [Fact]
         public void ShouldGetCompilationDependenciesForIssue129()
         {
             var resolver = CreateResolver();
-            var dependencies = resolver.GetDependencies("../../../../Dotnet.Script.Tests/TestFixtures/Issue129", true, "netcoreapp2.0");
-            Assert.Contains(dependencies, d => d.Contains("Auth0.ManagementApi"));
+            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("Issue129"), true, "netcoreapp2.0");
+            Assert.Contains(dependencies, d => d.Name == "Auth0.ManagementApi");
         }
+
+       
 
         private CompilationDependencyResolver CreateResolver()
         {           

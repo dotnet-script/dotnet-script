@@ -16,7 +16,7 @@ namespace Dotnet.Script.Core
         public virtual void WritePrettyError(string value)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Error.Write(value);
+            Error.WriteLine(value.TrimEnd(Environment.NewLine.ToCharArray()));
             Console.ResetColor();
         }
 

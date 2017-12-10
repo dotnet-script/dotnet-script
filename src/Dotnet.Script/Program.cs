@@ -9,6 +9,7 @@ using Microsoft.Extensions.CommandLineUtils;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace Dotnet.Script
 {
@@ -30,6 +31,12 @@ namespace Dotnet.Script
                     e = aggregateEx.Flatten().InnerException;
                 }
 
+                if (e is CompilationErrorException || e is ScriptRuntimeException)
+                {
+                    // no need to write out anything as the upstream services will report that
+                    return 0x1;
+                }
+
                 // Be verbose (stack trace) in debug mode otherwise brief
                 var error = args.Any(arg => arg == DebugFlagShort
                                          || arg == DebugFlagLong)
@@ -47,7 +54,6 @@ namespace Dotnet.Script
                 ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
             };
             var file = app.Argument("script", "Path to CSX script");            
-            var config = app.Option("-conf |--configuration <configuration>", "Configuration to use. Defaults to 'Release'", CommandOptionType.SingleValue);
             var interactive = app.Option("-i |--interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
 
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
@@ -70,7 +76,7 @@ namespace Dotnet.Script
                     int exitCode = 0;
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        exitCode = await RunCode(code.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
+                        exitCode = await RunCode(code.Value, debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
                     }
                     return exitCode;
                 });
@@ -109,7 +115,7 @@ namespace Dotnet.Script
                 int exitCode = 0;
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    exitCode = await RunScript(file.Value, config.HasValue() ? config.Value() : "Release", debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue());
+                    exitCode = await RunScript(file.Value, debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue());
                 }
                 else
                 {
@@ -121,7 +127,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);            
         }
 
-        private static async Task<int> RunScript(string file, string config, bool debugMode, IEnumerable<string> args, bool interactive)
+        private static async Task<int> RunScript(string file, bool debugMode, IEnumerable<string> args, bool interactive)
         {
             if (!File.Exists(file))
             {
@@ -134,7 +140,7 @@ namespace Dotnet.Script
             using (var filestream = new FileStream(absoluteFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 var sourceText = SourceText.From(filestream);
-                var context = new ScriptContext(sourceText, directory, config, args, absoluteFilePath, debugMode);
+                var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, debugMode);
 
                 if (interactive)
                 {
@@ -155,17 +161,17 @@ namespace Dotnet.Script
             await runner.RunLoop(debugMode);
         }
 
-        private static Task<int> RunCode(string code, string config, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
+        private static Task<int> RunCode(string code, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), config, args, null, debugMode);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, debugMode);
             return Run(debugMode, context);
         }
 
         private static Task<int> Run(bool debugMode, ScriptContext context)
         {
             var compiler = GetScriptCompiler(debugMode);
-            var runner = new ScriptRunner(compiler, compiler.Logger);
+            var runner = new ScriptRunner(compiler, compiler.Logger, ScriptConsole.Default);
             return runner.Execute<int>(context);
         }
 

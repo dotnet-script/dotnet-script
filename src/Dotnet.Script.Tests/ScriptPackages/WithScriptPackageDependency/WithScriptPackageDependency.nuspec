@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ScriptPackageWithScriptPackageDependency</id>
+    <version>1.0.0</version>
+    <description>ScriptPackageWithScriptPackageDependency</description>
+    <authors>dotnet-script</authors>
+    <owners>dotnet-script</owners>
+      <dependencies>
+          <dependency id="ScriptPackageWithMainCsx" version="1.0.0" />
+      </dependencies>
+  </metadata>
+  
+</package>

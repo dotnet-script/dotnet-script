@@ -1,7 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Net;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 
@@ -39,9 +37,18 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
 
             projectFile.Save(pathToProjectFile);
-            _logger.Debug($"Project file saved to {pathToProjectFile}");
+
+            LogProjectFileInfo(pathToProjectFile);
+
             CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return pathToProjectFile;
+        }
+
+        private void LogProjectFileInfo(string pathToProjectFile)
+        {
+            _logger.Debug($"Project file saved to {pathToProjectFile}");
+            var content = File.ReadAllText(pathToProjectFile);
+            _logger.Debug(content);
         }
 
         public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
@@ -68,7 +75,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
 
             projectFile.Save(pathToProjectFile);
-            _logger.Debug($"Project file saved to {pathToProjectFile}");
+
+            LogProjectFileInfo(pathToProjectFile);
+
             CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return pathToProjectFile;
         }
@@ -85,28 +94,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         }
 
         private static string GetPathToProjectFile(string targetDirectory)
-        {
-            var tempDirectory = Path.GetTempPath();
-            var pathRoot = Path.GetPathRoot(targetDirectory);
-            var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
-            if (pathRoot.Length > 0 && RuntimeHelper.IsWindows())
-            {
-                var driveLetter = pathRoot.Substring(0, 1);
-                if (driveLetter == "\\")
-                {
-                    targetDirectoryWithoutRoot = targetDirectoryWithoutRoot.TrimStart(new char[] { '\\' });
-                    driveLetter = "UNC";
-                }
-
-                targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
-            }
-            var pathToProjectDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
-
-            if (!Directory.Exists(pathToProjectDirectory))
-            {
-                Directory.CreateDirectory(pathToProjectDirectory);
-            }
-
+        { 
+            var pathToProjectDirectory = RuntimeHelper.CreateTempFolder(targetDirectory);
             var pathToProjectFile = Path.Combine(pathToProjectDirectory, "script.csproj");
             return pathToProjectFile;
         }

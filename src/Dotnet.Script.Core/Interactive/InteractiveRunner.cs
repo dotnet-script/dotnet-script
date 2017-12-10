@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using System.Text;
 using System;
+using System.Collections.Immutable;
+using Dotnet.Script.DependencyModel.NuGet;
 
 namespace Dotnet.Script.Core
 {
@@ -54,24 +56,33 @@ namespace Dotnet.Script.Core
 
         public virtual async Task RunLoopWithSeed(bool debugMode, ScriptContext scriptContext)
         {
-            await RunFirstScript(scriptContext);
+            await HandleScriptErrors(async () => await RunFirstScript(scriptContext));
             await RunLoop(debugMode);
         }
 
         protected virtual async Task Execute(string input, bool debugMode)
         {
-            try
+            await HandleScriptErrors(async () =>
             {
                 if (_scriptState == null)
                 {
                     var sourceText = SourceText.From(input);
-                    var context = new ScriptContext(sourceText, CurrentDirectory, debugMode ? "Debug" : "Release", Enumerable.Empty<string>(), debugMode: debugMode);
+                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(), debugMode: debugMode);
                     await RunFirstScript(context);
                 }
                 else
                 {
-                    var lineDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input);
+                    var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
+                    var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
+                    var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
+                    if (scriptMap.Count > 0)
+                    {
+                        _scriptOptions =
+                            _scriptOptions.WithSourceResolver(
+                                new NuGetSourceReferenceResolver(
+                                    new SourceFileResolver(ImmutableArray<string>.Empty, CurrentDirectory), scriptMap));
+                    }
                     foreach (var runtimeDependency in lineDependencies)
                     {
                         Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
@@ -80,21 +91,7 @@ namespace Dotnet.Script.Core
 
                     _scriptState = await _scriptState.ContinueWithAsync(input, _scriptOptions, ex => true);
                 }
-
-                if (_scriptState?.Exception != null)
-                {
-                    Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
-                }
-
-                if (_scriptState?.ReturnValue != null)
-                {
-                    _globals.Print(_scriptState.ReturnValue);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));
-            }
+            });
         }
 
         public virtual void Reset()
@@ -110,6 +107,9 @@ namespace Dotnet.Script.Core
 
         private async Task RunFirstScript(ScriptContext scriptContext)
         {
+            foreach (var arg in scriptContext.Args)
+                _globals.Args.Add(arg);
+
             var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
             _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
             _scriptOptions = compilationContext.ScriptOptions;
@@ -136,6 +136,34 @@ namespace Dotnet.Script.Core
             }
 
             return input.ToString();
+        }
+
+        private async Task HandleScriptErrors(Func<Task> doWork)
+        {
+            try
+            {
+                await doWork();
+                if (_scriptState?.Exception != null)
+                {
+                    Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                }
+
+                if (_scriptState?.ReturnValue != null)
+                {
+                    _globals.Print(_scriptState.ReturnValue);
+                }
+            }
+            catch (CompilationErrorException e)
+            {
+                foreach (var diagnostic in e.Diagnostics)
+                {
+                    Console.WritePrettyError(diagnostic.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));
+            }
         }
     }
 }

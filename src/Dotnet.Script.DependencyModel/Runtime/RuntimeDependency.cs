@@ -1,32 +1,26 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
 
 namespace Dotnet.Script.DependencyModel.Runtime
 {
     public class RuntimeDependency
     {
-        public AssemblyName Name { get; }
-        public string Path { get; }       
-
-        public RuntimeDependency(AssemblyName name, string path)
+        public RuntimeDependency(string name, string version, IReadOnlyList<RuntimeAssembly> assemblies, IReadOnlyList<string> nativeAssets, IReadOnlyList<string> scripts)
         {
             Name = name;
-            Path = path;
-        }
-        
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() ^ Path.GetHashCode();
+            Version = version;
+            Assemblies = assemblies;
+            NativeAssets = nativeAssets;
+            Scripts = scripts;            
         }
 
-        public override bool Equals(object obj)
-        {
-            var other = (RuntimeDependency)obj;
-            return other.Name == Name && other.Path == Path;
-        }
-        
-        public override string ToString()
-        {
-            return $"{nameof(Name)}: {Name}, {nameof(Path)}: {Path}";
-        }
+        public string Name { get; }
+
+        public string Version { get;}
+
+        public IReadOnlyList<RuntimeAssembly> Assemblies { get; }
+
+        public IReadOnlyList<string> NativeAssets { get; }
+
+        public IReadOnlyList<string> Scripts { get; }        
     }
 }

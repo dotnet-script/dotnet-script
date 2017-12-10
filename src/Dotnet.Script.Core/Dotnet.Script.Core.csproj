@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A cross platform library allowing you to run C# (CSX) scripts from a project.json dependency definition file and with support for debugging. Based on Roslyn.</Description>
-    <VersionPrefix>0.16.0</VersionPrefix>
+    <VersionPrefix>0.17.0</VersionPrefix>
     <Authors>filipw</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dotnet.Script.Core</AssemblyName>
@@ -31,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.4.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.6.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.3" />
     <PackageReference Include="System.Collections.Immutable" Version="1.4.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.5.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />

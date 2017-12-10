@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using Dotnet.Script.DependencyModel.Environment;
 using Xunit;
 
@@ -41,10 +42,18 @@ namespace Dotnet.Script.Tests
         }
         
         [Fact]
-        public static void ShouldReturnExitCodeOneWhenScriptFails()
+        public static void ShouldReturnExitCodeOnenWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
             Assert.Equal(1, result.exitCode);
+        }
+
+        [Fact]
+        public static void ShouldReturnStackTraceInformationWhenScriptFails()
+        {
+            var result = Execute(Path.Combine("Exception", "Error.csx"));
+            Assert.Contains("die!", result.output);
+            Assert.Contains("Error.csx:line 1", result.output);
         }
 
         [Fact]
@@ -101,7 +110,34 @@ namespace Dotnet.Script.Tests
             Assert.Equal(42,result.exitCode);
         }
 
+        [Fact]
+        public static void ShouldHandleIssue181()
+        {
+            var result = Execute(Path.Combine("Issue181", "Issue181.csx"));
+            Assert.Contains("42", result.output);
+        }
 
+        [Fact]
+        public static void ShouldHandleIssue198()
+        {         
+            var result = Execute(Path.Combine("Issue198", "Issue198.csx"));
+            Assert.Contains("NuGet.Client", result.output);
+        }
+
+
+        [Fact]
+        public static void ShouldHandleIssue204()
+        {            
+            var result = Execute(Path.Combine("Issue204", "Issue204.csx"));
+            Assert.Contains("System.Net.WebProxy", result.output);
+        }
+
+        [Fact]
+        public void ShouldHandleCSharp72()
+        {
+            var result = Execute(Path.Combine("CSharp72", "CSharp72.csx"));
+            Assert.Contains("hi", result.output);
+        }
 
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
