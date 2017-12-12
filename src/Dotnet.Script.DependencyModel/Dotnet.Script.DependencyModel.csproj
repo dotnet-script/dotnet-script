@@ -11,7 +11,7 @@
     <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script;csx;csharp;roslyn;omnisharp</PackageTags>
-    <Version>0.3.1</Version>    
+    <Version>0.4.0</Version>    
   </PropertyGroup>
 
   <ItemGroup>
