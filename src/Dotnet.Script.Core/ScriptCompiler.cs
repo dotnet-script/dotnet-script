@@ -60,6 +60,8 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
+        public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
         public ScriptLogger Logger { get; }
@@ -138,8 +140,22 @@ namespace Dotnet.Script.Core
             AssemblyLoadContext.Default.Resolving +=
                 (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(dependencyMap, assemblyLoadContext, assemblyName);
 
+            // when processing raw code, make sure we inject new lines after preprocessor directives
+            string code;
+            if (context.FilePath == null)
+            {
+                var syntaxTree = CSharpSyntaxTree.ParseText(context.Code, ParseOptions);
+                var syntaxRewriter = new PreprocessorLineRewriter();
+                var newSyntaxTree = syntaxRewriter.Visit(syntaxTree.GetRoot());
+                code = newSyntaxTree.ToFullString();
+            }
+            else
+            {
+                code = context.Code.ToString();
+            }
+
             var loader = new InteractiveAssemblyLoader();
-            var script = CSharpScript.Create<TReturn>(context.Code.ToString(), opts, typeof(THost), loader);
+            var script = CSharpScript.Create<TReturn>(code, opts, typeof(THost), loader);
             var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
             if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))

@@ -10,6 +10,8 @@ using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
 
 namespace Dotnet.Script
 {
