@@ -14,16 +14,23 @@ namespace Dotnet.Script
 
         public override SyntaxNode VisitLoadDirectiveTrivia(LoadDirectiveTriviaSyntax node)
         {
-            var currentNode = base.VisitLoadDirectiveTrivia(node);
-            var skippedTrivia = currentNode.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
-            return currentNode.ReplaceTrivia(skippedTrivia, SyntaxFactory.TriviaList(SyntaxFactory.LineFeed, skippedTrivia));
+            return HandleSkippedTrivia(base.VisitLoadDirectiveTrivia(node));
         }
 
         public override SyntaxNode VisitReferenceDirectiveTrivia(ReferenceDirectiveTriviaSyntax node)
         {
-            var currentNode = base.VisitReferenceDirectiveTrivia(node);
-            var skippedTrivia = currentNode.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
-            return currentNode.ReplaceTrivia(skippedTrivia, SyntaxFactory.TriviaList(SyntaxFactory.LineFeed, skippedTrivia));
+            return HandleSkippedTrivia(base.VisitReferenceDirectiveTrivia(node));
+        }
+
+        private SyntaxNode HandleSkippedTrivia(SyntaxNode node)
+        {
+            var skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
+            if (skippedTrivia != null)
+            {
+                return node.ReplaceTrivia(skippedTrivia, SyntaxFactory.TriviaList(SyntaxFactory.LineFeed, skippedTrivia));
+            }
+
+            return node;
         }
     }
 }
