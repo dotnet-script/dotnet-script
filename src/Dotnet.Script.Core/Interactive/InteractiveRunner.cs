@@ -72,23 +72,25 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
-                    var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
-
-                    var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
-                    if (scriptMap.Count > 0)
+                    if (input.StartsWith("#r ") || input.StartsWith("#load "))
                     {
-                        _scriptOptions =
-                            _scriptOptions.WithSourceResolver(
-                                new NuGetSourceReferenceResolver(
-                                    new SourceFileResolver(ImmutableArray<string>.Empty, CurrentDirectory), scriptMap));
-                    }
-                    foreach (var runtimeDependency in lineDependencies)
-                    {
-                        Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
-                        _scriptOptions = _scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
-                    }
+                        var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesFromCode(CurrentDirectory, input).ToArray();
+                        var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
+                        var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
+                        if (scriptMap.Count > 0)
+                        {
+                            _scriptOptions =
+                                _scriptOptions.WithSourceResolver(
+                                    new NuGetSourceReferenceResolver(
+                                        new SourceFileResolver(ImmutableArray<string>.Empty, CurrentDirectory), scriptMap));
+                        }
+                        foreach (var runtimeDependency in lineDependencies)
+                        {
+                            Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                            _scriptOptions = _scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
+                        }
+                    }
                     _scriptState = await _scriptState.ContinueWithAsync(input, _scriptOptions, ex => true);
                 }
             });
