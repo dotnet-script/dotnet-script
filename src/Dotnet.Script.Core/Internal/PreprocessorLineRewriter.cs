@@ -28,7 +28,7 @@ namespace Dotnet.Script
             if (skippedTrivia != null)
             {
                 var firstToken = skippedTrivia.GetStructure().ChildTokens().FirstOrDefault();
-                if (firstToken.Kind() == SyntaxKind.BadToken && firstToken.ToFullString().Trim() == ";")
+                if (firstToken != null && firstToken.Kind() == SyntaxKind.BadToken && firstToken.ToFullString().Trim() == ";")
                 {
                     node = node.ReplaceToken(firstToken, SyntaxFactory.Token(SyntaxKind.None));
                     skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
