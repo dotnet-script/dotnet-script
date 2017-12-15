@@ -27,7 +27,16 @@ namespace Dotnet.Script
             var skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
             if (skippedTrivia != null)
             {
-                return node.ReplaceTrivia(skippedTrivia, SyntaxFactory.TriviaList(SyntaxFactory.LineFeed, skippedTrivia));
+                var firstToken = skippedTrivia.GetStructure().ChildTokens().FirstOrDefault();
+                if (firstToken.Kind() == SyntaxKind.BadToken && firstToken.ToFullString().Trim() == ";")
+                {
+                    node = node.ReplaceToken(firstToken, SyntaxFactory.Token(SyntaxKind.None));
+                    skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
+                }
+
+                node = node.ReplaceTrivia(skippedTrivia, SyntaxFactory.TriviaList(SyntaxFactory.LineFeed, skippedTrivia));
+
+                return node;
             }
 
             return node;
