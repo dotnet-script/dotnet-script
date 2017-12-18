@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "Dotnet.Script": {
-      "commandName": "Project"
-    }
-  }
-}
