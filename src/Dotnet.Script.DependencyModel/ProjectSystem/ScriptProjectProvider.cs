@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
@@ -25,7 +26,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
             var parseresult = _scriptParser.ParseFromCode(code);
 
-            targetDirectory = Path.Combine(targetDirectory, "REPL");
+            targetDirectory = Path.Combine(targetDirectory, "interactive", Guid.NewGuid().ToString());
             var pathToProjectFile = GetPathToProjectFile(targetDirectory);
             var projectFile = new ProjectFile();
 
