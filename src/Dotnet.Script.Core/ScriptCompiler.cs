@@ -96,10 +96,7 @@ namespace Dotnet.Script.Core
             var platformIdentifier = RuntimeHelper.GetPlatformIdentifier();
             Logger.Verbose($"Current runtime is '{platformIdentifier}'.");
 
-            var runtimeDependencies = context.FilePath != null
-                ? RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory).ToArray()
-                : RuntimeDependencyResolver.GetDependenciesFromCode(context.WorkingDirectory, context.Code.ToString()).ToArray();
-
+            var runtimeDependencies = RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.Code.ToString()).ToArray();
             var opts = CreateScriptOptions(context, runtimeDependencies.ToList());
 
             var runtimeId = RuntimeHelper.GetRuntimeIdentifier();

@@ -26,7 +26,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
             var parseresult = _scriptParser.ParseFromCode(code);
 
-            targetDirectory = Path.Combine(targetDirectory, "interactive", Guid.NewGuid().ToString());
+            targetDirectory = Path.Combine(targetDirectory, "interactive");
             var pathToProjectFile = GetPathToProjectFile(targetDirectory);
             var projectFile = new ProjectFile();
 

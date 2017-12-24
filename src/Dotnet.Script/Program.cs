@@ -12,6 +12,7 @@ using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
+using Dotnet.Script.DependencyModel.Context;
 
 namespace Dotnet.Script
 {
@@ -166,7 +167,7 @@ namespace Dotnet.Script
         private static Task<int> RunCode(string code, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, debugMode);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, debugMode, ScriptMode.Eval);
             return Run(debugMode, context);
         }
 
