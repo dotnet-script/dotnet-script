@@ -139,9 +139,39 @@ namespace Dotnet.Script.Tests
             Assert.Contains("hi", result.output);
         }
 
+        [Fact]
+        public void ShouldEvaluateCode()
+        {
+            var code = "Console.WriteLine(12345);";
+            var result = ExecuteCode(code);
+            Assert.Contains("12345", result.output);
+        }
+
+        [Fact]
+        public void ShouldSupportInlineNugetReferencesinEvaluatedCode()
+        {
+            var code = @"#r \""nuget: AutoMapper, 6.1.1\"" using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
+            var result = ExecuteCode(code);
+            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
+        [Fact]
+        public void ShouldSupportInlineNugetReferencesWithTrailingSemicoloninEvaluatedCode()
+        {
+            var code = @"#r \""nuget: AutoMapper, 6.1.1\""; using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
+            var result = ExecuteCode(code);
+            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
+            return result;
+        }
+
+        private static (string output, int exitCode) ExecuteCode(string code)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"eval", new[] { $"\"{code}\"" }));
             return result;
         }
 
