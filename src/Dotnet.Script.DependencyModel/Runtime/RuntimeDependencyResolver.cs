@@ -45,15 +45,12 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory)};
         }
 
-        public IEnumerable<RuntimeDependency> GetDependenciesFromCode(string targetDirectory, string code)
+        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string code = null)
         {
-            var pathToProjectFile = _scriptProjectProvider.CreateProjectForRepl(code, targetDirectory, "netcoreapp2.0");
-            return GetDependenciesInternal(pathToProjectFile);
-        }
+            var pathToProjectFile = scriptMode == ScriptMode.Script 
+                ? _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true)
+                : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), "netcoreapp2.0");
 
-        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory)
-        {
-            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true);
             return GetDependenciesInternal(pathToProjectFile);
         }
 
