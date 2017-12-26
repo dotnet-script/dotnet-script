@@ -133,6 +133,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public static void ShouldHandleIssue214()
+        {
+            var result = Execute(Path.Combine("Issue214", "Issue214.csx"));
+            Assert.Contains("Hello World!", result.output);
+        }
+
+        [Fact]
         public void ShouldHandleCSharp72()
         {
             var result = Execute(Path.Combine("CSharp72", "CSharp72.csx"));
