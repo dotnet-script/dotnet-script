@@ -54,6 +54,11 @@ And run:
 docker run -it dotnet-script --version
 
 ```
+
+### Github
+
+You can manually download all the releases in `zip` format from the [Github releases page](https://github.com/filipw/dotnet-script/releases).
+
 ## Usage
 
 Our typical `helloworld.csx` might look like this
