@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Dotnet.Script.Core.Templates;
 
@@ -7,7 +8,7 @@ namespace Dotnet.Script.Core
 {
     public class Scaffolder
     {
-        public void InitializerFolder()
+        public void InitializerFolder(string fileName)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
             string vsCodeDirectory = Path.Combine(currentDirectory, ".vscode");
@@ -35,7 +36,13 @@ namespace Dotnet.Script.Core
                 WriteFile(pathToOmniSharpJson, omniSharpFileTemplate);
             }
 
-            CreateNewScriptFile("helloworld.csx");
+            if (Directory.GetFiles(currentDirectory, "*.csx", SearchOption.AllDirectories).Any()
+                && string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            CreateNewScriptFile(fileName ?? "main.csx");
         }
 
         public void CreateNewScriptFile(string file)

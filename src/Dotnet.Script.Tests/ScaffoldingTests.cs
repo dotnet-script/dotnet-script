@@ -8,33 +8,47 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldInitializeScriptFolder()
         {
-            var tempFolder = CreateTempFolder();            
-            var result = Execute("init", tempFolder);
-            Assert.Equal(0, result.exitCode);
-            Assert.True(File.Exists(Path.Combine(tempFolder, "helloworld.csx")));
-            Assert.True(File.Exists(Path.Combine(tempFolder, "omnisharp.json")));
-            Assert.True(File.Exists(Path.Combine(tempFolder, ".vscode", "launch.json")));
-            Directory.Delete(tempFolder,true);
+            using (var scriptFolder = new DisposableFolder())
+            {                
+                var result = Execute("init", scriptFolder.Path);
+                Assert.Equal(0, result.exitCode);
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "omnisharp.json")));
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));                
+            }
         }
 
         [Fact]
         public void ShouldCreateNewScript()
         {
-            var tempFolder = CreateTempFolder();
-            var result = Execute("new script.csx", tempFolder);
-            Assert.Equal(0, result.exitCode);
-            Assert.True(File.Exists(Path.Combine(tempFolder, "script.csx")));
-            Directory.Delete(tempFolder, true);
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("new script.csx", scriptFolder.Path);
+                Assert.Equal(0, result.exitCode);
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "script.csx")));
+            }
         }
 
-
-        private static string CreateTempFolder()
+        [Fact]
+        public void ShouldInitFolderWithCustomFileNAme()
         {
-            var userTempFolder = Path.GetTempPath();
-            var tempFile = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
-            var tempFolder = Path.Combine(userTempFolder, tempFile);
-            Directory.CreateDirectory(tempFolder);
-            return tempFolder;
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("init custom.csx", scriptFolder.Path);
+                Assert.Equal(0, result.exitCode);
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "custom.csx")));
+            }
+        }
+
+        [Fact]
+        public void ShouldNotCreateDefaultFileForFolderWithExistingScriptFiles()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                Execute("init custom.csx", scriptFolder.Path);
+                Execute("init", scriptFolder.Path);
+                Assert.False(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
+            }
         }
 
         /// <summary>
