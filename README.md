@@ -90,15 +90,33 @@ Simply create a folder somewhere on your system and issue the following command.
 dotnet script init
 ```
 
-This will create `Helloworld.csx` along with the launch configuration needed to debug the script in VS Code.
+This will create `main.csx` along with the launch configuration needed to debug the script in VS Code.
 
 ```shell
 .
 ├── .vscode
 │   └── launch.json
-├── helloworld.csx
+├── main.csx
 └── omnisharp.json
 ```
+
+We can also initialize a folder using a custom filename.
+
+```shell
+dotnet script init custom.csx
+```
+
+Instead of `main.csx` which is the default, we now have a file named `custom.csx`.
+
+```shell
+.
+├── .vscode
+│   └── launch.json
+├── custom.csx
+└── omnisharp.json
+```
+
+> Note: Executing `dotnet script init` inside a folder that already contains one or more script files will not create the `main.csx` file.
 
 ### Passing arguments to scripts
 
