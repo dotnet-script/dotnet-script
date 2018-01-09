@@ -88,7 +88,7 @@ namespace Dotnet.Script
             app.Command("init", c =>
             {
                 c.Description = "Creates a sample script along with the launch.json file needed to launch and debug the script.";
-                var fileName = c.Argument("filename", "The name of the sample script file to be created during initialization.");
+                var fileName = c.Argument("filename", "(Optional) The name of the sample script file to be created during initialization. Defaults to 'main.csx'");
                 c.OnExecute(() =>
                 {
                     var scaffolder = new Scaffolder();
