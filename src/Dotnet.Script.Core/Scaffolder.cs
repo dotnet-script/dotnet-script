@@ -36,7 +36,7 @@ namespace Dotnet.Script.Core
                 WriteFile(pathToOmniSharpJson, omniSharpFileTemplate);
             }
 
-            if (Directory.GetFiles(currentDirectory, "*.csx", SearchOption.AllDirectories).Any()
+            if (Directory.GetFiles(currentDirectory, "*.csx").Any()
                 && string.IsNullOrWhiteSpace(fileName))
             {
                 return;
