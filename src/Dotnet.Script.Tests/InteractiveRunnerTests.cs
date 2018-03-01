@@ -60,7 +60,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("2", result);
@@ -76,7 +76,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Error.ToString();
             Assert.Contains("(1,1): error CS0103: The name 'foo' does not exist in the current context", result);
@@ -92,7 +92,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoopWithSeed(false, new ScriptContext(SourceText.From(@"var x = 1;"), Directory.GetCurrentDirectory(), new string[0]));
+            await ctx.Runner.RunLoopWithSeed(new ScriptContext(SourceText.From(@"var x = 1;"), Directory.GetCurrentDirectory(), new string[0]));
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("2", result);
@@ -109,7 +109,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoopWithSeed(false, new ScriptContext(SourceText.From(@"throw new Exception(""die!"");"), Directory.GetCurrentDirectory(), new string[0]));
+            await ctx.Runner.RunLoopWithSeed(new ScriptContext(SourceText.From(@"throw new Exception(""die!"");"), Directory.GetCurrentDirectory(), new string[0]));
 
             var errorResult = ctx.Console.Error.ToString();
             var result = ctx.Console.Out.ToString();
@@ -130,7 +130,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("Submission#0.Foo", result);
@@ -148,7 +148,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("hi, foo", result);
@@ -165,7 +165,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("foo", result);
@@ -184,7 +184,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("[AutoMapper.MapperConfiguration]", result);
@@ -203,7 +203,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);           
+            await ctx.Runner.RunLoop();           
             var result = ctx.Console.Out.ToString();
             Assert.Contains("[Submission#1+SimpleTargets+TargetDictionary]", result);
         }
@@ -221,7 +221,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("500", result);
@@ -240,7 +240,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("2", result);
@@ -261,7 +261,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("[AutoMapper.MapperConfiguration]", result);
@@ -279,7 +279,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoop(false);
+            await ctx.Runner.RunLoop();
             var result = ctx.Console.Out.ToString();
             Assert.Contains("[Submission#0+SimpleTargets+TargetDictionary]", result);
         }
