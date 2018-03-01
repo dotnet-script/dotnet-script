@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -135,8 +134,8 @@ namespace Dotnet.Script.Core
                 }
             }
 
-            AssemblyLoadContext.Default.Resolving +=
-                (assemblyLoadContext, assemblyName) => MapUnresolvedAssemblyToRuntimeLibrary(dependencyMap, assemblyLoadContext, assemblyName);
+            AppDomain.CurrentDomain.AssemblyResolve += 
+                (sender, args) => MapUnresolvedAssemblyToRuntimeLibrary(dependencyMap, args);
 
             // when processing raw code, make sure we inject new lines after preprocessor directives
             string code;
@@ -183,15 +182,16 @@ namespace Dotnet.Script.Core
             compilationOptions = compilationOptions.WithOptimizationLevel(OptimizationLevel.Release);
             compilationOptionsField.SetValue(compilation, compilationOptions);        
         }
-
-        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IDictionary<string, RuntimeAssembly> dependencyMap, AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        
+        private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IDictionary<string, RuntimeAssembly> dependencyMap, ResolveEventArgs args)
         {
+            var assemblyName = new AssemblyName(args.Name);
             if (dependencyMap.TryGetValue(assemblyName.Name, out var runtimeAssembly))
             {
                 if (runtimeAssembly.Name.Version > assemblyName.Version)
                 {
                     Logger.Log($"Redirecting {assemblyName} to {runtimeAssembly.Name}");                    
-                    return loadContext.LoadFromAssemblyPath(runtimeAssembly.Path);
+                    return Assembly.LoadFile(runtimeAssembly.Path);
                 }
             }
 
