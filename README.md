@@ -378,6 +378,22 @@ This now gives us a chance to attach the debugger before stepping into the scrip
 
 Once that is done we should see out breakpoint being hit.
 
+## Configuration(Debug/Release)
+
+By default, scripts will be compiled using the `debug` configuration. This is to ensure that we can debug a script in VS Code as well as attaching a debugger for long running scripts.
+
+There are however situations where we might need to execute a script that is compiled with the `release` configuration. For instance, running benchmarks using [BenchmarkDotNet](http://benchmarkdotnet.org/) is not possible unless the script is compiled with the `release` configuration.
+
+We can specify this when executing the script.
+
+```shell
+dotnet script -c release foo.csx 
+```
+
+
+
+
+
 ## Team
 
 * [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
