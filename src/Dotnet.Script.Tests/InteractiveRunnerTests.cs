@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class InteractiveRunnerTests
     {
         private class InteractiveTestContext
