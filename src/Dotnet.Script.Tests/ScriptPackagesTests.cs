@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
-    [Collection("ScriptPackagesTests")]
+    [Collection("IntegrationTests")]
     public class ScriptPackagesTests : IClassFixture<ScriptPackagesFixture>
     {
 

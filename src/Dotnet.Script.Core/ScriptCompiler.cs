@@ -79,7 +79,8 @@ namespace Dotnet.Script.Core
                 .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
-                .WithFileEncoding(context.Code.Encoding);            
+                .WithFileEncoding(context.Code.Encoding);
+            
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
                 opts = opts.WithFilePath(context.FilePath);
@@ -129,7 +130,7 @@ namespace Dotnet.Script.Core
                 {
                     Logger.Verbose($"Adding reference to an inherited dependency => {inheritedAssemblyName.FullName}");
                     var assembly = Assembly.Load(inheritedAssemblyName);
-                    opts = opts.AddReferences(assembly);
+                    opts = opts.AddReferences(assembly);                    
                 }
             }
 
@@ -152,6 +153,17 @@ namespace Dotnet.Script.Core
 
             var loader = new InteractiveAssemblyLoader();
             var script = CSharpScript.Create<TReturn>(code, opts, typeof(THost), loader);
+
+            if (context.OptimizationLevel == OptimizationLevel.Release)
+            {
+                Logger.Verbose("Configuration/Optimization mode: Release");                
+                SetReleaseOptimizationLevel(script.GetCompilation());
+            }
+            else
+            {
+                Logger.Verbose("Configuration/Optimization mode: Debug");
+            }
+
             var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
 
             if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
@@ -163,6 +175,14 @@ namespace Dotnet.Script.Core
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader, opts);
         }
 
+        private static void SetReleaseOptimizationLevel(Compilation compilation)
+        {            
+            var compilationOptionsField = typeof(CSharpCompilation).GetTypeInfo().GetDeclaredField("_options");
+            var compilationOptions = (CSharpCompilationOptions)compilationOptionsField.GetValue(compilation);
+            compilationOptions = compilationOptions.WithOptimizationLevel(OptimizationLevel.Release);
+            compilationOptionsField.SetValue(compilation, compilationOptions);        
+        }
+        
         private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IDictionary<string, RuntimeAssembly> dependencyMap, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
