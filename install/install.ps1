@@ -11,7 +11,7 @@ Select-Object tag_name
 $tag_name =  $latestRelease.tag_name
 
 # Download the zip
-Write-Host "Downloading latest verson ($tag_name)"
+Write-Host "Downloading latest version ($tag_name)"
 $client = New-Object "System.Net.WebClient"
 $url = "https://github.com/filipw/dotnet-script/releases/download/$tag_name/dotnet-script.$tag_name.zip"
 $zipFile = Join-Path $tempFolder "dotnet-script.zip"
@@ -30,3 +30,5 @@ $paths += Join-Path $installationFolder "dotnet-script"
 $path = $paths -join ";"
 
 [System.Environment]::SetEnvironmentVariable("path", $path, [System.EnvironmentVariableTarget]::User)
+
+Write-Host "Successfully installed version ($tag_name)"
