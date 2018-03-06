@@ -18,8 +18,8 @@ namespace Dotnet.Script.DependencyModel.Context
 
         public void Restore(string pathToProjectFile)
         {
-            _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli.");
             var runtimeIdentifier = RuntimeHelper.GetRuntimeIdentifier();
+            _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");            
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" -r {runtimeIdentifier}");
             if (exitcode != 0)
             {
