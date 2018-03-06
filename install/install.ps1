@@ -1,3 +1,5 @@
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 # Create a temporary folder to download to.
 $tempFolder = Join-Path $env:TEMP "dotnet-script"
 New-Item $tempFolder -ItemType Directory -Force
