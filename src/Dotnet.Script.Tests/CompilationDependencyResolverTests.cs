@@ -4,6 +4,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class CompilationDependencyResolverTests
     {
         private readonly ITestOutputHelper _testOutputHelper;

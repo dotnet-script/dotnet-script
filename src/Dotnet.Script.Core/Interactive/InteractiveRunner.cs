@@ -38,9 +38,9 @@ namespace Dotnet.Script.Core
             _globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
         }
 
-        public virtual async Task RunLoop(bool debugMode)
+        public virtual async Task RunLoop()
         {
-            while (true && !_shouldExit)
+            while (!_shouldExit)
             {
                 Console.Out.Write("> ");
                 var input = ReadInput();
@@ -51,24 +51,24 @@ namespace Dotnet.Script.Core
                     continue;
                 }
 
-                await Execute(input, debugMode);
+                await Execute(input);
             }
         }
 
-        public virtual async Task RunLoopWithSeed(bool debugMode, ScriptContext scriptContext)
+        public virtual async Task RunLoopWithSeed(ScriptContext scriptContext)
         {
             await HandleScriptErrors(async () => await RunFirstScript(scriptContext));
-            await RunLoop(debugMode);
+            await RunLoop();
         }
 
-        protected virtual async Task Execute(string input, bool debugMode)
+        protected virtual async Task Execute(string input)
         {
             await HandleScriptErrors(async () =>
             {
                 if (_scriptState == null)
                 {
                     var sourceText = SourceText.From(input);
-                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(), debugMode: debugMode, scriptMode: ScriptMode.REPL);
+                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(),scriptMode: ScriptMode.REPL);
                     await RunFirstScript(context);
                 }
                 else

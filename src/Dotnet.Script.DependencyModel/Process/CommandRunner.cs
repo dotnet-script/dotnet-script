@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.Process
@@ -27,11 +28,20 @@ namespace Dotnet.Script.DependencyModel.Process
                 CreateNoWindow = true,
                 Arguments = arguments ?? "",
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,
+                RedirectStandardError = true,                
                 UseShellExecute = false
             };
+            RemoveMsBuildEnvironmentVariables(startInformation.Environment);
             return startInformation;
         }
+        private static void RemoveMsBuildEnvironmentVariables(IDictionary<string, string> environment)
+        {
+            // Remove various MSBuild environment variables set by OmniSharp to ensure that
+            // the .NET CLI is not launched with the wrong values.
+            environment.Remove("MSBUILD_EXE_PATH");
+            environment.Remove("MSBuildExtensionsPath");
+        }
+
 
         private static void RunAndWait(System.Diagnostics.Process process)
         {
