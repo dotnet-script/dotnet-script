@@ -1,6 +1,4 @@
-#load "FileUtils.csx"
-#load "DotNet.csx"
-#load "Command.csx"
+#load "nuget:Dotnet.Build, 0.2.5"
 
 using System.Xml.Linq;
 
@@ -11,18 +9,15 @@ public static class Choco
     /// </summary>
     /// <param name="pathToProjectFolder">The path to the project folder.</param>
     /// <param name="outputFolder">The path to the output folder (*.nupkg)</param>
-    public static void Pack(string pathToProjectFolder, string outputFolder)
-    {        
-        DotNet.Publish(pathToProjectFolder);        
-        Directory.CreateDirectory(outputFolder);        
-        var pathToPublishFolder = FileUtils.FindDirectory(Path.Combine(pathToProjectFolder, @"bin\Release"),"publish");        
+    public static void Pack(string pathToProjectFolder, string pathToBinaries, string outputFolder)
+    {                        
         File.Copy(Path.Combine(pathToProjectFolder, "../../LICENSE"), Path.Combine("Chocolatey","tools","LICENSE.TXT"), true);
-        string pathToProjectFile = FileUtils.FindFile(pathToProjectFolder, "*.csproj");
-        CreateSpecificationFromProject(pathToProjectFile, pathToPublishFolder);        
+        string pathToProjectFile = Directory.GetFiles(pathToProjectFolder, "*.csproj").Single();
+        CreateSpecificationFromProject(pathToProjectFile, pathToBinaries);        
         Command.Execute("choco.exe", $@"pack Chocolatey\chocolatey.nuspec  --outputdirectory {outputFolder}");      
     }
 
-    private static void CreateSpecificationFromProject(string pathToProjectFile, string pathToPublishFolder)
+    private static void CreateSpecificationFromProject(string pathToProjectFile, string pathToBinaries)
     {
         var projectFile = XDocument.Load(pathToProjectFile);
         var authors = projectFile.Descendants("Authors").SingleOrDefault()?.Value;
@@ -65,9 +60,8 @@ public static class Choco
         packageElement.Add(filesElement);
 
         // Add the tools folder that contains "ChocolateyInstall.ps1"
-        filesElement.Add(CreateFileElement(@"tools\*.*",@"Dotnet.Script\tools"));    
-        var srcFolder = Path.Combine("../",pathToPublishFolder).WithWindowsSlashes();
-        var srcGlobPattern = $@"{srcFolder}\**\*";
+        filesElement.Add(CreateFileElement(@"tools\*.*",$@"{packageId}\tools"));            
+        var srcGlobPattern = $@"{pathToBinaries}\**\*";
         filesElement.Add(CreateFileElement(srcGlobPattern,packageId));
                                 
         using (var fileStream = new FileStream("Chocolatey/chocolatey.nuspec",FileMode.Create))
