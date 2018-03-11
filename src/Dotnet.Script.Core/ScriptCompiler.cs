@@ -190,8 +190,12 @@ namespace Dotnet.Script.Core
             {
                 if (runtimeAssembly.Name.Version > assemblyName.Version)
                 {
-                    Logger.Log($"Redirecting {assemblyName} to {runtimeAssembly.Name}");                    
-                    return Assembly.LoadFile(runtimeAssembly.Path);
+                    var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                        .FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
+                    if(loadedAssembly != null) 
+                        return loadedAssembly;
+                    Logger.Log($"Redirecting {assemblyName} to {runtimeAssembly.Name}");                 
+                    return Assembly.LoadFrom(runtimeAssembly.Path);
                 }
             }
 
