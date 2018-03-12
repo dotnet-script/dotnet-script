@@ -14,14 +14,14 @@ public static class BuildContext
         DotnetScriptCoreProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.Core");
         DotnetScriptDependencyModelProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.DependencyModel");
         DotnetScriptDependencyModelNuGetProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.DependencyModel.NuGet");
+        TestProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.Tests");
 
         var artifactsFolder = CreateDirectory(Root, "Artifacts");
         GitHubArtifactsFolder = CreateDirectory(artifactsFolder, "GitHub");
         NuGetArtifactsFolder = CreateDirectory(artifactsFolder, "NuGet");
         ChocolateyArtifactsFolder = CreateDirectory(artifactsFolder, "Chocolatey");
         PublishArtifactsFolder = CreateDirectory(artifactsFolder, "Publish", ProjectName);
-        PublishArchiveFolder = Path.Combine(PublishArtifactsFolder, "..");
-        //PublishArtifactsFolder = CreateDirectory(artifactsFolder, "Publish", ProjectName);
+        PublishArchiveFolder = Path.Combine(PublishArtifactsFolder, "..");        
 
         PathToReleaseNotes = Path.Combine(GitHubArtifactsFolder, "ReleaseNotes.md");
 
