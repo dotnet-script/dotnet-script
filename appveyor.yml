@@ -13,10 +13,10 @@ build_script:
     dotnet script build.csx
 
 artifacts:
-- path: build\Artifacts\Chocolatey\*.nupgk
+- path: build\Artifacts\Chocolatey\*.nupkg
   name: Chocolatey Packages
 
-- path: build\Artifacts\NuGet\*.nupgk
+- path: build\Artifacts\NuGet\*.nupkg
   name: NuGet Packages
 
 - path: build\Artifacts\GitHub\*.zip
