@@ -1,8 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
+using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Runtime;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
+using Microsoft.CodeAnalysis.Text;
 using Xunit;
 
 namespace Dotnet.Script.Tests
@@ -190,6 +197,29 @@ namespace Dotnet.Script.Tests
             var code = @"#r \""nuget: AutoMapper, 6.1.1\""; using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
             var result = ExecuteCode(code);
             Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
+        [Fact]
+        public static void ShouldHandleIssue235()
+        {
+            var code = @"#r ""nuget: AgileObjects.AgileMapper, 0.23.0""
+using AgileObjects.AgileMapper;
+public class TestClass
+{
+    public TestClass()
+    {
+        IMapper mapper = Mapper.CreateNew();
+    }
+}";
+            var wd = Path.GetDirectoryName(typeof(ScriptExecutionTests).Assembly.Location);
+            var compiler = new ScriptCompiler(new ScriptLogger(Console.Error, true), new RuntimeDependencyResolver(type => ((level, message) => {})));
+            var res = compiler.CreateCompilationContext<object, InteractiveScriptGlobals>(new ScriptContext(SourceText.From(code), wd, Enumerable.Empty<string>()));
+            using(var ms = File.OpenWrite(Path.Combine(wd, "Issue235.dll")))
+            {
+                res.Script.GetCompilation().Emit(ms);
+            }
+            // var result = Execute(Path.Combine("Issue235", "Issue235.csx"));
+            // Assert.Contains("Hello World!", result.output);
         }
 
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
