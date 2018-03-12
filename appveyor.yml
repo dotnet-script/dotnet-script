@@ -24,7 +24,7 @@ artifacts:
 
 test: off
 environment:
-    IS_SECURE_BUILDENVIRONM∥ENT:
+    IS_SECURE_BUILDENVIRONMENT:
         secure: The encoded value of 'true' (not including the apostrophes)
     GITHUB_REPO_TOKEN:
         secure: The encoded value of your GitHub Access Token.
