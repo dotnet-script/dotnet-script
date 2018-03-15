@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using Dotnet.Script.Core;
+using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis;
@@ -211,15 +212,20 @@ public class TestClass
         IMapper mapper = Mapper.CreateNew();
     }
 }";
-            var wd = Path.GetDirectoryName(typeof(ScriptExecutionTests).Assembly.Location);
-            var compiler = new ScriptCompiler(new ScriptLogger(Console.Error, true), new RuntimeDependencyResolver(type => ((level, message) => {})));
-            var res = compiler.CreateCompilationContext<object, InteractiveScriptGlobals>(new ScriptContext(SourceText.From(code), wd, Enumerable.Empty<string>()));
-            using(var ms = File.OpenWrite(Path.Combine(wd, "Issue235.dll")))
+            var logger = new ScriptLogger(Console.Error, true);
+            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) => {}));
+            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
+            //Copied from Execute(string fixture, params string[] arguments)
+            //Probably there should be a better place for this
+            var workingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "TestFixtures", "Issue235"); 
+            var scriptContext = new ScriptContext(SourceText.From(code), workingDirectory, Enumerable.Empty<string>(), scriptMode: ScriptMode.REPL);
+            var compilationResult = compiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
+            using(var ms = File.OpenWrite(Path.Combine(workingDirectory, "Issue235.dll")))
             {
-                res.Script.GetCompilation().Emit(ms);
+                compilationResult.Script.GetCompilation().Emit(ms);
             }
-            // var result = Execute(Path.Combine("Issue235", "Issue235.csx"));
-            // Assert.Contains("Hello World!", result.output);
+            var result = Execute(Path.Combine("Issue235", "Issue235.csx"));
+            Assert.Contains("Hello World!", result.output);
         }
 
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
