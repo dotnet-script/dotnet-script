@@ -203,24 +203,15 @@ namespace Dotnet.Script.Tests
         [Fact]
         public static void ShouldHandleIssue235()
         {
-            var code = @"#r ""nuget: AgileObjects.AgileMapper, 0.23.0""
-using AgileObjects.AgileMapper;
-public class TestClass
-{
-    public TestClass()
-    {
-        IMapper mapper = Mapper.CreateNew();
-    }
-}";
             var logger = new ScriptLogger(Console.Error, true);
             var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) => {}));
             var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
             //Copied from Execute(string fixture, params string[] arguments)
             //Probably there should be a better place for this
             var workingDirectory = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "TestFixtures", "Issue235"); 
-            var scriptContext = new ScriptContext(SourceText.From(code), workingDirectory, Enumerable.Empty<string>(), scriptMode: ScriptMode.REPL);
+            var scriptContext = new ScriptContext(SourceText.From(File.ReadAllText(Path.Combine(workingDirectory, "TestClass.csx"))), workingDirectory, Enumerable.Empty<string>(), scriptMode: ScriptMode.REPL);
             var compilationResult = compiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
-            using(var ms = File.OpenWrite(Path.Combine(workingDirectory, "Issue235.dll")))
+            using(var ms = File.OpenWrite(Path.Combine(workingDirectory, "TestClass.dll")))
             {
                 compilationResult.Script.GetCompilation().Emit(ms);
             }
