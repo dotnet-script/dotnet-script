@@ -25,10 +25,10 @@ artifacts:
 test: off
 environment:
     IS_SECURE_BUILDENVIRONMENT:
-        secure: The encoded value of 'true' (not including the apostrophes)
+        secure: xU2zj54rFEPVqg/UuGU/DA==
     GITHUB_REPO_TOKEN:
-        secure: The encoded value of your GitHub Access Token.
+        secure: AzNlvlKMzcoPNzawN3Hv48N6dzPa0N57HdFfAXP2cELBp9uiwJxtLdKWuDhZyf21
     NUGET_APIKEY:
-        secure: The encoded value of your NuGet ApiKey.
+        secure: 81vsB74sZV0IlV1Ru/qKPbaDS47lQ80aeOLWCPmlvak7O/RA9EqqFqWVxZFS0ora
     CHOCO_APIKEY:
-        secure: The encoded value of the Choco API Key (dotnet-script account).
+        secure: scd8oB50KqKDRvt/+TSgUJavZzY39iqqa+1AZmj1CGue1/vjWJn6vIO4sMhN+d2l
