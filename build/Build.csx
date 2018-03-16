@@ -1,33 +1,49 @@
 #! "netcoreapp2.0"
-#r "nuget:NetStandard.Library,2.0.0"
-#r "nuget:Microsoft.DotNet.PlatformAbstractions, 2.0.3"
-#load "DotNet.csx"
+#load "nuget:Dotnet.Build, 0.2.8"
+#load "nuget:github-changelog, 0.1.4"
 #load "Choco.csx"
-#load "NuGet.csx"
-#load "FileUtils.csx"
+#load "BuildContext.csx"
 
-using System.Runtime.InteropServices;
+using static ReleaseManagement;
+using static ChangeLog;
+using static FileUtils;
 
-
-var currentFolder = Path.GetDirectoryName(GetScriptPath());
-var root = Path.GetFullPath(Path.Combine(currentFolder, ".."));
-
-
-DotNet.Build(Path.Combine(root, "src","Dotnet.Script"));
-
-DotNet.Test($"{root}/src/Dotnet.Script.Tests");
-
+DotNet.Build(DotnetScriptProjectFolder);
+DotNet.Test(TestProjectFolder);
+DotNet.Publish(DotnetScriptProjectFolder, PublishArtifactsFolder);
 
 // We only publish packages from Windows/AppVeyor
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+if (BuildEnvironment.IsWindows)
 {
-    string packagesOutputFolder = Path.Combine(root, "build", "NuGet");     
-    DotNet.Pack(Path.Combine(root, "src" , "Dotnet.Script"), packagesOutputFolder);
-    DotNet.Pack(Path.Combine(root, "src" , "Dotnet.Script.Core"), packagesOutputFolder);
-    DotNet.Pack(Path.Combine(root, "src" , "Dotnet.Script.DependencyModel"), packagesOutputFolder);
-    DotNet.Pack(Path.Combine(root, "src" , "Dotnet.Script.DependencyModel.NuGet"), packagesOutputFolder);
-    DotNet.Publish($"{root}/src/Dotnet.Script");
-    Choco.Pack($"{root}/src/Dotnet.Script","Chocolatey");
+    DotNet.Pack(DotnetScriptProjectFolder, NuGetArtifactsFolder);
+    DotNet.Pack(DotnetScriptCoreProjectFolder, NuGetArtifactsFolder);
+    DotNet.Pack(DotnetScriptDependencyModelProjectFolder, NuGetArtifactsFolder);
+    DotNet.Pack(DotnetScriptDependencyModelNuGetProjectFolder, NuGetArtifactsFolder);
+    Choco.Pack(DotnetScriptProjectFolder, PublishArtifactsFolder, ChocolateyArtifactsFolder);
+    Zip(PublishArchiveFolder, PathToGitHubReleaseAsset);
+    
+    
+    if (BuildEnvironment.IsSecure)
+    {
+        await CreateReleaseNotes();
+
+        if (Git.Default.IsTagCommit())
+        {
+            Git.Default.RequreCleanWorkingTree();
+            await ReleaseManagerFor(Owner,ProjectName,BuildEnvironment.GitHubAccessToken)
+            .CreateRelease(Git.Default.GetLatestTag(), PathToReleaseNotes, new [] { new ZipReleaseAsset(PathToGitHubReleaseAsset) });
+            NuGet.TryPush(NuGetArtifactsFolder);
+        }
+    }
 }
 
-
+private async Task CreateReleaseNotes()
+{
+    Logger.Log("Creating release notes");        
+    var generator = ChangeLogFrom(Owner, ProjectName, BuildEnvironment.GitHubAccessToken).SinceLatestTag();
+    if (!Git.Default.IsTagCommit())
+    {
+        generator = generator.IncludeUnreleased();
+    }
+    await generator.Generate(PathToReleaseNotes);
+}

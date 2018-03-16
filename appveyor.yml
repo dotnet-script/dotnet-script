@@ -1,23 +1,34 @@
 version: 1.0.{build}
 image: Visual Studio 2017
-build_script:
-- ps: >-
-    cd .\build\
 
-    .\install-dotnet-script.ps1
-- cmd:
-    dotnet .\dotnet-script\dotnet-script.dll build.csx
+install:
+- cmd: choco install dotnet.script
+
+build_script:
+- cmd: >-
+    cd build
+
+    refreshenv
+
+    dotnet script build.csx
+
+artifacts:
+- path: build\Artifacts\Chocolatey\*.nupkg
+  name: Chocolatey Packages
+
+- path: build\Artifacts\NuGet\*.nupkg
+  name: NuGet Packages
+
+- path: build\Artifacts\GitHub\*.zip
+  name: GitHub  
 
 test: off
-artifacts:
-- path: /**/Dotnet.Script*.nupkg
-  name: Chocolatey Packages
-# Uncomment this to enable deploy on repo tagging
-# deploy:
-#   provider: Chocolatey  
-#   api_key:
-#     secure: [Your API key goes here]
-#   skip_symbols: false  
-#   artifact: /.*\.nupkg/
-#   on:
-#     appveyor_repo_tag: true
+environment:
+    IS_SECURE_BUILDENVIRONMENT:
+        secure: xU2zj54rFEPVqg/UuGU/DA==
+    GITHUB_REPO_TOKEN:
+        secure: AzNlvlKMzcoPNzawN3Hv48N6dzPa0N57HdFfAXP2cELBp9uiwJxtLdKWuDhZyf21
+    NUGET_APIKEY:
+        secure: 81vsB74sZV0IlV1Ru/qKPbaDS47lQ80aeOLWCPmlvak7O/RA9EqqFqWVxZFS0ora
+    CHOCO_APIKEY:
+        secure: scd8oB50KqKDRvt/+TSgUJavZzY39iqqa+1AZmj1CGue1/vjWJn6vIO4sMhN+d2l
