@@ -1,42 +1,42 @@
-#load "nuget:Dotnet.Build, 0.2.7"
+#load "nuget:Dotnet.Build, 0.2.8"
 using static FileUtils;
 using System.Xml.Linq;
 
-private static string Version;
+string Version;
 
-public static string GitHubArtifactsFolder;
+string GitHubArtifactsFolder;
 
-public static string GitHubReleaseAsset;
+string GitHubReleaseAsset;
 
-public static string GitHubReleaseNoteAsset;
+string GitHubReleaseNoteAsset;
 
-public static string NuGetArtifactsFolder;
+string NuGetArtifactsFolder;
 
-public static string ChocolateyArtifactsFolder;
+string ChocolateyArtifactsFolder;
 
-public static string PublishArtifactsFolder;
+string PublishArtifactsFolder;
 
-public static string PublishArchiveFolder;
+string PublishArchiveFolder;
 
-public static string DotnetScriptProjectFolder;
+string DotnetScriptProjectFolder;
 
-public static string DotnetScriptCoreProjectFolder;
+string DotnetScriptCoreProjectFolder;
 
-public static string DotnetScriptDependencyModelProjectFolder;
+string DotnetScriptDependencyModelProjectFolder;
 
-public static string DotnetScriptDependencyModelNuGetProjectFolder;
+string DotnetScriptDependencyModelNuGetProjectFolder;
 
-public static string Root;
+string Root;
 
-public static string TestProjectFolder;
+string TestProjectFolder;
 
-public static string PathToReleaseNotes;
+string PathToReleaseNotes;
 
-public static string PathToGitHubReleaseAsset;
+string PathToGitHubReleaseAsset;
 
-public static string Owner;
+string Owner;
 
-public static string ProjectName;
+string ProjectName;
 
 Owner = "filipw";
 ProjectName = "dotnet-script";
