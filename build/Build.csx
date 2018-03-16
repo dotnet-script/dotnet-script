@@ -4,7 +4,6 @@
 #load "Choco.csx"
 #load "BuildContext.csx"
 
-using static BuildContext;
 using static ReleaseManagement;
 using static ChangeLog;
 using static FileUtils;
