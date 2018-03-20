@@ -9,4 +9,4 @@ Process.Start(new ProcessStartInfo {
     UseShellExecute = false,
     CreateNoWindow = true
 }).WaitForExit();
-Console.WriteLine("Hello World");
+Console.WriteLine("Hello World!");
