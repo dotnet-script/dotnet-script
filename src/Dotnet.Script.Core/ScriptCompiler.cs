@@ -80,12 +80,12 @@ namespace Dotnet.Script.Core
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
                 .WithFileEncoding(context.Code.Encoding);
-            
+
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
                 opts = opts.WithFilePath(context.FilePath);
             }
-            
+
             return opts;
         }
 
@@ -110,7 +110,7 @@ namespace Dotnet.Script.Core
                 .ToDictionary(f => f.Name, f => f.ResolvedRuntimeAssembly, StringComparer.OrdinalIgnoreCase);
 
             foreach (var runtimeAssembly in dependencyMap.Values)
-            {                                
+            {
                 Logger.Verbose("Adding reference to a runtime dependency => " + runtimeAssembly);
                 opts = opts.AddReferences(MetadataReference.CreateFromFile(runtimeAssembly.Path));
             }
@@ -126,15 +126,15 @@ namespace Dotnet.Script.Core
             foreach (var inheritedAssemblyName in inheritedAssemblyNames)
             {
                 // Always prefer the resolved runtime dependency rather than the inherited assembly.
-                if(!dependencyMap.ContainsKey(inheritedAssemblyName.Name))                
+                if(!dependencyMap.ContainsKey(inheritedAssemblyName.Name))
                 {
                     Logger.Verbose($"Adding reference to an inherited dependency => {inheritedAssemblyName.FullName}");
                     var assembly = Assembly.Load(inheritedAssemblyName);
-                    opts = opts.AddReferences(assembly);                    
+                    opts = opts.AddReferences(assembly);
                 }
             }
 
-            AppDomain.CurrentDomain.AssemblyResolve += 
+            AppDomain.CurrentDomain.AssemblyResolve +=
                 (sender, args) => MapUnresolvedAssemblyToRuntimeLibrary(dependencyMap, args);
 
             // when processing raw code, make sure we inject new lines after preprocessor directives
@@ -156,7 +156,7 @@ namespace Dotnet.Script.Core
 
             if (context.OptimizationLevel == OptimizationLevel.Release)
             {
-                Logger.Verbose("Configuration/Optimization mode: Release");                
+                Logger.Verbose("Configuration/Optimization mode: Release");
                 SetReleaseOptimizationLevel(script.GetCompilation());
             }
             else
@@ -176,13 +176,13 @@ namespace Dotnet.Script.Core
         }
 
         private static void SetReleaseOptimizationLevel(Compilation compilation)
-        {            
+        {
             var compilationOptionsField = typeof(CSharpCompilation).GetTypeInfo().GetDeclaredField("_options");
             var compilationOptions = (CSharpCompilationOptions)compilationOptionsField.GetValue(compilation);
             compilationOptions = compilationOptions.WithOptimizationLevel(OptimizationLevel.Release);
-            compilationOptionsField.SetValue(compilation, compilationOptions);        
+            compilationOptionsField.SetValue(compilation, compilationOptions);
         }
-        
+
         private Assembly MapUnresolvedAssemblyToRuntimeLibrary(IDictionary<string, RuntimeAssembly> dependencyMap, ResolveEventArgs args)
         {
             var assemblyName = new AssemblyName(args.Name);
@@ -192,9 +192,12 @@ namespace Dotnet.Script.Core
                 {
                     var loadedAssembly = AppDomain.CurrentDomain.GetAssemblies()
                         .FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
-                    if(loadedAssembly != null) 
+                    if(loadedAssembly != null)
+                    {
+                        Logger.Log($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
                         return loadedAssembly;
-                    Logger.Log($"Redirecting {assemblyName} to {runtimeAssembly.Name}");                 
+                    }
+                    Logger.Log($"Redirecting {assemblyName} to {runtimeAssembly.Name}");
                     return Assembly.LoadFrom(runtimeAssembly.Path);
                 }
             }
