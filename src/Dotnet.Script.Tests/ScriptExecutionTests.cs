@@ -1,16 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Security.Cryptography;
-using Dotnet.Script.Core;
-using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
-using Dotnet.Script.DependencyModel.Runtime;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.CodeAnalysis.Text;
 using Xunit;
 
 namespace Dotnet.Script.Tests
