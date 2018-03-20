@@ -12,7 +12,7 @@ namespace Dotnet.Script.Tests
     {
         [Fact]
         public void ShouldExecuteHelloWorld()
-        {            
+        {
             var result = ExecuteInProcess(Path.Combine("HelloWorld", "HelloWorld.csx"));
             //Assert.Contains("Hello World", result.output);
         }
@@ -39,9 +39,9 @@ namespace Dotnet.Script.Tests
             {
                 var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
                 Assert.Contains("Connection successful", result.output);
-            }            
+            }
         }
-        
+
         [Fact]
         public static void ShouldReturnExitCodeOnenWhenScriptFails()
         {
@@ -80,7 +80,7 @@ namespace Dotnet.Script.Tests
             {
                 var result = Execute(Path.Combine("Issue166", "Issue166.csx"));
                 Assert.Contains("Connection successful", result.output);
-            }                
+            }
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace Dotnet.Script.Tests
         public static void ShouldNotPassUnEscapedKnownArgumentToScript()
         {
             var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "-v");
-            Assert.DoesNotContain("-v", result.output);            
+            Assert.DoesNotContain("-v", result.output);
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace Dotnet.Script.Tests
 
         [Fact]
         public static void ShouldHandleIssue198()
-        {         
+        {
             var result = Execute(Path.Combine("Issue198", "Issue198.csx"));
             Assert.Contains("NuGet.Client", result.output);
         }
@@ -128,7 +128,7 @@ namespace Dotnet.Script.Tests
 
         [Fact]
         public static void ShouldHandleIssue204()
-        {            
+        {
             var result = Execute(Path.Combine("Issue204", "Issue204.csx"));
             Assert.Contains("System.Net.WebProxy", result.output);
         }
@@ -192,6 +192,45 @@ namespace Dotnet.Script.Tests
             Assert.Contains("AutoMapper.MapperConfiguration", result.output);
         }
 
+        [Fact]
+        public static void ShouldHandleIssue235()
+        {
+            string code =
+            @"using AgileObjects.AgileMapper;
+    public class TestClass
+    {
+        public TestClass()
+        {
+            IMapper mapper = Mapper.CreateNew();
+        }
+    }";
+
+            string script =
+            @"#! ""netcoreapp2.0""
+    #r ""nuget: AgileObjects.AgileMapper, 0.23.1""
+    #r ""TestLibrary.dll""
+    
+    using AgileObjects.AgileMapper;
+
+    IMapper mapper = Mapper.CreateNew();
+    var testClass = new TestClass();
+    Console.WriteLine(""Hello World!"");";
+
+
+            using (var disposableFolder = new DisposableFolder())
+            {
+                var projectFolder = Path.Combine(disposableFolder.Path, "TestLibrary");
+                ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "new classlib -n TestLibrary" }, disposableFolder.Path);
+                ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "add TestLibrary.csproj package AgileObjects.AgileMapper -v 0.23.0" }, projectFolder);
+                File.WriteAllText(Path.Combine(projectFolder, "Class1.cs"), code);
+                File.WriteAllText(Path.Combine(projectFolder, "script.csx"), script);
+                ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "build -c release -o ./" }, projectFolder);
+
+                var dotnetScriptArguments = GetDotnetScriptArguments(Path.Combine(projectFolder, "script.csx"));
+                var result = ProcessHelper.RunAndCaptureOutput("dotnet", dotnetScriptArguments);
+                Assert.Contains("Hello World!", result.output);
+            }
+        }
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
@@ -209,8 +248,8 @@ namespace Dotnet.Script.Tests
         /// </summary>        
         private static int ExecuteInProcess(string fixture, params string[] arguments)
         {
-            var pathToFixture = Path.Combine("..", "..", "..","TestFixtures", fixture);
-            var allArguments = new List<string>(new[] {pathToFixture});
+            var pathToFixture = Path.Combine("..", "..", "..", "TestFixtures", fixture);
+            var allArguments = new List<string>(new[] { pathToFixture });
             if (arguments != null)
             {
                 allArguments.AddRange(arguments);
