@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using Dotnet.Script.DependencyModel.Environment;
 using Xunit;
 
@@ -13,15 +12,15 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            var result = ExecuteInProcess(Path.Combine("HelloWorld", "HelloWorld.csx"));
-            //Assert.Contains("Hello World", result.output);
+            var result = Execute(Path.Combine("HelloWorld", "HelloWorld.csx"));
+            Assert.Contains("Hello World", result.output);
         }
 
         [Fact]
         public void ShouldExecuteScriptWithInlineNugetPackage()
         {
-            var result = ExecuteInProcess(Path.Combine("InlineNugetPackage", "InlineNugetPackage.csx"));
-            //Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+            var result = Execute(Path.Combine("InlineNugetPackage", "InlineNugetPackage.csx"));
+            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
         }
 
         [Fact]
