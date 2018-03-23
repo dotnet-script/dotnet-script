@@ -59,6 +59,20 @@ docker run -it dotnet-script --version
 
 You can manually download all the releases in `zip` format from the [Github releases page](https://github.com/filipw/dotnet-script/releases).
 
+### .Net Core Global Tool
+
+.Net Core 2.1 introduces the concept of global tools meaning that we can install `dotnet-script` using nothing but the `dotnet CLI`
+
+```shell
+dotnet install tool -g dotnet-script
+```
+
+The advantage of this approach is that we will execute the same command for installation across all platforms.
+
+> In order to use the global tool we need at least [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1) 
+
+
+
 ## Usage
 
 Our typical `helloworld.csx` might look like this
