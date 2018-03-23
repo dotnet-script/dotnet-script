@@ -69,7 +69,7 @@ dotnet install tool -g dotnet-script
 
 The advantage of this approach is that we will execute the same command for installation across all platforms.
 
-> In order to se global tool we need at least [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1) 
+> In order to use the global tool we need at least [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1) 
 
 
 
