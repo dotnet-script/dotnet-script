@@ -1,5 +1,5 @@
 #! "netcoreapp2.0"
-#load "nuget:Dotnet.Build, 0.2.8"
+#load "nuget:Dotnet.Build, 0.2.9"
 #load "nuget:github-changelog, 0.1.4"
 #load "Choco.csx"
 #load "BuildContext.csx"
@@ -15,14 +15,14 @@ DotNet.Publish(DotnetScriptProjectFolder, PublishArtifactsFolder);
 // We only publish packages from Windows/AppVeyor
 if (BuildEnvironment.IsWindows)
 {
+    NuGet.PackAsTool(DotnetScriptProjectFolder,PublishArtifactsFolder,NuGetArtifactsFolder);
     DotNet.Pack(DotnetScriptProjectFolder, NuGetArtifactsFolder);
     DotNet.Pack(DotnetScriptCoreProjectFolder, NuGetArtifactsFolder);
     DotNet.Pack(DotnetScriptDependencyModelProjectFolder, NuGetArtifactsFolder);
     DotNet.Pack(DotnetScriptDependencyModelNuGetProjectFolder, NuGetArtifactsFolder);
     Choco.Pack(DotnetScriptProjectFolder, PublishArtifactsFolder, ChocolateyArtifactsFolder);
     Zip(PublishArchiveFolder, PathToGitHubReleaseAsset);
-    
-    
+
     if (BuildEnvironment.IsSecure)
     {
         await CreateReleaseNotes();
