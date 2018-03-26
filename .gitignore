@@ -261,3 +261,4 @@ project.json
 *.zip
 /build/dotnet-script
 /dotnet-script
+/.vscode
