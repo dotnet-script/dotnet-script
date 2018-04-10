@@ -24,6 +24,8 @@ artifacts:
 
 test: off
 environment:
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+    DOTNET_CLI_TELEMETRY_OPTOUT: true
     IS_SECURE_BUILDENVIRONMENT:
         secure: xU2zj54rFEPVqg/UuGU/DA==
     GITHUB_REPO_TOKEN:
