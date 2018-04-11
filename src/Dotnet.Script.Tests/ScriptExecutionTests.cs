@@ -230,6 +230,13 @@ namespace Dotnet.Script.Tests
                 Assert.Contains("Hello World!", result.output);
             }
         }
+
+        [Fact]
+        public static void ShouldHandleIssue226()
+        {
+            var result = Execute(Path.Combine("Issue226", "Issue226.csx"));
+            Assert.Contains("Hello World!", result.output);
+        }
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
