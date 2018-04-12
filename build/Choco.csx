@@ -26,6 +26,15 @@ public static class Choco
         }
     }
 
+    public static void TryPush(string packagesFolder, string apiKey, string source = "https://push.chocolatey.org/")
+    {
+        var packageFiles = Directory.GetFiles(packagesFolder, "*.nupkg");        
+        foreach(var packageFile in packageFiles)
+        {                                    
+            Command.Capture("choco.exe", $"push {packageFile} --source {source} --key {apiKey}").Dump();           
+        }
+    }
+
     private static void CreateSpecificationFromProject(string pathToProjectFile, string pathToBinaries)
     {
         var projectFile = XDocument.Load(pathToProjectFile);
