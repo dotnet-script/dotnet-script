@@ -1,5 +1,8 @@
 ﻿using System.IO;
 using Xunit;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Dotnet.Script.Tests
 {
@@ -15,6 +18,30 @@ namespace Dotnet.Script.Tests
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "omnisharp.json")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));                
+            }
+        }
+
+        [Fact]
+        public void ShouldCreateEnableScriptNugetReferencesSetting()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("init", scriptFolder.Path);
+                Assert.Equal(0, result.exitCode);                
+                dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
+                Assert.True(settings.script.enableScriptNuGetReferences.Value);
+            }
+        }
+
+        [Fact]
+        public void ShouldCreateDefaultTargetFrameworkSetting()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("init", scriptFolder.Path);
+                Assert.Equal(0, result.exitCode);
+                dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
+                Assert.Equal("netcoreapp2.0", settings.script.defaultTargetFramework.Value);                
             }
         }
 
