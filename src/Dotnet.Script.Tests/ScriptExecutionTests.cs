@@ -204,9 +204,8 @@ namespace Dotnet.Script.Tests
         }
     }";
 
-            string script =
-            @"#! ""netcoreapp2.0""
-    #r ""nuget: AgileObjects.AgileMapper, 0.23.1""
+            string script =     
+    @"#r ""nuget: AgileObjects.AgileMapper, 0.23.1""
     #r ""TestLibrary.dll""
     
     using AgileObjects.AgileMapper;
@@ -264,7 +263,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp2.0", "dotnet-script.dll"), fixture });
+            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, RuntimeHelper.TargetFramework, "dotnet-script.dll"), fixture });
             if (arguments != null)
             {
                 allArguments.AddRange(arguments);

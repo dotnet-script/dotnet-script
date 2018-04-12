@@ -1,5 +1,4 @@
-﻿#! "netcoreapp2.0"
-#r "nuget:NuGet.Client,*"
+﻿#r "nuget:NuGet.Client,*"
 #r "nuget:NuGet.Configuration,*"
 
 using System.Linq;

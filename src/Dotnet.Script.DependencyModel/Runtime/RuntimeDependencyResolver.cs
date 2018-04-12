@@ -48,8 +48,8 @@ namespace Dotnet.Script.DependencyModel.Runtime
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string code = null)
         {
             var pathToProjectFile = scriptMode == ScriptMode.Script 
-                ? _scriptProjectProvider.CreateProject(targetDirectory, "netcoreapp2.0", true)
-                : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), "netcoreapp2.0");
+                ? _scriptProjectProvider.CreateProject(targetDirectory, RuntimeHelper.TargetFramework, true)
+                : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), RuntimeHelper.TargetFramework);
 
             return GetDependenciesInternal(pathToProjectFile);
         }

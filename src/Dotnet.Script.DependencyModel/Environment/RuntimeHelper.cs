@@ -22,6 +22,8 @@ namespace Dotnet.Script.DependencyModel.Environment
             return GetPlatformIdentifier() == "win";
         }
 
+        public static string TargetFramework = "netcoreapp2.0";
+
         private static string GetDotnetBinaryPath()
         {
             string basePath;
@@ -39,7 +41,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         public static string GetPathToNuGetStoreFolder()
         {            
             var processArchitecture = GetProcessArchitecture();
-            var storePath = Path.Combine(GetDotnetBinaryPath(), "store", processArchitecture, "netcoreapp2.0");
+            var storePath = Path.Combine(GetDotnetBinaryPath(), "store", processArchitecture, TargetFramework);
             return storePath;
         }
 

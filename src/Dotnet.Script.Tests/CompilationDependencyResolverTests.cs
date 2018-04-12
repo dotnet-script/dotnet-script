@@ -1,4 +1,5 @@
 ﻿using Dotnet.Script.DependencyModel.Compilation;
+using Dotnet.Script.DependencyModel.Environment;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,7 +19,7 @@ namespace Dotnet.Script.Tests
         public void ShouldGetCompilationDependenciesForPackageContainingInlineNuGetPackageReference()
         {            
             var resolver = CreateResolver();
-            var dependencies =  resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("InlineNugetPackage"), true, "netcoreapp2.0");
+            var dependencies =  resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("InlineNugetPackage"), true, RuntimeHelper.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "AutoMapper");
         }
 
@@ -26,7 +27,7 @@ namespace Dotnet.Script.Tests
         public void ShouldGetCompilationDependenciesForPackageContainingNativeLibrary()
         {
             var resolver = CreateResolver();
-            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("NativeLibrary"), true, "netcoreapp2.0");
+            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("NativeLibrary"), true, RuntimeHelper.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "Microsoft.Data.Sqlite");
         }
 
@@ -34,7 +35,7 @@ namespace Dotnet.Script.Tests
         public void ShouldGetCompilationDependenciesForIssue129()
         {
             var resolver = CreateResolver();
-            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("Issue129"), true, "netcoreapp2.0");
+            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("Issue129"), true, RuntimeHelper.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "Auth0.ManagementApi");
         }
 

@@ -1,6 +1,6 @@
 ﻿{
   "script": {
     "enableScriptNuGetReferences": true,
-    "defaultTargetFramework": "netcoreapp2.0"
+    "defaultTargetFramework": "N/A"
   }
 }
