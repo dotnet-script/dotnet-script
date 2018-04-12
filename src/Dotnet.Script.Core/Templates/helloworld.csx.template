@@ -1,1 +1,3 @@
-﻿Console.WriteLine("Hello world!");
+﻿#! "netcoreapp2.0"
+
+Console.WriteLine("Hello world!");
