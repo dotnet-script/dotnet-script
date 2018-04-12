@@ -33,6 +33,7 @@ if (BuildEnvironment.IsWindows)
             await ReleaseManagerFor(Owner,ProjectName,BuildEnvironment.GitHubAccessToken)
             .CreateRelease(Git.Default.GetLatestTag(), PathToReleaseNotes, new [] { new ZipReleaseAsset(PathToGitHubReleaseAsset) });
             NuGet.TryPush(NuGetArtifactsFolder);
+            Choco.TryPush(ChocolateyArtifactsFolder, BuildEnvironment.ChocolateyApiKey);
         }
     }
 }

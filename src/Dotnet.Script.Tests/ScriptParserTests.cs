@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Text;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Xunit;
 using Xunit.Abstractions;
@@ -61,9 +62,9 @@ namespace Dotnet.Script.Tests
         {
             var parser = CreateParser();
 
-            var result = parser.ParseFromCode("#! \"netcoreapp2.0\"");
+            var result = parser.ParseFromCode($"#! \"{RuntimeHelper.TargetFramework}\"");
 
-            Assert.Equal("netcoreapp2.0", result.TargetFramework);            
+            Assert.Equal(RuntimeHelper.TargetFramework, result.TargetFramework);            
         }
 
         private ScriptParser CreateParser()

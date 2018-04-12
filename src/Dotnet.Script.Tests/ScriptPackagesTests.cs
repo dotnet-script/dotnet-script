@@ -62,7 +62,7 @@ namespace Dotnet.Script.Tests
         {
             var resolver = CreateResolverCompilationDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
-            var dependencies = resolver.GetDependencies(fixture, true, "netcoreapp2.0");
+            var dependencies = resolver.GetDependencies(fixture, true, RuntimeHelper.TargetFramework);
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
             Assert.NotEmpty(scriptFiles);
         }

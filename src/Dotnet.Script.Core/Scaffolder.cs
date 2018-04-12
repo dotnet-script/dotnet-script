@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Dotnet.Script.Core.Templates;
+using Dotnet.Script.DependencyModel.Environment;
+using Newtonsoft.Json.Linq;
 
 namespace Dotnet.Script.Core
 {
@@ -33,7 +35,9 @@ namespace Dotnet.Script.Core
             if (!File.Exists(pathToOmniSharpJson))
             {
                 var omniSharpFileTemplate = TemplateLoader.ReadTemplate("omnisharp.json.template");
-                WriteFile(pathToOmniSharpJson, omniSharpFileTemplate);
+                JObject settings = JObject.Parse(omniSharpFileTemplate);
+                settings["script"]["defaultTargetFramework"] = RuntimeHelper.TargetFramework;
+                WriteFile(pathToOmniSharpJson, settings.ToString());
             }
 
             if (Directory.GetFiles(currentDirectory, "*.csx").Any()

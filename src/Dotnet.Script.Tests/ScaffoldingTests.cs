@@ -1,5 +1,9 @@
 ﻿using System.IO;
 using Xunit;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Dotnet.Script.DependencyModel.Environment;
 
 namespace Dotnet.Script.Tests
 {
@@ -15,6 +19,30 @@ namespace Dotnet.Script.Tests
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "omnisharp.json")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));                
+            }
+        }
+
+        [Fact]
+        public void ShouldCreateEnableScriptNugetReferencesSetting()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("init", scriptFolder.Path);
+                Assert.Equal(0, result.exitCode);
+                dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
+                Assert.True(settings.script.enableScriptNuGetReferences.Value);
+            }
+        }
+
+        [Fact]
+        public void ShouldCreateDefaultTargetFrameworkSetting()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("init", scriptFolder.Path);
+                Assert.Equal(0, result.exitCode);
+                dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
+                Assert.Equal(RuntimeHelper.TargetFramework, settings.script.defaultTargetFramework.Value);                
             }
         }
 
@@ -73,7 +101,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, "netcoreapp2.0", "dotnet-script.dll"), args };
+            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, RuntimeHelper.TargetFramework, "dotnet-script.dll"), args };
         }
     }
 
