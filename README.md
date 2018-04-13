@@ -83,7 +83,6 @@ And run:
 
 ```
 docker run -it dotnet-script --version
-
 ```
 
 ### Github
@@ -111,8 +110,6 @@ That is all it takes and we can execute the script
 ```
 dotnet script helloworld.csx
 ```
-
-
 
 ### Scaffolding
 
@@ -421,10 +418,6 @@ We can specify this when executing the script.
 ```shell
 dotnet script -c release foo.csx 
 ```
-
-
-
-
 
 ## Team
 
