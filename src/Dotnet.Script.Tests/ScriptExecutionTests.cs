@@ -192,6 +192,22 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldExecuteRemoteScript()
+        {
+            var url = "https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx";
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
+            Assert.Contains("Hello World", result.output);
+        }
+
+        [Fact]
+        public void ShouldHandleNonExistingRemoteScript()
+        {
+            var url = "https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/DoesNotExists.csx";
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
+            Assert.Contains("Not Found", result.output);
+        }
+
+        [Fact]
         public static void ShouldHandleIssue235()
         {
             string code =
@@ -230,11 +246,11 @@ namespace Dotnet.Script.Tests
             }
         }
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
-        {
+        {            
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
             return result;
         }
-
+        
         private static (string output, int exitCode) ExecuteCode(string code)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"eval", new[] { $"\"{code}\"" }));

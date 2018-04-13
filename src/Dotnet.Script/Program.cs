@@ -12,6 +12,7 @@ using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.Scripting;
 using Dotnet.Script.DependencyModel.Context;
 using Microsoft.CodeAnalysis;
+using System.Net;
 
 namespace Dotnet.Script
 {
@@ -141,6 +142,14 @@ namespace Dotnet.Script
         {
             if (!File.Exists(file))
             {
+                if (IsHttpUri(file))
+                {
+                    var downloader = new ScriptDownloader();
+                    var scriptFile = await downloader.Download(file);
+                    var exitCode = await RunScript(scriptFile, debugMode, optimizationLevel, args, interactive);
+                    File.Delete(scriptFile);
+                    return exitCode; 
+                }
                 throw new Exception($"Couldn't find file '{file}'");
             }
 
@@ -162,6 +171,12 @@ namespace Dotnet.Script
 
                 return await Run(debugMode, context);
             }
+        }
+
+        private static bool IsHttpUri(string fileName)
+        {
+            return Uri.TryCreate(fileName, UriKind.Absolute, out Uri uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);           
         }
 
         private static async Task RunInteractive(bool debugMode)
