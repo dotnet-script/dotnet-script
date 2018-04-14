@@ -416,7 +416,7 @@ There are however situations where we might need to execute a script that is com
 We can specify this when executing the script.
 
 ```shell
-dotnet script -c release foo.csx 
+dotnet script foo.csx -c release
 ```
 
 ## Team
