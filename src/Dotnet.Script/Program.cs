@@ -80,8 +80,13 @@ namespace Dotnet.Script
                 {
                     int exitCode = 0;
                     if (!string.IsNullOrWhiteSpace(code.Value))
-                    {                        
-                        exitCode = await RunCode(code.Value, debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
+                    {
+                        var optimizationLevel = OptimizationLevel.Debug;
+                        if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                        {
+                            optimizationLevel = OptimizationLevel.Release;
+                        }
+                        exitCode = await RunCode(code.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
                     }
                     return exitCode;
                 });
@@ -145,8 +150,8 @@ namespace Dotnet.Script
                 if (IsHttpUri(file))
                 {
                     var downloader = new ScriptDownloader();
-                    var scriptFile = await downloader.Download(file);
-                    var exitCode = await RunScript(scriptFile, debugMode, optimizationLevel, args, interactive);
+                    var scriptFile = await downloader.Download(file);                    
+                    var exitCode = await RunScript(scriptFile, debugMode, optimizationLevel, args, interactive);                    
                     File.Delete(scriptFile);
                     return exitCode; 
                 }
@@ -186,10 +191,10 @@ namespace Dotnet.Script
             await runner.RunLoop();
         }
 
-        private static Task<int> RunCode(string code, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
+        private static Task<int> RunCode(string code, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, scriptMode: ScriptMode.Eval);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null,optimizationLevel, ScriptMode.Eval);
             return Run(debugMode, context);
         }
 

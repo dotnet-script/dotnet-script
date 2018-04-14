@@ -176,6 +176,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldEvaluateCodeInReleaseMode()
+        {
+            var code = File.ReadAllText(Path.Combine("..", "..", "..", "TestFixtures", "Configuration", "Configuration.csx"));
+            var result = ExecuteCodeInReleaseMode(code);
+            Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
         public void ShouldSupportInlineNugetReferencesinEvaluatedCode()
         {
             var code = @"#r \""nuget: AutoMapper, 6.1.1\"" using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
@@ -266,6 +274,12 @@ namespace Dotnet.Script.Tests
             return result;
         }
 
+        private static (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"-c", new[] {"release", "eval", $"\"{code}\"" }));
+            return result;
+        }
+
         /// <summary>
         /// Use this method if you need to debug 
         /// </summary>        
@@ -277,6 +291,21 @@ namespace Dotnet.Script.Tests
             {
                 allArguments.AddRange(arguments);
             }
+            return Program.Main(allArguments.ToArray());
+        }
+
+        /// <summary>
+        /// Use this method if you need to debug 
+        /// </summary>        
+        private static int ExecuteCodeProcess(string code, params string[] arguments)
+        {            
+            var allArguments = new List<string>();
+            if (arguments != null)
+            {
+                allArguments.AddRange(arguments);
+            }
+            allArguments.Add("eval");
+            allArguments.Add(code);
             return Program.Main(allArguments.ToArray());
         }
 
