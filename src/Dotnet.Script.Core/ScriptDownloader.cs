@@ -16,10 +16,7 @@ namespace Dotnet.Script.Core
                     response.EnsureSuccessStatusCode();
                     using (HttpContent content = response.Content)
                     {
-                        string scriptFile = $"{Path.GetTempFileName()}.csx";                        
-                        var code = await content.ReadAsStringAsync();
-                        File.WriteAllText(scriptFile, code);
-                        return scriptFile;
+                        return await content.ReadAsStringAsync();
                     }
                 }
             }

@@ -150,11 +150,10 @@ namespace Dotnet.Script
                 if (IsHttpUri(file))
                 {
                     var downloader = new ScriptDownloader();
-                    var scriptFile = await downloader.Download(file);                    
-                    var exitCode = await RunScript(scriptFile, debugMode, optimizationLevel, args, interactive);                    
-                    File.Delete(scriptFile);
-                    return exitCode; 
+                    var code = await downloader.Download(file);
+                    return await RunCode(code, debugMode, optimizationLevel, args, Directory.GetCurrentDirectory());                    
                 }
+
                 throw new Exception($"Couldn't find file '{file}'");
             }
 
