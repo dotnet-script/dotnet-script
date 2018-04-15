@@ -243,7 +243,7 @@ Run(Args, targets);
 
 Scripts don't actually have to exists locally on the machine. We can also execute scripts that are made available on an `http(s)` endpoint.  
 
-This means that we can create a Gist on Github and execute it just by providing the url to the Gist.
+This means that we can create a Gist on Github and execute it just by providing the URL to the Gist.
 
 This [Gist](https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx) contains a script that prints out "Hello World"
 
@@ -253,7 +253,7 @@ We can execute the script like this
 dotnet script https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx
 ```
 
-That is a pretty long url, so why don't make it a [tiny url](https://tinyurl.com/) like this.
+That is a pretty long URL, so why don't make it a [TinyURL](https://tinyurl.com/) like this:
 
 ```shell
 dotnet script https://tinyurl.com/y8cda9zt
