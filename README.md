@@ -241,7 +241,7 @@ Run(Args, targets);
 
 ### Remote Scripts
 
-Scripts don't actually have to exists locally on the machine. We can also execute scripts that are made available on an `http(s)` endpoint.  
+Scripts don't actually have to exist locally on the machine. We can also execute scripts that are made available on an `http(s)` endpoint.  
 
 This means that we can create a Gist on Github and execute it just by providing the URL to the Gist.
 
