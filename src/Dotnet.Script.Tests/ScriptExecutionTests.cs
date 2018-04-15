@@ -203,6 +203,7 @@ namespace Dotnet.Script.Tests
         public void ShouldExecuteRemoteScript()
         {
             var url = "https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx";
+            Program.Main(new[] {url });
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
             Assert.Contains("Hello World", result.output);
         }
@@ -215,6 +216,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello World", result.output);
         }
 
+        [Fact]
+        public void ShouldThrowExceptionOnInvalidMediaType()
+        {
+            var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
+            Assert.Contains("not supported", result.output);
+        }
 
         [Fact]
         public void ShouldHandleNonExistingRemoteScript()
