@@ -268,7 +268,7 @@ public static string GetScriptPath([CallerFilePath] string path = null) => path;
 public static string GetScriptFolder([CallerFilePath] string path = null) => Path.GetDirectoryName(path);
 ```
 
-> Tips: Put these methods as top level methods in a separate script file and `#load` that file wherever access to the script path and/or folder is needed. 
+> Tip: Put these methods as top level methods in a separate script file and `#load` that file wherever access to the script path and/or folder is needed. 
 
 
 
