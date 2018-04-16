@@ -52,13 +52,14 @@ namespace Dotnet.Script.DependencyModel.Environment
         }
 
         public static string GetRuntimeIdentifier()
-        {            
+        {
             var platformIdentifier = GetPlatformIdentifier();
-            if (platformIdentifier == "osx")
+            if (platformIdentifier == "osx" || platformIdentifier == "linux")
             {
                 return $"{platformIdentifier}-{GetProcessArchitecture()}";
             }
-            return RuntimeEnvironment.GetRuntimeIdentifier();            
+            var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
+            return runtimeIdentifier;
         }
 
         public static string CreateTempFolder(string targetDirectory)
