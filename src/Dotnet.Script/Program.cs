@@ -12,6 +12,7 @@ using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.Scripting;
 using Dotnet.Script.DependencyModel.Context;
 using Microsoft.CodeAnalysis;
+using System.Net;
 
 namespace Dotnet.Script
 {
@@ -79,8 +80,13 @@ namespace Dotnet.Script
                 {
                     int exitCode = 0;
                     if (!string.IsNullOrWhiteSpace(code.Value))
-                    {                        
-                        exitCode = await RunCode(code.Value, debugMode.HasValue(), app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
+                    {
+                        var optimizationLevel = OptimizationLevel.Debug;
+                        if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                        {
+                            optimizationLevel = OptimizationLevel.Release;
+                        }
+                        exitCode = await RunCode(code.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
                     }
                     return exitCode;
                 });
@@ -141,6 +147,13 @@ namespace Dotnet.Script
         {
             if (!File.Exists(file))
             {
+                if (IsHttpUri(file))
+                {
+                    var downloader = new ScriptDownloader();
+                    var code = await downloader.Download(file);
+                    return await RunCode(code, debugMode, optimizationLevel, args, Directory.GetCurrentDirectory());                    
+                }
+
                 throw new Exception($"Couldn't find file '{file}'");
             }
 
@@ -164,6 +177,12 @@ namespace Dotnet.Script
             }
         }
 
+        private static bool IsHttpUri(string fileName)
+        {
+            return Uri.TryCreate(fileName, UriKind.Absolute, out Uri uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);           
+        }
+
         private static async Task RunInteractive(bool debugMode)
         {
             var compiler = GetScriptCompiler(debugMode);
@@ -171,10 +190,10 @@ namespace Dotnet.Script
             await runner.RunLoop();
         }
 
-        private static Task<int> RunCode(string code, bool debugMode, IEnumerable<string> args, string currentWorkingDirectory)
+        private static Task<int> RunCode(string code, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory)
         {
             var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, scriptMode: ScriptMode.Eval);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null,optimizationLevel, ScriptMode.Eval);
             return Run(debugMode, context);
         }
 

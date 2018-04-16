@@ -176,6 +176,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldEvaluateCodeInReleaseMode()
+        {
+            var code = File.ReadAllText(Path.Combine("..", "..", "..", "TestFixtures", "Configuration", "Configuration.csx"));
+            var result = ExecuteCodeInReleaseMode(code);
+            Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
         public void ShouldSupportInlineNugetReferencesinEvaluatedCode()
         {
             var code = @"#r \""nuget: AutoMapper, 6.1.1\"" using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
@@ -189,6 +197,39 @@ namespace Dotnet.Script.Tests
             var code = @"#r \""nuget: AutoMapper, 6.1.1\""; using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
             var result = ExecuteCode(code);
             Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
+        [Fact]
+        public void ShouldExecuteRemoteScript()
+        {
+            var url = "https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx";
+            Program.Main(new[] {url });
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
+            Assert.Contains("Hello World", result.output);
+        }
+
+        [Fact]
+        public void ShouldExecuteRemoteScriptUsingTinyUrl()
+        {
+            var url = "https://tinyurl.com/y8cda9zt";
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
+            Assert.Contains("Hello World", result.output);
+        }
+
+        [Fact]
+        public void ShouldThrowExceptionOnInvalidMediaType()
+        {
+            var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
+            Assert.Contains("not supported", result.output);
+        }
+
+        [Fact]
+        public void ShouldHandleNonExistingRemoteScript()
+        {
+            var url = "https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/DoesNotExists.csx";
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
+            Assert.Contains("Not Found", result.output);
         }
 
         [Fact]
@@ -230,14 +271,20 @@ namespace Dotnet.Script.Tests
             }
         }
         private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
-        {
+        {            
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
             return result;
         }
-
+        
         private static (string output, int exitCode) ExecuteCode(string code)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"eval", new[] { $"\"{code}\"" }));
+            return result;
+        }
+
+        private static (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"-c", new[] {"release", "eval", $"\"{code}\"" }));
             return result;
         }
 
@@ -252,6 +299,21 @@ namespace Dotnet.Script.Tests
             {
                 allArguments.AddRange(arguments);
             }
+            return Program.Main(allArguments.ToArray());
+        }
+
+        /// <summary>
+        /// Use this method if you need to debug 
+        /// </summary>        
+        private static int ExecuteCodeProcess(string code, params string[] arguments)
+        {            
+            var allArguments = new List<string>();
+            if (arguments != null)
+            {
+                allArguments.AddRange(arguments);
+            }
+            allArguments.Add("eval");
+            allArguments.Add(code);
             return Program.Main(allArguments.ToArray());
         }
 
