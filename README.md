@@ -259,6 +259,17 @@ That is a pretty long URL, so why don't make it a [TinyURL](https://tinyurl.com/
 dotnet script https://tinyurl.com/y8cda9zt
 ```
 
+### Script Location
+
+A pretty common scenario is that we have logic that is relative to the script path. We don't want to require the user to be in a certain directory for these paths to resolve correctly so here is how to provide the script path and the script folder regardless of the current working directory.
+
+```c#
+public static string GetScriptPath([CallerFilePath] string path = null) => path;
+public static string GetScriptFolder([CallerFilePath] string path = null) => Path.GetDirectoryName(path);
+```
+
+> Tip: Put these methods as top level methods in a separate script file and `#load` that file wherever access to the script path and/or folder is needed. 
+
 
 
 ## REPL
