@@ -1,5 +1,5 @@
 language: csharp
-dotnet: 2.0.0
+dotnet: 2.1.300-preview2-008533
 env:
   global:
     - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
