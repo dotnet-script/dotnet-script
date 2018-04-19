@@ -18,33 +18,15 @@ The only thing we need to install is [.Net Core SDK](https://www.microsoft.com/n
 ### .Net Core 2.1 Global Tool
 
 .Net Core 2.1 introduces the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
+To do this, you will need [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1).
 
 ```shell
-dotnet tool install -g dotnet-script
-
-You can invoke the tool using the following command: dotnet-script
-Tool 'dotnet-script' (version '0.20.0') was successfully installed.
+dotnet install tool -g dotnet-script
 ```
 
 The advantage of this approach is that you can use the same command for installation across all platforms.
 
-> In order to use the global tool you need [.Net Core SDK 2.1.300 preview2](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview2) or higher. It also works with [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1), but that one had a different syntax: `dotnet install tool -g dotnet-script` and is now deprecated.
-
-.NET Core SDK also supports viewing a list of installed tools and their uninstallation.
-
-```shell
-dotnet tool list -g
-
-Package Id         Version      Commands
----------------------------------------------
-dotnet-script      0.20.0       dotnet-script
-```
-
-```shell
-dotnet tool uninstall dotnet-script -g
-
-Tool 'dotnet-script' (version '0.20.0') was successfully uninstalled.
-```
+>  ⚠️ [.Net Core SDK 2.1.300 preview2](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview2) is already out. Unfortunately, it [doesn't support .NET Core 2.0 tools](https://github.com/dotnet/cli/issues/9073#issuecomment-382020484) (dotnet-script uses .NET Core 2.0 runtime to execute your scripts) so is not compatible with dotnet-script at the moment.
 
 ### Windows
 
