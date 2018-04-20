@@ -14,8 +14,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            var result = ExecuteInProcess(Path.Combine("HelloWorld", "HelloWorld.csx"));
-            //Assert.Contains("Hello World", result.output);
+            var result = Execute(Path.Combine("HelloWorld", "HelloWorld.csx"));
+            Assert.Contains("Hello World", result.output);
         }
 
         [Fact]
@@ -126,12 +126,11 @@ namespace Dotnet.Script.Tests
             Assert.Contains("NuGet.Client", result.output);
         }
 
-
         [Fact]
         public static void ShouldHandleIssue204()
         {
-            var result = ExecuteInProcess(Path.Combine("Issue204", "Issue204.csx"));
-            //Assert.Contains("System.Net.WebProxy", result.output);
+            var result = Execute(Path.Combine("Issue204", "Issue204.csx"));
+            Assert.Contains("System.Net.WebProxy", result.output);
         }
 
         [Fact]

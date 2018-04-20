@@ -49,9 +49,7 @@ namespace Dotnet.Script.Core
         };
 
         // see: https://github.com/dotnet/roslyn/issues/5501
-        // protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
-
-        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702" };
+        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };        
 
         public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
 
@@ -150,9 +148,15 @@ namespace Dotnet.Script.Core
 
         private void EvaluateDiagnostics<TReturn>(Script<TReturn> script)
         {
-            var orderedDiagnostics = script.GetDiagnostics(SuppressedDiagnosticIds);
+            var orderedDiagnostics = script.GetDiagnostics();
 
-            if (orderedDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error))
+            var suppressedDiagnostics = orderedDiagnostics.Where(d => SuppressedDiagnosticIds.Contains(d.Id));
+            foreach (var suppressedDiagnostic in suppressedDiagnostics)
+            {
+                Logger.Verbose($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
+            }
+
+            if (orderedDiagnostics.Except(suppressedDiagnostics).Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.",
                     orderedDiagnostics.ToImmutableArray());

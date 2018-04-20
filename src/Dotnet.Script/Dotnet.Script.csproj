@@ -5,8 +5,7 @@
     <Authors>filipw</Authors>
     <TargetFrameworks>netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
     <DebugType>portable</DebugType>
-    <AssemblyName>dotnet-script</AssemblyName>
-      <PackageId>dotnet-script</PackageId>
+    <AssemblyName>dotnet-script</AssemblyName>      
     <OutputType>Exe</OutputType>   
     <PackageTags>dotnet;cli;script;csx;csharp;roslyn</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
