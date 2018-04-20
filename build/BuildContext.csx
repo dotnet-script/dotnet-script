@@ -1,6 +1,12 @@
-#load "nuget:Dotnet.Build, 0.3.0"
+#load "nuget:Dotnet.Build, 0.3.1"
 using static FileUtils;
 using System.Xml.Linq;
+
+const string NetCoreApp20 = "netcoreapp2.0";
+
+const string NetCoreApp21 = "netcoreapp2.1";
+
+const string GlobalToolPackageId = "dotnet-script";
 
 string Version;
 
@@ -17,6 +23,8 @@ string ChocolateyArtifactsFolder;
 string PublishArtifactsFolder;
 
 string PublishArchiveFolder;
+
+string SolutionFolder;
 
 string DotnetScriptProjectFolder;
 
@@ -41,7 +49,7 @@ string ProjectName;
 Owner = "filipw";
 ProjectName = "dotnet-script";
 Root = FileUtils.GetScriptFolder();
-
+SolutionFolder = Path.Combine(Root,"..","src");
 DotnetScriptProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script");
 DotnetScriptCoreProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.Core");
 DotnetScriptDependencyModelProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.DependencyModel");

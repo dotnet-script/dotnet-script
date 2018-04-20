@@ -1,49 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
-    <VersionPrefix>0.21.0</VersionPrefix>
-    <Authors>filipw</Authors>
-    <TargetFrameworks>netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
-    <DebugType>portable</DebugType>
-    <AssemblyName>dotnet-script</AssemblyName>      
-    <OutputType>Exe</OutputType>   
-    <PackageTags>dotnet;cli;script;csx;csharp;roslyn</PackageTags>
-    <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <IsPackable>true</IsPackable>   
-  </PropertyGroup>
-  <Choose>
-    <When Condition=" '$(TargetFramework)'=='netcoreapp2.1' ">
-      <PropertyGroup>        
-        <PackageId>dotnet-script</PackageId>
-        <PackAsTool>true</PackAsTool>        
-      </PropertyGroup>
-    </When>
-    <When Condition=" '$(TargetFramework)'=='netcoreapp2.0' ">
-        <PropertyGroup>
-            <PackageId>Dotnet.Script</PackageId>
-        </PropertyGroup>
-       <ItemGroup>
+    <PropertyGroup>
+        <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
+        <VersionPrefix>0.21.0</VersionPrefix>
+        <Authors>filipw</Authors>
+        <PackageId>Dotnet.Script</PackageId>
+        <TargetFrameworks>netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
+        <DebugType>portable</DebugType>
+        <AssemblyName>dotnet-script</AssemblyName>
+        <OutputType>Exe</OutputType>
+        <PackageTags>dotnet;cli;script;csx;csharp;roslyn</PackageTags>
+        <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
+        <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
+        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+        <PackAsTool>false</PackAsTool>
+        <IsPackable>true</IsPackable>
+    </PropertyGroup>    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.7.0" />
+        <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
         <Content Include="dotnet-script.cmd">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
         <Content Include="dotnet-script.sh">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-      </ItemGroup>
-    </When>
-  </Choose>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.7.0" />
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
-  </ItemGroup>
+    </ItemGroup>
 </Project>
