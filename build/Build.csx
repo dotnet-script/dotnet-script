@@ -25,6 +25,7 @@ if (BuildEnvironment.IsWindows)
         PatchTargetFramework(globalToolBuildFolder.Path, NetCoreApp21);
         PatchPackAsTool(globalToolBuildFolder.Path);
         PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
+        PatchContent(globalToolBuildFolder.Path);
         DotNet.Pack(Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script"),NuGetArtifactsFolder);
     }
     
@@ -93,4 +94,16 @@ private void PatchPackageId(string solutionFolder, string packageId)
     var packAsToolElement = projectFile.Descendants("PackageId").Single();
     packAsToolElement.Value = packageId;   
     projectFile.Save(pathToDotnetScriptProject); 
+}
+
+private void PatchContent(string solutionFolder)
+{
+    var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
+    var projectFile = XDocument.Load(pathToDotnetScriptProject);
+    var contentElements = projectFile.Descendants("Content");
+    foreach (var contentElement in contentElements)
+    {
+        contentElement.Remove();
+    }
+    projectFile.Save(pathToDotnetScriptProject);
 }
