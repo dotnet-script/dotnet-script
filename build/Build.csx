@@ -100,7 +100,7 @@ private void PatchContent(string solutionFolder)
 {
     var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
     var projectFile = XDocument.Load(pathToDotnetScriptProject);
-    var contentElements = projectFile.Descendants("Content");
+    var contentElements = projectFile.Descendants("Content").ToArray();
     foreach (var contentElement in contentElements)
     {
         contentElement.Remove();
