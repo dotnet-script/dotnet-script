@@ -1,5 +1,5 @@
 #! "netcoreapp2.0"
-#load "nuget:Dotnet.Build, 0.2.9"
+#load "nuget:Dotnet.Build, 0.3.1"
 #load "nuget:github-changelog, 0.1.4"
 #load "Choco.csx"
 #load "BuildContext.csx"
@@ -7,22 +7,42 @@
 using static ReleaseManagement;
 using static ChangeLog;
 using static FileUtils;
+using System.Xml.Linq;
+
+
 
 DotNet.Build(DotnetScriptProjectFolder);
 DotNet.Test(TestProjectFolder);
-DotNet.Publish(DotnetScriptProjectFolder, PublishArtifactsFolder);
+DotNet.Publish(DotnetScriptProjectFolder, PublishArtifactsFolder, NetCoreApp20);
 
 // We only publish packages from Windows/AppVeyor
 if (BuildEnvironment.IsWindows)
-{
-    NuGet.PackAsTool(DotnetScriptProjectFolder,PublishArtifactsFolder,NuGetArtifactsFolder);
-    DotNet.Pack(DotnetScriptProjectFolder, NuGetArtifactsFolder);
+{    
+    
+    using(var globalToolBuildFolder = new DisposableFolder())
+    {
+        Copy(SolutionFolder, globalToolBuildFolder.Path);
+        PatchTargetFramework(globalToolBuildFolder.Path, NetCoreApp21);
+        PatchPackAsTool(globalToolBuildFolder.Path);
+        PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
+        PatchContent(globalToolBuildFolder.Path);
+        DotNet.Pack(Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script"),NuGetArtifactsFolder);
+    }
+    
+    using(var nugetPackageBuildFolder = new DisposableFolder())
+    {
+        Copy(SolutionFolder, nugetPackageBuildFolder.Path);
+        PatchTargetFramework(nugetPackageBuildFolder.Path, NetCoreApp20);        
+        DotNet.Pack(Path.Combine(nugetPackageBuildFolder.Path,"Dotnet.Script"),NuGetArtifactsFolder);
+    }
+    
     DotNet.Pack(DotnetScriptCoreProjectFolder, NuGetArtifactsFolder);
     DotNet.Pack(DotnetScriptDependencyModelProjectFolder, NuGetArtifactsFolder);
     DotNet.Pack(DotnetScriptDependencyModelNuGetProjectFolder, NuGetArtifactsFolder);
+            
     Choco.Pack(DotnetScriptProjectFolder, PublishArtifactsFolder, ChocolateyArtifactsFolder);
     Zip(PublishArchiveFolder, PathToGitHubReleaseAsset);
-
+    
     if (BuildEnvironment.IsSecure)
     {
         await CreateReleaseNotes();
@@ -47,4 +67,43 @@ private async Task CreateReleaseNotes()
         generator = generator.IncludeUnreleased();
     }
     await generator.Generate(PathToReleaseNotes);
+}
+
+private void PatchTargetFramework(string solutionFolder, string targetFramework)
+{
+    var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
+    var projectFile = XDocument.Load(pathToDotnetScriptProject);
+    var targetFrameworksElement = projectFile.Descendants("TargetFrameworks").Single();
+    targetFrameworksElement.ReplaceWith(new XElement("TargetFramework",targetFramework));
+    projectFile.Save(pathToDotnetScriptProject);
+}
+
+private void PatchPackAsTool(string solutionFolder)
+{
+    var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
+    var projectFile = XDocument.Load(pathToDotnetScriptProject);
+    var packAsToolElement = projectFile.Descendants("PackAsTool").Single();
+    packAsToolElement.Value = "true";   
+    projectFile.Save(pathToDotnetScriptProject); 
+}
+
+private void PatchPackageId(string solutionFolder, string packageId)
+{
+    var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
+    var projectFile = XDocument.Load(pathToDotnetScriptProject);
+    var packAsToolElement = projectFile.Descendants("PackageId").Single();
+    packAsToolElement.Value = packageId;   
+    projectFile.Save(pathToDotnetScriptProject); 
+}
+
+private void PatchContent(string solutionFolder)
+{
+    var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
+    var projectFile = XDocument.Load(pathToDotnetScriptProject);
+    var contentElements = projectFile.Descendants("Content").ToArray();
+    foreach (var contentElement in contentElements)
+    {
+        contentElement.Remove();
+    }
+    projectFile.Save(pathToDotnetScriptProject);
 }

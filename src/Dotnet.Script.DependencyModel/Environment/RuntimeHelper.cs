@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.PlatformAbstractions;
 
@@ -9,6 +10,8 @@ namespace Dotnet.Script.DependencyModel.Environment
     {
         private static readonly Regex RuntimeMatcher =
             new Regex($"{GetPlatformIdentifier()}.*-{GetProcessArchitecture()}");
+
+        private static readonly Lazy<string> LazyTargetFramework = new Lazy<string>(GetNetCoreAppVersion); 
 
         public static string GetPlatformIdentifier()
         {
@@ -22,7 +25,22 @@ namespace Dotnet.Script.DependencyModel.Environment
             return GetPlatformIdentifier() == "win";
         }
 
-        public static string TargetFramework = "netcoreapp2.0";
+        public static string TargetFramework => LazyTargetFramework.Value;
+
+        private static string GetNetCoreAppVersion()
+        {
+            // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156 
+
+            var codeBase = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.CodeBase;
+            var pattern = @"^.*Microsoft\.NETCore\.App\/(\d\.\d)";
+            var match = Regex.Match(codeBase, pattern, RegexOptions.IgnoreCase);
+            if (!match.Success)
+            {
+                throw new InvalidOperationException("Unable to determine netcoreapp version");
+            }
+            var version = match.Groups[1].Value;
+            return $"netcoreapp{version}";
+        }
 
         private static string GetDotnetBinaryPath()
         {

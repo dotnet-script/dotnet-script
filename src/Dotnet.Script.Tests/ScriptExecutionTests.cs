@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Dotnet.Script.DependencyModel.Environment;
 using Xunit;
 
@@ -124,7 +126,6 @@ namespace Dotnet.Script.Tests
             Assert.Contains("NuGet.Client", result.output);
         }
 
-
         [Fact]
         public static void ShouldHandleIssue204()
         {
@@ -219,6 +220,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowExceptionOnInvalidMediaType()
         {
+            var t = ResolveTargetFramework();
             var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(url));
             Assert.Contains("not supported", result.output);
@@ -233,6 +235,17 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleScriptUsingTheProcessClass()
+        {
+            // This test ensures that we can load the Process class.
+            // This used to fail when executing a netcoreapp2.0 script
+            // from dotnet-script built for netcoreapp2.1
+            var result = Execute(Path.Combine("Process", "Process.csx"));
+            Assert.Contains("Success", result.output);
+        }
+
+
+        [Fact(Skip = "This also failes when run a standard netcoreapp2.1 console app")]
         public static void ShouldHandleIssue235()
         {
             string code =
@@ -332,5 +345,13 @@ namespace Dotnet.Script.Tests
             }
             return allArguments.ToArray();
         }
-    }
+
+        private static string ResolveTargetFramework()
+        {
+            return Assembly.GetEntryAssembly().GetCustomAttributes()
+                .OfType<System.Runtime.Versioning.TargetFrameworkAttribute>()
+                .Select(x => x.FrameworkName)
+                .FirstOrDefault();
+        }
+}
 }

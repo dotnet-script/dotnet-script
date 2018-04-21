@@ -1,5 +1,5 @@
 language: csharp
-dotnet: 2.0.0
+dotnet: 2.1.300-preview2-008533
 env:
   global:
     - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
@@ -10,11 +10,21 @@ matrix:
   include:
     - os: linux
       dist: trusty      
-      sudo: false
+      sudo: required
+      install:
+        - curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        - sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+        - sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
+        - sudo apt-get update
+        - sudo apt-get install dotnet-sdk-2.0.3
     - os: osx
-      osx_image: xcode9      
-      sudo: required               
-script:  
-  - ulimit -n8192  
+      osx_image: xcode9       
+      sudo: required
+      install:
+        - ulimit -n8192  
+        - sudo curl -L https://download.microsoft.com/download/5/D/F/5DF4B836-7DFD-4CCF-AC96-101E2A4C7421/dotnet-sdk-2.1.2-osx-x64.pkg -o dotnet-sdk.pkg
+        - sudo installer -pkg dotnet-sdk.pkg -target /
+        - dotnet --info        
+script:      
   - chmod +x build.sh
   - ./build.sh
