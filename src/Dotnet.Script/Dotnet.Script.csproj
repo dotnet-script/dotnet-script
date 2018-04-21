@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
-        <VersionPrefix>0.21.0</VersionPrefix>
+        <VersionPrefix>0.22.0</VersionPrefix>
         <Authors>filipw</Authors>
         <PackageId>Dotnet.Script</PackageId>
         <TargetFrameworks>netcoreapp2.0;netcoreapp2.1</TargetFrameworks>
