@@ -13,20 +13,38 @@ Run C# scripts from the .NET CLI.
 
 ### Prerequisites
 
-The only thing we need to install is [.Net Core SDK](https://www.microsoft.com/net/download/core).
+The only thing we need to install is [.Net Core 2.0+ SDK](https://www.microsoft.com/net/download/core). dotnet-script supports both .NET Core 2.1 and .NET Core 2.0. Depending on the currently active .NET Core SDK, dotnet-script will run either as `netcoreapp2.1` or as `netcoreapp2.0`. You can use [global.json](https://docs.microsoft.com/en-us/dotnet/core/tools/global-json) file to control that.
 
 ### .Net Core 2.1 Global Tool
 
 .Net Core 2.1 introduces the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
-To do this, you will need [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1).
 
 ```shell
-dotnet install tool -g dotnet-script
+dotnet tool install -g dotnet-script
+
+You can invoke the tool using the following command: dotnet-script
+Tool 'dotnet-script' (version '0.22.0') was successfully installed.
 ```
 
 The advantage of this approach is that you can use the same command for installation across all platforms.
 
->  ⚠️ [.Net Core SDK 2.1.300 preview2](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview2) is already out. Unfortunately, it [doesn't support .NET Core 2.0 tools](https://github.com/dotnet/cli/issues/9073#issuecomment-382020484) (dotnet-script uses .NET Core 2.0 runtime to execute your scripts) so is not compatible with dotnet-script at the moment.
+> ⚠️ In order to use the global tool you need [.Net Core SDK 2.1.300 preview2](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview2) or higher. It also works with [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1), but that one had a different syntax: `dotnet install tool -g dotnet-script` and is now deprecated.
+
+.NET Core SDK also supports viewing a list of installed tools and their uninstallation.
+
+```shell
+dotnet tool list -g
+
+Package Id         Version      Commands
+---------------------------------------------
+dotnet-script      0.22.0       dotnet-script
+```
+
+```shell
+dotnet tool uninstall dotnet-script -g
+
+Tool 'dotnet-script' (version '0.22.0') was successfully uninstalled.
+```
 
 ### Windows
 
@@ -74,7 +92,7 @@ You can manually download all the releases in `zip` format from the [Github rele
 
 ## Usage
 
-Our typical `helloworld.csx` might look like this
+Our typical `helloworld.csx` might look like this:
 
 ```
 #! "netcoreapp2.0"
@@ -83,14 +101,19 @@ Console.WriteLine("Hello world!");
 
 Let us take a quick look at what is going on here.
 
-`#! "netcoreapp2.0"` tells OmniSharp to resolve metadata in the context of a`netcoreapp2.0` application.
-
-This will bring in all assemblies from [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App/2.0.0) and should cover most scripting needs. 
+`#! "netcoreapp2.0"` tells OmniSharp to resolve metadata in the context of a`netcoreapp2.0` application. This will bring in all assemblies from [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App/2.0.0) and should cover most scripting needs. 
 
 That is all it takes and we can execute the script
 
 ```
 dotnet script helloworld.csx
+```
+
+If you are using .NET Core 2.1 SDK, you could also create your script as a `netcoreapp2.1` application.
+
+```
+#! "netcoreapp2.1"
+Console.WriteLine("Hello world!");
 ```
 
 ### Scaffolding
