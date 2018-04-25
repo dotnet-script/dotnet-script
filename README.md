@@ -28,7 +28,7 @@ Tool 'dotnet-script' (version '0.22.0') was successfully installed.
 
 The advantage of this approach is that you can use the same command for installation across all platforms.
 
-> ⚠️ In order to use the global tool you need [.Net Core SDK 2.1.300 preview2](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview2) or higher. It also works with [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1), but that one had a different syntax: `dotnet install tool -g dotnet-script` and is now deprecated.
+> ⚠️ In order to use the global tool you need [.Net Core SDK 2.1.300 preview2](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview2) or higher. The earlier previews of .NET Core 2.1, such as [.Net Core SDK 2.1.300 preview1](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300-preview1), are not supported.
 
 .NET Core SDK also supports viewing a list of installed tools and their uninstallation.
 
