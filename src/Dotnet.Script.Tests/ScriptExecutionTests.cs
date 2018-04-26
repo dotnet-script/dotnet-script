@@ -120,6 +120,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public static void ShouldHandleIssue189()
+        {
+            var result = Execute(Path.Combine("Issue189","SomeFolder","Script.csx"));
+            Assert.Contains("Newtonsoft.Json.JsonConvert", result.output);
+        }
+
+        [Fact]
         public static void ShouldHandleIssue198()
         {
             var result = Execute(Path.Combine("Issue198", "Issue198.csx"));
