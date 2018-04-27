@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System;
 using Microsoft.CodeAnalysis.Text;
+using Dotnet.Script.DependencyModel.Context;
 
 namespace Dotnet.Script.Tests
 {
@@ -93,7 +94,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoopWithSeed(new ScriptContext(SourceText.From(@"var x = 1;"), Directory.GetCurrentDirectory(), new string[0]));
+            await ctx.Runner.RunLoopWithSeed(new ScriptContext(SourceText.From(@"var x = 1;"), Directory.GetCurrentDirectory(), new string[0], scriptMode:ScriptMode.REPL));
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("2", result);
@@ -110,7 +111,7 @@ namespace Dotnet.Script.Tests
             };
 
             var ctx = GetRunner(commands);
-            await ctx.Runner.RunLoopWithSeed(new ScriptContext(SourceText.From(@"throw new Exception(""die!"");"), Directory.GetCurrentDirectory(), new string[0]));
+            await ctx.Runner.RunLoopWithSeed(new ScriptContext(SourceText.From(@"throw new Exception(""die!"");"), Directory.GetCurrentDirectory(), new string[0], scriptMode:ScriptMode.REPL));
 
             var errorResult = ctx.Console.Error.ToString();
             var result = ctx.Console.Out.ToString();

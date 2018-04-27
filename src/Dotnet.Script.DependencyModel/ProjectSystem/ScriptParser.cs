@@ -44,7 +44,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             foreach (var csxFile in csxFiles)
             {
                 _logger.Debug($"Parsing {csxFile}");
-                var fileContent = ReadFile(csxFile);
+                var fileContent = FileUtils.ReadFile(csxFile);
                 allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(fileContent));
                 allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(fileContent));
                 string targetFramework = ReadTargetFramework(fileContent);
@@ -101,17 +101,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 return match.Groups[1].Value;
             }
             return null;
-        }
-
-        private static string ReadFile(string pathToFile)
-        {
-            using (var fileStream = new FileStream(pathToFile, FileMode.Open))
-            {
-                using (var reader = new StreamReader(fileStream))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
         }
     }
 }

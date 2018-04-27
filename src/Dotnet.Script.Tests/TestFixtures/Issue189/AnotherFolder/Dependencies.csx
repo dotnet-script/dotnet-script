@@ -1,0 +1,1 @@
+﻿#r "nuget: Newtonsoft.Json,10.0.3"

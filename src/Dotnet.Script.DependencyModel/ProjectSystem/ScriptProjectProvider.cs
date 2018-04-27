@@ -9,16 +9,17 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     public class ScriptProjectProvider 
     {
         private readonly ScriptParser _scriptParser;
-
+        private readonly ScriptFilesResolver _scriptFilesResolver;
         private readonly Logger _logger;
         
-        private ScriptProjectProvider(ScriptParser scriptParser, LogFactory logFactory)
+        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory)
         {
             _logger = logFactory.CreateLogger<ScriptProjectProvider>();
             _scriptParser = scriptParser;
+            _scriptFilesResolver = scriptFilesResolver;
         }
 
-        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), logFactory)
+        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory)
         {
         }
 
@@ -60,12 +61,24 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 return null;
             }
 
-            _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework." );
-            
+            _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework.");
+
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
+            return CreateProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, csxFiles);
+        }
+
+        public string CreateProjectForScriptFile(string scriptFile)
+        {
+            _logger.Debug($"Creating project file for {scriptFile}");
+            var scriptFiles = _scriptFilesResolver.GetScriptFiles(scriptFile);
+            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), RuntimeHelper.TargetFramework, scriptFiles.ToArray());                        
+        }
+
+        private string CreateProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
+        {
             var parseresult = _scriptParser.ParseFromFiles(csxFiles);
 
-            pathToProjectFile = GetPathToProjectFile(targetDirectory);
+            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
             var projectFile = new ProjectFile();
 
             foreach (var packageReference in parseresult.PackageReferences)
