@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Dotnet.Script.Core.Internal;
+using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.NuGet;
 using Dotnet.Script.DependencyModel.Runtime;
@@ -83,10 +84,9 @@ namespace Dotnet.Script.Core
         public virtual ScriptCompilationContext<TReturn> CreateCompilationContext<TReturn, THost>(ScriptContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            
-            Logger.Verbose($"Current runtime is '{RuntimeHelper.GetPlatformIdentifier()}'.");
 
-            var runtimeDependencies = RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.Code.ToString()).ToArray();
+            Logger.Verbose($"Current runtime is '{RuntimeHelper.GetPlatformIdentifier()}'.");
+            RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
             var scriptOptions = CreateScriptOptions(context, runtimeDependencies.ToList());
 
@@ -112,6 +112,18 @@ namespace Dotnet.Script.Core
             EvaluateDiagnostics(script);
 
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions);
+        }
+
+        private RuntimeDependency[] GetRuntimeDependencies(ScriptContext context)
+        {
+            if (context.ScriptMode == ScriptMode.Script)
+            {
+                return RuntimeDependencyResolver.GetDependencies(context.FilePath).ToArray();
+            }
+            else
+            {
+                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.Code.ToString()).ToArray();
+            }
         }
 
         private static void LoadNativeAssets(RuntimeDependency[] runtimeDependencies)

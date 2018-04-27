@@ -54,6 +54,12 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return GetDependenciesInternal(pathToProjectFile);
         }
 
+        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile)
+        {
+            var pathToProjectFile =  _scriptProjectProvider.CreateProjectForScriptFile(scriptFile);
+            return GetDependenciesInternal(pathToProjectFile);
+        }
+
         private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile)
         {
             var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
