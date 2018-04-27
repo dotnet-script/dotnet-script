@@ -218,6 +218,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleIssue268()
+        {
+            var result = Execute($"{Path.Combine("Issue268", "Issue268.csx")}");
+            Assert.Contains("value:", result.output);
+        }
+
+        [Fact]
         public void ShouldThrowExceptionOnInvalidMediaType()
         {
             var t = ResolveTargetFramework();
