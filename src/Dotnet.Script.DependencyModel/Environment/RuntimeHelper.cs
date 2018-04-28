@@ -11,7 +11,9 @@ namespace Dotnet.Script.DependencyModel.Environment
         private static readonly Regex RuntimeMatcher =
             new Regex($"{GetPlatformIdentifier()}.*-{GetProcessArchitecture()}");
 
-        private static readonly Lazy<string> LazyTargetFramework = new Lazy<string>(GetNetCoreAppVersion); 
+        private static readonly Lazy<string> LazyTargetFramework = new Lazy<string>(GetNetCoreAppVersion);
+
+        private static readonly Lazy<string> LazyInstallLocation = new Lazy<string>(GetInstallLocation);
 
         public static string GetPlatformIdentifier()
         {
@@ -27,6 +29,8 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         public static string TargetFramework => LazyTargetFramework.Value;
 
+        public static string InstallLocation => LazyInstallLocation.Value;
+
         private static string GetNetCoreAppVersion()
         {
             // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156 
@@ -40,6 +44,11 @@ namespace Dotnet.Script.DependencyModel.Environment
             }
             var version = match.Groups[1].Value;
             return $"netcoreapp{version}";
+        }
+
+        private static string GetInstallLocation()
+        {
+            return Path.GetDirectoryName(new Uri(typeof(RuntimeHelper).GetTypeInfo().Assembly.CodeBase).LocalPath);            
         }
 
         private static string GetDotnetBinaryPath()
