@@ -13,6 +13,8 @@ using Microsoft.CodeAnalysis.Scripting;
 using Dotnet.Script.DependencyModel.Context;
 using Microsoft.CodeAnalysis;
 using System.Net;
+using System.Text;
+using Dotnet.Script.DependencyModel.Environment;
 
 namespace Dotnet.Script
 {
@@ -69,6 +71,8 @@ namespace Dotnet.Script
             app.HelpOption("-? | -h | --help");
 
             app.VersionOption("-v | --version", GetVersionInfo);
+
+            app.VersionOption("-i | --info", GetInfo);
 
             app.Command("eval", c =>
             {
@@ -208,6 +212,13 @@ namespace Dotnet.Script
         {
             var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
             return versionAttribute?.InformationalVersion;
+        }
+
+        private static string GetInfo()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Target framework    : {RuntimeHelper.TargetFramework}");
+            return sb.ToString();
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode)
