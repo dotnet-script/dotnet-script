@@ -15,21 +15,28 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private static readonly Lazy<string> LazyInstallLocation = new Lazy<string>(GetInstallLocation);
 
-        public static string GetPlatformIdentifier()
-        {
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Darwin) return "osx";
-            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Linux) return "linux";
-            return "win";            
-        }
+        private static readonly Lazy<string> LazyPlatformIdentifier = new Lazy<string>(GetPlatformIdentifier);
 
-        public static bool IsWindows()
-        {
-            return GetPlatformIdentifier() == "win";
-        }
+        private static readonly Lazy<string> LazyRuntimeIdentifier = new Lazy<string>(GetRuntimeIdentifier);
+
+        private static readonly Lazy<bool> LazyIsWindows = new Lazy<bool>(() => PlatformIdentifier == "win");
+                
+        public static bool IsWindows => LazyIsWindows.Value;
+
+        public static string PlatformIdentifier => LazyPlatformIdentifier.Value;
+
+        public static string RuntimeIdentifier => LazyRuntimeIdentifier.Value;
 
         public static string TargetFramework => LazyTargetFramework.Value;
 
         public static string InstallLocation => LazyInstallLocation.Value;
+
+        private static string GetPlatformIdentifier()
+        {
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Darwin) return "osx";
+            if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Linux) return "linux";
+            return "win";
+        }
 
         private static string GetNetCoreAppVersion()
         {
@@ -54,7 +61,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         private static string GetDotnetBinaryPath()
         {
             string basePath;
-            if (IsWindows())
+            if (IsWindows)
             {
                 basePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
             }
@@ -78,7 +85,7 @@ namespace Dotnet.Script.DependencyModel.Environment
             return RuntimeEnvironment.RuntimeArchitecture;            
         }
 
-        public static string GetRuntimeIdentifier()
+        private static string GetRuntimeIdentifier()
         {
             var platformIdentifier = GetPlatformIdentifier();
             if (platformIdentifier == "osx" || platformIdentifier == "linux")
@@ -99,7 +106,7 @@ namespace Dotnet.Script.DependencyModel.Environment
             var tempDirectory = Path.GetTempPath();
             var pathRoot = Path.GetPathRoot(targetDirectory);
             var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
-            if (pathRoot.Length > 0 && RuntimeHelper.IsWindows())
+            if (pathRoot.Length > 0 && IsWindows)
             {
                 var driveLetter = pathRoot.Substring(0, 1);
                 if (driveLetter == "\\")

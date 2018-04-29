@@ -212,21 +212,11 @@ namespace Dotnet.Script
             sb.AppendLine($"Version             : {versionAttribute?.InformationalVersion}");            
             sb.AppendLine($"Install location    : {RuntimeHelper.InstallLocation}");
             sb.AppendLine($"Target framework    : {RuntimeHelper.TargetFramework}");
-            sb.AppendLine($"Platform identifier : {RuntimeHelper.GetPlatformIdentifier()}");
-            sb.AppendLine($"Runtime identifier  : {RuntimeHelper.GetRuntimeIdentifier()}");
+            sb.AppendLine($"Platform identifier : {RuntimeHelper.PlatformIdentifier}");
+            sb.AppendLine($"Runtime identifier  : {RuntimeHelper.RuntimeIdentifier}");
             return sb.ToString();
 
             
-        }
-
-        private static string GetInfo()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Install location    : {RuntimeHelper.InstallLocation}");
-            sb.AppendLine($"Target framework    : {RuntimeHelper.TargetFramework}");
-            sb.AppendLine($"Platform identifier : {RuntimeHelper.GetPlatformIdentifier()}");
-            sb.AppendLine($"Runtime identifier  : {RuntimeHelper.GetRuntimeIdentifier()}");
-            return sb.ToString();
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode)
