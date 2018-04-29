@@ -72,14 +72,11 @@ namespace Dotnet.Script
 
             app.VersionOption("-v | --version", GetVersionInfo);
 
-            app.VersionOption("-i | --info", GetInfo);
-
             app.Command("eval", c =>
             {
                 c.Description = "Execute CSX code.";
                 var code = c.Argument("code", "Code to execute.");
-                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
-
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);                
                 c.OnExecute(async () =>
                 {
                     int exitCode = 0;
@@ -210,8 +207,16 @@ namespace Dotnet.Script
 
         private static string GetVersionInfo()
         {
-            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
-            return versionAttribute?.InformationalVersion;
+            StringBuilder sb = new StringBuilder();
+            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();                        
+            sb.AppendLine($"Version             : {versionAttribute?.InformationalVersion}");            
+            sb.AppendLine($"Install location    : {RuntimeHelper.InstallLocation}");
+            sb.AppendLine($"Target framework    : {RuntimeHelper.TargetFramework}");
+            sb.AppendLine($"Platform identifier : {RuntimeHelper.GetPlatformIdentifier()}");
+            sb.AppendLine($"Runtime identifier  : {RuntimeHelper.GetRuntimeIdentifier()}");
+            return sb.ToString();
+
+            
         }
 
         private static string GetInfo()
