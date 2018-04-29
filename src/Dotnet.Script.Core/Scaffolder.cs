@@ -22,12 +22,12 @@ namespace Dotnet.Script.Core
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             if (!File.Exists(pathToLaunchFile))
             {
-                string baseDirectory = Path.GetDirectoryName(new Uri(typeof(Scaffolder).GetTypeInfo().Assembly.CodeBase).LocalPath);
-                string csxPath = Path.Combine(baseDirectory, "dotnet-script.dll").Replace(@"\", "/");
+                string installLocation = RuntimeHelper.InstallLocation;
+                string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
                                 
                 string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
 
-                string launchFileContent = lauchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", csxPath);
+                string launchFileContent = lauchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
                 WriteFile(pathToLaunchFile, launchFileContent);
             }
             

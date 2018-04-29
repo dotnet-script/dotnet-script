@@ -79,7 +79,6 @@ namespace Dotnet.Script.DependencyModel.Environment
             return storePath;
         }
 
-
         private static string GetProcessArchitecture()
         {
             return RuntimeEnvironment.RuntimeArchitecture;            
