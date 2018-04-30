@@ -11,24 +11,26 @@ namespace Dotnet.Script.DependencyModel.Context
     {
         private readonly CommandRunner _commandRunner;
         private readonly Logger _logger;
-        private static readonly string PathToNuget;
+        private readonly ScriptEnvironment _scriptEnvironment;
+        private static readonly string PathToNuget;        
 
         static NuGetRestorer()
         {
             var directory = Path.GetDirectoryName(new Uri(typeof(NuGetRestorer).GetTypeInfo().Assembly.CodeBase).LocalPath);
-            PathToNuget = Path.Combine(directory, "NuGet430.exe");
+            PathToNuget = Path.Combine(directory, "NuGet430.exe");            
         }
 
         public NuGetRestorer(CommandRunner commandRunner, LogFactory logFactory)
         {
             _commandRunner = commandRunner;
             _logger = logFactory.CreateLogger<NuGetRestorer>();
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         public void Restore(string pathToProjectFile)
         {
             ExtractNugetExecutable();
-            if (RuntimeHelper.IsWindows)
+            if (_scriptEnvironment.IsWindows)
             {
                 _commandRunner.Execute(PathToNuget, $"restore {pathToProjectFile}");
             }
@@ -42,7 +44,7 @@ namespace Dotnet.Script.DependencyModel.Context
 
         private bool CheckAvailability()
         {
-            if (RuntimeHelper.IsWindows)
+            if (_scriptEnvironment.IsWindows)
             {
                 return _commandRunner.Execute(PathToNuget) == 0;
             }

@@ -10,6 +10,13 @@ namespace Dotnet.Script.Core
 {
     public class Scaffolder
     {
+        private ScriptEnvironment _scriptEnvironment;
+
+        public Scaffolder()
+        {
+            _scriptEnvironment = ScriptEnvironment.Default;
+        }
+
         public void InitializerFolder(string fileName)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -22,7 +29,7 @@ namespace Dotnet.Script.Core
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             if (!File.Exists(pathToLaunchFile))
             {
-                string installLocation = RuntimeHelper.InstallLocation;
+                string installLocation = _scriptEnvironment.InstallLocation;
                 string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
                                 
                 string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
@@ -36,7 +43,7 @@ namespace Dotnet.Script.Core
             {
                 var omniSharpFileTemplate = TemplateLoader.ReadTemplate("omnisharp.json.template");
                 JObject settings = JObject.Parse(omniSharpFileTemplate);
-                settings["script"]["defaultTargetFramework"] = RuntimeHelper.TargetFramework;
+                settings["script"]["defaultTargetFramework"] = _scriptEnvironment.TargetFramework;
                 WriteFile(pathToOmniSharpJson, settings.ToString());
             }
 

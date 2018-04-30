@@ -11,6 +11,13 @@ namespace Dotnet.Script.Tests
     [Collection("IntegrationTests")]
     public class ScriptExecutionTests
     {
+        private ScriptEnvironment _scriptEnvironment;
+
+        public ScriptExecutionTests()
+        {
+            _scriptEnvironment = ScriptEnvironment.Default;
+        }
+
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
@@ -36,7 +43,7 @@ namespace Dotnet.Script.Tests
         public void ShouldHandlePackageWithNativeLibraries()
         {
             // We have no story for this on *nix yet
-            if (RuntimeHelper.IsWindows)
+            if (_scriptEnvironment.IsWindows)
             {
                 var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
                 Assert.Contains("Connection successful", result.output);
@@ -44,14 +51,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
-        public static void ShouldReturnExitCodeOnenWhenScriptFails()
+        public void ShouldReturnExitCodeOnenWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
             Assert.Equal(1, result.exitCode);
         }
 
         [Fact]
-        public static void ShouldReturnStackTraceInformationWhenScriptFails()
+        public void ShouldReturnStackTraceInformationWhenScriptFails()
         {
             var result = Execute(Path.Combine("Exception", "Error.csx"));
             Assert.Contains("die!", result.output);
@@ -59,25 +66,25 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
-        public static void ShouldReturnExitCodeOneWhenScriptFailsToCompile()
+        public void ShouldReturnExitCodeOneWhenScriptFailsToCompile()
         {
             var result = Execute(Path.Combine("CompilationError", "CompilationError.csx"));
             Assert.Equal(1, result.exitCode);
         }
 
         [Fact]
-        public static void ShouldHandleIssue129()
+        public void ShouldHandleIssue129()
         {
             var result = Execute(Path.Combine("Issue129", "Issue129.csx"));
             Assert.Contains("Bad HTTP authentication header", result.output);
         }
 
         [Fact]
-        public static void ShouldHandleIssue166()
+        public void ShouldHandleIssue166()
         {
             // System.Data.SqlClient loads native assets
             // No story on *nix yet.
-            if (RuntimeHelper.IsWindows)
+            if (_scriptEnvironment.IsWindows)
             {
                 var result = Execute(Path.Combine("Issue166", "Issue166.csx"));
                 Assert.Contains("Connection successful", result.output);
@@ -85,84 +92,84 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
-        public static void ShouldPassUnknownArgumentToScript()
+        public void ShouldPassUnknownArgumentToScript()
         {
             var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "arg1");
             Assert.Contains("arg1", result.output);
         }
 
         [Fact]
-        public static void ShouldPassKnownArgumentToScriptWhenEscapedByDoubleHyphen()
+        public void ShouldPassKnownArgumentToScriptWhenEscapedByDoubleHyphen()
         {
             var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "--", "-v");
             Assert.Contains("-v", result.output);
         }
 
         [Fact]
-        public static void ShouldNotPassUnEscapedKnownArgumentToScript()
+        public void ShouldNotPassUnEscapedKnownArgumentToScript()
         {
             var result = Execute($"{Path.Combine("Arguments", "Arguments.csx")}", "-v");
             Assert.DoesNotContain("-v", result.output);
         }
 
         [Fact]
-        public static void ShouldPropagateReturnValue()
+        public void ShouldPropagateReturnValue()
         {
             var result = Execute($"{Path.Combine("ReturnValue", "ReturnValue.csx")}");
             Assert.Equal(42,result.exitCode);
         }
 
         [Fact]
-        public static void ShouldHandleIssue181()
+        public void ShouldHandleIssue181()
         {
             var result = Execute(Path.Combine("Issue181", "Issue181.csx"));
             Assert.Contains("42", result.output);
         }
 
         [Fact]
-        public static void ShouldHandleIssue189()
+        public void ShouldHandleIssue189()
         {
             var result = Execute(Path.Combine("Issue189","SomeFolder","Script.csx"));
             Assert.Contains("Newtonsoft.Json.JsonConvert", result.output);
         }
 
         [Fact]
-        public static void ShouldHandleIssue198()
+        public void ShouldHandleIssue198()
         {
             var result = Execute(Path.Combine("Issue198", "Issue198.csx"));
             Assert.Contains("NuGet.Client", result.output);
         }
 
         [Fact]
-        public static void ShouldHandleIssue204()
+        public void ShouldHandleIssue204()
         {
             var result = Execute(Path.Combine("Issue204", "Issue204.csx"));
             Assert.Contains("System.Net.WebProxy", result.output);
         }
 
         [Fact]
-        public static void ShouldHandleIssue214()
+        public void ShouldHandleIssue214()
         {
             var result = Execute(Path.Combine("Issue214", "Issue214.csx"));
             Assert.Contains("Hello World!", result.output);
         }
 
         [Fact]
-        public static void ShouldCompileScriptWithReleaseConfiguration()
+        public void ShouldCompileScriptWithReleaseConfiguration()
         {
             var result = Execute(Path.Combine("Configuration", "Configuration.csx"),"-c", "release");
             Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
-        public static void ShouldCompileScriptWithDebugConfigurationWhenSpecified()
+        public void ShouldCompileScriptWithDebugConfigurationWhenSpecified()
         {
             var result = Execute(Path.Combine("Configuration", "Configuration.csx"), "-c", "debug");
             Assert.Contains("true", result.output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
-        public static void ShouldCompileScriptWithDebugConfigurationWhenNotSpecified()
+        public void ShouldCompileScriptWithDebugConfigurationWhenNotSpecified()
         {
             var result = Execute(Path.Combine("Configuration", "Configuration.csx"));
             Assert.Contains("true", result.output, StringComparison.OrdinalIgnoreCase);
@@ -260,7 +267,7 @@ namespace Dotnet.Script.Tests
 
 
         [Fact(Skip = "This also failes when run a standard netcoreapp2.1 console app")]
-        public static void ShouldHandleIssue235()
+        public void ShouldHandleIssue235()
         {
             string code =
             @"using AgileObjects.AgileMapper;
@@ -297,19 +304,19 @@ namespace Dotnet.Script.Tests
                 Assert.Contains("Hello World!", result.output);
             }
         }
-        private static (string output, int exitCode) Execute(string fixture, params string[] arguments)
+        private (string output, int exitCode) Execute(string fixture, params string[] arguments)
         {            
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(Path.Combine("..", "..", "..", "TestFixtures", fixture), arguments));
             return result;
         }
         
-        private static (string output, int exitCode) ExecuteCode(string code)
+        private (string output, int exitCode) ExecuteCode(string code)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"eval", new[] { $"\"{code}\"" }));
             return result;
         }
 
-        private static (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
+        private (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"-c", new[] {"release", "eval", $"\"{code}\"" }));
             return result;
@@ -344,7 +351,7 @@ namespace Dotnet.Script.Tests
             return Program.Main(allArguments.ToArray());
         }
 
-        private static string[] GetDotnetScriptArguments(string fixture, params string[] arguments)
+        private string[] GetDotnetScriptArguments(string fixture, params string[] arguments)
         {
             string configuration;
 #if DEBUG
@@ -352,7 +359,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, RuntimeHelper.TargetFramework, "dotnet-script.dll"), fixture });
+            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll"), fixture });
             if (arguments != null)
             {
                 allArguments.AddRange(arguments);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
@@ -19,22 +20,27 @@ namespace Dotnet.Script.DependencyModel.Runtime
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
         private readonly ScriptFilesDependencyResolver _scriptFilesDependencyResolver;
         private readonly Logger _logger;
-      
-        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver, LogFactory logFactory)
+        private readonly ScriptEnvironment _scriptEnvironment;
+        private readonly Regex _runtimeMatcher;
+
+        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
         {            
             _scriptProjectProvider = scriptProjectProvider;
             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
             _scriptFilesDependencyResolver = scriptFilesDependencyResolver;
             _logger = logFactory.CreateLogger<RuntimeDependencyResolver>();
+            _scriptEnvironment = scriptEnvironment;
+            _runtimeMatcher = new Regex($"{_scriptEnvironment.PlatformIdentifier}.*-{_scriptEnvironment.ProccessorArchitecture}");
         }
 
-        public RuntimeDependencyResolver(LogFactory logFactory) 
+        public RuntimeDependencyResolver(LogFactory logFactory)
             : this
-            (                  
-                  new ScriptProjectProvider(logFactory), 
+            (
+                  new ScriptProjectProvider(logFactory),
                   new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
-                  new ScriptFilesDependencyResolver(logFactory), 
-                  logFactory
+                  new ScriptFilesDependencyResolver(logFactory),
+                  logFactory,
+                  ScriptEnvironment.Default
             )
         {
         }
@@ -48,8 +54,8 @@ namespace Dotnet.Script.DependencyModel.Runtime
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string code = null)
         {
             var pathToProjectFile = scriptMode == ScriptMode.Script 
-                ? _scriptProjectProvider.CreateProject(targetDirectory, RuntimeHelper.TargetFramework, true)
-                : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), RuntimeHelper.TargetFramework);
+                ? _scriptProjectProvider.CreateProject(targetDirectory, _scriptEnvironment.TargetFramework, true)
+                : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), ScriptEnvironment.Default.TargetFramework);
 
             return GetDependenciesInternal(pathToProjectFile);
         }
@@ -66,7 +72,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
             var dependencyContext = dependencyInfo.DependencyContext;
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
-            nuGetPackageFolders.Add(RuntimeHelper.GetPathToNuGetStoreFolder());
+            nuGetPackageFolders.Add(_scriptEnvironment.NuGetStoreFolder);
 
             var runtimeDependencies = new List<RuntimeDependency>();
 
@@ -95,7 +101,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
         {
             List<string> result = new List<string>();
             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(
-                nlg => RuntimeHelper.AppliesToCurrentRuntime(nlg.Runtime)))
+                nlg => AppliesToCurrentRuntime(nlg.Runtime)))
             {
 
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
@@ -113,7 +119,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
             var runtimeAssemblyGroup =
                 runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag =>
-                    rag.Runtime == RuntimeHelper.RuntimeIdentifier);
+                    rag.Runtime == _scriptEnvironment.RuntimeIdentifier);
 
             if (runtimeAssemblyGroup == null)
             {
@@ -149,6 +155,11 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 }
             }
             throw new InvalidOperationException("Not found");
+        }
+
+        private bool AppliesToCurrentRuntime(string runtime)
+        {
+            return string.IsNullOrWhiteSpace(runtime) || _runtimeMatcher.IsMatch(runtime);
         }
     }
 }

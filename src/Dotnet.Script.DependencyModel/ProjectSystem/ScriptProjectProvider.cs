@@ -10,16 +10,18 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     {
         private readonly ScriptParser _scriptParser;
         private readonly ScriptFilesResolver _scriptFilesResolver;
+        private readonly ScriptEnvironment _scriptEnvironment;
         private readonly Logger _logger;
         
-        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory)
+        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
         {
             _logger = logFactory.CreateLogger<ScriptProjectProvider>();
             _scriptParser = scriptParser;
             _scriptFilesResolver = scriptFilesResolver;
+            _scriptEnvironment = scriptEnvironment;
         }
 
-        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory)
+        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, ScriptEnvironment.Default)
         {
         }
 
@@ -71,7 +73,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
             _logger.Debug($"Creating project file for {scriptFile}");
             var scriptFiles = _scriptFilesResolver.GetScriptFiles(scriptFile);
-            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), RuntimeHelper.TargetFramework, scriptFiles.ToArray());                        
+            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());                        
         }
 
         private string CreateProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
@@ -109,7 +111,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static string GetPathToProjectFile(string targetDirectory)
         { 
-            var pathToProjectDirectory = RuntimeHelper.CreateTempFolder(targetDirectory);
+            var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory);
             var pathToProjectFile = Path.Combine(pathToProjectDirectory, "script.csproj");
             return pathToProjectFile;
         }

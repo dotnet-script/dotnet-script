@@ -210,10 +210,10 @@ namespace Dotnet.Script
             StringBuilder sb = new StringBuilder();
             var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();                        
             sb.AppendLine($"Version             : {versionAttribute?.InformationalVersion}");            
-            sb.AppendLine($"Install location    : {RuntimeHelper.InstallLocation}");
-            sb.AppendLine($"Target framework    : {RuntimeHelper.TargetFramework}");
-            sb.AppendLine($"Platform identifier : {RuntimeHelper.PlatformIdentifier}");
-            sb.AppendLine($"Runtime identifier  : {RuntimeHelper.RuntimeIdentifier}");
+            sb.AppendLine($"Install location    : {ScriptEnvironment.Default.InstallLocation}");
+            sb.AppendLine($"Target framework    : {ScriptEnvironment.Default.TargetFramework}");
+            sb.AppendLine($"Platform identifier : {ScriptEnvironment.Default.PlatformIdentifier}");
+            sb.AppendLine($"Runtime identifier  : {ScriptEnvironment.Default.RuntimeIdentifier}");
             return sb.ToString();
 
             

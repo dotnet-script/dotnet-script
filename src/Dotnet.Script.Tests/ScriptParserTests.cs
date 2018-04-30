@@ -10,10 +10,12 @@ namespace Dotnet.Script.Tests
     public class ScriptParserTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
         public ScriptParserTests(ITestOutputHelper testOutputHelper)
         {
-            _testOutputHelper = testOutputHelper;            
+            _testOutputHelper = testOutputHelper;
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         [Fact]
@@ -62,9 +64,9 @@ namespace Dotnet.Script.Tests
         {
             var parser = CreateParser();
 
-            var result = parser.ParseFromCode($"#! \"{RuntimeHelper.TargetFramework}\"");
+            var result = parser.ParseFromCode($"#! \"{_scriptEnvironment.TargetFramework}\"");
 
-            Assert.Equal(RuntimeHelper.TargetFramework, result.TargetFramework);            
+            Assert.Equal(_scriptEnvironment.TargetFramework, result.TargetFramework);            
         }
 
         private ScriptParser CreateParser()

@@ -13,6 +13,12 @@ namespace Dotnet.Script.Tests
     [Collection("IntegrationTests")]
     public class ScriptPackagesTests : IClassFixture<ScriptPackagesFixture>
     {
+        private readonly ScriptEnvironment _scriptEnvironment;
+
+        public ScriptPackagesTests()
+        {
+            _scriptEnvironment = ScriptEnvironment.Default;
+        }
 
         [Fact]
         public void ShouldHandleScriptPackageWithMainCsx()
@@ -62,7 +68,7 @@ namespace Dotnet.Script.Tests
         {
             var resolver = CreateResolverCompilationDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
-            var dependencies = resolver.GetDependencies(fixture, true, RuntimeHelper.TargetFramework);
+            var dependencies = resolver.GetDependencies(fixture, true, _scriptEnvironment.TargetFramework);
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
             Assert.NotEmpty(scriptFiles);
         }
@@ -109,10 +115,13 @@ namespace Dotnet.Script.Tests
 
     public class ScriptPackagesFixture
     {
+        private readonly ScriptEnvironment _scriptEnvironment;
+
         public ScriptPackagesFixture()
         {
+            _scriptEnvironment = ScriptEnvironment.Default;
             ClearGlobalPackagesFolder();
-            BuildScriptPackages();
+            BuildScriptPackages();            
         }
 
         private void ClearGlobalPackagesFolder()
@@ -125,7 +134,7 @@ namespace Dotnet.Script.Tests
             }
         }
 
-        private static void BuildScriptPackages()
+        private void BuildScriptPackages()
         {
             string pathToPackagesOutputFolder = GetPathToPackagesFolder();
             RemoveDirectory(pathToPackagesOutputFolder);
@@ -136,7 +145,7 @@ namespace Dotnet.Script.Tests
             foreach (var specFile in specFiles)
             {
                 string command;
-                if (RuntimeHelper.IsWindows)
+                if (_scriptEnvironment.IsWindows)
                 {                    
                     command = pathtoNuget430;
                     var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
@@ -153,7 +162,7 @@ namespace Dotnet.Script.Tests
         private static string GetPathToPackagesFolder()
         {
             var targetDirectory = TestPathUtils.GetFullPathToTestFixture(Path.Combine("ScriptPackage", "packages"));
-            return RuntimeHelper.CreateTempFolder(targetDirectory);
+            return DependencyModel.ProjectSystem.FileUtils.CreateTempFolder(targetDirectory);
         }
 
         private static void RemoveDirectory(string path)
