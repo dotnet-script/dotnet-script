@@ -11,17 +11,19 @@ namespace Dotnet.Script.Tests
     public class ScriptProjectProviderTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
         public ScriptProjectProviderTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         [Fact]
         public void ShouldCopyLocalNuGetConfig()
         {
             var provider = CreateProvider();
-            var pathToProjectFile = provider.CreateProject(TestPathUtils.GetFullPathToTestFixture("LocalNuGetConfig"), RuntimeHelper.TargetFramework, true);
+            var pathToProjectFile = provider.CreateProject(TestPathUtils.GetFullPathToTestFixture("LocalNuGetConfig"), _scriptEnvironment.TargetFramework, true);
             var pathToProjectFileFolder = Path.GetDirectoryName(pathToProjectFile);
             Assert.True(File.Exists(Path.Combine(pathToProjectFileFolder,"NuGet.Config")));
         }
@@ -32,7 +34,7 @@ namespace Dotnet.Script.Tests
             StringBuilder log = new StringBuilder();            
             var provider = new ScriptProjectProvider(type => ((level, message) => log.AppendLine(message)));
 
-            provider.CreateProject(TestPathUtils.GetFullPathToTestFixture("HelloWorld"), RuntimeHelper.TargetFramework, true);
+            provider.CreateProject(TestPathUtils.GetFullPathToTestFixture("HelloWorld"), _scriptEnvironment.TargetFramework, true);
             var output = log.ToString();
 
             Assert.Contains("<Project Sdk=\"Microsoft.NET.Sdk\">",output);

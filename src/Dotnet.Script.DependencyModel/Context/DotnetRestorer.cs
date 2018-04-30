@@ -9,16 +9,18 @@ namespace Dotnet.Script.DependencyModel.Context
     {
         private readonly CommandRunner _commandRunner;
         private readonly Logger _logger;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
         public DotnetRestorer(CommandRunner commandRunner, LogFactory logFactory)
         {
             _commandRunner = commandRunner;
             _logger = logFactory.CreateLogger<DotnetRestorer>();
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         public void Restore(string pathToProjectFile)
         {
-            var runtimeIdentifier = RuntimeHelper.RuntimeIdentifier;
+            var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
             _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");            
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" -r {runtimeIdentifier}");
             if (exitcode != 0)

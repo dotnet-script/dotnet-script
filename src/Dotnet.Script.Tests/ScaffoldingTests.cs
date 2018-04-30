@@ -9,6 +9,13 @@ namespace Dotnet.Script.Tests
 {
     public class ScaffoldingTests
     {
+        private readonly ScriptEnvironment _scriptEnvironment;
+
+        public ScaffoldingTests()
+        {
+            _scriptEnvironment = ScriptEnvironment.Default;
+        }
+
         [Fact]
         public void ShouldInitializeScriptFolder()
         {
@@ -42,7 +49,7 @@ namespace Dotnet.Script.Tests
                 var result = Execute("init", scriptFolder.Path);
                 Assert.Equal(0, result.exitCode);
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
-                Assert.Equal(RuntimeHelper.TargetFramework, settings.script.defaultTargetFramework.Value);                
+                Assert.Equal(_scriptEnvironment.TargetFramework, settings.script.defaultTargetFramework.Value);                
             }
         }
 
@@ -87,13 +94,13 @@ namespace Dotnet.Script.Tests
             return Program.Main(args);
         }
 
-        private static (string output, int exitCode) Execute(string args, string workingDirectory)
+        private (string output, int exitCode) Execute(string args, string workingDirectory)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(args), workingDirectory);
             return result;
         }
 
-        private static string[] GetDotnetScriptArguments(string args)
+        private string[] GetDotnetScriptArguments(string args)
         {
             string configuration;
 #if DEBUG
@@ -101,7 +108,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, RuntimeHelper.TargetFramework, "dotnet-script.dll"), args };
+            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll"), args };
         }
     }
 

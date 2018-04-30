@@ -25,7 +25,9 @@ namespace Dotnet.Script.Core
         // Note: Windows only, Mac and Linux needs something else?
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
-        
+
+        private ScriptEnvironment _scriptEnvironment;
+
         static ScriptCompiler()
         {
             // force Roslyn to use ReferenceManager for the first time
@@ -62,6 +64,7 @@ namespace Dotnet.Script.Core
         {
             Logger = logger;
             RuntimeDependencyResolver = runtimeDependencyResolver;
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
@@ -85,7 +88,7 @@ namespace Dotnet.Script.Core
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            Logger.Verbose($"Current runtime is '{RuntimeHelper.PlatformIdentifier}'.");
+            Logger.Verbose($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");
             RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
             var scriptOptions = CreateScriptOptions(context, runtimeDependencies.ToList());
@@ -126,11 +129,11 @@ namespace Dotnet.Script.Core
             }
         }
 
-        private static void LoadNativeAssets(RuntimeDependency[] runtimeDependencies)
+        private void LoadNativeAssets(RuntimeDependency[] runtimeDependencies)
         {
             foreach (var nativeAsset in runtimeDependencies.SelectMany(rtd => rtd.NativeAssets).Distinct())
             {
-                if (RuntimeHelper.IsWindows)
+                if (_scriptEnvironment.IsWindows)
                 {
                     LoadLibrary(nativeAsset);
                 }

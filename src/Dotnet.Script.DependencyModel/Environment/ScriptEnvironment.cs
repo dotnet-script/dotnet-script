@@ -8,7 +8,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 {
     public class ScriptEnvironment
     {
-        private static readonly Lazy<ScriptEnvironment> _instance = new Lazy<ScriptEnvironment>(() => new ScriptEnvironment());
+        private static readonly Lazy<ScriptEnvironment> _default = new Lazy<ScriptEnvironment>(() => new ScriptEnvironment());
 
         private readonly Lazy<string> _targetFramework;
 
@@ -22,7 +22,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private readonly Lazy<string> _nuGetStoreFolder;
 
-        public static ScriptEnvironment Instance => _instance.Value;
+        public static ScriptEnvironment Default => _default.Value;
 
         private ScriptEnvironment()
         {
@@ -30,7 +30,7 @@ namespace Dotnet.Script.DependencyModel.Environment
             _installLocation = new Lazy<string>(GetInstallLocation);
             _platformIdentifier = new Lazy<string>(GetPlatformIdentifier);
             _runtimeIdentifier = new Lazy<string>(GetRuntimeIdentifier);
-            _isWindows = new Lazy<bool>(PlatformIdentifier == "win");
+            _isWindows = new Lazy<bool>(() => PlatformIdentifier == "win");
             _nuGetStoreFolder = new Lazy<string>(GetPathToNuGetStoreFolder);
         }
 
