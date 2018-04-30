@@ -153,7 +153,7 @@ namespace Dotnet.Script.Tests
         private static string GetPathToPackagesFolder()
         {
             var targetDirectory = TestPathUtils.GetFullPathToTestFixture(Path.Combine("ScriptPackage", "packages"));
-            return RuntimeHelper.CreateTempFolder(targetDirectory);
+            return DependencyModel.ProjectSystem.FileUtils.CreateTempFolder(targetDirectory);
         }
 
         private static void RemoveDirectory(string path)
