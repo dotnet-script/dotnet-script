@@ -13,6 +13,8 @@ using Microsoft.CodeAnalysis.Scripting;
 using Dotnet.Script.DependencyModel.Context;
 using Microsoft.CodeAnalysis;
 using System.Net;
+using System.Text;
+using Dotnet.Script.DependencyModel.Environment;
 
 namespace Dotnet.Script
 {
@@ -74,8 +76,7 @@ namespace Dotnet.Script
             {
                 c.Description = "Execute CSX code.";
                 var code = c.Argument("code", "Code to execute.");
-                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
-
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);                
                 c.OnExecute(async () =>
                 {
                     int exitCode = 0;
@@ -206,8 +207,16 @@ namespace Dotnet.Script
 
         private static string GetVersionInfo()
         {
-            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();            
-            return versionAttribute?.InformationalVersion;
+            StringBuilder sb = new StringBuilder();
+            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();                        
+            sb.AppendLine($"Version             : {versionAttribute?.InformationalVersion}");            
+            sb.AppendLine($"Install location    : {RuntimeHelper.InstallLocation}");
+            sb.AppendLine($"Target framework    : {RuntimeHelper.TargetFramework}");
+            sb.AppendLine($"Platform identifier : {RuntimeHelper.PlatformIdentifier}");
+            sb.AppendLine($"Runtime identifier  : {RuntimeHelper.RuntimeIdentifier}");
+            return sb.ToString();
+
+            
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode)

@@ -36,7 +36,7 @@ namespace Dotnet.Script.Tests
         public void ShouldHandlePackageWithNativeLibraries()
         {
             // We have no story for this on *nix yet
-            if (RuntimeHelper.IsWindows())
+            if (RuntimeHelper.IsWindows)
             {
                 var result = Execute(Path.Combine("NativeLibrary", "NativeLibrary.csx"));
                 Assert.Contains("Connection successful", result.output);
@@ -77,7 +77,7 @@ namespace Dotnet.Script.Tests
         {
             // System.Data.SqlClient loads native assets
             // No story on *nix yet.
-            if (RuntimeHelper.IsWindows())
+            if (RuntimeHelper.IsWindows)
             {
                 var result = Execute(Path.Combine("Issue166", "Issue166.csx"));
                 Assert.Contains("Connection successful", result.output);

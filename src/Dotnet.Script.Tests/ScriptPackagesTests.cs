@@ -136,7 +136,7 @@ namespace Dotnet.Script.Tests
             foreach (var specFile in specFiles)
             {
                 string command;
-                if (RuntimeHelper.IsWindows())
+                if (RuntimeHelper.IsWindows)
                 {                    
                     command = pathtoNuget430;
                     var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });

@@ -85,7 +85,7 @@ namespace Dotnet.Script.Core
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            Logger.Verbose($"Current runtime is '{RuntimeHelper.GetPlatformIdentifier()}'.");
+            Logger.Verbose($"Current runtime is '{RuntimeHelper.PlatformIdentifier}'.");
             RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
             var scriptOptions = CreateScriptOptions(context, runtimeDependencies.ToList());
@@ -130,7 +130,7 @@ namespace Dotnet.Script.Core
         {
             foreach (var nativeAsset in runtimeDependencies.SelectMany(rtd => rtd.NativeAssets).Distinct())
             {
-                if (RuntimeHelper.IsWindows())
+                if (RuntimeHelper.IsWindows)
                 {
                     LoadLibrary(nativeAsset);
                 }

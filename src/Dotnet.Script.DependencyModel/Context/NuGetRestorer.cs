@@ -28,7 +28,7 @@ namespace Dotnet.Script.DependencyModel.Context
         public void Restore(string pathToProjectFile)
         {
             ExtractNugetExecutable();
-            if (RuntimeHelper.IsWindows())
+            if (RuntimeHelper.IsWindows)
             {
                 _commandRunner.Execute(PathToNuget, $"restore {pathToProjectFile}");
             }
@@ -42,7 +42,7 @@ namespace Dotnet.Script.DependencyModel.Context
 
         private bool CheckAvailability()
         {
-            if (RuntimeHelper.IsWindows())
+            if (RuntimeHelper.IsWindows)
             {
                 return _commandRunner.Execute(PathToNuget) == 0;
             }
