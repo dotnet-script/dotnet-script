@@ -18,8 +18,6 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private readonly Lazy<string> _runtimeIdentifier;
 
-        private readonly Lazy<bool> _isWindows;
-
         private readonly Lazy<string> _nuGetStoreFolder;
 
         public static ScriptEnvironment Default => _default.Value;
@@ -30,11 +28,10 @@ namespace Dotnet.Script.DependencyModel.Environment
             _installLocation = new Lazy<string>(GetInstallLocation);
             _platformIdentifier = new Lazy<string>(GetPlatformIdentifier);
             _runtimeIdentifier = new Lazy<string>(GetRuntimeIdentifier);
-            _isWindows = new Lazy<bool>(() => PlatformIdentifier == "win");
             _nuGetStoreFolder = new Lazy<string>(GetPathToNuGetStoreFolder);
         }
 
-        public bool IsWindows => _isWindows.Value;
+        public bool IsWindows => PlatformIdentifier == "win";
 
         public string PlatformIdentifier => _platformIdentifier.Value;
 
