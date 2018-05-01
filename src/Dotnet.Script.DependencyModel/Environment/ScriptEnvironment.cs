@@ -8,7 +8,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 {
     public class ScriptEnvironment
     {
-        private static readonly Lazy<ScriptEnvironment> _default = new Lazy<ScriptEnvironment>(() => new ScriptEnvironment());
+        public static readonly ScriptEnvironment Default = new ScriptEnvironment();
 
         private readonly Lazy<string> _targetFramework;
 
@@ -21,8 +21,6 @@ namespace Dotnet.Script.DependencyModel.Environment
         private readonly Lazy<bool> _isWindows;
 
         private readonly Lazy<string> _nuGetStoreFolder;
-
-        public static ScriptEnvironment Default => _default.Value;
 
         private ScriptEnvironment()
         {
