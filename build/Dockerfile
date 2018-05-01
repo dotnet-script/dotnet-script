@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.0.0-sdk as builder
+FROM microsoft/dotnet:2.1-sdk as builder
 COPY . /dotnet-script
 WORKDIR /dotnet-script
 
