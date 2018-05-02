@@ -84,6 +84,7 @@ namespace Dotnet.Script.Core
                     "System.Core",
                     "System.Data",
                     "System.Data.DataSetExtensions",
+                    "System.Runtime",
                     "System.Xml",
                     "System.Xml.Linq",
                     "System.Net.Http",
