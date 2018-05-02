@@ -3,75 +3,35 @@ using static FileUtils;
 using System.Xml.Linq;
 
 const string NetCoreApp20 = "netcoreapp2.0";
-
 const string NetCoreApp21 = "netcoreapp2.1";
-
 const string GlobalToolPackageId = "dotnet-script";
 
-string Version;
+var owner = "filipw";
+var projectName = "dotnet-script";
+var root = FileUtils.GetScriptFolder();
+var solutionFolder = Path.Combine(root,"..","src");
+var dotnetScriptProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script");
+var dotnetScriptCoreProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Core");
+var dotnetScriptDependencyModelProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel");
+var dotnetScriptDependencyModelNuGetProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel.NuGet");
+var testProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Tests");
+var testDesktopProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Desktop.Tests");
 
-string GitHubArtifactsFolder;
+var artifactsFolder = CreateDirectory(root, "Artifacts");
+var gitHubArtifactsFolder = CreateDirectory(artifactsFolder, "GitHub");
+var nuGetArtifactsFolder = CreateDirectory(artifactsFolder, "NuGet");
+var chocolateyArtifactsFolder = CreateDirectory(artifactsFolder, "Chocolatey");
+var publishArtifactsFolder = CreateDirectory(artifactsFolder, "Publish", projectName);
+var publishArchiveFolder = Path.Combine(publishArtifactsFolder, "..");
+var pathToReleaseNotes = Path.Combine(gitHubArtifactsFolder, "ReleaseNotes.md");
 
-string GitHubReleaseAsset;
+var version = ReadVersion();
 
-string GitHubReleaseNoteAsset;
-
-string NuGetArtifactsFolder;
-
-string ChocolateyArtifactsFolder;
-
-string PublishArtifactsFolder;
-
-string PublishArchiveFolder;
-
-string SolutionFolder;
-
-string DotnetScriptProjectFolder;
-
-string DotnetScriptCoreProjectFolder;
-
-string DotnetScriptDependencyModelProjectFolder;
-
-string DotnetScriptDependencyModelNuGetProjectFolder;
-
-string Root;
-
-string TestProjectFolder;
-
-string PathToReleaseNotes;
-
-string PathToGitHubReleaseAsset;
-
-string Owner;
-
-string ProjectName;
-
-Owner = "filipw";
-ProjectName = "dotnet-script";
-Root = FileUtils.GetScriptFolder();
-SolutionFolder = Path.Combine(Root,"..","src");
-DotnetScriptProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script");
-DotnetScriptCoreProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.Core");
-DotnetScriptDependencyModelProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.DependencyModel");
-DotnetScriptDependencyModelNuGetProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.DependencyModel.NuGet");
-TestProjectFolder = Path.Combine(Root, "..", "src", "Dotnet.Script.Tests");
-
-var artifactsFolder = CreateDirectory(Root, "Artifacts");
-GitHubArtifactsFolder = CreateDirectory(artifactsFolder, "GitHub");
-NuGetArtifactsFolder = CreateDirectory(artifactsFolder, "NuGet");
-ChocolateyArtifactsFolder = CreateDirectory(artifactsFolder, "Chocolatey");
-PublishArtifactsFolder = CreateDirectory(artifactsFolder, "Publish", ProjectName);
-PublishArchiveFolder = Path.Combine(PublishArtifactsFolder, "..");
-
-PathToReleaseNotes = Path.Combine(GitHubArtifactsFolder, "ReleaseNotes.md");
-
-Version = ReadVersion();
-
-PathToGitHubReleaseAsset = Path.Combine(GitHubArtifactsFolder, $"{ProjectName}.{Version}.zip");
+var pathToGitHubReleaseAsset = Path.Combine(gitHubArtifactsFolder, $"{projectName}.{version}.zip");
 
 string ReadVersion()
 {
-    var projectFile = XDocument.Load(Directory.GetFiles(DotnetScriptProjectFolder, "*.csproj").Single());
+    var projectFile = XDocument.Load(Directory.GetFiles(dotnetScriptProjectFolder, "*.csproj").Single());
     var versionPrefix = projectFile.Descendants("VersionPrefix").SingleOrDefault()?.Value;
     var versionSuffix = projectFile.Descendants("VersionSuffix").SingleOrDefault()?.Value;
 
