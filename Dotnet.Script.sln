@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Script.Desktop.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Script.Shared.Tests", "src\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj", "{8FFA2816-411E-437C-AB75-FFA546780E7A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F20002BB-970C-4318-B618-58D478CAC405}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +129,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ADA5A9A5-CBE9-48DA-8C71-318574C986C8} = {F20002BB-970C-4318-B618-58D478CAC405}
+		{B0E5959C-6E7F-4023-96BA-5AD4A5E00541} = {F20002BB-970C-4318-B618-58D478CAC405}
+		{8FFA2816-411E-437C-AB75-FFA546780E7A} = {F20002BB-970C-4318-B618-58D478CAC405}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3B983DCE-42D8-48BE-BCC9-CDE81001EBDA}
