@@ -213,7 +213,7 @@ namespace Dotnet.Script.Shared.Tests
         [Fact]
         public async Task LoadedFile()
         {
-            var pathToFixture = Path.Combine("..", "..", "..", "..", "DotNet.Script.Tests", "TestFixtures", "REPL", "main.csx");
+            var pathToFixture = Path.Combine("..", "..", "..", "..", "Dotnet.Script.Tests", "TestFixtures", "REPL", "main.csx");
             var commands = new[]
             {
                 "var x = 5;",
