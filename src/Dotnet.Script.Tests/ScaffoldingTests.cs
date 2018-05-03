@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using Xunit;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Dotnet.Script.DependencyModel.Environment;
+
 
 namespace Dotnet.Script.Tests
 {
@@ -83,6 +83,26 @@ namespace Dotnet.Script.Tests
                 Execute("init custom.csx", scriptFolder.Path);
                 Execute("init", scriptFolder.Path);
                 Assert.False(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
+            }
+        }
+
+        [Fact]
+        public void ShouldUpdatePathToDotnetScript()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {             
+                Execute("init", scriptFolder.Path);
+                var pathToLaunchConfiguration = Path.Combine(scriptFolder.Path, ".vscode/launch.json");
+                var config = JObject.Parse(File.ReadAllText(pathToLaunchConfiguration));
+
+                config.SelectToken("configurations[0].args[1]").Replace("InvalidPath/dotnet-script.dll,");
+
+                FileUtils.WriteFile(pathToLaunchConfiguration, config.ToString());
+                
+                var result = Execute("init", scriptFolder.Path);
+
+                config = JObject.Parse(File.ReadAllText(pathToLaunchConfiguration));
+                Assert.NotEqual("InvalidPath/dotnet-script.dll", config.SelectToken("configurations[0].args[1]").Value<string>());
             }
         }
 

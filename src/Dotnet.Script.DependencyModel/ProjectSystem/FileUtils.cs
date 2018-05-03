@@ -19,6 +19,17 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             }
         }
 
+        public static void WriteFile(string path, string content)
+        {
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            {
+                using (var streamWriter = new StreamWriter(fileStream))
+                {
+                    streamWriter.Write(content);
+                }
+            }
+        }
+
         public static string CreateTempFolder(string targetDirectory)
         {
             if (!Path.IsPathRooted(targetDirectory))

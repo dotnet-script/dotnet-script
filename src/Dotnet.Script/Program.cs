@@ -97,10 +97,11 @@ namespace Dotnet.Script
             {
                 c.Description = "Creates a sample script along with the launch.json file needed to launch and debug the script.";
                 var fileName = c.Argument("filename", "(Optional) The name of the sample script file to be created during initialization. Defaults to 'main.csx'");
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var scaffolder = new Scaffolder();
-                    scaffolder.InitializerFolder(fileName.Value);
+                    var scaffolder = new Scaffolder(new ScriptLogger(ScriptConsole.Default.Error, debugMode.HasValue()));
+                    scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
                 });
             });
@@ -109,15 +110,16 @@ namespace Dotnet.Script
             {
                 c.Description = "Creates a new script file";
                 var fileNameArgument = c.Argument("filename", "The script file name");
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var scaffolder = new Scaffolder();
+                    var scaffolder = new Scaffolder(new ScriptLogger(ScriptConsole.Default.Error, debugMode.HasValue()));
                     if (fileNameArgument.Value == null)
                     {
                         c.ShowHelp();
                         return 0;
                     }
-                    scaffolder.CreateNewScriptFile(fileNameArgument.Value);
+                    scaffolder.CreateNewScriptFile(fileNameArgument.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
                 });
             });

@@ -5,6 +5,17 @@ namespace Dotnet.Script.Tests
 {
     public class FileUtils
     {
+        public static void WriteFile(string path, string content)
+        {
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            {
+                using (var streamWriter = new StreamWriter(fileStream))
+                {
+                    streamWriter.Write(content);
+                }
+            }
+        }
+
         public static void RemoveDirectory(string path)
         {
             if (!Directory.Exists(path))
