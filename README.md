@@ -1,13 +1,24 @@
 # dotnet script
 
-Run C# scripts from the .NET CLI.
+Run C# scripts from the .NET CLI.  
 
 ## Build status
 
 | Build server | Platform    | Build status                             |
 | ------------ | ----------- | ---------------------------------------- |
 | AppVeyor     | Windows     | [![](https://img.shields.io/appveyor/ci/filipw/dotnet-script/master.svg)](https://ci.appveyor.com/project/filipw/dotnet-script/branch/master) |
-| Travis       | Linux/ OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script) |
+| Travis       | Linux / OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script) |
+
+
+## Nuget Packages
+
+| Name    | Version                             | Framework | Description
+| --------| ---------------------------------------- | ---------- |-------
+| `dotnet-script` | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/) | `netcoreapp2.1` / `netcoreapp2.0` | .NET Core global tool
+| `Dotnet.Script`| [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/) | `netcoreapp2.1` / `netcoreapp2.0` | .NET Core project tool
+| `Dotnet.Script.Core` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/) | `netstandard2.0` | Core library for hosting dotnet-script logic in your own app.
+| `Dotnet.Script.DependencyModel` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/) | `netstandard2.0` / `net46` | Provides runtime and compilation dependency resolution for dotnet-script based scripts.
+| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0` / `net46` | A null implementation of a `MetadataReferenceResolver` that allows inline nuget references to be specified in script (csx) files.
 
 ## Installing
 

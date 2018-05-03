@@ -76,6 +76,21 @@ namespace Dotnet.Script.Core
                 .WithEmitDebugInformation(true)
                 .WithFileEncoding(context.Code.Encoding);
 
+            // if the framework is not Core CLR, add GAC references
+            if (!ScriptEnvironment.Default.IsNetCore)
+            {
+                opts = opts.AddReferences(
+                    "System",
+                    "System.Core",
+                    "System.Data",
+                    "System.Data.DataSetExtensions",
+                    "System.Runtime",
+                    "System.Xml",
+                    "System.Xml.Linq",
+                    "System.Net.Http",
+                    "Microsoft.CSharp");
+            }
+
             if (!string.IsNullOrWhiteSpace(context.FilePath))
             {
                 opts = opts.WithFilePath(context.FilePath);

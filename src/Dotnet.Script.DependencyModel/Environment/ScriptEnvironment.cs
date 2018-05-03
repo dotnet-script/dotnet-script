@@ -8,7 +8,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 {
     public class ScriptEnvironment
     {
-        private static readonly Lazy<ScriptEnvironment> _default = new Lazy<ScriptEnvironment>(() => new ScriptEnvironment());
+        public static readonly ScriptEnvironment Default = new ScriptEnvironment();
 
         private readonly Lazy<string> _targetFramework;
 
@@ -22,7 +22,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private readonly Lazy<string> _nuGetStoreFolder;
 
-        public static ScriptEnvironment Default => _default.Value;
+        private string _overrriddenTargetFramework;
 
         private ScriptEnvironment()
         {
@@ -40,13 +40,25 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         public string RuntimeIdentifier => _runtimeIdentifier.Value;
 
-        public string TargetFramework => _targetFramework.Value;
+        public string TargetFramework => _overrriddenTargetFramework ?? _targetFramework.Value;
 
         public string InstallLocation => _installLocation.Value;
 
         public string ProccessorArchitecture => RuntimeEnvironment.RuntimeArchitecture;
 
         public string NuGetStoreFolder => _nuGetStoreFolder.Value;
+
+        public bool IsNetCore => TargetFramework.StartsWith("netcoreapp", StringComparison.InvariantCultureIgnoreCase);
+
+        public void OverrideTargetFramework(string targetFramework)
+        {
+            if (_targetFramework.IsValueCreated)
+            {
+                throw new InvalidOperationException($"Cannot override target framework because a value {_targetFramework.Value} has already been resolved and used.");
+            }
+
+            _overrriddenTargetFramework = targetFramework;
+        }
 
         private static string GetPlatformIdentifier()
         {

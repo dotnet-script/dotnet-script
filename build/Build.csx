@@ -9,11 +9,17 @@ using static ChangeLog;
 using static FileUtils;
 using System.Xml.Linq;
 
+DotNet.Build(dotnetScriptProjectFolder);
+DotNet.Test(testProjectFolder);
 
+// desktop CLR tests should only run on Windows
+// we can run them on Mono in the future using the xunit runner instead of dotnet test
+if (BuildEnvironment.IsWindows) 
+{
+    DotNet.Test(testDesktopProjectFolder);    
+}
 
-DotNet.Build(DotnetScriptProjectFolder);
-DotNet.Test(TestProjectFolder);
-DotNet.Publish(DotnetScriptProjectFolder, PublishArtifactsFolder, NetCoreApp20);
+DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, NetCoreApp20);
 
 // We only publish packages from Windows/AppVeyor
 if (BuildEnvironment.IsWindows)
@@ -21,27 +27,27 @@ if (BuildEnvironment.IsWindows)
     
     using(var globalToolBuildFolder = new DisposableFolder())
     {
-        Copy(SolutionFolder, globalToolBuildFolder.Path);
+        Copy(solutionFolder, globalToolBuildFolder.Path);
         PatchTargetFramework(globalToolBuildFolder.Path, NetCoreApp21);
         PatchPackAsTool(globalToolBuildFolder.Path);
         PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
         PatchContent(globalToolBuildFolder.Path);
-        DotNet.Pack(Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script"),NuGetArtifactsFolder);
+        DotNet.Pack(Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script"), nuGetArtifactsFolder);
     }
     
     using(var nugetPackageBuildFolder = new DisposableFolder())
     {
-        Copy(SolutionFolder, nugetPackageBuildFolder.Path);
+        Copy(solutionFolder, nugetPackageBuildFolder.Path);
         PatchTargetFramework(nugetPackageBuildFolder.Path, NetCoreApp20);        
-        DotNet.Pack(Path.Combine(nugetPackageBuildFolder.Path,"Dotnet.Script"),NuGetArtifactsFolder);
+        DotNet.Pack(Path.Combine(nugetPackageBuildFolder.Path,"Dotnet.Script"), nuGetArtifactsFolder);
     }
     
-    DotNet.Pack(DotnetScriptCoreProjectFolder, NuGetArtifactsFolder);
-    DotNet.Pack(DotnetScriptDependencyModelProjectFolder, NuGetArtifactsFolder);
-    DotNet.Pack(DotnetScriptDependencyModelNuGetProjectFolder, NuGetArtifactsFolder);
+    DotNet.Pack(dotnetScriptCoreProjectFolder, nuGetArtifactsFolder);
+    DotNet.Pack(dotnetScriptDependencyModelProjectFolder, nuGetArtifactsFolder);
+    DotNet.Pack(dotnetScriptDependencyModelNuGetProjectFolder, nuGetArtifactsFolder);
             
-    Choco.Pack(DotnetScriptProjectFolder, PublishArtifactsFolder, ChocolateyArtifactsFolder);
-    Zip(PublishArchiveFolder, PathToGitHubReleaseAsset);
+    Choco.Pack(dotnetScriptProjectFolder, publishArtifactsFolder, chocolateyArtifactsFolder);
+    Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
     
     if (BuildEnvironment.IsSecure)
     {
@@ -50,10 +56,10 @@ if (BuildEnvironment.IsWindows)
         if (Git.Default.IsTagCommit())
         {
             Git.Default.RequreCleanWorkingTree();
-            await ReleaseManagerFor(Owner,ProjectName,BuildEnvironment.GitHubAccessToken)
-            .CreateRelease(Git.Default.GetLatestTag(), PathToReleaseNotes, new [] { new ZipReleaseAsset(PathToGitHubReleaseAsset) });
-            NuGet.TryPush(NuGetArtifactsFolder);
-            Choco.TryPush(ChocolateyArtifactsFolder, BuildEnvironment.ChocolateyApiKey);
+            await ReleaseManagerFor(owner, projectName,BuildEnvironment.GitHubAccessToken)
+            .CreateRelease(Git.Default.GetLatestTag(), pathToReleaseNotes, new [] { new ZipReleaseAsset(pathToGitHubReleaseAsset) });
+            NuGet.TryPush(nuGetArtifactsFolder);
+            Choco.TryPush(chocolateyArtifactsFolder, BuildEnvironment.ChocolateyApiKey);
         }
     }
 }
@@ -61,12 +67,12 @@ if (BuildEnvironment.IsWindows)
 private async Task CreateReleaseNotes()
 {
     Logger.Log("Creating release notes");        
-    var generator = ChangeLogFrom(Owner, ProjectName, BuildEnvironment.GitHubAccessToken).SinceLatestTag();
+    var generator = ChangeLogFrom(owner, projectName, BuildEnvironment.GitHubAccessToken).SinceLatestTag();
     if (!Git.Default.IsTagCommit())
     {
         generator = generator.IncludeUnreleased();
     }
-    await generator.Generate(PathToReleaseNotes);
+    await generator.Generate(pathToReleaseNotes);
 }
 
 private void PatchTargetFramework(string solutionFolder, string targetFramework)
