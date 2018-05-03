@@ -1,13 +1,13 @@
 # dotnet script
 
-Run C# scripts from the .NET CLI.
+Run C# scripts from the .NET CLI.  [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)
 
 ## Build status
 
 | Build server | Platform    | Build status                             |
 | ------------ | ----------- | ---------------------------------------- |
 | AppVeyor     | Windows     | [![](https://img.shields.io/appveyor/ci/filipw/dotnet-script/master.svg)](https://ci.appveyor.com/project/filipw/dotnet-script/branch/master) |
-| Travis       | Linux/ OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script) |
+| Travis       | Linux / OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script) |
 
 ## Installing
 
