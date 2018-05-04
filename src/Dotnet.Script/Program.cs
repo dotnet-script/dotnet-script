@@ -70,7 +70,9 @@ namespace Dotnet.Script
 
             app.HelpOption("-? | -h | --help");
 
-            app.VersionOption("-v | --version", GetVersionInfo);
+            app.VersionOption("-v | --version", GetVersion());
+
+            var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
             app.Command("eval", c =>
             {
@@ -127,6 +129,13 @@ namespace Dotnet.Script
             app.OnExecute(async () =>
             {
                 int exitCode = 0;
+
+                if (infoOption.HasValue())
+                {
+                    Console.Write(GetEnvironmentInfo());
+                    return 0;
+                }
+
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     var optimizationLevel = OptimizationLevel.Debug;
@@ -207,18 +216,21 @@ namespace Dotnet.Script
             return runner.Execute<int>(context);
         }
 
-        private static string GetVersionInfo()
+        private static string GetEnvironmentInfo()
         {
-            StringBuilder sb = new StringBuilder();
-            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();                        
-            sb.AppendLine($"Version             : {versionAttribute?.InformationalVersion}");            
+            StringBuilder sb = new StringBuilder();            
+            sb.AppendLine($"Version             : {GetVersion()}");            
             sb.AppendLine($"Install location    : {ScriptEnvironment.Default.InstallLocation}");
             sb.AppendLine($"Target framework    : {ScriptEnvironment.Default.TargetFramework}");
             sb.AppendLine($"Platform identifier : {ScriptEnvironment.Default.PlatformIdentifier}");
             sb.AppendLine($"Runtime identifier  : {ScriptEnvironment.Default.RuntimeIdentifier}");
-            return sb.ToString();
+            return sb.ToString();            
+        }
 
-            
+        private static string GetVersion()
+        {
+            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();
+            return versionAttribute?.InformationalVersion;
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode)
