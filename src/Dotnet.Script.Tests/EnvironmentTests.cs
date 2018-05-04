@@ -9,16 +9,15 @@ namespace Dotnet.Script.Tests
 {
     public class EnvironmentTests
     {
-        [Fact]
-        public void ShouldPrintVersionNumber()
+        [Theory]
+        [InlineData("-v")]
+        [InlineData("--version")]
+        public void ShouldPrintVersionNumber(string versionFlag)
         {
-            var result = ScriptTestRunner.Default.Execute("--version");
+            var result = ScriptTestRunner.Default.Execute(versionFlag);
             Assert.Equal(0, result.exitCode);
-            Assert.Matches(@"\d*.\d*.\d*", result.output);
-
-            result = ScriptTestRunner.Default.Execute("-v");
-            Assert.Equal(0, result.exitCode);
-            Assert.Matches(@"\d*.\d*.\d*", result.output);
+            // TODO test that version appears on first line of output!
+            Assert.Matches(@"^[0-9]+(\.[0-9]+){2}$", result.output);
         }
 
         [Fact]
