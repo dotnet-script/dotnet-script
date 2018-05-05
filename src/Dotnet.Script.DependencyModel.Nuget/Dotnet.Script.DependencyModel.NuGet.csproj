@@ -8,12 +8,12 @@
     <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script;csx;csharp;roslyn;nuget</PackageTags>
-    <Version>0.6.0</Version>
+    <Version>0.6.1</Version>
     <Description>A MetadataReferenceResolver that allows inline nuget references to be specified in script(csx) files.</Description>
     <Authors>dotnet-script</Authors>
     <Company>dotnet-script</Company>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.8.0" />
    </ItemGroup>
 </Project>
