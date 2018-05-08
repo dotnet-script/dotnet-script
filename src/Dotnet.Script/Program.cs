@@ -70,7 +70,7 @@ namespace Dotnet.Script
 
             app.HelpOption("-? | -h | --help");
 
-            app.VersionOption("-v | --version", GetVersion());
+            app.VersionOption("-v | --version", GetVersion);
 
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
