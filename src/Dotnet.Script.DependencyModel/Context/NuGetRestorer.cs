@@ -57,7 +57,7 @@ namespace Dotnet.Script.DependencyModel.Context
             if (!File.Exists(PathToNuget))
             {
                 _logger.Debug("Extracting NuGet executable");
-                using (Stream input = typeof(NuGetRestorer).GetTypeInfo().Assembly.GetManifestResourceStream("Dotnet.Script.NuGetMetadataResolver.NuGet.NuGet.exe"))
+                using (Stream input = typeof(NuGetRestorer).GetTypeInfo().Assembly.GetManifestResourceStream("Dotnet.Script.DependencyModel.NuGet.NuGet430.exe"))
                 {
 
                     byte[] byteData = StreamToBytes(input);
