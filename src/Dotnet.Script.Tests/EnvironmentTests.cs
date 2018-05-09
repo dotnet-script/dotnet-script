@@ -28,6 +28,7 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Version", result.output);
             Assert.Contains("Install location", result.output);
             Assert.Contains("Target framework", result.output);
+            Assert.Contains(".NET Core version", result.output);
             Assert.Contains("Platform identifier", result.output);
             Assert.Contains("Runtime identifier", result.output);
         }
