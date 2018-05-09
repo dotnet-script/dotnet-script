@@ -22,11 +22,14 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private readonly Lazy<string> _nuGetStoreFolder;
 
+        private readonly Lazy<DotnetVersion> _netCoreVersion;
+
         private string _overrriddenTargetFramework;
 
         private ScriptEnvironment()
         {
-            _targetFramework = new Lazy<string>(GetNetCoreAppVersion);
+            _netCoreVersion = new Lazy<DotnetVersion>(GetNetCoreAppVersion);
+            _targetFramework = new Lazy<string>(() => _netCoreVersion.Value == DotnetVersion.Unknown ? throw new PlatformNotSupportedException("Cannot determine .NET Core Version") : _netCoreVersion.Value.Tfm);
             _installLocation = new Lazy<string>(GetInstallLocation);
             _platformIdentifier = new Lazy<string>(GetPlatformIdentifier);
             _runtimeIdentifier = new Lazy<string>(GetRuntimeIdentifier);
@@ -48,7 +51,9 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         public string NuGetStoreFolder => _nuGetStoreFolder.Value;
 
-        public bool IsNetCore => TargetFramework.StartsWith("netcoreapp", StringComparison.InvariantCultureIgnoreCase);
+        public DotnetVersion NetCoreVersion => _netCoreVersion.Value;
+
+        public bool IsNetCore => _netCoreVersion.Value != DotnetVersion.Unknown;
 
         public void OverrideTargetFramework(string targetFramework)
         {
@@ -67,19 +72,20 @@ namespace Dotnet.Script.DependencyModel.Environment
             return "win";
         }
 
-        private static string GetNetCoreAppVersion()
+        private static DotnetVersion GetNetCoreAppVersion()
         {
             // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156 
-
             var codeBase = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.CodeBase;
-            var pattern = @"^.*Microsoft\.NETCore\.App\/(\d\.\d)";
+            var pattern = @"^.*Microsoft\.NETCore\.App\/(\d\.\d)(.*?)\/";
             var match = Regex.Match(codeBase, pattern, RegexOptions.IgnoreCase);
             if (!match.Success)
             {
-                throw new InvalidOperationException("Unable to determine netcoreapp version");
+                return DotnetVersion.Unknown;
             }
-            var version = match.Groups[1].Value;
-            return $"netcoreapp{version}";
+            var tfm = match.Groups[1].Value;
+            var version = match.Groups[1].Value + match.Groups[2].Value;
+
+            return new DotnetVersion(version, $"netcoreapp{tfm}");
         }
 
         private static string GetInstallLocation()
@@ -123,5 +129,19 @@ namespace Dotnet.Script.DependencyModel.Environment
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             return runtimeIdentifier;
         }
+    }
+
+    public class DotnetVersion
+    {
+        public static DotnetVersion Unknown = new DotnetVersion("unknown", "unknown");
+
+        public DotnetVersion(string version, string tfm)
+        {
+            Version = version;
+            Tfm = tfm;
+        }
+
+        public string Version { get; }
+        public string Tfm { get; }
     }
 }
