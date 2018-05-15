@@ -5,16 +5,15 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.Extensions.CommandLineUtils;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.Scripting;
 using Dotnet.Script.DependencyModel.Context;
 using Microsoft.CodeAnalysis;
-using System.Net;
 using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Dotnet.Script
 {
@@ -70,7 +69,7 @@ namespace Dotnet.Script
 
             app.HelpOption("-? | -h | --help");
 
-            app.VersionOption("-v | --version", GetVersion());
+            app.VersionOption("-v | --version", GetVersion);
 
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
@@ -218,10 +217,12 @@ namespace Dotnet.Script
 
         private static string GetEnvironmentInfo()
         {
+            var netCoreVersion = ScriptEnvironment.Default.NetCoreVersion;
             StringBuilder sb = new StringBuilder();            
             sb.AppendLine($"Version             : {GetVersion()}");            
             sb.AppendLine($"Install location    : {ScriptEnvironment.Default.InstallLocation}");
-            sb.AppendLine($"Target framework    : {ScriptEnvironment.Default.TargetFramework}");
+            sb.AppendLine($"Target framework    : {netCoreVersion.Tfm}");
+            sb.AppendLine($".NET Core version   : {netCoreVersion.Version}");
             sb.AppendLine($"Platform identifier : {ScriptEnvironment.Default.PlatformIdentifier}");
             sb.AppendLine($"Runtime identifier  : {ScriptEnvironment.Default.RuntimeIdentifier}");
             return sb.ToString();            
