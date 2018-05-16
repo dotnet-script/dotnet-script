@@ -32,6 +32,10 @@ namespace Dotnet.Script.Core
         public void CreateNewScriptFile(string fileName, string currentDirectory)
         {
             _logger.Log($"Creating '{fileName}'");
+            if(!Path.HasExtension(fileName))
+            {
+                fileName = Path.ChangeExtension(fileName, ".csx");
+            }
             var pathToScriptFile = Path.Combine(currentDirectory, fileName);
             if (!File.Exists(pathToScriptFile))
             {
