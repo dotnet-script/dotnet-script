@@ -2,7 +2,7 @@
 
 Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug them in VS Code - all of that with full language services support from OmniSharp.
 
-> ⚠️ If you are using C# for VS Code version [1.15.0](https://github.com/OmniSharp/omnisharp-vscode/releases/tag/v1.15.0) on Linux or Mac, make sure to go to VS Code settings and set `"omnisharp.path":"latest"`. This will ensure that you get the latest version of OmniSharp. There is a [bug](https://github.com/OmniSharp/omnisharp-roslyn/issues/1184) in the version of OmniSharp that shipped with 1.15.0, that prevents C# scripting from working in non-Windows environments. Additionally, this change will allow you to use C# 7.3 already.
+> ⚠️ If you are using C# for VS Code version [1.15.0](https://github.com/OmniSharp/omnisharp-vscode/releases/tag/v1.15.0) on Linux or Mac, make sure to update to [1.15.2](https://github.com/OmniSharp/omnisharp-vscode/releases/tag/v1.15.2). There is a [bug](https://github.com/OmniSharp/omnisharp-roslyn/issues/1184) in the version of OmniSharp that shipped with 1.15.0, that prevents C# scripting from working in non-Windows environments. You can also go to VS Code settings and set `"omnisharp.path":"latest"`. This change will allow you to use C# 7.3 already.
 
 ## Build status
 
