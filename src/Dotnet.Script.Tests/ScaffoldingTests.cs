@@ -59,22 +59,48 @@ namespace Dotnet.Script.Tests
             using (var scriptFolder = new DisposableFolder())
             {
                 var result = Execute("new script.csx", scriptFolder.Path);
+                
                 Assert.Equal(0, result.exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "script.csx")));
             }
         }
-
+        
         [Fact]
-        public void ShouldInitFolderWithCustomFileNAme()
+        public void ShouldCreateNewScriptWithExtension()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("new anotherScript", scriptFolder.Path);
+                
+                Assert.Equal(0, result.exitCode);
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherScript.csx")));
+            }
+        }
+        
+        [Fact]
+        public void ShouldInitFolderWithCustomFileName()
         {
             using (var scriptFolder = new DisposableFolder())
             {
                 var result = Execute("init custom.csx", scriptFolder.Path);
+                
                 Assert.Equal(0, result.exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "custom.csx")));
             }
         }
-
+        
+        [Fact]
+        public void ShouldInitFolderWithCustomFileNameAndExtension()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var result = Execute("init anotherCustom", scriptFolder.Path);
+                
+                Assert.Equal(0, result.exitCode);
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherCustom.csx")));
+            }
+        }
+        
         [Fact]
         public void ShouldNotCreateDefaultFileForFolderWithExistingScriptFiles()
         {
