@@ -49,14 +49,16 @@ namespace Dotnet.Script.DependencyModel.NuGet
         public override string ResolveReference(string path, string baseFilePath)
         {
             if (path.StartsWith("nuget:", StringComparison.OrdinalIgnoreCase))
-            {                
+            {
                 var packageName = PackageNameMatcher.Match(path).Groups[1].Value;
-                var scripts = _scriptMap[packageName];
-                if (scripts.Count == 1)
+                if (_scriptMap.TryGetValue(packageName, out var scripts))
                 {
-                    return scripts[0];
+                    if (scripts.Count == 1)
+                    {
+                        return scripts[0];
+                    }
+                    return path;
                 }
-                return path;
             }
             var resolvedReference = _sourceReferenceResolver.ResolveReference(path, baseFilePath);
             return resolvedReference;
