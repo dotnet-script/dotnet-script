@@ -44,7 +44,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             foreach (var csxFile in csxFiles)
             {
                 _logger.Debug($"Parsing {csxFile}");
-                var fileContent = FileUtils.ReadFile(csxFile);
+                var fileContent = File.ReadAllText(csxFile);
                 allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(fileContent));
                 allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(fileContent));
                 string targetFramework = ReadTargetFramework(fileContent);

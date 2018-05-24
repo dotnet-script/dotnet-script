@@ -40,7 +40,7 @@ namespace Dotnet.Script.Core
             if (!File.Exists(pathToScriptFile))
             {
                 var scriptFileTemplate = TemplateLoader.ReadTemplate("helloworld.csx.template");
-                FileUtils.WriteFile(pathToScriptFile, scriptFileTemplate);
+                File.WriteAllText(pathToScriptFile, scriptFileTemplate);
                 _logger.Log($"...'{pathToScriptFile}' [Created]");
             }
             else
@@ -83,7 +83,7 @@ namespace Dotnet.Script.Core
                 var omniSharpFileTemplate = TemplateLoader.ReadTemplate("omnisharp.json.template");
                 JObject settings = JObject.Parse(omniSharpFileTemplate);
                 settings["script"]["defaultTargetFramework"] = _scriptEnvironment.TargetFramework;
-                FileUtils.WriteFile(pathToOmniSharpJson, settings.ToString());
+                File.WriteAllText(pathToOmniSharpJson, settings.ToString());
                 _logger.Log($"...'{pathToOmniSharpJson}' [Created]");
             }
             else
@@ -108,13 +108,13 @@ namespace Dotnet.Script.Core
             {                
                 string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
                 string launchFileContent = lauchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
-                FileUtils.WriteFile(pathToLaunchFile, launchFileContent);
+                File.WriteAllText(pathToLaunchFile, launchFileContent);
                 _logger.Log($"...'{pathToLaunchFile}' [Created]");
             }
             else
             {
                 _logger.Log($"...'{pathToLaunchFile}' already exists' [Skipping]");
-                var launchFileContent = FileUtils.ReadFile(pathToLaunchFile);
+                var launchFileContent = File.ReadAllText(pathToLaunchFile);
                 string pattern = @"^(\s*"")(.*dotnet-script.dll)("").*$";
                 if (Regex.IsMatch(launchFileContent, pattern, RegexOptions.Multiline))
                 {
@@ -122,7 +122,7 @@ namespace Dotnet.Script.Core
                     if (launchFileContent != newLaunchFileContent)
                     {
                         _logger.Log($"...Fixed path to dotnet-script: '{dotnetScriptPath}' [Updated]");
-                        FileUtils.WriteFile(pathToLaunchFile, newLaunchFileContent);
+                        File.WriteAllText(pathToLaunchFile, newLaunchFileContent);
                     }
                 }
             }

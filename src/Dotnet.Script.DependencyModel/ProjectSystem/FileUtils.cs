@@ -8,28 +8,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     public static class FileUtils
     {
-        public static string ReadFile(string path)
-        {
-            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                using (var reader = new StreamReader(fileStream))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
-        }
-
-        public static void WriteFile(string path, string content)
-        {
-            using (var fileStream = new FileStream(path, FileMode.Create))
-            {
-                using (var streamWriter = new StreamWriter(fileStream))
-                {
-                    streamWriter.Write(content);
-                }
-            }
-        }
-
         public static string CreateTempFolder(string targetDirectory)
         {
             if (!Path.IsPathRooted(targetDirectory))

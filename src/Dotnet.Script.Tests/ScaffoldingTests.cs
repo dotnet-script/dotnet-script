@@ -123,8 +123,8 @@ namespace Dotnet.Script.Tests
 
                 config.SelectToken("configurations[0].args[1]").Replace("InvalidPath/dotnet-script.dll,");
 
-                FileUtils.WriteFile(pathToLaunchConfiguration, config.ToString());
-                
+                File.WriteAllText(pathToLaunchConfiguration, config.ToString());
+
                 var result = Execute("init", scriptFolder.Path);
 
                 config = JObject.Parse(File.ReadAllText(pathToLaunchConfiguration));

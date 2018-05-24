@@ -39,7 +39,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static string[] GetLoadDirectives(string csxFile)
         {
-            var content = FileUtils.ReadFile(csxFile);
+            var content = File.ReadAllText(csxFile);
             var matches = Regex.Matches(content, @"^\s*#load\s*""\s*(.+)\s*""", RegexOptions.IgnoreCase | RegexOptions.Multiline);
             List<string> result = new List<string>();
             foreach (var match in matches.Cast<Match>())
