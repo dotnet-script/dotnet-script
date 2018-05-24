@@ -195,7 +195,7 @@ will pass the `-d` before `--` to `dotnet script` and enable the debug mode wher
 `dotnet script` has built-in support for referencing NuGet packages directly from within the script.
 
 ```c#
-#r "nuget: AutoMapper, 9.1.0"
+#r "nuget: AutoMapper, 6.1.0"
 ```
 
 ![package](https://user-images.githubusercontent.com/1034073/30176983-98a6b85e-9404-11e7-8855-4ae65a20d6b1.gif)
