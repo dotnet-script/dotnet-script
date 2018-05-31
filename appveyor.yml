@@ -3,7 +3,7 @@ image: Visual Studio 2017
 
 install:
 - ps: iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1
-- ps: .\dotnet-install.ps1 -Version 2.1.300-preview2-008530 -InstallDir $env:ProgramFiles/dotnet
+- ps: .\dotnet-install.ps1 -Version 2.1.300 -InstallDir $env:ProgramFiles/dotnet
 - cmd: choco install dotnet.script
 
 build_script:
