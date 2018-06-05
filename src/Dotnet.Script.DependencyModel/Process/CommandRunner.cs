@@ -51,6 +51,7 @@ namespace Dotnet.Script.DependencyModel.Process
             process.BeginOutputReadLine();
             process.WaitForExit();
         }
+
         private System.Diagnostics.Process CreateProcess(ProcessStartInfo startInformation)
         {
             var process = new System.Diagnostics.Process {StartInfo = startInformation};

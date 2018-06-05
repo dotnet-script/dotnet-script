@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Dotnet.Script": {
+      "commandName": "Project",
+      "commandLineArgs": "publish ../../temp_project_builder\\misc\\tempScript\\main.csx"
+    }
+  }
+}

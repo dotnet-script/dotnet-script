@@ -15,6 +15,19 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _document = XDocument.Parse(template);
         }
 
+        public ProjectFile(string xmlText)
+        {
+            _document = XDocument.Parse(xmlText);
+        }
+
+        public void AddReference(string reference)
+        {
+            var itemGroupElement = _document.Descendants("ItemGroup").Single();
+            var packageReferenceElement = new XElement("Reference");
+            packageReferenceElement.Add(new XAttribute("Include", reference));
+            itemGroupElement.Add(packageReferenceElement);
+        }
+
         public void AddPackageReference(PackageReference packageReference)
         {
             var itemGroupElement = _document.Descendants("ItemGroup").Single();

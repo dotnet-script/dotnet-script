@@ -15,6 +15,8 @@ using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using McMaster.Extensions.CommandLineUtils;
 using System.Diagnostics;
+using Dotnet.Script.DependencyModel.ProjectSystem;
+using Dotnet.Script.DependencyModel.Process;
 
 namespace Dotnet.Script
 {
@@ -58,7 +60,7 @@ namespace Dotnet.Script
             {
                 ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
             };
-            var file = app.Argument("script", "Path to CSX script");            
+            var file = app.Argument("script", "Path to CSX script");
             var interactive = app.Option("-i | --interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
 
             var configuration = app.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
@@ -80,7 +82,7 @@ namespace Dotnet.Script
             {
                 c.Description = "Execute CSX code.";
                 var code = c.Argument("code", "Code to execute.");
-                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);                
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(async () =>
                 {
                     int exitCode = 0;
@@ -128,6 +130,30 @@ namespace Dotnet.Script
                 });
             });
 
+            app.Command("publish", c =>
+            {
+                c.Description = "Creates an executable from a script";
+                var fileNameArgument = c.Argument("filename", "The script file name");
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
+                c.OnExecute(() =>
+                {
+                    if (fileNameArgument.Value == null)
+                    {
+                        c.ShowHelp();
+                        return 0;
+                    }
+                    var provider = new ScriptProjectProvider(GetLogFactory(true));
+                    var commandRunner = new CommandRunner(GetLogFactory(true));
+                    var compiler = GetScriptCompiler(true);
+
+                    var fullFilePath = Path.GetFullPath(fileNameArgument.Value);
+                    var publishDirectory = $"{Path.GetDirectoryName(fullFilePath)}/publish";
+                    var publisher = new ScriptPublisher(provider, commandRunner, compiler);
+                    publisher.CreateExecutable(fullFilePath, publishDirectory);
+                    return 0;
+                });
+            });
+
             app.OnExecute(async () =>
             {
                 int exitCode = 0;
@@ -154,7 +180,7 @@ namespace Dotnet.Script
                 return exitCode;
             });
 
-            return app.Execute(argsBeforeDoubleHyphen);            
+            return app.Execute(argsBeforeDoubleHyphen);
         }
 
         private static async Task<int> RunScript(string file, bool debugMode, OptimizationLevel optimizationLevel,  IEnumerable<string> args, bool interactive, string[] packageSources)
@@ -194,7 +220,7 @@ namespace Dotnet.Script
         private static bool IsHttpUri(string fileName)
         {
             return Uri.TryCreate(fileName, UriKind.Absolute, out Uri uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);           
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
         private static async Task RunInteractive(bool debugMode, string[] packageSources)
@@ -221,14 +247,14 @@ namespace Dotnet.Script
         private static string GetEnvironmentInfo()
         {
             var netCoreVersion = ScriptEnvironment.Default.NetCoreVersion;
-            StringBuilder sb = new StringBuilder();            
-            sb.AppendLine($"Version             : {GetVersion()}");            
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Version             : {GetVersion()}");
             sb.AppendLine($"Install location    : {ScriptEnvironment.Default.InstallLocation}");
             sb.AppendLine($"Target framework    : {netCoreVersion.Tfm}");
             sb.AppendLine($".NET Core version   : {netCoreVersion.Version}");
             sb.AppendLine($"Platform identifier : {ScriptEnvironment.Default.PlatformIdentifier}");
             sb.AppendLine($"Runtime identifier  : {ScriptEnvironment.Default.RuntimeIdentifier}");
-            return sb.ToString();            
+            return sb.ToString();
         }
 
         private static string GetVersion()
@@ -254,6 +280,22 @@ namespace Dotnet.Script
 
             var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
             return compiler;
+        }
+
+        private static LogFactory GetLogFactory(bool debugMode)
+        {
+            var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
+            return type => ((level, message) =>
+            {
+                if (level == LogLevel.Debug)
+                {
+                    logger.Verbose(message);
+                }
+                if (level == LogLevel.Info)
+                {
+                    logger.Log(message);
+                }
+            });
         }
     }
 }

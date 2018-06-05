@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Script Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "dotnet",
+            "args": [
+              "exec", 
+              "C:/Users/sharpiro/.dotnet/tools/.store/dotnet-script/0.24.0/dotnet-script/0.24.0/tools/netcoreapp2.1/any/dotnet-script.dll", 
+              "${file}"
+            ],
+            "cwd": "${workspaceRoot}",
+            "stopAtEntry": true
+        }
+    ]
+}

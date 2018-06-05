@@ -21,7 +21,7 @@ namespace Dotnet.Script.DependencyModel.NuGet
         {
             _metadataReferenceResolver = metadataReferenceResolver;
         }
-        
+
         public override bool Equals(object other)
         {
             return _metadataReferenceResolver.Equals(other);
@@ -42,6 +42,10 @@ namespace Dotnet.Script.DependencyModel.NuGet
 
         public override ImmutableArray<PortableExecutableReference> ResolveReference(string reference, string baseFilePath, MetadataReferenceProperties properties)
         {
+            if (reference.StartsWith("load"))
+            {
+
+            }
             if (reference.StartsWith("nuget", StringComparison.OrdinalIgnoreCase))
             {
                 // HACK We need to return something here to "mark" the reference as resolved. 
