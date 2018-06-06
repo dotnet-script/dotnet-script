@@ -140,7 +140,7 @@ namespace Dotnet.Script.Core
             }
             else
             {
-                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.Code.ToString()).ToArray();
+                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
             }
         }
 

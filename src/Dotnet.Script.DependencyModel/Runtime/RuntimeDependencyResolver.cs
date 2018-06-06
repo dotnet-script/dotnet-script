@@ -51,13 +51,13 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory)};
         }
 
-        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string code = null)
+        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string[] packagesSources , string code = null)
         {
             var pathToProjectFile = scriptMode == ScriptMode.Script 
                 ? _scriptProjectProvider.CreateProject(targetDirectory, _scriptEnvironment.TargetFramework, true)
                 : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), ScriptEnvironment.Default.TargetFramework);
 
-            return GetDependenciesInternal(pathToProjectFile, Array.Empty<string>());
+            return GetDependenciesInternal(pathToProjectFile, packagesSources);
         }
 
         public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packagesSources)

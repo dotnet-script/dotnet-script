@@ -62,7 +62,7 @@ namespace Dotnet.Script
 
             var configuration = app.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
 
-            var packageSources = app.Option("-s | --sources <SOURCE>", " A list of packages sources to be used when resolving NuGet packages", CommandOptionType.MultipleValue);
+            var packageSources = app.Option("-s | --sources <SOURCE>", "Specifies a NuGet package source to use when resolving NuGet packages.", CommandOptionType.MultipleValue);
 
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
@@ -148,7 +148,7 @@ namespace Dotnet.Script
                 }
                 else
                 {
-                    await RunInteractive(debugMode.HasValue());
+                    await RunInteractive(debugMode.HasValue(), packageSources.Values?.ToArray());
                 }
                 return exitCode;
             });
@@ -196,10 +196,10 @@ namespace Dotnet.Script
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);           
         }
 
-        private static async Task RunInteractive(bool debugMode)
+        private static async Task RunInteractive(bool debugMode, string[] packageSources)
         {
             var compiler = GetScriptCompiler(debugMode);
-            var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+            var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default, packageSources);
             await runner.RunLoop();
         }
 

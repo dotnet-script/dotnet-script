@@ -25,16 +25,17 @@ namespace Dotnet.Script.Core
         protected ScriptLogger Logger;
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole Console;
+        private readonly string[] _packageSources;
         protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
         protected InteractiveCommandProvider InteractiveCommandParser = new InteractiveCommandProvider();
         protected string CurrentDirectory = Directory.GetCurrentDirectory();
 
-        public InteractiveRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole console)
-        {
+        public InteractiveRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole console, string[] packageSources = null)
+        {            
             Logger = logger;
             ScriptCompiler = scriptCompiler;
             Console = console;
-
+            _packageSources = packageSources ?? Array.Empty<string>();
             _globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
         }
 
@@ -68,14 +69,14 @@ namespace Dotnet.Script.Core
                 if (_scriptState == null)
                 {
                     var sourceText = SourceText.From(input);
-                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(),scriptMode: ScriptMode.REPL);
+                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(),scriptMode: ScriptMode.REPL, packageSources: _packageSources);
                     await RunFirstScript(context);
                 }
                 else
                 {
                     if (input.StartsWith("#r ") || input.StartsWith("#load "))
                     {
-                        var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL, input).ToArray();
+                        var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL,_packageSources, input).ToArray();
                         var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
                         var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
