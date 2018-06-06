@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
@@ -30,13 +31,29 @@ namespace Dotnet.Script.DependencyModel.Context
         public void Restore(string pathToProjectFile, string[] packageSources)
         {
             ExtractNugetExecutable();
+            var packageSourcesArgument = CreatePackageSourcesArguments();
+            int exitcode = 0;
             if (_scriptEnvironment.IsWindows)
             {
-                _commandRunner.Execute(PathToNuget, $"restore {pathToProjectFile}");
+                exitcode = _commandRunner.Execute(PathToNuget, $"restore {pathToProjectFile} {packageSourcesArgument}");
             }
             else
             {
-                _commandRunner.Execute("mono", $"{PathToNuget} restore \"{pathToProjectFile}\"");
+                exitcode =_commandRunner.Execute("mono", $"{PathToNuget} restore \"{pathToProjectFile}\" {packageSourcesArgument}");
+            }
+
+            if (exitcode != 0)
+            {
+                // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'
+                throw new Exception($"Unable to restore packages from '{pathToProjectFile}'. Make sure that all script files contains valid NuGet references");
+            }
+
+            string CreatePackageSourcesArguments()
+            {
+                return packageSources.Length == 0
+                    ? string.Empty
+                    : packageSources.Select(s => $"-Source {s}")
+                        .Aggregate((current, next) => $"{current} {next}");
             }
         }
 

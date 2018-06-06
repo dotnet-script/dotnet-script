@@ -21,8 +21,7 @@ namespace Dotnet.Script.DependencyModel.Context
         }
 
         public void Restore(string pathToProjectFile, string[] packageSources)
-        {
-            //var packageSourcesArgument = string.Empty;
+        {           
             var packageSourcesArgument = CreatePackageSourcesArguments();
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
             _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");            
