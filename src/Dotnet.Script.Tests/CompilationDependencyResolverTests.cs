@@ -22,7 +22,7 @@ namespace Dotnet.Script.Tests
         public void ShouldGetCompilationDependenciesForPackageContainingInlineNuGetPackageReference()
         {            
             var resolver = CreateResolver();
-            var dependencies =  resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("InlineNugetPackage"), true, _scriptEnvironment.TargetFramework);
+            var dependencies =  resolver.GetDependencies(TestPathUtils.GetPathToTestFixtureFolder("InlineNugetPackage"), true, _scriptEnvironment.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "AutoMapper");
         }
 
@@ -30,7 +30,7 @@ namespace Dotnet.Script.Tests
         public void ShouldGetCompilationDependenciesForPackageContainingNativeLibrary()
         {
             var resolver = CreateResolver();
-            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("NativeLibrary"), true, _scriptEnvironment.TargetFramework);
+            var dependencies = resolver.GetDependencies(TestPathUtils.GetPathToTestFixtureFolder("NativeLibrary"), true, _scriptEnvironment.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "Microsoft.Data.Sqlite");
         }
 
@@ -38,7 +38,7 @@ namespace Dotnet.Script.Tests
         public void ShouldGetCompilationDependenciesForIssue129()
         {
             var resolver = CreateResolver();
-            var dependencies = resolver.GetDependencies(TestPathUtils.GetFullPathToTestFixture("Issue129"), true, _scriptEnvironment.TargetFramework);
+            var dependencies = resolver.GetDependencies(TestPathUtils.GetPathToTestFixtureFolder("Issue129"), true, _scriptEnvironment.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "Auth0.ManagementApi");
         }
 

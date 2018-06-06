@@ -52,7 +52,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
                 return Array.Empty<CompilationDependency>();
             }
 
-            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
+            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile, Array.Empty<string>());
 
             var dependencyContext = dependencyInfo.DependencyContext;
 

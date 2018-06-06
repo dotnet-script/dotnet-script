@@ -136,7 +136,7 @@ namespace Dotnet.Script.Core
         {
             if (context.ScriptMode == ScriptMode.Script)
             {
-                return RuntimeDependencyResolver.GetDependencies(context.FilePath).ToArray();
+                return RuntimeDependencyResolver.GetDependencies(context.FilePath, context.PackageSources).ToArray();
             }
             else
             {

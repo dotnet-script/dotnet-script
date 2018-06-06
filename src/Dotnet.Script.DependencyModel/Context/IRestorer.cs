@@ -9,7 +9,8 @@
         /// Restores the dependencies specified in the given project file.
         /// </summary>
         /// <param name="pathToProjectFile"></param>
-        void Restore(string pathToProjectFile);
+        /// <param name="packageSources">A list of packages sources to be used when restoring NuGet packages.</param>
+        void Restore(string pathToProjectFile, string[] packageSources);
 
         /// <summary>
         /// Gets a <see cref="bool"/> value that indicates if this <see cref="IRestorer"/> is available on the system.

@@ -27,7 +27,7 @@ namespace Dotnet.Script.DependencyModel.Context
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
-        public void Restore(string pathToProjectFile)
+        public void Restore(string pathToProjectFile, string[] packageSources)
         {
             ExtractNugetExecutable();
             if (_scriptEnvironment.IsWindows)
