@@ -15,6 +15,7 @@ namespace Dotnet.Script.DependencyModel.Process
 
         public int Execute(string commandPath, string arguments = null)
         {
+            _logger.Debug($"Executing '{commandPath} {arguments}'");
             var startInformation = CreateProcessStartInfo(commandPath, arguments);            
             var process = CreateProcess(startInformation);
             RunAndWait(process);

@@ -23,7 +23,7 @@ namespace Dotnet.Script.DependencyModel.Context
         {           
             var packageSourcesArgument = CreatePackageSourcesArguments();
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
-            _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier} PackageSources : {packageSourcesArgument}");            
+            _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" -r {runtimeIdentifier} {packageSourcesArgument}");
             if (exitcode != 0)
             {
