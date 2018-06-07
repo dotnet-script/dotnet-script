@@ -202,6 +202,26 @@ will pass the `-d` before `--` to `dotnet script` and enable the debug mode wher
 
 > Note: Omnisharp needs to be restarted after adding a new package reference
 
+#### Package Sources
+
+We can define package sources using a `NuGet.Config` file in the script root folder. In addition to being used during execution of the script, it will also be used by `OmniSharp` that provides language services for packages resolved from these package sources.
+
+As an alternative to maintaining a local `NuGet.Config` file we can define these package sources globally either at the user level or at the computer level as described in [Configuring NuGet Behaviour](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file)
+
+It is also possible to specify packages sources when executing the script.
+
+```
+dotnet script foo.csx -s https://SomePackageSource
+```
+
+Multiple packages sources can be specified like this:
+
+```
+dotnet script foo.csx -s https://SomePackageSource -s https://AnotherPackageSource
+```
+
+
+
 ### Debugging
 
 The days of debugging scripts using `Console.WriteLine` are over. One major feature of `dotnet script` is the ability to debug scripts directly in VS Code. Just set a breakpoint anywhere in your script file(s) and hit F5(start debugging)
@@ -339,7 +359,7 @@ REPL also supports inline Nuget packages - meaning the Nuget packages can be ins
 
 ### Multiline mode
 
-Using Roslyn syntax parsing, we also support multiline REPL mode. This means that if you have an uncompleted code block and press <kbd>Enter</kbd>, we will automatically enter the multline mode. The mode is indicated by the `*` character. This is particularly useful for declaring classes and other more complex constructs.
+Using Roslyn syntax parsing, we also support multiline REPL mode. This means that if you have an uncompleted code block and press <kbd>Enter</kbd>, we will automatically enter the multiline mode. The mode is indicated by the `*` character. This is particularly useful for declaring classes and other more complex constructs.
 
 ```
 ~$ dotnet script
