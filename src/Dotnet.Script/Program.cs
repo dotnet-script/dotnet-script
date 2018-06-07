@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis;
 using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using McMaster.Extensions.CommandLineUtils;
+using System.Diagnostics;
 
 namespace Dotnet.Script
 {
@@ -23,7 +24,7 @@ namespace Dotnet.Script
         const string DebugFlagLong = "--debug";
 
         public static int Main(string[] args)
-        {
+        {          
             try
             {
                 return Wain(args);
@@ -90,7 +91,7 @@ namespace Dotnet.Script
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
-                        exitCode = await RunCode(code.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
+                        exitCode = await RunCode(code.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value(), packageSources.Values?.ToArray());                        
                     }
                     return exitCode;
                 });
@@ -164,7 +165,7 @@ namespace Dotnet.Script
                 {
                     var downloader = new ScriptDownloader();
                     var code = await downloader.Download(file);
-                    return await RunCode(code, debugMode, optimizationLevel, args, Directory.GetCurrentDirectory());                    
+                    return await RunCode(code, debugMode, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);                    
                 }
 
                 throw new Exception($"Couldn't find file '{file}'");
@@ -203,10 +204,10 @@ namespace Dotnet.Script
             await runner.RunLoop();
         }
 
-        private static Task<int> RunCode(string code, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory)
+        private static Task<int> RunCode(string code, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
         {
             var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null,optimizationLevel, ScriptMode.Eval);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null,optimizationLevel, ScriptMode.Eval, packageSources:packageSources);
             return Run(debugMode, context);
         }
 
