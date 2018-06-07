@@ -182,7 +182,7 @@ namespace Dotnet.Script
                 if (interactive)
                 {
                     var compiler = GetScriptCompiler(debugMode);
-                    var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+                    var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default, packageSources);
                     await runner.RunLoopWithSeed(context);
                     return 0;
                 }

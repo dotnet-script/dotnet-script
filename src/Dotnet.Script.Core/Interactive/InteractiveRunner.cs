@@ -30,7 +30,7 @@ namespace Dotnet.Script.Core
         protected InteractiveCommandProvider InteractiveCommandParser = new InteractiveCommandProvider();
         protected string CurrentDirectory = Directory.GetCurrentDirectory();
 
-        public InteractiveRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole console, string[] packageSources = null)
+        public InteractiveRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole console, string[] packageSources)
         {            
             Logger = logger;
             ScriptCompiler = scriptCompiler;
