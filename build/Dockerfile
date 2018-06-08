@@ -13,11 +13,11 @@ RUN apt install nuget -y
 
 RUN dotnet restore
 RUN dotnet test src/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj
-RUN dotnet publish -c Release src/Dotnet.Script/Dotnet.Script.csproj -f netcoreapp2.0
+RUN dotnet publish -c Release src/Dotnet.Script/Dotnet.Script.csproj -f netcoreapp2.1
 
-FROM microsoft/dotnet:2.0.0-sdk
+FROM microsoft/dotnet:2.1-sdk
 
-COPY --from=builder /dotnet-script/src/Dotnet.Script/bin/Release/netcoreapp2.0/publish/ /dotnet-script/
+COPY --from=builder /dotnet-script/src/Dotnet.Script/bin/Release/netcoreapp2.1/publish/ /dotnet-script/
 
 WORKDIR /scripts
 
