@@ -134,7 +134,7 @@ namespace Dotnet.Script
             {
                 c.Description = "Creates an executable from a script";
                 var fileNameArgument = c.Argument("filename", "The script file name");
-                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
+                var publishDirectoryOption = c.Option("-o |--output", "Directory where the published executable should be placed.  Defaults to a 'publish' folder in the current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
                     if (fileNameArgument.Value == null)
@@ -142,14 +142,23 @@ namespace Dotnet.Script
                         c.ShowHelp();
                         return 0;
                     }
-                    var provider = new ScriptProjectProvider(GetLogFactory(true));
-                    var commandRunner = new CommandRunner(GetLogFactory(true));
-                    var compiler = GetScriptCompiler(true);
+                    var optimizationLevel = OptimizationLevel.Debug;
+                    if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                    {
+                        optimizationLevel = OptimizationLevel.Release;
+                    }
 
                     var fullFilePath = Path.GetFullPath(fileNameArgument.Value);
-                    var publishDirectory = $"{Path.GetDirectoryName(fullFilePath)}/publish";
-                    var publisher = new ScriptPublisher(provider, commandRunner, compiler);
-                    publisher.CreateExecutable(fullFilePath, publishDirectory);
+                    var publishDirectory = publishDirectoryOption.Value() ?? $"{Path.GetDirectoryName(fullFilePath)}/publish";
+
+                    var provider = new ScriptProjectProvider(GetLogFactory(debugMode.HasValue()));
+                    var commandRunner = new CommandRunner(GetLogFactory(debugMode.HasValue()));
+                    var compiler = GetScriptCompiler(true);
+                    var publisher = new ScriptPublisher(provider, commandRunner, compiler, ScriptConsole.Default);
+                    var sourceText = SourceText.From(File.ReadAllText(fullFilePath));
+                    var context = new ScriptContext(sourceText, publishDirectory, Enumerable.Empty<string>(), fullFilePath, optimizationLevel);
+
+                    publisher.CreateExecutable(context);
                     return 0;
                 });
             });

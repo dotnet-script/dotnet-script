@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel.Context;
@@ -16,11 +14,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using RuntimeAssembly = Dotnet.Script.DependencyModel.Runtime.RuntimeAssembly;
-
 
 namespace Dotnet.Script.Core
 {
@@ -52,12 +48,11 @@ namespace Dotnet.Script.Core
             "System.Linq",
             "System.Linq.Expressions",
             "System.Text",
-            "System.Threading.Tasks",
-            //"globalCompilation"
+            "System.Threading.Tasks"
         };
 
         // see: https://github.com/dotnet/roslyn/issues/5501
-        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
+        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };        
 
         public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
 
@@ -75,8 +70,8 @@ namespace Dotnet.Script.Core
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
         {
             var scriptMap = runtimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
-            var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
-                .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory), scriptMap))
+            var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)                
+                .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
                 .WithFileEncoding(context.Code.Encoding);
@@ -129,67 +124,6 @@ namespace Dotnet.Script.Core
             var loader = new InteractiveAssemblyLoader();
 
             var script = CSharpScript.Create<TReturn>(code, scriptOptions, typeof(THost), loader);
-
-
-            //const string assemblyName = "scriptAssembly";
-            //var xxxx = CSharpScript.Create("System.Console.WriteLine(\"test\");").GetCompilation().SyntaxTrees.Single();
-            //var tempTree = CSharpSyntaxTree.ParseText("System.Console.WriteLine(\"test\");");
-            //var tempRoot = tempTree.GetCompilationUnitRoot();
-
-            //var generatedTree = ConsoleAppGenerator.Generate("temp").SyntaxTree;
-            //generatedTree = generatedTree.WithRootAndOptions(generatedTree.GetRoot(), ((CSharpParseOptions)generatedTree.Options).WithLanguageVersion(LanguageVersion.CSharp7_3));
-            //var tempString = generatedTree.ToString();
-
-            //var tempOptions = (script.GetCompilation().Options
-            //    //.WithOutputKind(OutputKind.ConsoleApplication)
-            //    .WithScriptClassName(assemblyName)
-            //as CSharpCompilationOptions);
-
-            //var scriptCompilation = script.GetCompilation()
-            //    .WithOptions(tempOptions)
-            //    //.AddSyntaxTrees(generatedTree)
-            //    //.AddSyntaxTrees(xxxx)
-            //    .WithAssemblyName(assemblyName)
-            //    as CSharpCompilation;
-            ////var entryPoint = scriptCompilation.GetEntryPoint(CancellationToken.None);
-            //var tempCompilationDiagnostics = scriptCompilation.GetDiagnostics();
-            //scriptCompilation.Emit($@"../../temp_project_builder\misc\tempScript\{assemblyName}.dll");
-
-            //var x = tempCompilation.References.Single(r => r.Display.ToLowerInvariant().Contains("private.corelib"));
-            //var y = tempCompilation.References.First(r => r.Display.ToLowerInvariant().Contains("runtime"));
-            //var regTree = CSharpSyntaxTree.ParseText(File.ReadAllText(@"C:\Users\u403598\Desktop\temp\script\program.cs"));
-
-            //var opts = ScriptOptions.Default.AddImports(ImportedNamespaces);
-            ////.WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory), scriptMap))
-            ////.WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
-            ////.WithEmitDebugInformation(true)
-            ////.WithFileEncoding(context.Code.Encoding);
-            //var xyz = new CSharpCompilationOptions(OutputKind.ConsoleApplication)
-            //    .WithMetadataReferenceResolver(opts.MetadataResolver)
-            //    .WithSourceReferenceResolver(opts.SourceResolver);
-            ////var customScriptCompilation = (CSharpCompilation.CreateScriptCompilation("normalProgram", /*new SyntaxTree[] { generatedTree }.Concat*/(scriptCompilation.SyntaxTrees.Single())));
-            //var customCompilation = (CSharpCompilation.Create("normalProgram", /*new SyntaxTree[] { generatedTree }.Concat*/(new SyntaxTree[] { scriptCompilation.SyntaxTrees.Last() }))
-            ////.AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
-            ////.AddReferences(MetadataReference.CreateFromFile(typeof(System.Runtime.GCSettings).Assembly.Location));
-            ////.AddReferences(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location))
-            ////.AddReferences(x)
-            ////.AddReferences(y)
-            ////.WithScriptCompilationInfo(tempCompilation.ScriptCompilationInfo)
-            //.WithOptions(xyz)
-            //.WithReferences(scriptCompilation.References)
-            ////.WithOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication))
-            // as CSharpCompilation);
-            //var entryPoint2 = customCompilation.GetEntryPoint(CancellationToken.None);
-            //var diagnostics = customCompilation.GetDiagnostics();
-
-            var x = 5;
-            x++;
-            //customCompilation.Emit($@"../../temp_project_builder\misc\tempScript\customAssembly.dll");
-
-
-            //var refs = typeof(object).Assembly.meta
-
-            //reg.Emit($@"C:\Users\u403598\Desktop\temp\script\regular.dll");
 
             SetOptimizationLevel(context, script);
 
@@ -275,7 +209,7 @@ namespace Dotnet.Script.Core
         private string GetScriptCode(ScriptContext context)
         {
             string code;
-
+            
             // when processing raw code, make sure we inject new lines after preprocessor directives
             if (context.FilePath == null)
             {
@@ -325,8 +259,8 @@ namespace Dotnet.Script.Core
             {
                 if (runtimeAssembly.Name.Version > assemblyName.Version)
                 {
-                    loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);
-                    if (loadedAssembly != null)
+                    loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);                    
+                    if(loadedAssembly != null)
                     {
                         Logger.Log($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
                         return loadedAssembly;

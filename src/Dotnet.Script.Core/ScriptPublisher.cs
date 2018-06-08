@@ -1,76 +1,99 @@
-﻿using Dotnet.Script.DependencyModel.Process;
+﻿using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Dotnet.Script.Core
 {
     public class ScriptPublisher
     {
+        const string AssemblyName = "scriptAssembly";
+
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly CommandRunner _commandRunner;
         private readonly ScriptCompiler _scriptCompiler;
+        private readonly ScriptConsole _scriptConsole;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
-        public ScriptPublisher(ScriptProjectProvider scriptProjectProvider, CommandRunner commandRunner, ScriptCompiler scriptCompiler)
+        public ScriptPublisher(ScriptProjectProvider scriptProjectProvider, CommandRunner commandRunner, ScriptCompiler scriptCompiler,
+            ScriptConsole scriptConsole)
         {
             _scriptProjectProvider = scriptProjectProvider ?? throw new ArgumentNullException(nameof(scriptProjectProvider));
             _commandRunner = commandRunner ?? throw new ArgumentNullException(nameof(commandRunner));
             _scriptCompiler = scriptCompiler ?? throw new ArgumentNullException(nameof(scriptCompiler));
+            _scriptConsole = scriptConsole ?? throw new ArgumentNullException(nameof(scriptConsole));
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
-        public void CreateExecutable(string fullFilePath, string publishDirectory)
+        public void CreateExecutable(ScriptContext context)
         {
-            const string outputAssemblyName = "scriptAssembly";
-            var projectPath = _scriptProjectProvider.CreateProjectForScriptFile(fullFilePath, new PackageReference[] { new PackageReference("Microsoft.CodeAnalysis.Scripting", "2.8.2", PackageOrigin.ReferenceDirective) });
-            var projectDirecory = Path.GetDirectoryName(projectPath);
+            var tempProjectPath = _scriptProjectProvider.CreateProjectForScriptFile(context.FilePath, new PackageReference[] { new PackageReference("Microsoft.CodeAnalysis.Scripting", "2.8.2", PackageOrigin.ReferenceDirective) });
+            var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
-            CreateScriptLibrary(fullFilePath, projectDirecory);
+            CreateScriptAssembly(context, tempProjectDirecory);
 
-            var projectFile = new ProjectFile(File.ReadAllText(projectPath));
-            projectFile.AddReference(outputAssemblyName);
-            projectFile.Save(projectPath);
+            var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
+            // todo: grab version in a better way?
+            projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", "2.8.2", PackageOrigin.ReferenceDirective));
+            projectFile.AddReference(AssemblyName);
+            projectFile.Save(tempProjectPath);
 
-            CopyProgram(projectDirecory);
+            CopyProgramTemplate(tempProjectDirecory);
 
-            var exitcode = _commandRunner.Execute("dotnet", $"publish \"{projectPath}\" -c Release -r win10-x64 -o {publishDirectory}");
+            var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
+
+            // todo: may want to add ability to return dotnet.exe errors
+            var exitcode = _commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
+            if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
         }
 
-        private void CreateScriptLibrary(string fullFilePath, string projectDirectory)
+        private void CreateScriptAssembly(ScriptContext context, string tempProjectDirecory)
         {
-            const string assemblyName = "scriptAssembly";
+            try
+            {
+                var compilationContext = _scriptCompiler.CreateCompilationContext<int, CommandLineScriptGlobals>(context);
+                var scriptOptions = compilationContext.Script.GetCompilation().Options
+                    .WithScriptClassName(AssemblyName);
+                var scriptCompilation = compilationContext.Script.GetCompilation()
+                      .WithOptions(scriptOptions)
+                    .WithAssemblyName(AssemblyName);
+                var emitResult = scriptCompilation.Emit($"{tempProjectDirecory}/{AssemblyName}.dll");
+                if (!emitResult.Success) throw new Exception("Failed while emitting the generated script assembly");
 
-            var sourceText = SourceText.From(File.ReadAllText(fullFilePath));
-            var context = new ScriptContext(sourceText, projectDirectory, Enumerable.Empty<string>(), fullFilePath, OptimizationLevel.Debug);
-
-            var compilationContext = _scriptCompiler.CreateCompilationContext<int, CommandLineScriptGlobals>(context);
-            var tempOptions = compilationContext.Script.GetCompilation().Options
-                .WithScriptClassName(assemblyName);
-            var scriptCompilation = compilationContext.Script.GetCompilation()
-                  .WithOptions(tempOptions)
-                .WithAssemblyName(assemblyName);
-            var tempCompilationDiagnostics = scriptCompilation.GetDiagnostics();
-            scriptCompilation.Emit($"{projectDirectory}/{assemblyName}.dll");
+                foreach (var reference in scriptCompilation.DirectiveReferences)
+                {
+                    var refInfo = new FileInfo(reference.Display);
+                    File.Copy(refInfo.FullName, $"{tempProjectDirecory}/{refInfo.Name}", true);
+                }
+            }
+            catch (CompilationErrorException ex)
+            {
+                foreach (var diagnostic in ex.Diagnostics)
+                {
+                    _scriptConsole.WritePrettyError(diagnostic.ToString());
+                }
+                throw;
+            }
         }
 
-        private void CopyProgram(string projectDirecory)
+        private void CopyProgramTemplate(string tempProjectDirecory)
         {
-            var program = ReadTemplate("program.publish.template");
-            File.WriteAllText($"{projectDirecory}/Program.cs", program);
-        }
+            const string resourceName = "Dotnet.Script.Core.Templates.program.publish.template";
 
-        private static string ReadTemplate(string name)
-        {
-            var allResources = typeof(ScriptPublisher).GetTypeInfo().Assembly.GetManifestResourceNames();
-            var resourceStream = typeof(ScriptPublisher).GetTypeInfo().Assembly.GetManifestResourceStream($"Dotnet.Script.Core.Templates.{name}");
+            var resourceStream = typeof(ScriptPublisher).GetTypeInfo().Assembly.GetManifestResourceStream(resourceName);
+            if (resourceStream == null) throw new FileNotFoundException($"Unable to locate resource '{resourceName}'");
+
+            string program;
             using (var streamReader = new StreamReader(resourceStream))
             {
-                return streamReader.ReadToEnd();
+                program = streamReader.ReadToEnd();
             }
+            File.WriteAllText($"{tempProjectDirecory}/Program.cs", program);
         }
     }
 }

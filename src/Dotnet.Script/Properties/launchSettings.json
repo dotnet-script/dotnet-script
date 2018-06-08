@@ -2,7 +2,7 @@
   "profiles": {
     "Dotnet.Script": {
       "commandName": "Project",
-      "commandLineArgs": "publish ../../temp_project_builder\\misc\\tempScript\\main.csx"
+      "commandLineArgs": "publish C:\\Users\\sharpiro\\Desktop\\temp\\tempScript\\main.csx -o C:\\Users\\sharpiro\\Desktop\\temp\\publishTemp"
     }
   }
 }
