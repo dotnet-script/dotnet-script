@@ -2,6 +2,7 @@
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class PackageSourceTests : IClassFixture<ScriptPackagesFixture>
     {
         [Fact]
@@ -9,9 +10,9 @@ namespace Dotnet.Script.Tests
         {
             var fixture = "ScriptPackage/WithNoNuGetConfig";
             var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);            
-            var result = ScriptTestRunner.Default.ExecuteFixture(fixture, "-s", pathToScriptPackages);
-            Assert.Equal(0, result.exitCode);
+            var result = ScriptTestRunner.Default.ExecuteFixture(fixture, "-s", pathToScriptPackages);            
             Assert.Contains("Hello", result.output);
+            Assert.Equal(0, result.exitCode);
         }
 
         [Fact]
@@ -20,9 +21,9 @@ namespace Dotnet.Script.Tests
             var fixture = "ScriptPackage/WithNoNuGetConfig";
             var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);            
             var code = @"#load \""nuget:ScriptPackageWithMainCsx,1.0.0\"" SayHello();";
-            var result = ScriptTestRunner.Default.Execute("-s", pathToScriptPackages, "eval", $"\"{code}\"");            
-            Assert.Equal(0, result.exitCode);
+            var result = ScriptTestRunner.Default.Execute("-s", pathToScriptPackages, "eval", $"\"{code}\"");
             Assert.Contains("Hello", result.output);
+            Assert.Equal(0, result.exitCode);            
         }
     }
 }
