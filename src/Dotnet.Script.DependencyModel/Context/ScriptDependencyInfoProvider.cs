@@ -27,21 +27,21 @@ namespace Dotnet.Script.DependencyModel.Context
         /// </summary>
         /// <param name="pathToProjectFile">The path to the project file.</param>
         /// <returns>The <see cref="DependencyContext"/> for a given project file (csproj).</returns>
-        public ScriptDependencyInfo GetDependencyInfo(string pathToProjectFile)
+        public ScriptDependencyInfo GetDependencyInfo(string pathToProjectFile, string[] packagesSources)
         {            
-            Restore(pathToProjectFile);
+            Restore(pathToProjectFile, packagesSources);
             var context =  ReadDependencyContext(pathToProjectFile);
             var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);
             return new ScriptDependencyInfo(context, nugetPackageFolders);
         }
 
-        private void Restore(string pathToProjectFile)
+        private void Restore(string pathToProjectFile, string[] packageSources)
         {
             foreach (var restorer in _restorers)
             {
                 if (restorer.CanRestore)
                 {
-                    restorer.Restore(pathToProjectFile);
+                    restorer.Restore(pathToProjectFile, packageSources);
                     return;
                 }
             }

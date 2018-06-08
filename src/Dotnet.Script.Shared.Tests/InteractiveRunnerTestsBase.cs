@@ -47,7 +47,7 @@ namespace Dotnet.Script.Shared.Tests
             }));
 
             var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
-            var runner = new InteractiveRunner(compiler, logger, console);
+            var runner = new InteractiveRunner(compiler, logger, console, Array.Empty<string>());
             return new InteractiveTestContext(console, runner);
         }
 

@@ -136,11 +136,11 @@ namespace Dotnet.Script.Core
         {
             if (context.ScriptMode == ScriptMode.Script)
             {
-                return RuntimeDependencyResolver.GetDependencies(context.FilePath).ToArray();
+                return RuntimeDependencyResolver.GetDependencies(context.FilePath, context.PackageSources).ToArray();
             }
             else
             {
-                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.Code.ToString()).ToArray();
+                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
             }
         }
 

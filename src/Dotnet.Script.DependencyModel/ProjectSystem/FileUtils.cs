@@ -10,6 +10,18 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     {
         public static string CreateTempFolder(string targetDirectory)
         {
+            string pathToProjectDirectory = GetPathToTempFolder(targetDirectory);
+
+            if (!Directory.Exists(pathToProjectDirectory))
+            {
+                Directory.CreateDirectory(pathToProjectDirectory);
+            }
+
+            return pathToProjectDirectory;
+        }
+
+        public static string GetPathToTempFolder(string targetDirectory)
+        {
             if (!Path.IsPathRooted(targetDirectory))
             {
                 throw new ArgumentOutOfRangeException(nameof(targetDirectory), "Must be a root path");
@@ -30,12 +42,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
             }
             var pathToProjectDirectory = Path.Combine(tempDirectory, "scripts", targetDirectoryWithoutRoot);
-
-            if (!Directory.Exists(pathToProjectDirectory))
-            {
-                Directory.CreateDirectory(pathToProjectDirectory);
-            }
-
             return pathToProjectDirectory;
         }
     }

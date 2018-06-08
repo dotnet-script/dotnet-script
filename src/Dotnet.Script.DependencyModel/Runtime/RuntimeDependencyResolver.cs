@@ -51,24 +51,24 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory)};
         }
 
-        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string code = null)
+        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string[] packagesSources , string code = null)
         {
             var pathToProjectFile = scriptMode == ScriptMode.Script 
                 ? _scriptProjectProvider.CreateProject(targetDirectory, _scriptEnvironment.TargetFramework, true)
                 : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), ScriptEnvironment.Default.TargetFramework);
 
-            return GetDependenciesInternal(pathToProjectFile);
+            return GetDependenciesInternal(pathToProjectFile, packagesSources);
         }
 
-        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile)
+        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packagesSources)
         {
-            var pathToProjectFile =  _scriptProjectProvider.CreateProjectForScriptFile(scriptFile);
-            return GetDependenciesInternal(pathToProjectFile);
+            var pathToProjectFile = _scriptProjectProvider.CreateProjectForScriptFile(scriptFile);
+            return GetDependenciesInternal(pathToProjectFile, packagesSources);
         }
 
-        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile)
+        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile, string[] packageSources)
         {
-            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile);
+            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile, packageSources);
 
             var dependencyContext = dependencyInfo.DependencyContext;
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();

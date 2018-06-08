@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis;
 using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using McMaster.Extensions.CommandLineUtils;
+using System.Diagnostics;
 
 namespace Dotnet.Script
 {
@@ -23,7 +24,7 @@ namespace Dotnet.Script
         const string DebugFlagLong = "--debug";
 
         public static int Main(string[] args)
-        {
+        {          
             try
             {
                 return Wain(args);
@@ -61,7 +62,9 @@ namespace Dotnet.Script
             var interactive = app.Option("-i | --interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
 
             var configuration = app.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
-            
+
+            var packageSources = app.Option("-s | --sources <SOURCE>", "Specifies a NuGet package source to use when resolving NuGet packages.", CommandOptionType.MultipleValue);
+
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
@@ -88,7 +91,7 @@ namespace Dotnet.Script
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
-                        exitCode = await RunCode(code.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value());                        
+                        exitCode = await RunCode(code.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value(), packageSources.Values?.ToArray());                        
                     }
                     return exitCode;
                 });
@@ -142,11 +145,11 @@ namespace Dotnet.Script
                     {
                         optimizationLevel = OptimizationLevel.Release;
                     }
-                    exitCode = await RunScript(file.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue());
+                exitCode = await RunScript(file.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue(), packageSources.Values?.ToArray());
                 }
                 else
                 {
-                    await RunInteractive(debugMode.HasValue());
+                    await RunInteractive(debugMode.HasValue(), packageSources.Values?.ToArray());
                 }
                 return exitCode;
             });
@@ -154,7 +157,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);            
         }
 
-        private static async Task<int> RunScript(string file, bool debugMode, OptimizationLevel optimizationLevel,  IEnumerable<string> args, bool interactive)
+        private static async Task<int> RunScript(string file, bool debugMode, OptimizationLevel optimizationLevel,  IEnumerable<string> args, bool interactive, string[] packageSources)
         {
             if (!File.Exists(file))
             {
@@ -162,7 +165,7 @@ namespace Dotnet.Script
                 {
                     var downloader = new ScriptDownloader();
                     var code = await downloader.Download(file);
-                    return await RunCode(code, debugMode, optimizationLevel, args, Directory.GetCurrentDirectory());                    
+                    return await RunCode(code, debugMode, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);                    
                 }
 
                 throw new Exception($"Couldn't find file '{file}'");
@@ -174,12 +177,12 @@ namespace Dotnet.Script
             using (var filestream = new FileStream(absoluteFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 var sourceText = SourceText.From(filestream);
-                var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel);
+                var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
 
                 if (interactive)
                 {
                     var compiler = GetScriptCompiler(debugMode);
-                    var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+                    var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default, packageSources);
                     await runner.RunLoopWithSeed(context);
                     return 0;
                 }
@@ -194,17 +197,17 @@ namespace Dotnet.Script
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);           
         }
 
-        private static async Task RunInteractive(bool debugMode)
+        private static async Task RunInteractive(bool debugMode, string[] packageSources)
         {
             var compiler = GetScriptCompiler(debugMode);
-            var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default);
+            var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default, packageSources);
             await runner.RunLoop();
         }
 
-        private static Task<int> RunCode(string code, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory)
+        private static Task<int> RunCode(string code, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
         {
             var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null,optimizationLevel, ScriptMode.Eval);
+            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null,optimizationLevel, ScriptMode.Eval, packageSources:packageSources);
             return Run(debugMode, context);
         }
 

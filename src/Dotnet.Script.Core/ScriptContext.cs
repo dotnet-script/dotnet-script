@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Dotnet.Script.Core
 {
     public class ScriptContext
     {
-        public ScriptContext(SourceText code, string workingDirectory, IEnumerable<string> args, string filePath = null, OptimizationLevel optimizationLevel = OptimizationLevel.Debug, ScriptMode scriptMode = ScriptMode.Script)
+        public ScriptContext(SourceText code, string workingDirectory, IEnumerable<string> args, string filePath = null, OptimizationLevel optimizationLevel = OptimizationLevel.Debug, ScriptMode scriptMode = ScriptMode.Script, string[] packageSources = null)
         {
             Code = code;
             WorkingDirectory = workingDirectory;
@@ -17,6 +18,7 @@ namespace Dotnet.Script.Core
             FilePath = filePath;
             OptimizationLevel = optimizationLevel;
             ScriptMode = filePath != null ? ScriptMode.Script : scriptMode;
+            PackageSources = packageSources ?? Array.Empty<string>();
         }
 
         public SourceText Code { get; }
@@ -30,5 +32,7 @@ namespace Dotnet.Script.Core
         public OptimizationLevel OptimizationLevel { get; }
 
         public ScriptMode ScriptMode { get; }
+
+        public string[] PackageSources { get; }
     }
 }

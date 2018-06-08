@@ -31,22 +31,17 @@ namespace Dotnet.Script.Tests
 
         public (string output, int exitCode) ExecuteFixture(string fixture, params string[] arguments)
         {
-            var pathToFixture = Path.Combine("..", "..", "..", "TestFixtures", fixture);
+            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(new string[] { pathToFixture}.Concat(arguments ?? Array.Empty<string>()).ToArray()));
             return result;
         }
 
         public int ExecuteFixtureInProcess(string fixture, params string[] arguments)
         {
-            var pathToFixture = Path.Combine("..", "..", "..", "TestFixtures", fixture);
-            return Program.Main(new[] { GetPathToFixture(fixture) }.Concat(arguments ?? Array.Empty<string>()).ToArray());
+            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);            
+            return Program.Main(new[] { pathToFixture }.Concat(arguments ?? Array.Empty<string>()).ToArray());
         }
-
-        private static string GetPathToFixture(string fixture)
-        {
-            return Path.Combine("..", "..", "..", "TestFixtures", fixture);
-        }
-
+        
         private string[] GetDotnetScriptArguments(params string[] arguments)
         {
             string configuration;
