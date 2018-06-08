@@ -23,16 +23,16 @@ namespace Dotnet.Script.Core
         }
 
         public void InitializerFolder(string fileName, string currentWorkingDirectory)
-        {
+        {            
             CreateLaunchConfiguration(currentWorkingDirectory);
             CreateOmniSharpConfigurationFile(currentWorkingDirectory);
-            CreateScriptFile(fileName, currentWorkingDirectory);
+            CreateScriptFile(fileName, currentWorkingDirectory);            
         }
 
         public void CreateNewScriptFile(string fileName, string currentDirectory)
         {
             _logger.Log($"Creating '{fileName}'");
-            if (!Path.HasExtension(fileName))
+            if(!Path.HasExtension(fileName))
             {
                 fileName = Path.ChangeExtension(fileName, ".csx");
             }
@@ -57,7 +57,7 @@ namespace Dotnet.Script.Core
             }
             else
             {
-                CreateNewScriptFile(fileName, currentWorkingDirectory);
+                CreateNewScriptFile(fileName,currentWorkingDirectory);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Dotnet.Script.Core
             string installLocation = _scriptEnvironment.InstallLocation;
             string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
             if (!File.Exists(pathToLaunchFile))
-            {
+            {                
                 string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
                 string launchFileContent = lauchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
                 File.WriteAllText(pathToLaunchFile, launchFileContent);

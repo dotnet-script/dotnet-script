@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Dotnet.Script": {
-      "commandName": "Project",
-      "commandLineArgs": "publish C:\\Users\\sharpiro\\Desktop\\temp\\tempScript\\main.csx -o C:\\Users\\sharpiro\\Desktop\\temp\\publishTemp"
-    }
-  }
-}
