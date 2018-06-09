@@ -133,6 +133,7 @@ namespace Dotnet.Script
                 c.Description = "Creates an executable from a script";
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 var publishDirectoryOption = c.Option("-o |--output", "Directory where the published executable should be placed.  Defaults to a 'publish' folder in the current directory.", CommandOptionType.SingleValue);
+                var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
                 c.OnExecute(() =>
                 {
                     if (fileNameArgument.Value == null)
@@ -149,7 +150,7 @@ namespace Dotnet.Script
 
                     var publishDirectory = publishDirectoryOption.Value() ?? $"{Path.GetDirectoryName(fileNameArgument.Value)}/publish";
                     var logFactory = GetLogFactory();
-                    var compiler = GetScriptCompiler(debugMode.HasValue());
+                    var compiler = GetScriptCompiler(publishDebugMode.HasValue());
                     var publisher = new ScriptPublisher(logFactory, compiler);
                     var code = SourceText.From(File.ReadAllText(fileNameArgument.Value));
                     var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), fileNameArgument.Value, optimizationLevel);
@@ -159,7 +160,7 @@ namespace Dotnet.Script
 
                     LogFactory GetLogFactory()
                     {
-                        var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode.HasValue());
+                        var logger = new ScriptLogger(ScriptConsole.Default.Error, publishDebugMode.HasValue());
                         return type => ((level, message) =>
                         {
                             if (level == LogLevel.Debug)
