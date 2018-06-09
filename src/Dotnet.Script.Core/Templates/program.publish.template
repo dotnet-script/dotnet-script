@@ -21,10 +21,10 @@ namespace dotnetPublishCode
                 var factoryMethod = typeof(scriptAssembly).GetMethod("<Factory>");
                 if (factoryMethod == null) throw new Exception("couldn't find factory method to initiate script");
 
-				// todo: not sure what the second parameter is, using 'null' for now
+                // todo: not sure what the second parameter is, using 'null' for now
                 var invokeTask = factoryMethod.Invoke(null, new object[] { new object[] { globals, null } }) as Task<int>;
                 var invokeResult = invokeTask.Result;
-                if (invokeResult != 0) WriteLine(invokeResult);
+                if (invokeResult != 0) WritePrettyError($"Error result: '{invokeResult}'");
             }
             // todo: not getting the full script stack trace
             catch (AggregateException ex)

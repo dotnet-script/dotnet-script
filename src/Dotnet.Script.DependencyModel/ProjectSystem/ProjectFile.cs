@@ -20,20 +20,20 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _document = XDocument.Parse(xmlText);
         }
 
-        public void AddReference(string reference)
-        {
-            var itemGroupElement = _document.Descendants("ItemGroup").Single();
-            var packageReferenceElement = new XElement("Reference");
-            packageReferenceElement.Add(new XAttribute("Include", reference));
-            itemGroupElement.Add(packageReferenceElement);
-        }
-
         public void AddPackageReference(PackageReference packageReference)
         {
             var itemGroupElement = _document.Descendants("ItemGroup").Single();
             var packageReferenceElement = new XElement("PackageReference");
             packageReferenceElement.Add(new XAttribute("Include", packageReference.Id));
             packageReferenceElement.Add(new XAttribute("Version", packageReference.Version));
+            itemGroupElement.Add(packageReferenceElement);
+        }
+
+        public void AddAssemblyReference(string assemblyPath)
+        {
+            var itemGroupElement = _document.Descendants("ItemGroup").Single();
+            var packageReferenceElement = new XElement("Reference");
+            packageReferenceElement.Add(new XAttribute("Include", assemblyPath));
             itemGroupElement.Add(packageReferenceElement);
         }
 
