@@ -1,18 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.NuGet;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using System.IO;
 using Microsoft.CodeAnalysis.Text;
-using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using System.Text;
-using System;
-using System.Collections.Immutable;
-using Dotnet.Script.DependencyModel.NuGet;
-using Dotnet.Script.DependencyModel.Context;
-using System.Diagnostics;
 
 namespace Dotnet.Script.Core
 {
@@ -69,7 +68,6 @@ namespace Dotnet.Script.Core
             {
                 if (_scriptState == null)
                 {
-                    //Debugger.Launch();
                     var sourceText = SourceText.From(input);
                     var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(),scriptMode: ScriptMode.REPL, packageSources: _packageSources);
                     await RunFirstScript(context);
@@ -77,8 +75,7 @@ namespace Dotnet.Script.Core
                 else
                 {
                     if (input.StartsWith("#r ") || input.StartsWith("#load "))
-                    {
-                        Debugger.Launch();
+                    {                        
                         var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL,_packageSources, input).ToArray();
                         var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
