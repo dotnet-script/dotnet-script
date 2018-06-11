@@ -75,7 +75,7 @@ namespace Dotnet.Script.Core
                 else
                 {
                     if (input.StartsWith("#r ") || input.StartsWith("#load "))
-                    {                        
+                    {
                         var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL,_packageSources, input).ToArray();
                         var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
