@@ -12,6 +12,7 @@ using System;
 using System.Collections.Immutable;
 using Dotnet.Script.DependencyModel.NuGet;
 using Dotnet.Script.DependencyModel.Context;
+using System.Diagnostics;
 
 namespace Dotnet.Script.Core
 {
@@ -68,6 +69,7 @@ namespace Dotnet.Script.Core
             {
                 if (_scriptState == null)
                 {
+                    //Debugger.Launch();
                     var sourceText = SourceText.From(input);
                     var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(),scriptMode: ScriptMode.REPL, packageSources: _packageSources);
                     await RunFirstScript(context);
@@ -76,6 +78,7 @@ namespace Dotnet.Script.Core
                 {
                     if (input.StartsWith("#r ") || input.StartsWith("#load "))
                     {
+                        Debugger.Launch();
                         var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL,_packageSources, input).ToArray();
                         var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 

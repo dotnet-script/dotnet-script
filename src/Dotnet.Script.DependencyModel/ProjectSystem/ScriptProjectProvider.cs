@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Environment;
@@ -27,18 +28,33 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         public string CreateProjectForRepl(string code, string targetDirectory, string defaultTargetFramework = "net46")
         {
-            var parseresult = _scriptParser.ParseFromCode(code);
+            var scriptFiles = _scriptFilesResolver.GetScriptFilesFromCode(code);
+            targetDirectory = Path.Combine(targetDirectory, "interactive");
+
+            var parseResultFromCode = _scriptParser.ParseFromCode(code);
+            var parseResultFromLoadedFiles = _scriptParser.ParseFromFiles(scriptFiles);
+            var allPackageReferences = new HashSet<PackageReference>();
+
+            foreach (var packageReference in parseResultFromCode.PackageReferences)
+            {
+                allPackageReferences.Add(packageReference);
+            }
+
+            foreach (var packageReference in parseResultFromLoadedFiles.PackageReferences)
+            {
+                allPackageReferences.Add(packageReference);
+            }
 
             targetDirectory = Path.Combine(targetDirectory, "interactive");
             var pathToProjectFile = GetPathToProjectFile(targetDirectory);
             var projectFile = new ProjectFile();
 
-            foreach (var packageReference in parseresult.PackageReferences)
+            foreach (var packageReference in allPackageReferences)
             {
                 projectFile.AddPackageReference(packageReference);
             }
 
-            projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
+            projectFile.SetTargetFramework(parseResultFromCode.TargetFramework ?? defaultTargetFramework);
 
             projectFile.Save(pathToProjectFile);
 
@@ -73,7 +89,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
             _logger.Debug($"Creating project file for {scriptFile}");
             var scriptFiles = _scriptFilesResolver.GetScriptFiles(scriptFile);
-            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());                        
+            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());
         }
 
         private string CreateProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
