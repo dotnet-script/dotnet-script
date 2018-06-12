@@ -151,7 +151,8 @@ namespace Dotnet.Script
                     var publishDirectory = publishDirectoryOption.Value() ?? $"{Path.GetDirectoryName(fileNameArgument.Value)}/publish";
                     var logFactory = GetLogFactory();
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue());
-                    var publisher = new ScriptPublisher(logFactory, compiler);
+                    var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
+                    var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
                     var code = SourceText.From(File.ReadAllText(fileNameArgument.Value));
                     var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), fileNameArgument.Value, optimizationLevel);
 

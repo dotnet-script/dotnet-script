@@ -4,7 +4,6 @@ using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 using System;
 using System.IO;
 using System.Reflection;
@@ -14,26 +13,26 @@ namespace Dotnet.Script.Core
     public class ScriptPublisher
     {
         const string AssemblyName = "scriptAssembly";
+        const string ScriptingVersion = "2.8.2";
 
         private readonly ScriptProjectProvider _scriptProjectProvider;
-        private readonly ScriptCompiler _scriptCompiler;
+        private readonly ScriptEmitter _scriptEmitter;
         private readonly ScriptConsole _scriptConsole;
         private readonly ScriptEnvironment _scriptEnvironment;
 
-        public ScriptPublisher(ScriptProjectProvider scriptProjectProvider, ScriptCompiler scriptCompiler,
-            ScriptConsole scriptConsole)
+        public ScriptPublisher(ScriptProjectProvider scriptProjectProvider, ScriptEmitter scriptEmitter, ScriptConsole scriptConsole)
         {
             _scriptProjectProvider = scriptProjectProvider ?? throw new ArgumentNullException(nameof(scriptProjectProvider));
-            _scriptCompiler = scriptCompiler ?? throw new ArgumentNullException(nameof(scriptCompiler));
+            _scriptEmitter = scriptEmitter ?? throw new ArgumentNullException(nameof(scriptEmitter));
             _scriptConsole = scriptConsole ?? throw new ArgumentNullException(nameof(scriptConsole));
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
-        public ScriptPublisher(LogFactory logFactory, ScriptCompiler scriptCompiler)
+        public ScriptPublisher(LogFactory logFactory, ScriptEmitter scriptEmitter)
             : this
             (
                 new ScriptProjectProvider(logFactory),
-                scriptCompiler,
+                scriptEmitter,
                 ScriptConsole.Default
             )
         {
@@ -47,8 +46,7 @@ namespace Dotnet.Script.Core
             var scriptAssemblyPath = CreateScriptAssembly(context, tempProjectDirecory);
 
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
-            // todo: grab version in a better way?
-            projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", "2.8.2", PackageOrigin.ReferenceDirective));
+            projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion, PackageOrigin.ReferenceDirective));
             projectFile.AddAssemblyReference(scriptAssemblyPath);
             projectFile.Save(tempProjectPath);
 
@@ -66,27 +64,37 @@ namespace Dotnet.Script.Core
         {
             try
             {
-                var compilationContext = _scriptCompiler.CreateCompilationContext<int, CommandLineScriptGlobals>(context);
-                var scriptOptions = compilationContext.Script.GetCompilation().Options
-                    .WithScriptClassName(AssemblyName);
-                var scriptCompilation = compilationContext.Script.GetCompilation()
-                      .WithOptions(scriptOptions)
-                    .WithAssemblyName(AssemblyName);
-
-                foreach (var reference in scriptCompilation.DirectiveReferences)
+                var emitResult = _scriptEmitter.Emit<int>(context, AssemblyName);
+                if (emitResult.IsErrored)
                 {
-                    var refInfo = new FileInfo(reference.Display);
-                    File.Copy(refInfo.FullName, $"{tempProjectDirecory}/{refInfo.Name}", true);
+                    throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
                 }
 
                 var assemblyPath = $"{tempProjectDirecory}/{AssemblyName}.dll";
-                var emitResult = scriptCompilation.Emit(assemblyPath);
-                if (!emitResult.Success) throw new Exception("Failed while emitting the generated script assembly");
+                using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
+                using (emitResult.PeStream)
+                {
+                    emitResult.PeStream.WriteTo(peFileStream);
+                }
+
+                using (var pdbFileStream = new FileStream($"{tempProjectDirecory}/{AssemblyName}.pdb", FileMode.Create))
+                using (emitResult.PdbStream)
+                {
+                    emitResult.PdbStream.WriteTo(pdbFileStream);
+                }
+
+                foreach (var reference in emitResult.DirectiveReferences)
+                {
+                    if (reference.Display.EndsWith(".NuGet.dll")) continue;
+                    var refInfo = new FileInfo(reference.Display);
+                    File.Copy(refInfo.FullName, $"{tempProjectDirecory}/{refInfo.Name}", true);
+                }
 
                 return assemblyPath;
             }
             catch (CompilationErrorException ex)
             {
+                _scriptConsole.WritePrettyError(ex.Message);
                 foreach (var diagnostic in ex.Diagnostics)
                 {
                     _scriptConsole.WritePrettyError(diagnostic.ToString());
