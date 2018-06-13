@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel.Context;
@@ -52,7 +53,7 @@ namespace Dotnet.Script.Core
         };
 
         // see: https://github.com/dotnet/roslyn/issues/5501
-        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };        
+        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
         public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
 
@@ -106,7 +107,9 @@ namespace Dotnet.Script.Core
             Logger.Verbose($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");
             RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
-            var scriptOptions = CreateScriptOptions(context, runtimeDependencies.ToList());
+            var encoding = context.Code.Encoding ?? Encoding.UTF8; // encoding is required when emitting debug information
+            var scriptOptions = CreateScriptOptions(context, runtimeDependencies.ToList())
+                .WithFileEncoding(encoding);
 
             var loadedAssembliesMap = CreateLoadedAssembliesMap();
 
@@ -209,7 +212,7 @@ namespace Dotnet.Script.Core
         private string GetScriptCode(ScriptContext context)
         {
             string code;
-            
+
             // when processing raw code, make sure we inject new lines after preprocessor directives
             if (context.FilePath == null)
             {
@@ -259,7 +262,7 @@ namespace Dotnet.Script.Core
             {
                 if (runtimeAssembly.Name.Version > assemblyName.Version)
                 {
-                    loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);                    
+                    loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);
                     if(loadedAssembly != null)
                     {
                         Logger.Log($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
