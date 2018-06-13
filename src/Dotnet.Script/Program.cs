@@ -148,7 +148,7 @@ namespace Dotnet.Script
                         optimizationLevel = OptimizationLevel.Release;
                     }
 
-                    var publishDirectory = publishDirectoryOption.Value() ?? $"{Path.GetDirectoryName(fileNameArgument.Value)}/publish";
+                    var publishDirectory = publishDirectoryOption.Value() ?? Path.Combine(Path.GetDirectoryName(fileNameArgument.Value), "publish");
                     var logFactory = GetLogFactory();
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue());
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);

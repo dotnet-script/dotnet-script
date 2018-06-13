@@ -21,7 +21,7 @@ namespace Dotnet.Script.Core
         public MemoryStream PdbStream { get; }
         public ImmutableArray<Diagnostic> Diagnostics { get; private set; } = ImmutableArray.Create<Diagnostic>();
         public ImmutableArray<MetadataReference> DirectiveReferences { get; } = ImmutableArray.Create<MetadataReference>();
-        public bool IsErrored => Diagnostics.Any();
+        public bool Success => !Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
 
         public static ScriptEmitResult Error(IEnumerable<Diagnostic> diagnostics)
         {

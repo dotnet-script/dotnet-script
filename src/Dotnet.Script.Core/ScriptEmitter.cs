@@ -32,7 +32,6 @@ namespace Dotnet.Script.Core
                         .WithAssemblyName(assemblyName);
                 }
 
-
                 var peStream = new MemoryStream();
                 var pdbStream = new MemoryStream();
                 var result = compilation.Emit(peStream, pdbStream: pdbStream, options: new EmitOptions().

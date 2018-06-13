@@ -65,19 +65,20 @@ namespace Dotnet.Script.Core
             try
             {
                 var emitResult = _scriptEmitter.Emit<int>(context, AssemblyName);
-                if (emitResult.IsErrored)
+                if (!emitResult.Success)
                 {
                     throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
                 }
 
-                var assemblyPath = $"{tempProjectDirecory}/{AssemblyName}.dll";
+                var assemblyPath = Path.Combine(tempProjectDirecory, $"{AssemblyName}.dll");
                 using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
                 using (emitResult.PeStream)
                 {
                     emitResult.PeStream.WriteTo(peFileStream);
                 }
 
-                using (var pdbFileStream = new FileStream($"{tempProjectDirecory}/{AssemblyName}.pdb", FileMode.Create))
+                var pdbPath = Path.Combine(tempProjectDirecory, $"{AssemblyName}.pdb");
+                using (var pdbFileStream = new FileStream(pdbPath, FileMode.Create))
                 using (emitResult.PdbStream)
                 {
                     emitResult.PdbStream.WriteTo(pdbFileStream);
@@ -87,7 +88,8 @@ namespace Dotnet.Script.Core
                 {
                     if (reference.Display.EndsWith(".NuGet.dll")) continue;
                     var refInfo = new FileInfo(reference.Display);
-                    File.Copy(refInfo.FullName, $"{tempProjectDirecory}/{refInfo.Name}", true);
+                    var newAssemblyPath = Path.Combine(tempProjectDirecory, refInfo.Name);
+                    File.Copy(refInfo.FullName, newAssemblyPath, true);
                 }
 
                 return assemblyPath;
@@ -115,7 +117,8 @@ namespace Dotnet.Script.Core
             {
                 program = streamReader.ReadToEnd();
             }
-            File.WriteAllText($"{tempProjectDirecory}/Program.cs", program);
+            var programcsPath = Path.Combine(tempProjectDirecory, "Program.cs");
+            File.WriteAllText(programcsPath, program);
         }
     }
 }
