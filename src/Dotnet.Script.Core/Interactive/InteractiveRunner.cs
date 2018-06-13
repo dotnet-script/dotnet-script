@@ -1,17 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.NuGet;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using System.IO;
 using Microsoft.CodeAnalysis.Text;
-using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using System.Text;
-using System;
-using System.Collections.Immutable;
-using Dotnet.Script.DependencyModel.NuGet;
-using Dotnet.Script.DependencyModel.Context;
 
 namespace Dotnet.Script.Core
 {

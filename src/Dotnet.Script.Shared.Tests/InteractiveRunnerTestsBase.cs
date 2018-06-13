@@ -230,6 +230,26 @@ namespace Dotnet.Script.Shared.Tests
         }
 
         [Fact]
+        public async Task LoadFileWithNuGetReference()
+        {
+            var pathToFixture = Path.Combine("..", "..", "..", "..", "Dotnet.Script.Tests", "TestFixtures", "InlineNugetPackage", "InlineNugetPackage.csx");
+            var commands = new[]
+            {                
+                $@"#load ""{pathToFixture}""",
+                "using AutoMapper;",
+                "typeof(MapperConfiguration)",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop();
+
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("AutoMapper.MapperConfiguration", result);
+        }
+
+
+        [Fact]
         public async Task ResetCommand()
         {
             var commands = new[]
