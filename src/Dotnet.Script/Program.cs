@@ -148,13 +148,15 @@ namespace Dotnet.Script
                         optimizationLevel = OptimizationLevel.Release;
                     }
 
-                    var publishDirectory = publishDirectoryOption.Value() ?? Path.Combine(Path.GetDirectoryName(fileNameArgument.Value), "publish");
+                    var absoluteFilePath = Path.IsPathRooted(fileNameArgument.Value) ? fileNameArgument.Value : Path.Combine(Directory.GetCurrentDirectory(), fileNameArgument.Value);
+                    var publishDirectory = publishDirectoryOption.Value() ?? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish");
+                    var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
                     var logFactory = GetLogFactory();
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue());
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                     var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
-                    var code = SourceText.From(File.ReadAllText(fileNameArgument.Value));
-                    var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), fileNameArgument.Value, optimizationLevel);
+                    var code = SourceText.From(File.ReadAllText(absoluteFilePath));
+                    var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 
                     publisher.CreateExecutable(context, logFactory);
                     return 0;
