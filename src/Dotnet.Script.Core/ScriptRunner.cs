@@ -28,6 +28,7 @@ namespace Dotnet.Script.Core
         {
             var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
+            var assembly = Assembly.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
 
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
@@ -38,7 +39,6 @@ namespace Dotnet.Script.Core
                 return loadedAssembly;
             };
 
-            var assembly = Assembly.LoadFrom(dllPath);
             var type = assembly.GetType("Submission#0");
             var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
 
