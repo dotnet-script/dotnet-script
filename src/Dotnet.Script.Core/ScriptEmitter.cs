@@ -16,20 +16,12 @@ namespace Dotnet.Script.Core
             _scriptCompiler = scriptCompiler;
         }
 
-        public virtual ScriptEmitResult Emit<TReturn>(ScriptContext context, string assemblyName = null)
+        public virtual ScriptEmitResult Emit<TReturn>(ScriptContext context)
         {
             try
             {
                 var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, CommandLineScriptGlobals>(context);
                 var compilation = compilationContext.Script.GetCompilation();
-                if (!string.IsNullOrEmpty(assemblyName))
-                {
-                    var compilationOptions = compilation.Options
-                        .WithScriptClassName(assemblyName);
-                    compilation = compilation
-                        .WithOptions(compilationOptions)
-                        .WithAssemblyName(assemblyName);
-                }
 
                 var peStream = new MemoryStream();
                 EmitOptions emitOptions = null;

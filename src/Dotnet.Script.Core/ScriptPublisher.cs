@@ -67,7 +67,7 @@ namespace Dotnet.Script.Core
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
-            var scriptAssemblyPath = CreateScriptAssembly(context, tempProjectDirecory, true);
+            var scriptAssemblyPath = CreateScriptAssembly(context, tempProjectDirecory);
 
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion, PackageOrigin.ReferenceDirective));
@@ -85,11 +85,11 @@ namespace Dotnet.Script.Core
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
         }
 
-        private string CreateScriptAssembly(ScriptContext context, string outputDirectory, bool useAssemblyName = false)
+        private string CreateScriptAssembly(ScriptContext context, string outputDirectory)
         {
             try
             {
-                var emitResult = _scriptEmitter.Emit<int>(context, useAssemblyName ? AssemblyName : "");
+                var emitResult = _scriptEmitter.Emit<int>(context);
                 if (!emitResult.Success)
                 {
                     throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
