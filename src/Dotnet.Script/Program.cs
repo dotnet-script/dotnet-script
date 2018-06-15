@@ -157,7 +157,7 @@ namespace Dotnet.Script
                     var logFactory = GetLogFactory();
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue());
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
-                    var publisher = new ScriptPublisher(logFactory, scriptEmmiter, compiler.Logger);
+                    var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
                     var code = SourceText.From(File.ReadAllText(absoluteFilePath));
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 

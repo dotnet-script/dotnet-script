@@ -19,25 +19,21 @@ namespace Dotnet.Script.Core
         private readonly ScriptEmitter _scriptEmitter;
         private readonly ScriptConsole _scriptConsole;
         private readonly ScriptEnvironment _scriptEnvironment;
-        private readonly ScriptLogger _logger;
 
-        public ScriptPublisher(ScriptProjectProvider scriptProjectProvider, ScriptEmitter scriptEmitter, ScriptConsole scriptConsole,
-            ScriptLogger scriptLogger)
+        public ScriptPublisher(ScriptProjectProvider scriptProjectProvider, ScriptEmitter scriptEmitter, ScriptConsole scriptConsole)
         {
             _scriptProjectProvider = scriptProjectProvider ?? throw new ArgumentNullException(nameof(scriptProjectProvider));
             _scriptEmitter = scriptEmitter ?? throw new ArgumentNullException(nameof(scriptEmitter));
             _scriptConsole = scriptConsole ?? throw new ArgumentNullException(nameof(scriptConsole));
             _scriptEnvironment = ScriptEnvironment.Default;
-            _logger = scriptLogger;
         }
 
-        public ScriptPublisher(LogFactory logFactory, ScriptEmitter scriptEmitter, ScriptLogger scriptLogger)
+        public ScriptPublisher(LogFactory logFactory, ScriptEmitter scriptEmitter)
             : this
             (
                 new ScriptProjectProvider(logFactory),
                 scriptEmitter,
-                ScriptConsole.Default,
-                scriptLogger
+                ScriptConsole.Default
             )
         {
         }
@@ -47,7 +43,6 @@ namespace Dotnet.Script.Core
             Directory.CreateDirectory(context.WorkingDirectory);
             Directory.CreateDirectory(Path.Combine(context.WorkingDirectory, "obj"));
 
-            _logger.Verbose("Publishing dll");
             CreateScriptAssembly(context, context.WorkingDirectory);
 
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
@@ -80,7 +75,6 @@ namespace Dotnet.Script.Core
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors
-            _logger.Verbose("Publishing exe");
             var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
         }
