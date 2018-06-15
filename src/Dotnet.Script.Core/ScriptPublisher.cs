@@ -45,15 +45,21 @@ namespace Dotnet.Script.Core
         public void CreateAssembly(ScriptContext context, LogFactory logFactory)
         {
             Directory.CreateDirectory(context.WorkingDirectory);
+            Directory.CreateDirectory(Path.Combine(context.WorkingDirectory, "obj"));
 
             _logger.Verbose("Publishing dll");
             CreateScriptAssembly(context, context.WorkingDirectory);
 
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
+
             var sourceProjectAssetsPath = Path.Combine(tempProjectDirecory, "obj", "project.assets.json");
-            var destinationProjectAssetsPath = Path.Combine(context.WorkingDirectory, "project.assets.json");
+            var destinationProjectAssetsPath = Path.Combine(context.WorkingDirectory, "obj", "project.assets.json");
             File.Copy(sourceProjectAssetsPath, destinationProjectAssetsPath, overwrite: true);
+
+            var sourceNugetPropsPath = Path.Combine(tempProjectDirecory, "obj", "script.csproj.nuget.g.props");
+            var destinationNugetPropsPath = Path.Combine(context.WorkingDirectory, "obj", "script.csproj.nuget.g.props");
+            File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
         }
 
         public void CreateExecutable(ScriptContext context, LogFactory logFactory)
@@ -94,16 +100,6 @@ namespace Dotnet.Script.Core
                 using (emitResult.PeStream)
                 {
                     emitResult.PeStream.WriteTo(peFileStream);
-                }
-
-                if (emitResult.PdbStream != null)
-                {
-                    var pdbPath = Path.Combine(outputDirectory, $"{AssemblyName}.pdb");
-                    using (var pdbFileStream = new FileStream(pdbPath, FileMode.Create))
-                    using (emitResult.PdbStream)
-                    {
-                        emitResult.PdbStream.WriteTo(pdbFileStream);
-                    }
                 }
 
                 foreach (var reference in emitResult.DirectiveReferences)

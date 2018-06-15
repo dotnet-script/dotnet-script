@@ -32,20 +32,18 @@ namespace Dotnet.Script.Core
                 }
 
                 var peStream = new MemoryStream();
-                MemoryStream pdbStream = null;
                 EmitOptions emitOptions = null;
                 if (context.OptimizationLevel == Microsoft.CodeAnalysis.OptimizationLevel.Debug)
                 {
                     emitOptions = new EmitOptions()
-                        .WithDebugInformationFormat(DebugInformationFormat.PortablePdb);
-                    pdbStream = new MemoryStream();
+                        .WithDebugInformationFormat(DebugInformationFormat.Embedded);
                 }
 
-                var result = compilation.Emit(peStream, pdbStream: pdbStream, options: emitOptions);
+                var result = compilation.Emit(peStream, options: emitOptions);
 
                 if (result.Success)
                 {
-                    return new ScriptEmitResult(peStream, pdbStream, compilation.DirectiveReferences);
+                    return new ScriptEmitResult(peStream, compilation.DirectiveReferences);
                 }
 
                 return ScriptEmitResult.Error(result.Diagnostics);

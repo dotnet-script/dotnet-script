@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Dotnet.Script.DependencyModel.Logging;
@@ -35,11 +34,11 @@ namespace Dotnet.Script.DependencyModel.Context
             return new ScriptDependencyInfo(context, nugetPackageFolders);
         }
 
-        public ScriptDependencyInfo GetDependencyInfoFromAssetsFile(string directory)
+        public ScriptDependencyInfo GetDependencyInfo(string dllPath)
         {
-            var context = ReadDependencyContextFromAssets(directory);
-            //var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);
-            return new ScriptDependencyInfo(context, new string[0]);
+            var context = ReadDependencyContext(dllPath);
+            var nugetPackageFolders = GetNuGetPackageFolders(dllPath);
+            return new ScriptDependencyInfo(context, nugetPackageFolders);
         }
 
         private void Restore(string pathToProjectFile, string[] packageSources)
@@ -61,20 +60,6 @@ namespace Dotnet.Script.DependencyModel.Context
             var pathToAssetsFiles = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
 
             using (FileStream fs = new FileStream(pathToAssetsFiles, FileMode.Open, FileAccess.Read))
-            {
-                // https://github.com/dotnet/core-setup/blob/master/src/managed/Microsoft.Extensions.DependencyModel/DependencyContextJsonReader.cs
-                using (var contextReader = new DependencyContextJsonReader())
-                {
-                    return contextReader.Read(fs);
-                }
-            }
-        }
-
-        public static DependencyContext ReadDependencyContextFromAssets(string directory)
-        {
-            //_logger.Debug($"Reading dependency context from {pathToAssetsFile}");
-
-            using (FileStream fs = new FileStream(Path.Combine(directory, "project.assets.json"), FileMode.Open, FileAccess.Read))
             {
                 // https://github.com/dotnet/core-setup/blob/master/src/managed/Microsoft.Extensions.DependencyModel/DependencyContextJsonReader.cs
                 using (var contextReader = new DependencyContextJsonReader())
