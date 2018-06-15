@@ -11,7 +11,7 @@ namespace Dotnet.Script.DependencyModel.Context
     /// Represents a class that is capable of providing 
     /// the <see cref="DependencyContext"/> for a given project file (csproj).
     /// </summary>
-    public class ScriptDependencyInfoProvider 
+    public class ScriptDependencyInfoProvider
     {
         private readonly IRestorer[] _restorers;
         private readonly Logger _logger;
@@ -28,11 +28,18 @@ namespace Dotnet.Script.DependencyModel.Context
         /// <param name="pathToProjectFile">The path to the project file.</param>
         /// <returns>The <see cref="DependencyContext"/> for a given project file (csproj).</returns>
         public ScriptDependencyInfo GetDependencyInfo(string pathToProjectFile, string[] packagesSources)
-        {            
+        {
             Restore(pathToProjectFile, packagesSources);
-            var context =  ReadDependencyContext(pathToProjectFile);
+            var context = ReadDependencyContext(pathToProjectFile);
             var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);
             return new ScriptDependencyInfo(context, nugetPackageFolders);
+        }
+
+        public ScriptDependencyInfo GetDependencyInfoFromAssetsFile(string directory)
+        {
+            var context = ReadDependencyContextFromAssets(directory);
+            //var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);
+            return new ScriptDependencyInfo(context, new string[0]);
         }
 
         private void Restore(string pathToProjectFile, string[] packageSources)
@@ -54,6 +61,20 @@ namespace Dotnet.Script.DependencyModel.Context
             var pathToAssetsFiles = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
 
             using (FileStream fs = new FileStream(pathToAssetsFiles, FileMode.Open, FileAccess.Read))
+            {
+                // https://github.com/dotnet/core-setup/blob/master/src/managed/Microsoft.Extensions.DependencyModel/DependencyContextJsonReader.cs
+                using (var contextReader = new DependencyContextJsonReader())
+                {
+                    return contextReader.Read(fs);
+                }
+            }
+        }
+
+        public static DependencyContext ReadDependencyContextFromAssets(string directory)
+        {
+            //_logger.Debug($"Reading dependency context from {pathToAssetsFile}");
+
+            using (FileStream fs = new FileStream(Path.Combine(directory, "project.assets.json"), FileMode.Open, FileAccess.Read))
             {
                 // https://github.com/dotnet/core-setup/blob/master/src/managed/Microsoft.Extensions.DependencyModel/DependencyContextJsonReader.cs
                 using (var contextReader = new DependencyContextJsonReader())

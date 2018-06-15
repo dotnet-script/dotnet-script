@@ -21,21 +21,27 @@ namespace Dotnet.Script.Core
             try
             {
                 var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, CommandLineScriptGlobals>(context);
-
                 var compilation = compilationContext.Script.GetCompilation();
                 if (!string.IsNullOrEmpty(assemblyName))
                 {
-                    var compilationOptions = compilationContext.Script.GetCompilation().Options
+                    var compilationOptions = compilation.Options
                         .WithScriptClassName(assemblyName);
-                    compilation = compilationContext.Script.GetCompilation()
+                    compilation = compilation
                         .WithOptions(compilationOptions)
                         .WithAssemblyName(assemblyName);
                 }
 
                 var peStream = new MemoryStream();
-                var pdbStream = new MemoryStream();
-                var result = compilation.Emit(peStream, pdbStream: pdbStream, options: new EmitOptions().
-                    WithDebugInformationFormat(DebugInformationFormat.PortablePdb));
+                MemoryStream pdbStream = null;
+                EmitOptions emitOptions = null;
+                if (context.OptimizationLevel == Microsoft.CodeAnalysis.OptimizationLevel.Debug)
+                {
+                    emitOptions = new EmitOptions()
+                        .WithDebugInformationFormat(DebugInformationFormat.PortablePdb);
+                    pdbStream = new MemoryStream();
+                }
+
+                var result = compilation.Emit(peStream, pdbStream: pdbStream, options: emitOptions);
 
                 if (result.Success)
                 {

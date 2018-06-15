@@ -1,4 +1,10 @@
+using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
+using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.ProjectSystem;
+using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
@@ -16,6 +22,53 @@ namespace Dotnet.Script.Core
             Logger = logger;
             ScriptCompiler = scriptCompiler;
             ScriptConsole = scriptConsole;
+        }
+
+        public async Task<TReturn> Execute<TReturn>(string dllPath)
+        {
+            var assembly = Assembly.LoadFrom(dllPath);
+            var refs = assembly.GetReferencedAssemblies();
+            //var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(dllPath));
+            //var projectFile = new ProjectFile();
+
+            //foreach (var @ref in refs)
+            //{
+            //    projectFile.AddPackageReference(new PackageReference("AutoMapper", "6.1.0", PackageOrigin.ReferenceDirective));
+            //}
+            //projectFile.Save(tempProjectPath);
+
+            //var deps = ScriptCompiler.RuntimeDependencyResolver.GetDependencies();
+            //var @ref = Assembly.LoadFrom(@"C:\Users\u403598\Desktop\temp\nuget_testing\AutoMapper.dll");
+            //AppDomain.CurrentDomain.Load(@ref.GetName());
+
+            var rootDir = Path.GetDirectoryName(dllPath);
+            var temp = ScriptDependencyInfoProvider.ReadDependencyContextFromAssets(rootDir);
+            var rootNuget = Path.Combine(Environment.GetEnvironmentVariable("userprofile"), ".nuget", "packages");
+            var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesCustom(rootDir, new string[] { rootNuget, @"C:\Program Files\dotnet\sdk\NuGetFallbackFolder" });
+            var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
+
+            AppDomain.CurrentDomain.AssemblyResolve +=
+                (sender, args) =>
+                {
+                    var assemblyName = new AssemblyName(args.Name);
+                    var result = runtimeDepsMap.TryGetValue(assemblyName.Name, out RuntimeAssembly runtimeAssembly);
+                    if (!result) throw new Exception($"Unable to locate assembly '{assemblyName.Name}: {assemblyName.Version}");
+                    var loadedAssembly = Assembly.LoadFrom(runtimeAssembly.Path);
+                    return loadedAssembly;
+                };
+
+            //foreach (var @ref in refs)
+            //{
+            //    AppDomain.CurrentDomain.Load(@ref);
+            //}
+
+            var type = assembly.GetType("Submission#0");
+            var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
+
+            var submissionStates = new object[2];
+            submissionStates[0] = new CommandLineScriptGlobals(ScriptConsole.Out, CSharpObjectFormatter.Instance);
+            var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
+            return await resultTask;
         }
 
         public Task<TReturn> Execute<TReturn>(ScriptContext context)
