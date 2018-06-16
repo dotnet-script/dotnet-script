@@ -43,10 +43,11 @@ namespace Dotnet.Script.Core
             Directory.CreateDirectory(context.WorkingDirectory);
             Directory.CreateDirectory(Path.Combine(context.WorkingDirectory, "obj"));
 
-            CreateScriptAssembly(context, context.WorkingDirectory);
-
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
+            var assemblyFileName = Path.GetFileName(tempProjectDirecory);
+            CreateScriptAssembly(context, context.WorkingDirectory, assemblyFileName);
+
 
             var sourceProjectAssetsPath = Path.Combine(tempProjectDirecory, "obj", "project.assets.json");
             var destinationProjectAssetsPath = Path.Combine(context.WorkingDirectory, "obj", "project.assets.json");
@@ -62,7 +63,7 @@ namespace Dotnet.Script.Core
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
-            var scriptAssemblyPath = CreateScriptAssembly(context, tempProjectDirecory);
+            var scriptAssemblyPath = CreateScriptAssembly(context, tempProjectDirecory, AssemblyName);
 
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion, PackageOrigin.ReferenceDirective));
@@ -79,7 +80,7 @@ namespace Dotnet.Script.Core
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
         }
 
-        private string CreateScriptAssembly(ScriptContext context, string outputDirectory)
+        private string CreateScriptAssembly(ScriptContext context, string outputDirectory, string assemblyFileName)
         {
             try
             {
@@ -89,7 +90,7 @@ namespace Dotnet.Script.Core
                     throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
                 }
 
-                var assemblyPath = Path.Combine(outputDirectory, $"{AssemblyName}.dll");
+                var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
                 using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
                 using (emitResult.PeStream)
                 {
