@@ -16,11 +16,11 @@ namespace Dotnet.Script.Core
             _scriptCompiler = scriptCompiler;
         }
 
-        public virtual ScriptEmitResult Emit<TReturn>(ScriptContext context)
+        public virtual ScriptEmitResult Emit<TReturn, THost>(ScriptContext context)
         {
             try
             {
-                var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, CommandLineScriptGlobals>(context);
+                var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
                 var compilation = compilationContext.Script.GetCompilation();
 
                 var peStream = new MemoryStream();
