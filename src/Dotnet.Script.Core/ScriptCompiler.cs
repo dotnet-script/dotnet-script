@@ -260,7 +260,7 @@ namespace Dotnet.Script.Core
             var assemblyName = new AssemblyName(args.Name);
             if (dependencyMap.TryGetValue(assemblyName.Name, out var runtimeAssembly))
             {
-                if (runtimeAssembly.Name.Version > assemblyName.Version)
+                if (assemblyName.Version == null || runtimeAssembly.Name.Version > assemblyName.Version)
                 {
                     loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);
                     if(loadedAssembly != null)
