@@ -155,6 +155,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleIssue318()
+        {
+            var result = Execute(Path.Combine("Issue318", "Issue318.csx"));
+            Assert.Contains("Hello World!", result.output);
+        }
+
+        [Fact]
         public void ShouldCompileScriptWithReleaseConfiguration()
         {
             var result = Execute(Path.Combine("Configuration", "Configuration.csx"),"-c", "release");
