@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Dotnet.Script.DependencyModel.Logging;
@@ -11,7 +10,7 @@ namespace Dotnet.Script.DependencyModel.Context
     /// Represents a class that is capable of providing 
     /// the <see cref="DependencyContext"/> for a given project file (csproj).
     /// </summary>
-    public class ScriptDependencyInfoProvider 
+    public class ScriptDependencyInfoProvider
     {
         private readonly IRestorer[] _restorers;
         private readonly Logger _logger;
@@ -28,10 +27,17 @@ namespace Dotnet.Script.DependencyModel.Context
         /// <param name="pathToProjectFile">The path to the project file.</param>
         /// <returns>The <see cref="DependencyContext"/> for a given project file (csproj).</returns>
         public ScriptDependencyInfo GetDependencyInfo(string pathToProjectFile, string[] packagesSources)
-        {            
+        {
             Restore(pathToProjectFile, packagesSources);
-            var context =  ReadDependencyContext(pathToProjectFile);
+            var context = ReadDependencyContext(pathToProjectFile);
             var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);
+            return new ScriptDependencyInfo(context, nugetPackageFolders);
+        }
+
+        public ScriptDependencyInfo GetDependencyInfo(string dllPath)
+        {
+            var context = ReadDependencyContext(dllPath);
+            var nugetPackageFolders = GetNuGetPackageFolders(dllPath);
             return new ScriptDependencyInfo(context, nugetPackageFolders);
         }
 

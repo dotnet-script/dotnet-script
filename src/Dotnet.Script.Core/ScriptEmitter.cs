@@ -16,30 +16,26 @@ namespace Dotnet.Script.Core
             _scriptCompiler = scriptCompiler;
         }
 
-        public virtual ScriptEmitResult Emit<TReturn>(ScriptContext context, string assemblyName = null)
+        public virtual ScriptEmitResult Emit<TReturn, THost>(ScriptContext context)
         {
             try
             {
-                var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, CommandLineScriptGlobals>(context);
-
+                var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
                 var compilation = compilationContext.Script.GetCompilation();
-                if (!string.IsNullOrEmpty(assemblyName))
-                {
-                    var compilationOptions = compilationContext.Script.GetCompilation().Options
-                        .WithScriptClassName(assemblyName);
-                    compilation = compilationContext.Script.GetCompilation()
-                        .WithOptions(compilationOptions)
-                        .WithAssemblyName(assemblyName);
-                }
 
                 var peStream = new MemoryStream();
-                var pdbStream = new MemoryStream();
-                var result = compilation.Emit(peStream, pdbStream: pdbStream, options: new EmitOptions().
-                    WithDebugInformationFormat(DebugInformationFormat.PortablePdb));
+                EmitOptions emitOptions = null;
+                if (context.OptimizationLevel == Microsoft.CodeAnalysis.OptimizationLevel.Debug)
+                {
+                    emitOptions = new EmitOptions()
+                        .WithDebugInformationFormat(DebugInformationFormat.Embedded);
+                }
+
+                var result = compilation.Emit(peStream, options: emitOptions);
 
                 if (result.Success)
                 {
-                    return new ScriptEmitResult(peStream, pdbStream, compilation.DirectiveReferences);
+                    return new ScriptEmitResult(peStream, compilation.DirectiveReferences);
                 }
 
                 return ScriptEmitResult.Error(result.Diagnostics);

@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyModel;
 namespace Dotnet.Script.DependencyModel.Runtime
 {
     public class RuntimeDependencyResolver
-    {        
+    {
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
         private readonly ScriptFilesDependencyResolver _scriptFilesDependencyResolver;
@@ -24,7 +24,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
         private readonly Regex _runtimeMatcher;
 
         private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
-        {            
+        {
             _scriptProjectProvider = scriptProjectProvider;
             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
             _scriptFilesDependencyResolver = scriptFilesDependencyResolver;
@@ -48,12 +48,12 @@ namespace Dotnet.Script.DependencyModel.Runtime
         private static IRestorer[] CreateRestorers(LogFactory logFactory)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory)};
+            return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory) };
         }
 
-        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string[] packagesSources , string code = null)
+        public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string[] packagesSources, string code = null)
         {
-            var pathToProjectFile = scriptMode == ScriptMode.Script 
+            var pathToProjectFile = scriptMode == ScriptMode.Script
                 ? _scriptProjectProvider.CreateProject(targetDirectory, _scriptEnvironment.TargetFramework, true)
                 : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), ScriptEnvironment.Default.TargetFramework);
 
@@ -66,9 +66,19 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return GetDependenciesInternal(pathToProjectFile, packagesSources);
         }
 
-        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile, string[] packageSources)
+        public IEnumerable<RuntimeDependency> GetDependencies(string dllPath)
         {
-            var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile, packageSources);
+            return GetDependenciesInternal(dllPath, restorePackages: false);
+        }
+
+        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectOrDll, string[] packageSources = null, bool restorePackages = true)
+        {
+            packageSources = packageSources ?? new string[0];
+            ScriptDependencyInfo dependencyInfo;
+            if (restorePackages)
+                dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll, packageSources);
+            else
+                dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll);
 
             var dependencyContext = dependencyInfo.DependencyContext;
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
@@ -78,7 +88,6 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
             var runtimeLibraries = dependencyContext.RuntimeLibraries;
 
-            
             foreach (var runtimeLibrary in runtimeLibraries)
             {
                 var runtimeDependency = new RuntimeDependency(runtimeLibrary.Name, runtimeLibrary.Version,
@@ -94,9 +103,9 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
         private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
-            return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);           
+            return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);
         }
-       
+
         private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
         {
             List<string> result = new List<string>();
@@ -129,16 +138,16 @@ namespace Dotnet.Script.DependencyModel.Runtime
             if (runtimeAssemblyGroup == null)
             {
                 return Array.Empty<RuntimeAssembly>();
-            }            
+            }
             foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
             {
                 var path = Path.Combine(runtimeLibrary.Path, assetPath);
                 if (!path.EndsWith("_._"))
                 {
                     var fullPath = GetFullPath(path, nugetPackageFolders);
-                        
+
                     _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
-                    result.Add(new RuntimeAssembly(AssemblyName.GetAssemblyName(fullPath),fullPath));                    
+                    result.Add(new RuntimeAssembly(AssemblyName.GetAssemblyName(fullPath), fullPath));
                 }
             }
             return result.ToArray();

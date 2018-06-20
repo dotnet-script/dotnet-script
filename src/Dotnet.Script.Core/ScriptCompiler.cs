@@ -71,7 +71,7 @@ namespace Dotnet.Script.Core
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
         {
             var scriptMap = runtimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
-            var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)                
+            var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
                 .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
@@ -229,7 +229,7 @@ namespace Dotnet.Script.Core
             return code;
         }
 
-        private static Dictionary<string, RuntimeAssembly> CreateScriptDependenciesMap(RuntimeDependency[] runtimeDependencies)
+        public static Dictionary<string, RuntimeAssembly> CreateScriptDependenciesMap(IEnumerable<RuntimeDependency> runtimeDependencies)
         {
             // Build up a dependency map that picks runtime assembly with the highest version.
             // This aligns with the CoreCLR that uses the highest version strategy.

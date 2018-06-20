@@ -12,8 +12,7 @@ namespace Dotnet.Script.Core
 {
     public class ScriptPublisher
     {
-        const string AssemblyName = "scriptAssembly";
-        const string ScriptingVersion = "2.8.2";
+        private const string ScriptingVersion = "2.8.2";
 
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptEmitter _scriptEmitter;
@@ -38,12 +37,34 @@ namespace Dotnet.Script.Core
         {
         }
 
-        public void CreateExecutable(ScriptContext context, LogFactory logFactory)
+        public void CreateAssembly<TReturn, THost>(ScriptContext context, LogFactory logFactory, string assemblyFileName = null)
         {
-            var tempProjectPath = _scriptProjectProvider.CreateProjectForScriptFile(context.FilePath);
+            Directory.CreateDirectory(context.WorkingDirectory);
+            Directory.CreateDirectory(Path.Combine(context.WorkingDirectory, "obj"));
+
+            assemblyFileName = assemblyFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
+            CreateScriptAssembly<TReturn, THost>(context, context.WorkingDirectory, assemblyFileName);
+
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
-            var scriptAssemblyPath = CreateScriptAssembly(context, tempProjectDirecory);
+            var sourceProjectAssetsPath = Path.Combine(tempProjectDirecory, "obj", "project.assets.json");
+            var destinationProjectAssetsPath = Path.Combine(context.WorkingDirectory, "obj", "project.assets.json");
+            File.Copy(sourceProjectAssetsPath, destinationProjectAssetsPath, overwrite: true);
+
+            var sourceNugetPropsPath = Path.Combine(tempProjectDirecory, "obj", "script.csproj.nuget.g.props");
+            var destinationNugetPropsPath = Path.Combine(context.WorkingDirectory, "obj", "script.csproj.nuget.g.props");
+            File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
+        }
+
+        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory)
+        {
+            const string AssemblyName = "scriptAssembly";
+
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
+            var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
+
+            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);
 
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion, PackageOrigin.ReferenceDirective));
@@ -60,35 +81,28 @@ namespace Dotnet.Script.Core
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
         }
 
-        private string CreateScriptAssembly(ScriptContext context, string tempProjectDirecory)
+        private string CreateScriptAssembly<TReturn, THost>(ScriptContext context, string outputDirectory, string assemblyFileName)
         {
             try
             {
-                var emitResult = _scriptEmitter.Emit<int>(context, AssemblyName);
+                var emitResult = _scriptEmitter.Emit<TReturn, THost>(context);
                 if (!emitResult.Success)
                 {
                     throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
                 }
 
-                var assemblyPath = Path.Combine(tempProjectDirecory, $"{AssemblyName}.dll");
+                var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
                 using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
                 using (emitResult.PeStream)
                 {
                     emitResult.PeStream.WriteTo(peFileStream);
                 }
 
-                var pdbPath = Path.Combine(tempProjectDirecory, $"{AssemblyName}.pdb");
-                using (var pdbFileStream = new FileStream(pdbPath, FileMode.Create))
-                using (emitResult.PdbStream)
-                {
-                    emitResult.PdbStream.WriteTo(pdbFileStream);
-                }
-
                 foreach (var reference in emitResult.DirectiveReferences)
                 {
                     if (reference.Display.EndsWith(".NuGet.dll")) continue;
                     var refInfo = new FileInfo(reference.Display);
-                    var newAssemblyPath = Path.Combine(tempProjectDirecory, refInfo.Name);
+                    var newAssemblyPath = Path.Combine(outputDirectory, refInfo.Name);
                     File.Copy(refInfo.FullName, newAssemblyPath, true);
                 }
 

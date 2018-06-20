@@ -21,16 +21,16 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void SimplePublishTest()
         {
-            using (var scriptFolder = new DisposableFolder())
+            using (var workspaceFolder = new DisposableFolder())
             {
                 var code = @"WriteLine(""hello world"");";
-                var mainPath = Path.Combine(scriptFolder.Path, "main.csx");
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
                 File.WriteAllText(mainPath, code);
                 var args = new string[] { "publish", mainPath };
-                var publishResult = Execute(string.Join(" ", args), scriptFolder.Path);
+                var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(scriptFolder.Path, "publish", "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", "script");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
@@ -92,6 +92,89 @@ namespace Dotnet.Script.Tests
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
+            }
+        }
+
+        [Fact]
+        public void SimplePublishDllTest()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var publishArgs = new string[] { "publish", mainPath, "--dll" };
+                var publishResult = Execute(string.Join(" ", publishArgs), workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var dllPath = Path.Combine("publish", "main.dll");
+                var executeArgs = new string[] { "exec", dllPath };
+                var dllRunResult = Execute(string.Join(" ", executeArgs), workspaceFolder.Path);
+
+                Assert.Equal(0, dllRunResult.exitCode);
+            }
+        }
+
+        [Fact]
+        public void SimplePublishDllFromCurrentDirectoryTest()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var publishArgs = new string[] { "publish", "main.csx", "--dll" };
+                var publishResult = Execute(string.Join(" ", publishArgs), workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var dllPath = Path.Combine(workspaceFolder.Path, "publish", "main.dll");
+                var executeArgs = new string[] { "exec", dllPath };
+                var dllRunResult = Execute(string.Join(" ", executeArgs), workspaceFolder.Path);
+
+                Assert.Equal(0, dllRunResult.exitCode);
+            }
+        }
+
+        [Fact]
+        public void SimplePublishDllToOtherFolderTest()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            using (var publishFolder = new DisposableFolder())
+            {
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var publishArgs = new string[] { "publish", mainPath, "--dll", "-o", publishFolder.Path };
+                var publishResult = Execute(string.Join(" ", publishArgs), workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var dllPath = Path.Combine(publishFolder.Path, "main.dll");
+                var executeArgs = new string[] { "exec", dllPath };
+                var dllRunResult = Execute(string.Join(" ", executeArgs), publishFolder.Path);
+
+                Assert.Equal(0, dllRunResult.exitCode);
+            }
+        }
+
+        [Fact]
+        public void CustomDllNameTest()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var outputName = "testName";
+                var assemblyName = $"{outputName}.dll";
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var publishArgs = new string[] { "publish", "main.csx", "--dll", "-n", outputName };
+                var publishResult = Execute(string.Join(" ", publishArgs), workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var dllPath = Path.Combine(workspaceFolder.Path, "publish", assemblyName);
+                var executeArgs = new string[] { "exec", dllPath };
+                var dllRunResult = Execute(string.Join(" ", executeArgs), workspaceFolder.Path);
+
+                Assert.Equal(0, dllRunResult.exitCode);
             }
         }
 

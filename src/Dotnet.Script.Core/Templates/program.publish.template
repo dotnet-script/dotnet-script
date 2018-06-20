@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using System.Threading.Tasks;
 using static System.Console;
+using System.Reflection;
 
 namespace dotnetPublishCode
 {
@@ -16,7 +17,9 @@ namespace dotnetPublishCode
                 foreach (var arg in args)
                     globals.Args.Add(arg);
 
-                var factoryMethod = typeof(scriptAssembly).GetMethod("<Factory>");
+                var assembly = Assembly.LoadFrom("scriptAssembly.dll");
+                var type = assembly.GetType("Submission#0");
+                var factoryMethod = type.GetMethod("<Factory>");
                 if (factoryMethod == null) throw new Exception("couldn't find factory method to initiate script");
 
                 var invokeTask = factoryMethod.Invoke(null, new object[] { new object[] { globals, null } }) as Task<int>;

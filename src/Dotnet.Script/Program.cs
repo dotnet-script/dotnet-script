@@ -15,6 +15,7 @@ using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using McMaster.Extensions.CommandLineUtils;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
 
 namespace Dotnet.Script
 {
@@ -130,9 +131,12 @@ namespace Dotnet.Script
 
             app.Command("publish", c =>
             {
-                c.Description = "Creates an executable from a script";
+                c.Description = "Creates an executable or DLL from a script";
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 var publishDirectoryOption = c.Option("-o |--output", "Directory where the published executable should be placed.  Defaults to a 'publish' folder in the current directory.", CommandOptionType.SingleValue);
+                var dllName = c.Option("-n |--name", "The name for the generated DLL (EXE not supported at this time).  Defaults to the name of the script.", CommandOptionType.SingleValue);
+                var dllOption = c.Option("--dll", "Publish to a .dll instead of a .exe", CommandOptionType.NoValue);
+                var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
                 var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
                 c.OnExecute(() =>
                 {
@@ -143,7 +147,7 @@ namespace Dotnet.Script
                     }
 
                     var optimizationLevel = OptimizationLevel.Debug;
-                    if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                    if (commandConfig.HasValue() && commandConfig.Value().ToLower() == "release")
                     {
                         optimizationLevel = OptimizationLevel.Release;
                     }
@@ -158,7 +162,11 @@ namespace Dotnet.Script
                     var code = SourceText.From(File.ReadAllText(absoluteFilePath));
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 
-                    publisher.CreateExecutable(context, logFactory);
+                    if (dllOption.HasValue())
+                        publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, dllName.Value());
+                    else
+                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory);
+
                     return 0;
 
                     LogFactory GetLogFactory()
@@ -176,6 +184,32 @@ namespace Dotnet.Script
                             }
                         });
                     }
+                });
+            });
+
+            app.Command("exec", c =>
+            {
+                c.Description = "Run a script from a DLL.";
+                var dllPath = c.Argument("dll", "Path to DLL based script");
+                var commandDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
+                c.OnExecute(async () =>
+                {
+                    int exitCode = 0;
+                    if (!string.IsNullOrWhiteSpace(dllPath.Value))
+                    {
+                        if (!File.Exists(dllPath.Value))
+                        {
+                            throw new Exception($"Couldn't find file '{dllPath.Value}'");
+                        }
+
+                        var absoluteFilePath = Path.IsPathRooted(dllPath.Value) ? dllPath.Value : Path.Combine(Directory.GetCurrentDirectory(), dllPath.Value);
+
+                        var compiler = GetScriptCompiler(commandDebugMode.HasValue());
+                        var runner = new ScriptRunner(compiler, compiler.Logger, ScriptConsole.Default);
+                        var result = await runner.Execute<int>(absoluteFilePath);
+                        return result;
+                    }
+                    return exitCode;
                 });
             });
 
