@@ -57,7 +57,7 @@ namespace Dotnet.Script.Core
             File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
         }
 
-        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory)
+        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier = null)
         {
             const string AssemblyName = "scriptAssembly";
 
@@ -73,11 +73,11 @@ namespace Dotnet.Script.Core
 
             CopyProgramTemplate(tempProjectDirecory);
 
-            var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
+            runtimeIdentifier = runtimeIdentifier ?? _scriptEnvironment.RuntimeIdentifier;
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors
-            var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
+            var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {Path.Combine(context.WorkingDirectory, runtimeIdentifier)}");
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
         }
 

@@ -138,6 +138,8 @@ namespace Dotnet.Script
                 var dllOption = c.Option("--dll", "Publish to a .dll instead of a .exe", CommandOptionType.NoValue);
                 var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
                 var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
+                var runtime = c.Option("-r |--runtime", "The runtime to publish the self contained EXE to. Defaults to the your current platform.", CommandOptionType.SingleValue);
+
                 c.OnExecute(() =>
                 {
                     if (fileNameArgument.Value == null)
@@ -163,9 +165,13 @@ namespace Dotnet.Script
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 
                     if (dllOption.HasValue())
+                    {
                         publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, dllName.Value());
+                    }
                     else
-                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory);
+                    {
+                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtime.Value());
+                    }
 
                     return 0;
 
