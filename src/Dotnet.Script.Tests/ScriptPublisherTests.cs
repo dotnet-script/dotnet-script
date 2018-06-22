@@ -42,7 +42,7 @@ namespace Dotnet.Script.Tests
         {
             using (var workspaceFolder = new DisposableFolder())
             {
-                var runtimeId = _scriptEnvironment.RuntimeIdentifier == "win10-x64" ? "osx -x64" : "win10-x64";
+                var runtimeId = _scriptEnvironment.RuntimeIdentifier == "win10-x64" ? "osx-x64" : "win10-x64";
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
                 File.WriteAllText(mainPath, code);
@@ -52,7 +52,11 @@ namespace Dotnet.Script.Tests
 
                 var publishPath = Path.Combine(workspaceFolder.Path, "publish", runtimeId);
                 Assert.True(Directory.Exists(publishPath), $"Publish directory {publishPath} was not found.");
-                Assert.True(Directory.EnumerateFiles(publishPath).GetEnumerator().MoveNext(), $"Publish directory {publishPath} was empty.");
+
+                using (var enumerator = Directory.EnumerateFiles(publishPath).GetEnumerator())
+                {
+                    Assert.True(enumerator.MoveNext(), $"Publish directory {publishPath} was empty.");
+                }
             }
         }
 
@@ -69,7 +73,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(publishRootFolder.Path, _scriptEnvironment.RuntimeIdentifier, "script");
+                var exePath = Path.Combine(publishRootFolder.Path, "script");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
