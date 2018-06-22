@@ -154,8 +154,15 @@ namespace Dotnet.Script
                         optimizationLevel = OptimizationLevel.Release;
                     }
 
+                    var runtimeIdentifier = runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier;
                     var absoluteFilePath = Path.IsPathRooted(fileNameArgument.Value) ? fileNameArgument.Value : Path.Combine(Directory.GetCurrentDirectory(), fileNameArgument.Value);
-                    var publishDirectory = publishDirectoryOption.Value() ?? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish");
+
+                    // if a publish directory has been specified, then it is used directly, otherwise:
+                    // -- for EXE {current dir}/publish/{runtime ID}
+                    // -- for DLL {current dir}/publish
+                    var publishDirectory = publishDirectoryOption.Value() ?? 
+                        (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
+
                     var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
                     var logFactory = GetLogFactory();
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue());
@@ -170,7 +177,7 @@ namespace Dotnet.Script
                     }
                     else
                     {
-                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtime.Value());
+                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtimeIdentifier);
                     }
 
                     return 0;

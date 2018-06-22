@@ -30,7 +30,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish", "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "script");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
@@ -50,7 +50,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(publishRootFolder.Path, "script");
+                var exePath = Path.Combine(publishRootFolder.Path, _scriptEnvironment.RuntimeIdentifier, "script");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
@@ -69,7 +69,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish", "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "script");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
