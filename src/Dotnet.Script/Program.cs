@@ -131,14 +131,14 @@ namespace Dotnet.Script
 
             app.Command("publish", c =>
             {
-                c.Description = "Creates an executable or DLL from a script";
+                c.Description = "Creates a self contained executable or DLL from a script";
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 var publishDirectoryOption = c.Option("-o |--output", "Directory where the published executable should be placed.  Defaults to a 'publish' folder in the current directory.", CommandOptionType.SingleValue);
-                var dllName = c.Option("-n |--name", "The name for the generated DLL (EXE not supported at this time).  Defaults to the name of the script.", CommandOptionType.SingleValue);
-                var dllOption = c.Option("--dll", "Publish to a .dll instead of a .exe", CommandOptionType.NoValue);
-                var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
+                var dllName = c.Option("-n |--name", "The name for the generated DLL (executable not supported at this time).  Defaults to the name of the script.", CommandOptionType.SingleValue);
+                var dllOption = c.Option("--dll", "Publish to a .dll instead of an executable.", CommandOptionType.NoValue);
+                var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for publishing the script [Release/Debug]. Default is \"Debug\"", CommandOptionType.SingleValue);
                 var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
-                var runtime = c.Option("-r |--runtime", "The runtime to publish the self contained EXE to. Defaults to the your current platform.", CommandOptionType.SingleValue);
+                var runtime = c.Option("-r |--runtime", "The runtime used when publishing the self contained executable. Defaults to the your current runtime.", CommandOptionType.SingleValue);
 
                 c.OnExecute(() =>
                 {
