@@ -131,13 +131,15 @@ namespace Dotnet.Script
 
             app.Command("publish", c =>
             {
-                c.Description = "Creates an executable or DLL from a script";
+                c.Description = "Creates a self contained executable or DLL from a script";
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 var publishDirectoryOption = c.Option("-o |--output", "Directory where the published executable should be placed.  Defaults to a 'publish' folder in the current directory.", CommandOptionType.SingleValue);
-                var dllName = c.Option("-n |--name", "The name for the generated DLL (EXE not supported at this time).  Defaults to the name of the script.", CommandOptionType.SingleValue);
-                var dllOption = c.Option("--dll", "Publish to a .dll instead of a .exe", CommandOptionType.NoValue);
-                var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
+                var dllName = c.Option("-n |--name", "The name for the generated DLL (executable not supported at this time).  Defaults to the name of the script.", CommandOptionType.SingleValue);
+                var dllOption = c.Option("--dll", "Publish to a .dll instead of an executable.", CommandOptionType.NoValue);
+                var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for publishing the script [Release/Debug]. Default is \"Debug\"", CommandOptionType.SingleValue);
                 var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
+                var runtime = c.Option("-r |--runtime", "The runtime used when publishing the self contained executable. Defaults to your current runtime.", CommandOptionType.SingleValue);
+
                 c.OnExecute(() =>
                 {
                     if (fileNameArgument.Value == null)
@@ -152,8 +154,15 @@ namespace Dotnet.Script
                         optimizationLevel = OptimizationLevel.Release;
                     }
 
+                    var runtimeIdentifier = runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier;
                     var absoluteFilePath = Path.IsPathRooted(fileNameArgument.Value) ? fileNameArgument.Value : Path.Combine(Directory.GetCurrentDirectory(), fileNameArgument.Value);
-                    var publishDirectory = publishDirectoryOption.Value() ?? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish");
+
+                    // if a publish directory has been specified, then it is used directly, otherwise:
+                    // -- for EXE {current dir}/publish/{runtime ID}
+                    // -- for DLL {current dir}/publish
+                    var publishDirectory = publishDirectoryOption.Value() ?? 
+                        (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
+
                     var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
                     var logFactory = GetLogFactory();
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue());
@@ -163,9 +172,13 @@ namespace Dotnet.Script
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 
                     if (dllOption.HasValue())
+                    {
                         publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, dllName.Value());
+                    }
                     else
-                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory);
+                    {
+                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtimeIdentifier);
+                    }
 
                     return 0;
 

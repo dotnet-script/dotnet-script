@@ -57,8 +57,13 @@ namespace Dotnet.Script.Core
             File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
         }
 
-        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory)
+        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier)
         {
+            if (runtimeIdentifier == null)
+            {
+                throw new ArgumentNullException(nameof(runtimeIdentifier));
+            }
+
             const string AssemblyName = "scriptAssembly";
 
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
@@ -72,8 +77,6 @@ namespace Dotnet.Script.Core
             projectFile.Save(tempProjectPath);
 
             CopyProgramTemplate(tempProjectDirecory);
-
-            var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors

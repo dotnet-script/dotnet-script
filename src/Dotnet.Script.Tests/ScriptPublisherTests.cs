@@ -30,10 +30,33 @@ namespace Dotnet.Script.Tests
                 var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish", "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "script");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
+            }
+        }
+
+        [Fact]
+        public void SimplePublishTestToDifferentRuntimeId()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var runtimeId = _scriptEnvironment.RuntimeIdentifier == "win10-x64" ? "osx-x64" : "win10-x64";
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var args = new string[] { "publish", mainPath, "--runtime", runtimeId };
+                var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var publishPath = Path.Combine(workspaceFolder.Path, "publish", runtimeId);
+                Assert.True(Directory.Exists(publishPath), $"Publish directory {publishPath} was not found.");
+
+                using (var enumerator = Directory.EnumerateFiles(publishPath).GetEnumerator())
+                {
+                    Assert.True(enumerator.MoveNext(), $"Publish directory {publishPath} was empty.");
+                }
             }
         }
 
@@ -69,7 +92,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish", "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "script");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
