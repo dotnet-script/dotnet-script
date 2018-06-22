@@ -38,6 +38,25 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void SimplePublishTestToDifferentRuntimeId()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var runtimeId = _scriptEnvironment.RuntimeIdentifier == "win10-x64" ? "osx -x64" : "win10-x64";
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var args = new string[] { "publish", mainPath, "--runtime", runtimeId };
+                var publishResult = Execute(string.Join(" ", args), workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var publishPath = Path.Combine(workspaceFolder.Path, "publish", runtimeId);
+                Assert.True(Directory.Exists(publishPath), $"Publish directory {publishPath} was not found.");
+                Assert.True(Directory.EnumerateFiles(publishPath).GetEnumerator().MoveNext(), $"Publish directory {publishPath} was empty.");
+            }
+        }
+
+        [Fact]
         public void SimplePublishToOtherFolderTest()
         {
             using (var workspaceFolder = new DisposableFolder())
