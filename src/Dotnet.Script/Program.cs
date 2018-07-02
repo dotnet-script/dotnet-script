@@ -16,6 +16,7 @@ using Dotnet.Script.DependencyModel.Environment;
 using McMaster.Extensions.CommandLineUtils;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Dotnet.Script
 {
@@ -23,6 +24,7 @@ namespace Dotnet.Script
     {
         const string DebugFlagShort = "-d";
         const string DebugFlagLong = "--debug";
+        static LogFactory logFactory;
 
         public static int Main(string[] args)
         {
@@ -55,6 +57,17 @@ namespace Dotnet.Script
 
         private static int Wain(string[] args)
         {
+            var loggerFactory = new LoggerFactory();
+            loggerFactory.AddConsole(Microsoft.Extensions.Logging.LogLevel.Information);
+            logFactory = type =>
+            {
+                var logger = loggerFactory.CreateLogger(type);
+                return (level, message) =>
+                {
+                    logger.LogInformation(message);
+                };
+            };
+
             var app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
@@ -105,7 +118,7 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var scaffolder = new Scaffolder(new ScriptLogger(ScriptConsole.Default.Error, debugMode.HasValue()));
+                    var scaffolder = new Scaffolder(logFactory);
                     scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
                 });
@@ -118,7 +131,7 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var scaffolder = new Scaffolder(new ScriptLogger(ScriptConsole.Default.Error, debugMode.HasValue()));
+                    var scaffolder = new Scaffolder(logFactory);
                     if (fileNameArgument.Value == null)
                     {
                         c.ShowHelp();
@@ -164,7 +177,7 @@ namespace Dotnet.Script
                         (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
 
                     var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
-                    var logFactory = GetLogFactory();
+                    ;
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue());
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                     var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
@@ -180,23 +193,7 @@ namespace Dotnet.Script
                         publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtimeIdentifier);
                     }
 
-                    return 0;
-
-                    LogFactory GetLogFactory()
-                    {
-                        var logger = new ScriptLogger(ScriptConsole.Default.Error, publishDebugMode.HasValue());
-                        return type => ((level, message) =>
-                        {
-                            if (level == LogLevel.Debug)
-                            {
-                                logger.Verbose(message);
-                            }
-                            if (level == LogLevel.Info)
-                            {
-                                logger.Log(message);
-                            }
-                        });
-                    }
+                    return 0;                  
                 });
             });
 
@@ -218,7 +215,7 @@ namespace Dotnet.Script
                         var absoluteFilePath = Path.IsPathRooted(dllPath.Value) ? dllPath.Value : Path.Combine(Directory.GetCurrentDirectory(), dllPath.Value);
 
                         var compiler = GetScriptCompiler(commandDebugMode.HasValue());
-                        var runner = new ScriptRunner(compiler, compiler.Logger, ScriptConsole.Default);
+                        var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                         var result = await runner.Execute<int>(absoluteFilePath);
                         return result;
                     }
@@ -280,7 +277,7 @@ namespace Dotnet.Script
                 if (interactive)
                 {
                     var compiler = GetScriptCompiler(debugMode);
-                    var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default, packageSources);
+                    var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
                     await runner.RunLoopWithSeed(context);
                     return 0;
                 }
@@ -298,7 +295,7 @@ namespace Dotnet.Script
         private static async Task RunInteractive(bool debugMode, string[] packageSources)
         {
             var compiler = GetScriptCompiler(debugMode);
-            var runner = new InteractiveRunner(compiler, compiler.Logger, ScriptConsole.Default, packageSources);
+            var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
             await runner.RunLoop();
         }
 
@@ -312,7 +309,7 @@ namespace Dotnet.Script
         private static Task<int> Run(bool debugMode, ScriptContext context)
         {
             var compiler = GetScriptCompiler(debugMode);
-            var runner = new ScriptRunner(compiler, compiler.Logger, ScriptConsole.Default);
+            var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
             return runner.Execute<int>(context);
         }
 
@@ -336,21 +333,9 @@ namespace Dotnet.Script
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode)
-        {
-            var logger = new ScriptLogger(ScriptConsole.Default.Error, debugMode);
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
-            {
-                if (level == LogLevel.Debug)
-                {
-                    logger.Verbose(message);
-                }
-                if (level == LogLevel.Info)
-                {
-                    logger.Log(message);
-                }
-            }));
-
-            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
+        {            
+            var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory);
+            var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
             return compiler;
         }
     }

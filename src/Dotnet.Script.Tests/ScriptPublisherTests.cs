@@ -2,8 +2,10 @@
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
+using Dotnet.Script.Shared.Tests;
 using System.IO;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
@@ -12,8 +14,9 @@ namespace Dotnet.Script.Tests
         private readonly ScriptEnvironment _scriptEnvironment;
         private readonly CommandRunner _commandRunner;
 
-        public ScriptPublisherTests()
+        public ScriptPublisherTests(ITestOutputHelper testOutputHelper)
         {
+            testOutputHelper.Capture();
             _scriptEnvironment = ScriptEnvironment.Default;
             _commandRunner = new CommandRunner(GetLogFactory());
         }
@@ -228,18 +231,7 @@ namespace Dotnet.Script.Tests
 
         private LogFactory GetLogFactory()
         {
-            var logger = new ScriptLogger(ScriptConsole.Default.Error, true);
-            return type => ((level, message) =>
-            {
-                if (level == LogLevel.Debug)
-                {
-                    logger.Verbose(message);
-                }
-                if (level == LogLevel.Info)
-                {
-                    logger.Log(message);
-                }
-            });
+            return TestOutputHelper.TestLogFactory;   
         }
     }
 }

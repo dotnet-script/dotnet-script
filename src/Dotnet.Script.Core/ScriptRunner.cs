@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -11,14 +12,14 @@ namespace Dotnet.Script.Core
 {
     public class ScriptRunner
     {
-        protected ScriptLogger Logger;
+        protected Logger Logger;
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole ScriptConsole;
         protected ScriptEnvironment _scriptEnvironment;
 
-        public ScriptRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole scriptConsole)
+        public ScriptRunner(ScriptCompiler scriptCompiler, LogFactory logFactory, ScriptConsole scriptConsole)
         {
-            Logger = logger;
+            Logger = logFactory.CreateLogger<ScriptRunner>();
             ScriptCompiler = scriptCompiler;
             ScriptConsole = scriptConsole;
             _scriptEnvironment = ScriptEnvironment.Default;

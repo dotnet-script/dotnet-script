@@ -12,7 +12,7 @@ namespace Dotnet.Script.DependencyModel.Logging
         Info      
     }
 
-    internal static class LogExtensions
+    public static class LogExtensions
     {
         public static Logger CreateLogger<T>(this LogFactory logFactory) => logFactory(typeof(T));
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.NuGet;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,7 +23,7 @@ namespace Dotnet.Script.Core
         private ScriptOptions _scriptOptions;
         private InteractiveScriptGlobals _globals;
 
-        protected ScriptLogger Logger;
+        protected Logger Logger;
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole Console;
         private readonly string[] _packageSources;
@@ -30,9 +31,9 @@ namespace Dotnet.Script.Core
         protected InteractiveCommandProvider InteractiveCommandParser = new InteractiveCommandProvider();
         protected string CurrentDirectory = Directory.GetCurrentDirectory();
 
-        public InteractiveRunner(ScriptCompiler scriptCompiler, ScriptLogger logger, ScriptConsole console, string[] packageSources)
-        {            
-            Logger = logger;
+        public InteractiveRunner(ScriptCompiler scriptCompiler, LogFactory logFactory, ScriptConsole console, string[] packageSources)
+        {
+            Logger = logFactory.CreateLogger<InteractiveRunner>();
             ScriptCompiler = scriptCompiler;
             Console = console;
             _packageSources = packageSources ?? Array.Empty<string>();
@@ -89,7 +90,7 @@ namespace Dotnet.Script.Core
                         }
                         foreach (var runtimeDependency in lineDependencies)
                         {
-                            Logger.Verbose("Adding reference to a runtime dependency => " + runtimeDependency);
+                            Logger.Debug("Adding reference to a runtime dependency => " + runtimeDependency);
                             _scriptOptions = _scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
                         }
                     }

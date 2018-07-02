@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.NuGet;
 using Dotnet.Script.DependencyModel.Runtime;
 using Microsoft.CodeAnalysis;
@@ -28,6 +29,8 @@ namespace Dotnet.Script.Core
         private static extern IntPtr LoadLibrary(string path);
 
         private ScriptEnvironment _scriptEnvironment;
+
+        private Logger _logger;
 
         static ScriptCompiler()
         {
@@ -59,13 +62,13 @@ namespace Dotnet.Script.Core
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
-        public ScriptLogger Logger { get; }
+        
 
-        public ScriptCompiler(ScriptLogger logger, RuntimeDependencyResolver runtimeDependencyResolver)
+        public ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
         {
-            Logger = logger;
-            RuntimeDependencyResolver = runtimeDependencyResolver;
+            _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
+            RuntimeDependencyResolver = runtimeDependencyResolver;           
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
@@ -104,7 +107,7 @@ namespace Dotnet.Script.Core
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            Logger.Verbose($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");
+            _logger.Info($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");                      
             RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
             var encoding = context.Code.Encoding ?? Encoding.UTF8; // encoding is required when emitting debug information
@@ -165,14 +168,14 @@ namespace Dotnet.Script.Core
                 loadedAssembliesMap.TryGetValue(runtimeAssembly.Name.Name, out var loadedAssembly);
                 if (loadedAssembly == null)
                 {
-                    Logger.Verbose("Adding reference to a runtime dependency => " + runtimeAssembly);
+                    _logger.Debug("Adding reference to a runtime dependency => " + runtimeAssembly);
                     scriptOptions = scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeAssembly.Path));
                 }
                 else
                 {
                     //Add the reference from the AssemblyLoadContext if present. 
                     scriptOptions = scriptOptions.AddReferences(loadedAssembly);
-                    Logger.Verbose("Already loaded => " + loadedAssembly);
+                    _logger.Debug("Already loaded => " + loadedAssembly);                    
                 }
             }
 
@@ -185,8 +188,8 @@ namespace Dotnet.Script.Core
 
             var suppressedDiagnostics = orderedDiagnostics.Where(d => SuppressedDiagnosticIds.Contains(d.Id));
             foreach (var suppressedDiagnostic in suppressedDiagnostics)
-            {
-                Logger.Verbose($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
+            {                
+                _logger.Debug($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
             }
 
             if (orderedDiagnostics.Except(suppressedDiagnostics).Any(d => d.Severity == DiagnosticSeverity.Error))
@@ -200,12 +203,12 @@ namespace Dotnet.Script.Core
         {
             if (context.OptimizationLevel == OptimizationLevel.Release)
             {
-                Logger.Verbose("Configuration/Optimization mode: Release");
+                _logger.Debug("Configuration/Optimization mode: Release");
                 SetReleaseOptimizationLevel(script.GetCompilation());
             }
             else
             {
-                Logger.Verbose("Configuration/Optimization mode: Debug");
+                _logger.Debug("Configuration/Optimization mode: Debug");
             }
         }
 
@@ -265,10 +268,10 @@ namespace Dotnet.Script.Core
                     loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);
                     if(loadedAssembly != null)
                     {
-                        Logger.Log($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
+                        _logger.Debug($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
                         return loadedAssembly;
                     }
-                    Logger.Log($"Redirecting {assemblyName} to {runtimeAssembly.Name}");
+                    _logger.Debug($"Redirecting {assemblyName} to {runtimeAssembly.Name}");
                     return Assembly.LoadFrom(runtimeAssembly.Path);
                 }
             }

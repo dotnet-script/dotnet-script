@@ -9,11 +9,17 @@ using System;
 using Microsoft.CodeAnalysis.Text;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
+using Xunit.Abstractions;
 
 namespace Dotnet.Script.Shared.Tests
 {
     public abstract class InteractiveRunnerTestsBase
     {
+        public InteractiveRunnerTestsBase(ITestOutputHelper testOutputHelper)
+        {
+            testOutputHelper.Capture();
+        }
+
         private class InteractiveTestContext
         {
             public InteractiveTestContext(ScriptConsole console, InteractiveRunner runner)
@@ -33,21 +39,11 @@ namespace Dotnet.Script.Shared.Tests
             var error = new StringWriter();
 
             var console = new ScriptConsole(writer, reader, error);
-            var logger = new ScriptLogger(console.Error, true);
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
-            {
-                if (level == LogLevel.Debug)
-                {
-                    logger.Verbose(message);
-                }
-                if (level == LogLevel.Info)
-                {
-                    logger.Log(message);
-                }
-            }));
 
-            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
-            var runner = new InteractiveRunner(compiler, logger, console, Array.Empty<string>());
+            var runtimeDependencyResolver = new RuntimeDependencyResolver(TestOutputHelper.TestLogFactory);
+
+            var compiler = new ScriptCompiler(TestOutputHelper.TestLogFactory, runtimeDependencyResolver);
+            var runner = new InteractiveRunner(compiler, TestOutputHelper.TestLogFactory, console, Array.Empty<string>());
             return new InteractiveTestContext(console, runner);
         }
 

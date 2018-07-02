@@ -1,7 +1,11 @@
-﻿using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using Dotnet.Script.DependencyModel.Logging;
 using Xunit.Abstractions;
 
-namespace Dotnet.Script.Tests
+namespace Dotnet.Script.Shared.Tests
 {
     public static class TestOutputHelper
     {
@@ -14,5 +18,11 @@ namespace Dotnet.Script.Tests
         }
 
         public static ITestOutputHelper Current => CurrentTestOutputHelper.Value;
+
+        public static LogFactory TestLogFactory => 
+            type => (level, message) => Current.WriteLine($"{level} {message}");
     }
+
+        
+
 }
