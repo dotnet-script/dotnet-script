@@ -23,8 +23,7 @@ namespace Dotnet.Script
     public class Program
     {
         const string DebugFlagShort = "-d";
-        const string DebugFlagLong = "--debug";
-        static LogFactory logFactory;
+        const string DebugFlagLong = "--debug";        
 
         public static int Main(string[] args)
         {
@@ -56,18 +55,7 @@ namespace Dotnet.Script
         }
 
         private static int Wain(string[] args)
-        {
-            var loggerFactory = new LoggerFactory();
-            loggerFactory.AddConsole(Microsoft.Extensions.Logging.LogLevel.Information);
-            logFactory = type =>
-            {
-                var logger = loggerFactory.CreateLogger(type);
-                return (level, message) =>
-                {
-                    logger.LogInformation(message);
-                };
-            };
-
+        {           
             var app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
@@ -81,6 +69,8 @@ namespace Dotnet.Script
 
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
+            var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
+            
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
             var argsAfterDoubleHypen = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
@@ -94,7 +84,7 @@ namespace Dotnet.Script
             {
                 c.Description = "Execute CSX code.";
                 var code = c.Argument("code", "Code to execute.");
-                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);                
                 c.OnExecute(async () =>
                 {
                     int exitCode = 0;
@@ -105,7 +95,8 @@ namespace Dotnet.Script
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
-                        exitCode = await RunCode(code.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value(), packageSources.Values?.ToArray());
+                        var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                        exitCode = await RunCode(code.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value(), packageSources.Values?.ToArray());
                     }
                     return exitCode;
                 });
@@ -118,6 +109,7 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
+                    var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
                     var scaffolder = new Scaffolder(logFactory);
                     scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
@@ -131,6 +123,7 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
+                    var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
                     var scaffolder = new Scaffolder(logFactory);
                     if (fileNameArgument.Value == null)
                     {
@@ -177,9 +170,10 @@ namespace Dotnet.Script
                         (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
 
                     var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
-                    ;
-                    var compiler = GetScriptCompiler(publishDebugMode.HasValue());
-                    var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
+
+                    var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                    var compiler = GetScriptCompiler(publishDebugMode.HasValue(), logFactory);
+                    var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);                    
                     var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
                     var code = SourceText.From(File.ReadAllText(absoluteFilePath));
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
@@ -212,9 +206,11 @@ namespace Dotnet.Script
                             throw new Exception($"Couldn't find file '{dllPath.Value}'");
                         }
 
-                        var absoluteFilePath = Path.IsPathRooted(dllPath.Value) ? dllPath.Value : Path.Combine(Directory.GetCurrentDirectory(), dllPath.Value);
+                        var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
 
-                        var compiler = GetScriptCompiler(commandDebugMode.HasValue());
+                        var absoluteFilePath = Path.IsPathRooted(dllPath.Value) ? dllPath.Value : Path.Combine(Directory.GetCurrentDirectory(), dllPath.Value);
+                       
+                        var compiler = GetScriptCompiler(commandDebugMode.HasValue(), logFactory);
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                         var result = await runner.Execute<int>(absoluteFilePath);
                         return result;
@@ -233,6 +229,8 @@ namespace Dotnet.Script
                     return 0;
                 }
 
+                var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     var optimizationLevel = OptimizationLevel.Debug;
@@ -240,11 +238,11 @@ namespace Dotnet.Script
                     {
                         optimizationLevel = OptimizationLevel.Release;
                     }
-                    exitCode = await RunScript(file.Value, debugMode.HasValue(), optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue(), packageSources.Values?.ToArray());
+                    exitCode = await RunScript(file.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue(), packageSources.Values?.ToArray());
                 }
                 else
                 {
-                    await RunInteractive(debugMode.HasValue(), packageSources.Values?.ToArray());
+                    await RunInteractive(debugMode.HasValue(), logFactory, packageSources.Values?.ToArray());
                 }
                 return exitCode;
             });
@@ -252,7 +250,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);
         }
 
-        private static async Task<int> RunScript(string file, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources)
+        private static async Task<int> RunScript(string file, bool debugMode, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources)
         {
             if (!File.Exists(file))
             {
@@ -260,7 +258,7 @@ namespace Dotnet.Script
                 {
                     var downloader = new ScriptDownloader();
                     var code = await downloader.Download(file);
-                    return await RunCode(code, debugMode, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);
+                    return await RunCode(code, debugMode, logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);
                 }
 
                 throw new Exception($"Couldn't find file '{file}'");
@@ -272,17 +270,17 @@ namespace Dotnet.Script
             using (var filestream = new FileStream(absoluteFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 var sourceText = SourceText.From(filestream);
-                var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
-
+                var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);               
                 if (interactive)
                 {
-                    var compiler = GetScriptCompiler(debugMode);
+                    var compiler = GetScriptCompiler(debugMode, logFactory);
+                    
                     var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
                     await runner.RunLoopWithSeed(context);
                     return 0;
                 }
 
-                return await Run(debugMode, context);
+                return await Run(debugMode, logFactory,  context);
             }
         }
 
@@ -292,23 +290,23 @@ namespace Dotnet.Script
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
-        private static async Task RunInteractive(bool debugMode, string[] packageSources)
+        private static async Task RunInteractive(bool debugMode, LogFactory logFactory, string[] packageSources)
         {
-            var compiler = GetScriptCompiler(debugMode);
+            var compiler = GetScriptCompiler(debugMode, logFactory);
             var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
             await runner.RunLoop();
         }
 
-        private static Task<int> RunCode(string code, bool debugMode, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
-        {
-            var sourceText = SourceText.From(code);
+        private static Task<int> RunCode(string code, bool debugMode, LogFactory logFactory,  OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
+        {            
+            var sourceText = SourceText.From(code);            
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, optimizationLevel, ScriptMode.Eval, packageSources: packageSources);
-            return Run(debugMode, context);
+            return Run(debugMode, logFactory, context);
         }
 
-        private static Task<int> Run(bool debugMode, ScriptContext context)
+        private static Task<int> Run(bool debugMode, LogFactory logFactory, ScriptContext context)
         {
-            var compiler = GetScriptCompiler(debugMode);
+            var compiler = GetScriptCompiler(debugMode, logFactory);
             var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
             return runner.Execute<int>(context);
         }
@@ -332,11 +330,11 @@ namespace Dotnet.Script
             return versionAttribute?.InformationalVersion;
         }
 
-        private static ScriptCompiler GetScriptCompiler(bool debugMode)
-        {            
+        private static ScriptCompiler GetScriptCompiler(bool debugMode, LogFactory logFactory)
+        {          
             var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory);
             var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
             return compiler;
-        }
+        }       
     }
 }
