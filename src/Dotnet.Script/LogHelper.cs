@@ -43,10 +43,20 @@ namespace Dotnet.Script
             return logLevel;
         }
 
-        public static DependencyModel.Logging.LogFactory CreateLogFactory(string verbosity)
+        public static DependencyModel.Logging.LogFactory CreateLogFactory(string verbosity, bool debugMode)
         {
-            var logLevel = ParseVerbosity(verbosity);
-            var loggerFactory = new LoggerFactory();            
+            LogLevel logLevel;
+            if (debugMode)
+            {
+                logLevel = LogLevel.Debug;
+            }
+            else
+            {
+                logLevel = ParseVerbosity(verbosity);
+            }
+            
+            var loggerFactory = new LoggerFactory();
+            
             loggerFactory.AddProvider(new ConsoleErrorLoggerProvider((message, level) => level >= logLevel));
 
             return type =>
@@ -54,6 +64,11 @@ namespace Dotnet.Script
                 var logger = loggerFactory.CreateLogger(type);
                 return (level, message) =>
                 {
+                    if (level == DependencyModel.Logging.LogLevel.Trace)
+                    {
+                        logger.LogTrace(message);
+                    }
+
                     if (level == DependencyModel.Logging.LogLevel.Debug)
                     {
                         logger.LogDebug(message);

@@ -54,6 +54,9 @@ namespace Dotnet.Script
             }
         }
 
+        public static Func<string, bool, LogFactory> CreateLogFactory 
+            = (verbosity, debugMode) => LogHelper.CreateLogFactory(verbosity, debugMode);
+
         private static int Wain(string[] args)
         {           
             var app = new CommandLineApplication(throwOnUnexpectedArg: false)
@@ -95,7 +98,7 @@ namespace Dotnet.Script
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
-                        var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                        var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                         exitCode = await RunCode(code.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value(), packageSources.Values?.ToArray());
                     }
                     return exitCode;
@@ -109,7 +112,7 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var scaffolder = new Scaffolder(logFactory);
                     scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
@@ -123,7 +126,7 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var scaffolder = new Scaffolder(logFactory);
                     if (fileNameArgument.Value == null)
                     {
@@ -171,7 +174,7 @@ namespace Dotnet.Script
 
                     var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
 
-                    var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue(), logFactory);
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);                    
                     var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
@@ -206,7 +209,7 @@ namespace Dotnet.Script
                             throw new Exception($"Couldn't find file '{dllPath.Value}'");
                         }
 
-                        var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                        var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
 
                         var absoluteFilePath = Path.IsPathRooted(dllPath.Value) ? dllPath.Value : Path.Combine(Directory.GetCurrentDirectory(), dllPath.Value);
                        
@@ -229,7 +232,7 @@ namespace Dotnet.Script
                     return 0;
                 }
 
-                var logFactory = LogHelper.CreateLogFactory(verbosity.Value());
+                var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
 
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {

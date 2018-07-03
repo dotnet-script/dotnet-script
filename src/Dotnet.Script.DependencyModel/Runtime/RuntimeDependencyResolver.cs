@@ -116,7 +116,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
                 {
                     var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders);
-                    _logger.Debug($"Loading native library from {fullPath}");
+                    _logger.Trace($"Loading native library from {fullPath}");
                     result.Add(fullPath);
                 }
             }
@@ -146,7 +146,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 {
                     var fullPath = GetFullPath(path, nugetPackageFolders);
 
-                    _logger.Debug($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
+                    _logger.Trace($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
                     result.Add(new RuntimeAssembly(AssemblyName.GetAssemblyName(fullPath), fullPath));
                 }
             }

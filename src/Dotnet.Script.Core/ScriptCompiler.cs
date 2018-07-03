@@ -168,14 +168,14 @@ namespace Dotnet.Script.Core
                 loadedAssembliesMap.TryGetValue(runtimeAssembly.Name.Name, out var loadedAssembly);
                 if (loadedAssembly == null)
                 {
-                    _logger.Debug("Adding reference to a runtime dependency => " + runtimeAssembly);
+                    _logger.Trace("Adding reference to a runtime dependency => " + runtimeAssembly);
                     scriptOptions = scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeAssembly.Path));
                 }
                 else
                 {
                     //Add the reference from the AssemblyLoadContext if present. 
                     scriptOptions = scriptOptions.AddReferences(loadedAssembly);
-                    _logger.Debug("Already loaded => " + loadedAssembly);                    
+                    _logger.Trace("Already loaded => " + loadedAssembly);                    
                 }
             }
 
@@ -268,10 +268,10 @@ namespace Dotnet.Script.Core
                     loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);
                     if(loadedAssembly != null)
                     {
-                        _logger.Debug($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
+                        _logger.Trace($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
                         return loadedAssembly;
                     }
-                    _logger.Debug($"Redirecting {assemblyName} to {runtimeAssembly.Name}");
+                    _logger.Trace($"Redirecting {assemblyName} to {runtimeAssembly.Name}");
                     return Assembly.LoadFrom(runtimeAssembly.Path);
                 }
             }

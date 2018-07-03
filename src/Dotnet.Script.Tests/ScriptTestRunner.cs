@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 
 namespace Dotnet.Script.Tests
 {
@@ -15,6 +16,7 @@ namespace Dotnet.Script.Tests
         private ScriptTestRunner()
         {
             _scriptEnvironment = ScriptEnvironment.Default;
+            Program.CreateLogFactory = (verbosity, debugMode) => TestOutputHelper.TestLogFactory;
         }
 
 
