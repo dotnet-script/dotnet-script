@@ -23,7 +23,7 @@ namespace Dotnet.Script
     public class Program
     {
         const string DebugFlagShort = "-d";
-        const string DebugFlagLong = "--debug";        
+        const string DebugFlagLong = "--debug";
 
         public static int Main(string[] args)
         {
@@ -55,7 +55,7 @@ namespace Dotnet.Script
         }
 
         public static Func<string, bool, LogFactory> CreateLogFactory 
-            = (verbosity, debugMode) => LogHelper.CreateLogFactory(verbosity, debugMode);
+            = (verbosity, debugMode) => LogHelper.CreateLogFactory(debugMode ? "debug" : verbosity);
 
         private static int Wain(string[] args)
         {           
@@ -249,6 +249,7 @@ namespace Dotnet.Script
                 }
                 return exitCode;
             });
+            
 
             return app.Execute(argsBeforeDoubleHyphen);
         }

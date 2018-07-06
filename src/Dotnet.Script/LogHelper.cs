@@ -1,88 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using Dotnet.Script.DependencyModel.Logging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Console.Internal;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Dotnet.Script
 {
     public static class LogHelper
-    {
-        private static Dictionary<string, LogLevel> _verbosityMap 
-            = new Dictionary<string, LogLevel>(StringComparer.InvariantCultureIgnoreCase);
-
-        static LogHelper()
+    {                     
+        public static LogFactory CreateLogFactory(string verbosity)
         {
-            _verbosityMap.Add("t", LogLevel.Trace);
-            _verbosityMap.Add("trace", LogLevel.Trace);
-            _verbosityMap.Add("d", LogLevel.Debug);
-            _verbosityMap.Add("debug", LogLevel.Debug);
-            _verbosityMap.Add("i", LogLevel.Information);
-            _verbosityMap.Add("info", LogLevel.Information);
-            _verbosityMap.Add("w", LogLevel.Warning);
-            _verbosityMap.Add("warning", LogLevel.Warning);
-            _verbosityMap.Add("e", LogLevel.Error);
-            _verbosityMap.Add("error", LogLevel.Error);
-            _verbosityMap.Add("c", LogLevel.Critical);
-            _verbosityMap.Add("critical", LogLevel.Critical);            
-        }
-
-        private static LogLevel ParseVerbosity(string verbosity)
-        {
-            if (string.IsNullOrWhiteSpace(verbosity))
-            {
-                return LogLevel.Warning;
-            }
-
-            if (!_verbosityMap.TryGetValue(verbosity, out var logLevel))
-            {
-                throw new InvalidOperationException($"Unknown verbosity level {verbosity}");
-            }
-
-            return logLevel;
-        }
-
-        public static DependencyModel.Logging.LogFactory CreateLogFactory(string verbosity, bool debugMode)
-        {
-            LogLevel logLevel;
-            if (debugMode)
-            {
-                logLevel = LogLevel.Debug;
-            }
-            else
-            {
-                logLevel = ParseVerbosity(verbosity);
-            }
+            var logLevel = (LogLevel)LevelMapper.FromString(verbosity);
             
-            var loggerFactory = new LoggerFactory();
-            
-            loggerFactory.AddProvider(new ConsoleErrorLoggerProvider((message, level) => level >= logLevel));
+            var loggerFactory = new LoggerFactory();            
+
+            loggerFactory.AddProvider(new ConsoleErrorLoggerProvider((message, level) => level >= logLevel));                        
 
             return type =>
             {
                 var logger = loggerFactory.CreateLogger(type);
-                return (level, message) =>
+                return (level, message, exception) =>
                 {
-                    if (level == DependencyModel.Logging.LogLevel.Trace)
-                    {
-                        logger.LogTrace(message);
-                    }
-
-                    if (level == DependencyModel.Logging.LogLevel.Debug)
-                    {
-                        logger.LogDebug(message);
-                    }
-
-                    if (level == DependencyModel.Logging.LogLevel.Info)
-                    {
-                        logger.LogInformation(message);
-                    }
+                    logger.Log((LogLevel)level, message, exception);                   
                 };
             };
         }    
     }   
-
+    
     public class WindowsLogErrorConsole : IConsole
     {
         private void SetColor(ConsoleColor? background, ConsoleColor? foreground)
@@ -118,7 +66,7 @@ namespace Dotnet.Script
         }
 
         public void Flush()
-        {
+        {            
             // No action required as for every write, data is sent directly to the console
             // output stream
         }
@@ -141,14 +89,25 @@ namespace Dotnet.Script
     {
         private readonly Func<string, LogLevel, bool> _filter;
 
+        private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers = new ConcurrentDictionary<string, ConsoleLogger>();
+
+        private readonly ConsoleLoggerProcessor _messageQueue = new ConsoleLoggerProcessor();
+
+        private readonly static ConstructorInfo ConsoleLoggerConstructor = typeof(ConsoleLogger).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)[0];
+
         public ConsoleErrorLoggerProvider(Func<string, LogLevel, bool> filter)
         {
             _filter = filter;
         }
-
+    
         public ILogger CreateLogger(string name)
         {
-            var consoleLogger = new ConsoleLogger(name, _filter, false);
+            return _loggers.GetOrAdd(name, CreateLoggerImplementation);            
+        }
+
+        private ConsoleLogger CreateLoggerImplementation(string name)
+        {            
+            var consoleLogger = (ConsoleLogger)ConsoleLoggerConstructor.Invoke(new object[] { name, _filter, null, _messageQueue });
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 consoleLogger.Console = new WindowsLogErrorConsole();
@@ -157,12 +116,13 @@ namespace Dotnet.Script
             {
                 consoleLogger.Console = new AnsiLogConsole(new AnsiSystemErrorConsole());
             }
-            
+
             return consoleLogger;
         }
 
         public void Dispose()
         {
+            _messageQueue.Dispose();
         }
-    }
+    }   
 }

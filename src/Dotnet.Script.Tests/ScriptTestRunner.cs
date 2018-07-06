@@ -16,7 +16,7 @@ namespace Dotnet.Script.Tests
         private ScriptTestRunner()
         {
             _scriptEnvironment = ScriptEnvironment.Default;
-            Program.CreateLogFactory = (verbosity, debugMode) => TestOutputHelper.TestLogFactory;
+            Program.CreateLogFactory = (verbosity, debugMode) => TestOutputHelper.CreateTestLogFactory();
         }
 
 

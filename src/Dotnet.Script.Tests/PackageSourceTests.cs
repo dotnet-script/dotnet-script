@@ -18,9 +18,9 @@ namespace Dotnet.Script.Tests
         {
             var fixture = "ScriptPackage/WithNoNuGetConfig";
             var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);            
-            var result = ScriptTestRunner.Default.ExecuteFixtureInProcess(fixture, "-s", pathToScriptPackages);            
-            //Assert.Contains("Hello", result.output);
-            //Assert.Equal(0, result.exitCode);
+            var result = ScriptTestRunner.Default.ExecuteFixture(fixture, "-s", pathToScriptPackages);            
+            Assert.Contains("Hello", result.output);
+            Assert.Equal(0, result.exitCode);
         }
 
         [Fact]

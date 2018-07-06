@@ -49,7 +49,7 @@ namespace Dotnet.Script.Tests
                 var result = Execute("init", scriptFolder.Path);
                 Assert.Equal(0, result.exitCode);
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
-                Assert.Equal(_scriptEnvironment.TargetFramework, settings.script.defaultTargetFramework.Value);                
+                Assert.Equal(_scriptEnvironment.TargetFramework, settings.script.defaultTargetFramework.Value);
             }
         }
 

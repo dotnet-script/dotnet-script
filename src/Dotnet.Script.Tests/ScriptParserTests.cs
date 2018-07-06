@@ -2,19 +2,19 @@
 using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.ProjectSystem;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
     public class ScriptParserTests
-    {
-        private readonly ITestOutputHelper _testOutputHelper;
+    {        
         private readonly ScriptEnvironment _scriptEnvironment;
 
         public ScriptParserTests(ITestOutputHelper testOutputHelper)
         {
-            _testOutputHelper = testOutputHelper;
+            testOutputHelper.Capture(minimumLogLevel:0);
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
@@ -71,7 +71,7 @@ namespace Dotnet.Script.Tests
 
         private ScriptParser CreateParser()
         {
-            return new ScriptParser(type => ((level, message) => _testOutputHelper.WriteLine(message)));
+            return new ScriptParser(TestOutputHelper.CreateTestLogFactory());
         }
     }
 }

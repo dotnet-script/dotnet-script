@@ -1,5 +1,6 @@
 ﻿using Dotnet.Script.DependencyModel.Compilation;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -7,14 +8,12 @@ namespace Dotnet.Script.Tests
 {
     [Collection("IntegrationTests")]
     public class CompilationDependencyResolverTests
-    {
-        private readonly ITestOutputHelper _testOutputHelper;
-
+    {        
         private readonly ScriptEnvironment _scriptEnvironment;
 
         public CompilationDependencyResolverTests(ITestOutputHelper testOutputHelper)
         {
-            _testOutputHelper = testOutputHelper;
+            testOutputHelper.Capture();
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
@@ -40,16 +39,10 @@ namespace Dotnet.Script.Tests
             var resolver = CreateResolver();
             var dependencies = resolver.GetDependencies(TestPathUtils.GetPathToTestFixtureFolder("Issue129"), true, _scriptEnvironment.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "Auth0.ManagementApi");
-        }
-
-       
-
+        }       
         private CompilationDependencyResolver CreateResolver()
-        {           
-            var resolver = new CompilationDependencyResolver(type => ((level, message) =>
-            {
-                _testOutputHelper.WriteLine($"{level}:{message ?? ""}");
-            }) );
+        {
+            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
             return resolver;            
         }
     }

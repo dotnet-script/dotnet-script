@@ -231,7 +231,7 @@ namespace Dotnet.Script.Tests
 
         private LogFactory GetLogFactory()
         {
-            return TestOutputHelper.TestLogFactory;   
+            return TestOutputHelper.CreateTestLogFactory();
         }
     }
 }
