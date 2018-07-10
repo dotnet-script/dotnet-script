@@ -43,7 +43,29 @@ namespace Dotnet.Script.Tests
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);            
             return Program.Main(new[] { pathToFixture }.Concat(arguments ?? Array.Empty<string>()).ToArray());
         }
-        
+
+        public static int ExecuteCodeInProcess(string code, params string[] arguments)
+        {
+            var allArguments = new List<string>();
+            if (arguments != null)
+            {
+                allArguments.AddRange(arguments);
+            }
+            allArguments.Add("eval");
+            allArguments.Add(code);
+            return Program.Main(allArguments.ToArray());
+        }
+        public (string output, int exitCode) ExecuteCode(string code)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(new[] {"eval", $"\"{code}\"" }));
+            return result;
+        }
+
+        public (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(new[] {"-c", "release", "eval", $"\"{code}\"" }));
+            return result;
+        }
         private string[] GetDotnetScriptArguments(params string[] arguments)
         {
             string configuration;
