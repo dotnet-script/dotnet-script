@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
