@@ -16,11 +16,11 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 | Name    | Version                             | Framework | Description
 | --------| ---------------------------------------- | ---------- |-------
-| `dotnet-script` | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/) | `netcoreapp2.1` / `netcoreapp2.0` | .NET Core global tool
-| `Dotnet.Script`| [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/) | `netcoreapp2.1` / `netcoreapp2.0` | .NET Core project tool
+| `dotnet-script` | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/) | `netcoreapp2.1` | .NET Core global tool
+| `Dotnet.Script`| [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/) | `netcoreapp2.1` | .NET Core project tool
 | `Dotnet.Script.Core` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/) | `netstandard2.0` | Core library for hosting dotnet-script logic in your own app.
-| `Dotnet.Script.DependencyModel` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/) | `netstandard2.0` / `net46` | Provides runtime and compilation dependency resolution for dotnet-script based scripts.
-| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0` / `net46` | A null implementation of a `MetadataReferenceResolver` that allows inline nuget references to be specified in script (csx) files.
+| `Dotnet.Script.DependencyModel` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/) | `netstandard2.0` | Provides runtime and compilation dependency resolution for dotnet-script based scripts.
+| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0` | A null implementation of a `MetadataReferenceResolver` that allows inline nuget references to be specified in script (csx) files.
 
 ## Installing
 
