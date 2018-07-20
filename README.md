@@ -26,7 +26,7 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ### Prerequisites
 
-The only thing we need to install is [.Net Core 2.0+ SDK](https://www.microsoft.com/net/download/core). dotnet-script supports both .NET Core 2.1 and .NET Core 2.0. Depending on the currently active .NET Core SDK, dotnet-script will run either as `netcoreapp2.1` or as `netcoreapp2.0`. You can use [global.json](https://docs.microsoft.com/en-us/dotnet/core/tools/global-json) file to control that.
+The only thing we need to install is [.Net Core 2.1+ SDK](https://www.microsoft.com/net/download/core). 
 
 ### .Net Core 2.1 Global Tool
 
@@ -108,25 +108,18 @@ You can manually download all the releases in `zip` format from the [Github rele
 Our typical `helloworld.csx` might look like this:
 
 ```
-#! "netcoreapp2.0"
+#! "netcoreapp2.1"
 Console.WriteLine("Hello world!");
 ```
 
 Let us take a quick look at what is going on here.
 
-`#! "netcoreapp2.0"` tells OmniSharp to resolve metadata in the context of a`netcoreapp2.0` application. This will bring in all assemblies from [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App/2.0.0) and should cover most scripting needs. 
+`#! "netcoreapp2.1"` tells OmniSharp to resolve metadata in the context of a`netcoreapp2.1` application. This will bring in all assemblies from [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App/2.0.0) and should cover most scripting needs. 
 
 That is all it takes and we can execute the script
 
 ```
 dotnet script helloworld.csx
-```
-
-If you are using .NET Core 2.1 SDK, you could also create your script as a `netcoreapp2.1` application.
-
-```
-#! "netcoreapp2.1"
-Console.WriteLine("Hello world!");
 ```
 
 ### Scaffolding
@@ -262,7 +255,7 @@ To consume a script package all we need to do specify the NuGet package in the `
 The following example loads the [simple-targets](https://www.nuget.org/packages/simple-targets-csx) package that contains script files to be included in our script.
 
 ```C#
-#! "netcoreapp2.0"
+#! "netcoreapp2.1"
 #load "nuget:simple-targets-csx, 6.0.0"
 
 using static SimpleTargets;
@@ -416,9 +409,7 @@ The following example shows how we can pipe data in and out of a script.
 The `UpperCase.csx` script simply converts the standard input to upper case and writes it back out to standard output.
 
 ```csharp
-#! "netcoreapp2.0"
-#r "nuget: NetStandard.Library, 2.0.0"
-
+#! "netcoreapp2.1"
 using (var streamReader = new StreamReader(Console.OpenStandardInput()))
 {    
     Write(streamReader.ReadToEnd().ToUpper()); 
