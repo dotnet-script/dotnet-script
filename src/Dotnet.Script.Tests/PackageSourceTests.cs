@@ -29,7 +29,8 @@ namespace Dotnet.Script.Tests
             var fixture = "ScriptPackage/WithNoNuGetConfig";
             var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);            
             var code = @"#load \""nuget:ScriptPackageWithMainCsx,1.0.0\"" SayHello();";
-            var result = ScriptTestRunner.Default.Execute("-s", pathToScriptPackages, "eval", $"\"{code}\"");
+            var result = ScriptTestRunner.Default.Execute($"-s {pathToScriptPackages} eval \"{code}\"");
+            //var result = ScriptTestRunner.Default.Execute("-s", pathToScriptPackages, "eval", $"\"{code}\"");
             Assert.Contains("Hello", result.output);
             Assert.Equal(0, result.exitCode);            
         }

@@ -18,13 +18,13 @@ namespace Dotnet.Script.Tests
             _scriptEnvironment = ScriptEnvironment.Default;
             Program.CreateLogFactory = (verbosity, debugMode) => TestOutputHelper.CreateTestLogFactory();
         }
-
-
-        public (string output, int exitCode) Execute(params string[] arguments)
+        
+        public (string output, int exitCode) Execute(string arguments, string workingDirectory = null)
         {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(arguments));
+            var result = ProcessHelper.RunAndCaptureOutput2("dotnet", GetDotnetScriptArguments2(arguments), workingDirectory);
             return result;
         }
+
 
         public int ExecuteInProcess(params string[] arguments)
         {                        
@@ -80,6 +80,19 @@ namespace Dotnet.Script.Tests
                 allArguments.AddRange(arguments);
             }
             return allArguments.ToArray();
+        }
+
+        private string GetDotnetScriptArguments2(string arguments)
+        {
+            string configuration;
+#if DEBUG
+            configuration = "Debug";
+#else
+            configuration = "Release";
+#endif
+            var allArgs = $"exec {Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")} {arguments}";
+
+            return allArgs;
         }
     }
 }

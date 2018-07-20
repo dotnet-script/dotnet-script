@@ -21,7 +21,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Helloworld");
+            var result = ScriptTestRunner.Default.ExecuteFixture("HelloWorld");
             Assert.Contains("Hello World", result.output);
         }
 

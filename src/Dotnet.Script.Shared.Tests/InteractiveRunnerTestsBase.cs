@@ -1,14 +1,11 @@
-﻿using Dotnet.Script.Core;
-using Dotnet.Script.DependencyModel.Runtime;
-using Dotnet.Script.DependencyModel.Logging;
-using System.Threading.Tasks;
-using Xunit;
+﻿using System;
 using System.IO;
-using System.Text;
-using System;
-using Microsoft.CodeAnalysis.Text;
+using System.Threading.Tasks;
+using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Context;
-using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Runtime;
+using Microsoft.CodeAnalysis.Text;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Dotnet.Script.Shared.Tests
