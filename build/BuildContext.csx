@@ -2,7 +2,6 @@
 using static FileUtils;
 using System.Xml.Linq;
 
-const string NetCoreApp21 = "netcoreapp2.1";
 const string GlobalToolPackageId = "dotnet-script";
 
 var owner = "filipw";
