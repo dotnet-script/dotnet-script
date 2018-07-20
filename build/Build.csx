@@ -19,7 +19,7 @@ if (BuildEnvironment.IsWindows)
     DotNet.Test(testDesktopProjectFolder);    
 }
 
-DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, NetCoreApp21);
+DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder);
 
 // We only publish packages from Windows/AppVeyor
 if (BuildEnvironment.IsWindows)
