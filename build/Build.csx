@@ -19,7 +19,7 @@ if (BuildEnvironment.IsWindows)
     DotNet.Test(testDesktopProjectFolder);    
 }
 
-DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, NetCoreApp20);
+DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder);
 
 // We only publish packages from Windows/AppVeyor
 if (BuildEnvironment.IsWindows)
@@ -27,8 +27,7 @@ if (BuildEnvironment.IsWindows)
     
     using(var globalToolBuildFolder = new DisposableFolder())
     {
-        Copy(solutionFolder, globalToolBuildFolder.Path);
-        PatchTargetFramework(globalToolBuildFolder.Path, NetCoreApp21);
+        Copy(solutionFolder, globalToolBuildFolder.Path);        
         PatchPackAsTool(globalToolBuildFolder.Path);
         PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
         PatchContent(globalToolBuildFolder.Path);
@@ -37,8 +36,7 @@ if (BuildEnvironment.IsWindows)
     
     using(var nugetPackageBuildFolder = new DisposableFolder())
     {
-        Copy(solutionFolder, nugetPackageBuildFolder.Path);
-        PatchTargetFramework(nugetPackageBuildFolder.Path, NetCoreApp20);        
+        Copy(solutionFolder, nugetPackageBuildFolder.Path);        
         DotNet.Pack(Path.Combine(nugetPackageBuildFolder.Path,"Dotnet.Script"), nuGetArtifactsFolder);
     }
     
@@ -73,15 +71,6 @@ private async Task CreateReleaseNotes()
         generator = generator.IncludeUnreleased();
     }
     await generator.Generate(pathToReleaseNotes);
-}
-
-private void PatchTargetFramework(string solutionFolder, string targetFramework)
-{
-    var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
-    var projectFile = XDocument.Load(pathToDotnetScriptProject);
-    var targetFrameworksElement = projectFile.Descendants("TargetFrameworks").Single();
-    targetFrameworksElement.ReplaceWith(new XElement("TargetFramework",targetFramework));
-    projectFile.Save(pathToDotnetScriptProject);
 }
 
 private void PatchPackAsTool(string solutionFolder)
