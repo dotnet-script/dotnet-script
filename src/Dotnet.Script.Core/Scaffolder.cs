@@ -13,14 +13,13 @@ namespace Dotnet.Script.Core
 {
     public class Scaffolder
     {
-        private ScriptEnvironment _scriptEnvironment;
-        private readonly Logger _logger;
+        private ScriptEnvironment _scriptEnvironment;        
         private const string DefaultScriptFileName = "main.csx";
+        private ScriptConsole _scriptConsole = ScriptConsole.Default;
 
-        public Scaffolder(LogFactory logFactory)
+        public Scaffolder()
         {
-            _scriptEnvironment = ScriptEnvironment.Default;
-            _logger = logFactory.CreateLogger<Scaffolder>();
+            _scriptEnvironment = ScriptEnvironment.Default;            
         }
 
         public void InitializerFolder(string fileName, string currentWorkingDirectory)
@@ -32,7 +31,7 @@ namespace Dotnet.Script.Core
 
         public void CreateNewScriptFile(string fileName, string currentDirectory)
         {
-            _logger.Info($"Creating '{fileName}'");
+            _scriptConsole.Out.WriteLine($"Creating '{fileName}'");
             if(!Path.HasExtension(fileName))
             {
                 fileName = Path.ChangeExtension(fileName, ".csx");
@@ -42,11 +41,11 @@ namespace Dotnet.Script.Core
             {
                 var scriptFileTemplate = TemplateLoader.ReadTemplate("helloworld.csx.template");
                 File.WriteAllText(pathToScriptFile, scriptFileTemplate);
-                _logger.Info($"...'{pathToScriptFile}' [Created]");
+                _scriptConsole.Out.WriteLine($"...'{pathToScriptFile}' [Created]");
             }
             else
             {
-                _logger.Info($"...'{pathToScriptFile}' already exists [Skipping]");
+                _scriptConsole.Out.WriteLine($"...'{pathToScriptFile}' already exists [Skipping]");
             }
         }
 
@@ -64,10 +63,10 @@ namespace Dotnet.Script.Core
 
         private void CreateDefaultScriptFile(string currentWorkingDirectory)
         {
-            _logger.Info($"Creating default script file '{DefaultScriptFileName}'");
+            _scriptConsole.Out.WriteLine($"Creating default script file '{DefaultScriptFileName}'");
             if (Directory.GetFiles(currentWorkingDirectory, "*.csx").Any())
             {
-                _logger.Info("...Folder already contains one or more script files [Skipping]");
+                _scriptConsole.Out.WriteLine("...Folder already contains one or more script files [Skipping]");
             }
             else
             {
@@ -77,7 +76,7 @@ namespace Dotnet.Script.Core
 
         private void CreateOmniSharpConfigurationFile(string currentWorkingDirectory)
         {
-            _logger.Info("Creating OmniSharp configuration file");
+            _scriptConsole.Out.WriteLine("Creating OmniSharp configuration file");
             string pathToOmniSharpJson = Path.Combine(currentWorkingDirectory, "omnisharp.json");
             if (!File.Exists(pathToOmniSharpJson))
             {
@@ -85,11 +84,11 @@ namespace Dotnet.Script.Core
                 JObject settings = JObject.Parse(omniSharpFileTemplate);
                 settings["script"]["defaultTargetFramework"] = _scriptEnvironment.TargetFramework;
                 File.WriteAllText(pathToOmniSharpJson, settings.ToString());
-                _logger.Info($"...'{pathToOmniSharpJson}' [Created]");
+                _scriptConsole.Out.WriteLine($"...'{pathToOmniSharpJson}' [Created]");
             }
             else
             {
-                _logger.Info($"...'{pathToOmniSharpJson} already exists' [Skipping]");
+                _scriptConsole.Out.WriteLine($"...'{pathToOmniSharpJson} already exists' [Skipping]");
             }
         }
 
@@ -101,7 +100,7 @@ namespace Dotnet.Script.Core
                 Directory.CreateDirectory(vsCodeDirectory);
             }
 
-            _logger.Info("Creating VS Code launch configuration file");
+            _scriptConsole.Out.WriteLine("Creating VS Code launch configuration file");
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             string installLocation = _scriptEnvironment.InstallLocation;
             string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
@@ -110,11 +109,11 @@ namespace Dotnet.Script.Core
                 string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
                 string launchFileContent = lauchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
                 File.WriteAllText(pathToLaunchFile, launchFileContent);
-                _logger.Info($"...'{pathToLaunchFile}' [Created]");
+                _scriptConsole.Out.WriteLine($"...'{pathToLaunchFile}' [Created]");
             }
             else
             {
-                _logger.Info($"...'{pathToLaunchFile}' already exists' [Skipping]");
+                _scriptConsole.Out.WriteLine($"...'{pathToLaunchFile}' already exists' [Skipping]");
                 var launchFileContent = File.ReadAllText(pathToLaunchFile);
                 string pattern = @"^(\s*"")(.*dotnet-script.dll)("").*$";
                 if (Regex.IsMatch(launchFileContent, pattern, RegexOptions.Multiline))
@@ -122,7 +121,7 @@ namespace Dotnet.Script.Core
                     var newLaunchFileContent = Regex.Replace(launchFileContent, pattern, $"$1{dotnetScriptPath}$3", RegexOptions.Multiline);
                     if (launchFileContent != newLaunchFileContent)
                     {
-                        _logger.Info($"...Fixed path to dotnet-script: '{dotnetScriptPath}' [Updated]");
+                        _scriptConsole.Out.WriteLine($"...Fixed path to dotnet-script: '{dotnetScriptPath}' [Updated]");
                         File.WriteAllText(pathToLaunchFile, newLaunchFileContent);
                     }
                 }

@@ -111,9 +111,8 @@ namespace Dotnet.Script
                 var fileName = c.Argument("filename", "(Optional) The name of the sample script file to be created during initialization. Defaults to 'main.csx'");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
-                {
-                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    var scaffolder = new Scaffolder(logFactory);
+                {                    
+                    var scaffolder = new Scaffolder();
                     scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
                 });
@@ -125,9 +124,8 @@ namespace Dotnet.Script
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
-                {
-                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    var scaffolder = new Scaffolder(logFactory);
+                {                    
+                    var scaffolder = new Scaffolder();
                     if (fileNameArgument.Value == null)
                     {
                         c.ShowHelp();
