@@ -101,7 +101,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldPassKnownArgumentToScriptWhenEscapedByDoubleHyphen()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Arguments", "--", "-v");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Arguments", "-- -v");
             Assert.Contains("-v", result.output);
         }
 
@@ -163,15 +163,15 @@ namespace Dotnet.Script.Tests
 
         [Fact]
         public void ShouldCompileScriptWithReleaseConfiguration()
-        {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c", "release");
+        {            
+            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c release");
             Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
         public void ShouldCompileScriptWithDebugConfigurationWhenSpecified()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c", "debug");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c debug");
             Assert.Contains("true", result.output, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -297,11 +297,11 @@ namespace Dotnet.Script.Tests
             using (var disposableFolder = new DisposableFolder())
             {
                 var projectFolder = Path.Combine(disposableFolder.Path, "TestLibrary");
-                ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "new classlib -n TestLibrary" }, disposableFolder.Path);
-                ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "add TestLibrary.csproj package AgileObjects.AgileMapper -v 0.25.0" }, projectFolder);
+                ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n TestLibrary", disposableFolder.Path);
+                ProcessHelper.RunAndCaptureOutput("dotnet", "add TestLibrary.csproj package AgileObjects.AgileMapper -v 0.25.0", projectFolder);
                 File.WriteAllText(Path.Combine(projectFolder, "Class1.cs"), code);
                 File.WriteAllText(Path.Combine(projectFolder, "script.csx"), script);
-                ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "build -c release -o ./" }, projectFolder);
+                ProcessHelper.RunAndCaptureOutput("dotnet", "build -c release -o ./", projectFolder);
 
                 var result = ScriptTestRunner.Default.Execute(Path.Combine(projectFolder, "script.csx"));
 

@@ -21,20 +21,19 @@ namespace Dotnet.Script.Tests
         
         public (string output, int exitCode) Execute(string arguments, string workingDirectory = null)
         {
-            var result = ProcessHelper.RunAndCaptureOutput2("dotnet", GetDotnetScriptArguments2(arguments), workingDirectory);
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(arguments), workingDirectory);
             return result;
         }
-
 
         public int ExecuteInProcess(params string[] arguments)
         {                        
             return Program.Main(arguments ?? Array.Empty<string>());
         }
 
-        public (string output, int exitCode) ExecuteFixture(string fixture, params string[] arguments)
+        public (string output, int exitCode) ExecuteFixture(string fixture, string arguments = null)
         {
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(new string[] { pathToFixture}.Concat(arguments ?? Array.Empty<string>()).ToArray()));
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"{pathToFixture} {arguments}"));
             return result;
         }
 
@@ -55,34 +54,20 @@ namespace Dotnet.Script.Tests
             allArguments.Add(code);
             return Program.Main(allArguments.ToArray());
         }
+
         public (string output, int exitCode) ExecuteCode(string code)
         {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(new[] {"eval", $"\"{code}\"" }));
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"eval \"{code}\""));
             return result;
         }
 
         public (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
-        {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(new[] {"-c", "release", "eval", $"\"{code}\"" }));
+        {            
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"-c release eval \"{code}\""));
             return result;
         }
-        private string[] GetDotnetScriptArguments(params string[] arguments)
-        {
-            string configuration;
-#if DEBUG
-            configuration = "Debug";
-#else
-            configuration = "Release";
-#endif
-            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")});
-            if (arguments != null)
-            {
-                allArguments.AddRange(arguments);
-            }
-            return allArguments.ToArray();
-        }
 
-        private string GetDotnetScriptArguments2(string arguments)
+        private string GetDotnetScriptArguments(string arguments)
         {
             string configuration;
 #if DEBUG

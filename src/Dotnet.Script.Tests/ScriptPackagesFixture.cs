@@ -41,13 +41,13 @@ namespace Dotnet.Script.Tests
                 string command;
                 if (_scriptEnvironment.IsWindows)
                 {                    
-                    command = pathtoNuget430;
-                    var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
+                    command = pathtoNuget430;                    
+                    var result = ProcessHelper.RunAndCaptureOutput(command, $"pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}" );
                 }
                 else
                 {
-                    command = "mono"; 
-                    var result = ProcessHelper.RunAndCaptureOutput(command, new[] { $"{pathtoNuget430} pack {specFile}", $"-OutputDirectory {pathToPackagesOutputFolder}" });
+                    command = "mono";                     
+                    var result = ProcessHelper.RunAndCaptureOutput(command, $"{pathtoNuget430} pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}");
                 }
                 
             }
@@ -89,7 +89,7 @@ namespace Dotnet.Script.Tests
 
         private string GetPathToGlobalPackagesFolder()
         {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", new[] { "nuget", "locals", "global-packages", "--list" });
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", "nuget locals global-packages --list");
             var match = Regex.Match(result.output, @"^.*global-packages:\s*(.*)$");
             return match.Groups[1].Value;
         }
