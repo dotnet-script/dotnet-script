@@ -13,10 +13,15 @@ namespace Dotnet.Script.Tests
 
         private ScriptEnvironment _scriptEnvironment;
 
+        static ScriptTestRunner()
+        {
+            // Redirect log messages to the test output window when running in process (DEBUG)
+            Program.CreateLogFactory = (verbosity, debugMode) => TestOutputHelper.CreateTestLogFactory();
+        }
+
         private ScriptTestRunner()
         {
-            _scriptEnvironment = ScriptEnvironment.Default;
-            Program.CreateLogFactory = (verbosity, debugMode) => TestOutputHelper.CreateTestLogFactory();
+            _scriptEnvironment = ScriptEnvironment.Default;            
         }
         
         public (string output, int exitCode) Execute(string arguments, string workingDirectory = null)
@@ -25,9 +30,9 @@ namespace Dotnet.Script.Tests
             return result;
         }
 
-        public int ExecuteInProcess(params string[] arguments)
+        public int ExecuteInProcess(string arguments = null)
         {                        
-            return Program.Main(arguments ?? Array.Empty<string>());
+            return Program.Main(arguments?.Split(" ") ?? Array.Empty<string>());
         }
 
         public (string output, int exitCode) ExecuteFixture(string fixture, string arguments = null)
@@ -37,18 +42,18 @@ namespace Dotnet.Script.Tests
             return result;
         }
 
-        public int ExecuteFixtureInProcess(string fixture, params string[] arguments)
+        public int ExecuteFixtureInProcess(string fixture, string arguments = null)
         {
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);            
-            return Program.Main(new[] { pathToFixture }.Concat(arguments ?? Array.Empty<string>()).ToArray());
+            return Program.Main(new[] { pathToFixture }.Concat(arguments?.Split(" ") ?? Array.Empty<string>()).ToArray());
         }
 
-        public static int ExecuteCodeInProcess(string code, params string[] arguments)
+        public static int ExecuteCodeInProcess(string code, string arguments)
         {
             var allArguments = new List<string>();
             if (arguments != null)
             {
-                allArguments.AddRange(arguments);
+                allArguments.AddRange(arguments?.Split(" "));
             }
             allArguments.Add("eval");
             allArguments.Add(code);

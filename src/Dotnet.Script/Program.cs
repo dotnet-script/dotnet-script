@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.Text;
 using Dotnet.Script.Core;
+using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
-using Microsoft.CodeAnalysis.Scripting;
-using Dotnet.Script.DependencyModel.Context;
-using Microsoft.CodeAnalysis;
-using System.Text;
-using Dotnet.Script.DependencyModel.Environment;
 using McMaster.Extensions.CommandLineUtils;
-using System.Diagnostics;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Dotnet.Script
 {
