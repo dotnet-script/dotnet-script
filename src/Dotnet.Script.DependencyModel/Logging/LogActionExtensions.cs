@@ -53,16 +53,11 @@ namespace Dotnet.Script.DependencyModel.Logging
 
         public static LogLevel FromString(string levelName)
         {
-            if (string.IsNullOrWhiteSpace(levelName))
+            if (string.IsNullOrWhiteSpace(levelName) || !_levelMap.TryGetValue(levelName, out var level))
             {
                 return LogLevel.Warning;
             }
-
-            if (!_levelMap.TryGetValue(levelName, out var level))
-            {
-                throw new InvalidOperationException($"Unknown level name : {levelName}");
-            }
-
+            
             return level;
         }
     }
