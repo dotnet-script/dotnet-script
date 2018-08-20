@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 
 namespace Dotnet.Script.Tests
 {
@@ -12,37 +13,66 @@ namespace Dotnet.Script.Tests
 
         private ScriptEnvironment _scriptEnvironment;
 
+        static ScriptTestRunner()
+        {
+            // Redirect log messages to the test output window when running in process (DEBUG)
+            Program.CreateLogFactory = (verbosity, debugMode) => TestOutputHelper.CreateTestLogFactory();
+        }
+
         private ScriptTestRunner()
         {
-            _scriptEnvironment = ScriptEnvironment.Default;
-        }
-
-
-        public (string output, int exitCode) Execute(params string[] arguments)
-        {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(arguments));
-            return result;
-        }
-
-        public int ExecuteInProcess(params string[] arguments)
-        {                        
-            return Program.Main(arguments ?? Array.Empty<string>());
-        }
-
-        public (string output, int exitCode) ExecuteFixture(string fixture, params string[] arguments)
-        {
-            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(new string[] { pathToFixture}.Concat(arguments ?? Array.Empty<string>()).ToArray()));
-            return result;
-        }
-
-        public int ExecuteFixtureInProcess(string fixture, params string[] arguments)
-        {
-            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);            
-            return Program.Main(new[] { pathToFixture }.Concat(arguments ?? Array.Empty<string>()).ToArray());
+            _scriptEnvironment = ScriptEnvironment.Default;            
         }
         
-        private string[] GetDotnetScriptArguments(params string[] arguments)
+        public (string output, int exitCode) Execute(string arguments, string workingDirectory = null)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(arguments), workingDirectory);
+            return result;
+        }
+
+        public int ExecuteInProcess(string arguments = null)
+        {                        
+            return Program.Main(arguments?.Split(" ") ?? Array.Empty<string>());
+        }
+
+        public (string output, int exitCode) ExecuteFixture(string fixture, string arguments = null)
+        {
+            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"{pathToFixture} {arguments}"));
+            return result;
+        }
+
+        public int ExecuteFixtureInProcess(string fixture, string arguments = null)
+        {
+            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);            
+            return Program.Main(new[] { pathToFixture }.Concat(arguments?.Split(" ") ?? Array.Empty<string>()).ToArray());
+        }
+
+        public static int ExecuteCodeInProcess(string code, string arguments)
+        {
+            var allArguments = new List<string>();
+            if (arguments != null)
+            {
+                allArguments.AddRange(arguments?.Split(" "));
+            }
+            allArguments.Add("eval");
+            allArguments.Add(code);
+            return Program.Main(allArguments.ToArray());
+        }
+
+        public (string output, int exitCode) ExecuteCode(string code)
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"eval \"{code}\""));
+            return result;
+        }
+
+        public (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
+        {            
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"-c release eval \"{code}\""));
+            return result;
+        }
+
+        private string GetDotnetScriptArguments(string arguments)
         {
             string configuration;
 #if DEBUG
@@ -50,12 +80,9 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            var allArguments = new List<string>(new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")});
-            if (arguments != null)
-            {
-                allArguments.AddRange(arguments);
-            }
-            return allArguments.ToArray();
+            var allArgs = $"exec {Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")} {arguments}";
+
+            return allArgs;
         }
     }
 }

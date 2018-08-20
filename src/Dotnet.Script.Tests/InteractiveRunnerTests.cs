@@ -1,19 +1,14 @@
-﻿using Dotnet.Script.Core;
-using Dotnet.Script.DependencyModel.Runtime;
-using Dotnet.Script.DependencyModel.Logging;
-using System.Threading.Tasks;
-using Xunit;
-using System.IO;
-using System.Text;
-using System;
-using Microsoft.CodeAnalysis.Text;
-using Dotnet.Script.DependencyModel.Context;
+﻿using Xunit;
 using Dotnet.Script.Shared.Tests;
+using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
     [Collection("IntegrationTests")]
     public class InteractiveRunnerTests : InteractiveRunnerTestsBase
     {
+        public InteractiveRunnerTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
     }
 }

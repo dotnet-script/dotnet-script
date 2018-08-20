@@ -6,7 +6,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Compilation;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
@@ -15,8 +17,9 @@ namespace Dotnet.Script.Tests
     {
         private readonly ScriptEnvironment _scriptEnvironment;
 
-        public ScriptPackagesTests()
+        public ScriptPackagesTests(ITestOutputHelper testOutputHelper)
         {
+            testOutputHelper.Capture();
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
@@ -82,10 +85,7 @@ namespace Dotnet.Script.Tests
 
         private CompilationDependencyResolver CreateResolverCompilationDependencyResolver()
         {
-            var resolver = new CompilationDependencyResolver(type => ((level, message) =>
-            {
-
-            }));
+            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
             return resolver;
         }
 

@@ -1,16 +1,23 @@
-﻿using Xunit;
+﻿using Dotnet.Script.Shared.Tests;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
     [Collection("IntegrationTests")]
     public class PackageSourceTests : IClassFixture<ScriptPackagesFixture>
     {
+        public PackageSourceTests(ITestOutputHelper testOutputHelper)
+        {
+            testOutputHelper.Capture();
+        }
+
         [Fact]
         public void ShouldHandleSpecifyingPackageSource()
         {
             var fixture = "ScriptPackage/WithNoNuGetConfig";
-            var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);            
-            var result = ScriptTestRunner.Default.ExecuteFixture(fixture, "-s", pathToScriptPackages);            
+            var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);
+            var result = ScriptTestRunner.Default.ExecuteFixture(fixture, $"-s {pathToScriptPackages}");
             Assert.Contains("Hello", result.output);
             Assert.Equal(0, result.exitCode);
         }
@@ -19,11 +26,11 @@ namespace Dotnet.Script.Tests
         public void ShouldHandleSpecifyingPackageSourceWhenEvaluatingCode()
         {
             var fixture = "ScriptPackage/WithNoNuGetConfig";
-            var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);            
+            var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);
             var code = @"#load \""nuget:ScriptPackageWithMainCsx,1.0.0\"" SayHello();";
-            var result = ScriptTestRunner.Default.Execute("-s", pathToScriptPackages, "eval", $"\"{code}\"");
+            var result = ScriptTestRunner.Default.Execute($"-s {pathToScriptPackages} eval \"{code}\"");
             Assert.Contains("Hello", result.output);
-            Assert.Equal(0, result.exitCode);            
+            Assert.Equal(0, result.exitCode);
         }
     }
 }

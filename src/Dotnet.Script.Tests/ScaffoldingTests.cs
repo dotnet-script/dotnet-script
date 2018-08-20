@@ -1,8 +1,7 @@
 ﻿using System.IO;
-using Xunit;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Dotnet.Script.DependencyModel.Environment;
+using Newtonsoft.Json.Linq;
+using Xunit;
 
 
 namespace Dotnet.Script.Tests
@@ -20,9 +19,10 @@ namespace Dotnet.Script.Tests
         public void ShouldInitializeScriptFolder()
         {
             using (var scriptFolder = new DisposableFolder())
-            {                
-                var result = Execute("init", scriptFolder.Path);
-                Assert.Equal(0, result.exitCode);
+            {                                                
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+
+                Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "omnisharp.json")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));                
@@ -34,9 +34,12 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                var result = Execute("init", scriptFolder.Path);
-                Assert.Equal(0, result.exitCode);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+
+                Assert.Equal(0, exitCode);
+
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
+
                 Assert.True(settings.script.enableScriptNuGetReferences.Value);
             }
         }
@@ -46,10 +49,13 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                var result = Execute("init", scriptFolder.Path);
+                var result = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+
                 Assert.Equal(0, result.exitCode);
+
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
-                Assert.Equal(_scriptEnvironment.TargetFramework, settings.script.defaultTargetFramework.Value);                
+
+                Assert.Equal(_scriptEnvironment.TargetFramework, settings.script.defaultTargetFramework.Value);
             }
         }
 
@@ -58,9 +64,9 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                var result = Execute("new script.csx", scriptFolder.Path);
-                
-                Assert.Equal(0, result.exitCode);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("new script.csx", scriptFolder.Path);
+
+                Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "script.csx")));
             }
         }
@@ -70,9 +76,9 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                var result = Execute("new anotherScript", scriptFolder.Path);
-                
-                Assert.Equal(0, result.exitCode);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("new anotherScript", scriptFolder.Path);
+
+                Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherScript.csx")));
             }
         }
@@ -82,9 +88,9 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                var result = Execute("init custom.csx", scriptFolder.Path);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init custom.csx", scriptFolder.Path);
                 
-                Assert.Equal(0, result.exitCode);
+                Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "custom.csx")));
             }
         }
@@ -94,9 +100,9 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                var result = Execute("init anotherCustom", scriptFolder.Path);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init anotherCustom", scriptFolder.Path);
                 
-                Assert.Equal(0, result.exitCode);
+                Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherCustom.csx")));
             }
         }
@@ -106,8 +112,8 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                Execute("init custom.csx", scriptFolder.Path);
-                Execute("init", scriptFolder.Path);
+                ScriptTestRunner.Default.Execute("init custom.csx", scriptFolder.Path);
+                ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
                 Assert.False(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
             }
         }
@@ -116,8 +122,8 @@ namespace Dotnet.Script.Tests
         public void ShouldUpdatePathToDotnetScript()
         {
             using (var scriptFolder = new DisposableFolder())
-            {             
-                Execute("init", scriptFolder.Path);
+            {
+                ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
                 var pathToLaunchConfiguration = Path.Combine(scriptFolder.Path, ".vscode/launch.json");
                 var config = JObject.Parse(File.ReadAllText(pathToLaunchConfiguration));
 
@@ -125,36 +131,11 @@ namespace Dotnet.Script.Tests
 
                 File.WriteAllText(pathToLaunchConfiguration, config.ToString());
 
-                var result = Execute("init", scriptFolder.Path);
+                ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
 
                 config = JObject.Parse(File.ReadAllText(pathToLaunchConfiguration));
                 Assert.NotEqual("InvalidPath/dotnet-script.dll", config.SelectToken("configurations[0].args[1]").Value<string>());
             }
-        }
-
-        /// <summary>
-        /// Use this if you need to debug.
-        /// </summary>        
-        private static int ExecuteInProcess(params string[] args)
-        {            
-            return Program.Main(args);
-        }
-
-        private (string output, int exitCode) Execute(string args, string workingDirectory)
-        {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(args), workingDirectory);
-            return result;
-        }
-
-        private string[] GetDotnetScriptArguments(string args)
-        {
-            string configuration;
-#if DEBUG
-            configuration = "Debug";
-#else
-            configuration = "Release";
-#endif
-            return new[] { "exec", Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll"), args };
         }
     }
 

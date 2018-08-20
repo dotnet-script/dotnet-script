@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
-        <VersionPrefix>0.25.0</VersionPrefix>
+        <VersionPrefix>0.26.0</VersionPrefix>
         <Authors>filipw</Authors>
         <PackageId>Dotnet.Script</PackageId>
         <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -19,10 +19,12 @@
         <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
         <PackAsTool>false</PackAsTool>
         <IsPackable>true</IsPackable>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>    
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.8.2" />
         <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.2" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />

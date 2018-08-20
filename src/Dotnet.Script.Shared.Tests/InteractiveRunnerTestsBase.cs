@@ -1,19 +1,22 @@
-﻿using Dotnet.Script.Core;
-using Dotnet.Script.DependencyModel.Runtime;
-using Dotnet.Script.DependencyModel.Logging;
-using System.Threading.Tasks;
-using Xunit;
+﻿using System;
 using System.IO;
-using System.Text;
-using System;
-using Microsoft.CodeAnalysis.Text;
+using System.Threading.Tasks;
+using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Context;
-using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Runtime;
+using Microsoft.CodeAnalysis.Text;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Dotnet.Script.Shared.Tests
 {
     public abstract class InteractiveRunnerTestsBase
     {
+        public InteractiveRunnerTestsBase(ITestOutputHelper testOutputHelper)
+        {
+            testOutputHelper.Capture();
+        }
+
         private class InteractiveTestContext
         {
             public InteractiveTestContext(ScriptConsole console, InteractiveRunner runner)
@@ -33,21 +36,12 @@ namespace Dotnet.Script.Shared.Tests
             var error = new StringWriter();
 
             var console = new ScriptConsole(writer, reader, error);
-            var logger = new ScriptLogger(console.Error, true);
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(type => ((level, message) =>
-            {
-                if (level == LogLevel.Debug)
-                {
-                    logger.Verbose(message);
-                }
-                if (level == LogLevel.Info)
-                {
-                    logger.Log(message);
-                }
-            }));
 
-            var compiler = new ScriptCompiler(logger, runtimeDependencyResolver);
-            var runner = new InteractiveRunner(compiler, logger, console, Array.Empty<string>());
+            var logFactory = TestOutputHelper.CreateTestLogFactory();
+            var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory);
+
+            var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
+            var runner = new InteractiveRunner(compiler, logFactory, console, Array.Empty<string>());
             return new InteractiveTestContext(console, runner);
         }
 

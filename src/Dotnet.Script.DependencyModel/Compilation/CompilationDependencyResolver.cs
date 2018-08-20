@@ -65,7 +65,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             foreach (var compilationLibrary in compileLibraries)
             {
                 var resolvedReferencePaths = new HashSet<string>();
-                _logger.Debug($"Resolving compilation reference paths for {compilationLibrary.Name}");
+                _logger.Trace($"Resolving compilation reference paths for {compilationLibrary.Name}");
                 var referencePaths = ResolveReferencePaths(compilationLibrary, compilationAssemblyResolvers);
                 var scripts =
                     _scriptFilesDependencyResolver.GetScriptFileDependencies(compilationLibrary.Path, dependencyInfo.NugetPackageFolders);
@@ -94,7 +94,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
             foreach (var referencePath in referencePaths)
             {
-                _logger.Debug($"{compilationLibrary.Name} => {referencePath}");
+                _logger.Trace($"{compilationLibrary.Name} => {referencePath}");
             }
 
             return referencePaths;
