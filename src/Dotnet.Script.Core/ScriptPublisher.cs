@@ -38,7 +38,7 @@ namespace Dotnet.Script.Core
         }
 
         public void CreateAssembly<TReturn, THost>(ScriptContext context, LogFactory logFactory, string assemblyFileName = null)
-        {           
+        {
             Directory.CreateDirectory(context.WorkingDirectory);
             Directory.CreateDirectory(Path.Combine(context.WorkingDirectory, "obj"));
 
@@ -78,7 +78,7 @@ namespace Dotnet.Script.Core
             CopyProgramTemplate(tempProjectDirecory);
 
             var commandRunner = new CommandRunner(logFactory);
-            // todo: may want to add ability to return dotnet.exe errors            
+            // todo: may want to add ability to return dotnet.exe errors
             var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
             _scriptConsole.Out.WriteLine($"Published {context.FilePath} (executable) to {context.WorkingDirectory}");
@@ -94,7 +94,7 @@ namespace Dotnet.Script.Core
                     throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
                 }
 
-                var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");                
+                var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
                 using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
                 using (emitResult.PeStream)
                 {
