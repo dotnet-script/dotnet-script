@@ -20,6 +20,13 @@ namespace Dotnet.Script.Core
             Console.ResetColor();
         }
 
+        public virtual void WriteSuccess(string value)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Out.WriteLine(value.TrimEnd(Environment.NewLine.ToCharArray()));
+            Console.ResetColor();
+        }
+
         public ScriptConsole(TextWriter output, TextReader input, TextWriter error)
         {
             Out = output;
