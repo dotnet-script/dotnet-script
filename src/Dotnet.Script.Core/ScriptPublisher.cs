@@ -38,13 +38,12 @@ namespace Dotnet.Script.Core
         }
 
         public void CreateAssembly<TReturn, THost>(ScriptContext context, LogFactory logFactory, string assemblyFileName = null)
-        {
+        {           
             Directory.CreateDirectory(context.WorkingDirectory);
             Directory.CreateDirectory(Path.Combine(context.WorkingDirectory, "obj"));
 
             assemblyFileName = assemblyFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
-            CreateScriptAssembly<TReturn, THost>(context, context.WorkingDirectory, assemblyFileName);
-
+            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, context.WorkingDirectory, assemblyFileName);
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
@@ -55,6 +54,7 @@ namespace Dotnet.Script.Core
             var sourceNugetPropsPath = Path.Combine(tempProjectDirecory, "obj", "script.csproj.nuget.g.props");
             var destinationNugetPropsPath = Path.Combine(context.WorkingDirectory, "obj", "script.csproj.nuget.g.props");
             File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
+            _scriptConsole.Out.WriteLine($"Published {context.FilePath} to { scriptAssemblyPath}");
         }
 
         public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier)
@@ -69,8 +69,7 @@ namespace Dotnet.Script.Core
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
-            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);
-
+            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);           
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion, PackageOrigin.ReferenceDirective));
             projectFile.AddAssemblyReference(scriptAssemblyPath);
@@ -79,9 +78,10 @@ namespace Dotnet.Script.Core
             CopyProgramTemplate(tempProjectDirecory);
 
             var commandRunner = new CommandRunner(logFactory);
-            // todo: may want to add ability to return dotnet.exe errors
+            // todo: may want to add ability to return dotnet.exe errors            
             var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
+            _scriptConsole.Out.WriteLine($"Published {context.FilePath} (executable) to {context.WorkingDirectory}");
         }
 
         private string CreateScriptAssembly<TReturn, THost>(ScriptContext context, string outputDirectory, string assemblyFileName)
@@ -94,7 +94,7 @@ namespace Dotnet.Script.Core
                     throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
                 }
 
-                var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
+                var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");                
                 using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
                 using (emitResult.PeStream)
                 {
