@@ -113,10 +113,10 @@ namespace Dotnet.Script.Core
             }
             catch (CompilationErrorException ex)
             {
-                _scriptConsole.WritePrettyError(ex.Message);
+                _scriptConsole.WriteError(ex.Message);
                 foreach (var diagnostic in ex.Diagnostics)
                 {
-                    _scriptConsole.WritePrettyError(diagnostic.ToString());
+                    _scriptConsole.WriteError(diagnostic.ToString());
                 }
                 throw;
             }

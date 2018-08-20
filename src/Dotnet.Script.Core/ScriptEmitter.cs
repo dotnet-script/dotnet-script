@@ -44,7 +44,7 @@ namespace Dotnet.Script.Core
             {
                 foreach (var diagnostic in e.Diagnostics)
                 {
-                    _scriptConsole.WritePrettyError(diagnostic.ToString());
+                    _scriptConsole.WriteError(diagnostic.ToString());
                 }
 
                 throw;

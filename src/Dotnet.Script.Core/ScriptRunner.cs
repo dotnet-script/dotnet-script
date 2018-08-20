@@ -70,7 +70,7 @@ namespace Dotnet.Script.Core
             {
                 foreach (var diagnostic in e.Diagnostics)
                 {
-                    ScriptConsole.WritePrettyError(diagnostic.ToString());
+                    ScriptConsole.WriteError(diagnostic.ToString());
                 }
 
                 throw;
@@ -89,7 +89,7 @@ namespace Dotnet.Script.Core
             {
                 // once Roslyn ships with this, we can format he exception using CSharpObjectFormatter
                 // https://github.com/dotnet/roslyn/blob/4175350b87f928e136cbb14c2668b7cb3338d5a1/src/Scripting/Core/Hosting/CommonMemberFilter.cs#L18
-                ScriptConsole.WritePrettyError(scriptState.Exception.ToString());
+                ScriptConsole.WriteError(scriptState.Exception.ToString());
                 throw new ScriptRuntimeException("Script execution resulted in an exception.", scriptState.Exception);
             }
 

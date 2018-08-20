@@ -150,7 +150,7 @@ namespace Dotnet.Script.Core
                 await doWork();
                 if (_scriptState?.Exception != null)
                 {
-                    Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                    Console.WriteError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
                 }
 
                 if (_scriptState?.ReturnValue != null)
@@ -162,12 +162,12 @@ namespace Dotnet.Script.Core
             {
                 foreach (var diagnostic in e.Diagnostics)
                 {
-                    Console.WritePrettyError(diagnostic.ToString());
+                    Console.WriteError(diagnostic.ToString());
                 }
             }
             catch (Exception e)
             {
-                Console.WritePrettyError(CSharpObjectFormatter.Instance.FormatException(e));
+                Console.WriteError(CSharpObjectFormatter.Instance.FormatException(e));
             }
         }
     }
