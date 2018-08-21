@@ -54,7 +54,7 @@ namespace Dotnet.Script.Core
             var sourceNugetPropsPath = Path.Combine(tempProjectDirecory, "obj", "script.csproj.nuget.g.props");
             var destinationNugetPropsPath = Path.Combine(context.WorkingDirectory, "obj", "script.csproj.nuget.g.props");
             File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
-            _scriptConsole.Out.WriteLine($"Published {context.FilePath} to { scriptAssemblyPath}");
+            _scriptConsole.WriteSuccess($"Published {context.FilePath} to { scriptAssemblyPath}");
         }
 
         public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier)
@@ -81,7 +81,7 @@ namespace Dotnet.Script.Core
             // todo: may want to add ability to return dotnet.exe errors
             var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
             if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
-            _scriptConsole.Out.WriteLine($"Published {context.FilePath} (executable) to {context.WorkingDirectory}");
+            _scriptConsole.WriteSuccess($"Published {context.FilePath} (executable) to {context.WorkingDirectory}");
         }
 
         private string CreateScriptAssembly<TReturn, THost>(ScriptContext context, string outputDirectory, string assemblyFileName)
@@ -113,10 +113,10 @@ namespace Dotnet.Script.Core
             }
             catch (CompilationErrorException ex)
             {
-                _scriptConsole.WritePrettyError(ex.Message);
+                _scriptConsole.WriteError(ex.Message);
                 foreach (var diagnostic in ex.Diagnostics)
                 {
-                    _scriptConsole.WritePrettyError(diagnostic.ToString());
+                    _scriptConsole.WriteError(diagnostic.ToString());
                 }
                 throw;
             }
