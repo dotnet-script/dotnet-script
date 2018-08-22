@@ -211,7 +211,7 @@ namespace Dotnet.Script
                        
                         var compiler = GetScriptCompiler(commandDebugMode.HasValue(), logFactory);
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
-                        var result = await runner.Execute<int>(absoluteFilePath);
+                        var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHypen));
                         return result;
                     }
                     return exitCode;
