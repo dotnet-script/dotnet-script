@@ -5,7 +5,6 @@ using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
