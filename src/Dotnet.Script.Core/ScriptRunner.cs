@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
@@ -25,7 +26,7 @@ namespace Dotnet.Script.Core
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
-        public async Task<TReturn> Execute<TReturn>(string dllPath)
+        public async Task<TReturn> Execute<TReturn>(string dllPath, IEnumerable<string> commandLineArgs)
         {
             var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
@@ -43,8 +44,13 @@ namespace Dotnet.Script.Core
             var type = assembly.GetType("Submission#0");
             var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
 
+            var globals = new CommandLineScriptGlobals(ScriptConsole.Out, CSharpObjectFormatter.Instance);
+            foreach (var arg in commandLineArgs)
+                globals.Args.Add(arg);
+
             var submissionStates = new object[2];
-            submissionStates[0] = new CommandLineScriptGlobals(ScriptConsole.Out, CSharpObjectFormatter.Instance);
+            submissionStates[0] = globals;
+
             var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
             return await resultTask;
         }

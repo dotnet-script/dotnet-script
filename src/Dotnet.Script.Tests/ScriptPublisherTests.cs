@@ -193,6 +193,25 @@ namespace Dotnet.Script.Tests
             }
         }
 
+        [Fact]
+        public void DllWithArgsTests()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var code = @"WriteLine(""Hello "" + Args[0] + Args[1] + Args[2] + Args[3] + Args[4]);";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} --dll", workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var dllPath = Path.Combine(workspaceFolder.Path, "publish", "main.dll");
+                var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath} -- w o r l d", workspaceFolder.Path);
+
+                Assert.Equal(0, dllRunResult.exitCode);
+                Assert.Contains("Hello world", dllRunResult.output);
+            }
+        }
+
         private LogFactory GetLogFactory()
         {
             return TestOutputHelper.CreateTestLogFactory();
