@@ -5,6 +5,7 @@ using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
@@ -104,9 +105,14 @@ namespace Dotnet.Script.Core
                 foreach (var reference in emitResult.DirectiveReferences)
                 {
                     if (reference.Display.EndsWith(".NuGet.dll")) continue;
-                    var refInfo = new FileInfo(reference.Display);
-                    var newAssemblyPath = Path.Combine(outputDirectory, refInfo.Name);
-                    File.Copy(refInfo.FullName, newAssemblyPath, true);
+                    var referenceFileInfo = new FileInfo(reference.Display);
+                    var fullPathToReference = Path.GetFullPath(referenceFileInfo.FullName);
+                    var fullPathToNewAssembly = Path.GetFullPath(Path.Combine(outputDirectory, referenceFileInfo.Name));
+                                        
+                    if (!Equals(fullPathToReference, fullPathToNewAssembly))
+                    {
+                        File.Copy(fullPathToReference, fullPathToNewAssembly, true);
+                    }                    
                 }
 
                 return assemblyPath;
