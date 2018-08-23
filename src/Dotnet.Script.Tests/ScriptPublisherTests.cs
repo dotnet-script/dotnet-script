@@ -3,6 +3,7 @@ using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.Shared.Tests;
+using System;
 using System.IO;
 using Xunit;
 using Xunit.Abstractions;
@@ -209,6 +210,23 @@ namespace Dotnet.Script.Tests
 
                 Assert.Equal(0, dllRunResult.exitCode);
                 Assert.Contains("Hello world", dllRunResult.output);
+            }
+        }
+
+        [Fact]
+        public void ShouldHandleReferencingAssemblyFromScriptFolder()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {               
+                ProcessHelper.RunAndCaptureOutput($"dotnet",$" new classlib -n MyCustomLibrary -o {workspaceFolder.Path}");
+                ProcessHelper.RunAndCaptureOutput($"dotnet", $" build -o {workspaceFolder.Path}", workspaceFolder.Path);
+                var code = $@"#r ""MyCustomLibrary.dll"" {Environment.NewLine} WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+
+                var publishResult = ScriptTestRunner.Default.Execute("publish main.csx --dll --output .", workspaceFolder.Path);
+
+                Assert.Equal(0, publishResult.exitCode);
             }
         }
 
