@@ -268,7 +268,7 @@ namespace Dotnet.Script
                     }
 
                     // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
-                    string publishDirectory = Path.Combine(Path.GetTempPath(), $"dotnet-scripts\\{uniqueFolderName}");
+                    string publishDirectory = Path.Combine(Path.GetTempPath(), Path.Combine($"dotnet-scripts","{uniqueFolderName}"));
                     string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
 
                     // compute a hash on the contents of a script
