@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
-using Dotnet.Script.DependencyModel.Environment;
+﻿using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
+using System;
+using System.Linq;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
@@ -20,9 +20,10 @@ namespace Dotnet.Script.DependencyModel.Context
         }
 
         public void Restore(string pathToProjectFile, string[] packageSources)
-        {           
+        {
             var packageSourcesArgument = CreatePackageSourcesArguments();
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
+
             _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" -r {runtimeIdentifier} {packageSourcesArgument}");
             if (exitcode != 0)
@@ -40,6 +41,6 @@ namespace Dotnet.Script.DependencyModel.Context
             }
         }
 
-        public bool CanRestore => _commandRunner.Execute("dotnet", "--version") == 0;
+        public bool CanRestore => true;
     }
 }
