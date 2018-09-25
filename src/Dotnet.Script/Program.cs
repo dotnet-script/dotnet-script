@@ -52,11 +52,11 @@ namespace Dotnet.Script
             }
         }
 
-        public static Func<string, bool, LogFactory> CreateLogFactory 
+        public static Func<string, bool, LogFactory> CreateLogFactory
             = (verbosity, debugMode) => LogHelper.CreateLogFactory(debugMode ? "debug" : verbosity);
 
         private static int Wain(string[] args)
-        {           
+        {
             var app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
                 ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
@@ -71,7 +71,7 @@ namespace Dotnet.Script
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
 
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
-            
+
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
             var argsAfterDoubleHypen = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
@@ -85,7 +85,7 @@ namespace Dotnet.Script
             {
                 c.Description = "Execute CSX code.";
                 var code = c.Argument("code", "Code to execute.");
-                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);                
+                var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(async () =>
                 {
                     int exitCode = 0;
@@ -109,7 +109,7 @@ namespace Dotnet.Script
                 var fileName = c.Argument("filename", "(Optional) The name of the sample script file to be created during initialization. Defaults to 'main.csx'");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
-                {                    
+                {
                     var scaffolder = new Scaffolder();
                     scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
@@ -122,7 +122,7 @@ namespace Dotnet.Script
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
-                {                    
+                {
                     var scaffolder = new Scaffolder();
                     if (fileNameArgument.Value == null)
                     {
@@ -165,16 +165,17 @@ namespace Dotnet.Script
                     // if a publish directory has been specified, then it is used directly, otherwise:
                     // -- for EXE {current dir}/publish/{runtime ID}
                     // -- for DLL {current dir}/publish
-                    var publishDirectory = publishDirectoryOption.Value() ?? 
+                    var publishDirectory = publishDirectoryOption.Value() ??
                         (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
 
                     var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue(), logFactory);
-                    var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);                    
+                    var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                     var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
-                    var code = SourceText.From(File.ReadAllText(absoluteFilePath));
+                    var rawCode = File.ReadAllText(absoluteFilePath);
+                    var code = SourceText.From(RemoveShebang(rawCode));
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 
                     if (dllOption.HasValue())
@@ -186,7 +187,7 @@ namespace Dotnet.Script
                         publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtimeIdentifier);
                     }
 
-                    return 0;                  
+                    return 0;
                 });
             });
 
@@ -208,7 +209,7 @@ namespace Dotnet.Script
                         var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
 
                         var absoluteFilePath = Path.IsPathRooted(dllPath.Value) ? dllPath.Value : Path.Combine(Directory.GetCurrentDirectory(), dllPath.Value);
-                       
+
                         var compiler = GetScriptCompiler(commandDebugMode.HasValue(), logFactory);
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                         var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHypen));
@@ -245,9 +246,23 @@ namespace Dotnet.Script
                 }
                 return exitCode;
             });
-            
+
 
             return app.Execute(argsBeforeDoubleHyphen);
+        }
+
+        // on osx/linux the shebang #!/usr/bin/env dotnet-script is a text file convention 
+        // which tells the system what program to use to interpret the content of a file marked as +x
+        // this function strips that out the shebang so that the compiler doesn't try to interpet as a 
+        // directive
+        private static String RemoveShebang(String rawCode)
+        {
+            if (rawCode.StartsWith("#!/usr/"))
+            {
+                rawCode = rawCode.Substring(rawCode.IndexOf("\n") + 1);
+            }
+
+            return rawCode;
         }
 
         private static async Task<int> RunScript(string file, bool debugMode, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources)
@@ -267,21 +282,19 @@ namespace Dotnet.Script
             var absoluteFilePath = Path.IsPathRooted(file) ? file : Path.Combine(Directory.GetCurrentDirectory(), file);
             var directory = Path.GetDirectoryName(absoluteFilePath);
 
-            using (var filestream = new FileStream(absoluteFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            var rawCode = File.ReadAllText(absoluteFilePath);
+            var sourceText = SourceText.From(RemoveShebang(rawCode));
+            var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
+            if (interactive)
             {
-                var sourceText = SourceText.From(filestream);
-                var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);               
-                if (interactive)
-                {
-                    var compiler = GetScriptCompiler(debugMode, logFactory);
-                    
-                    var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
-                    await runner.RunLoopWithSeed(context);
-                    return 0;
-                }
+                var compiler = GetScriptCompiler(debugMode, logFactory);
 
-                return await Run(debugMode, logFactory,  context);
+                var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
+                await runner.RunLoopWithSeed(context);
+                return 0;
             }
+
+            return await Run(debugMode, logFactory, context);
         }
 
         private static bool IsHttpUri(string fileName)
@@ -297,9 +310,9 @@ namespace Dotnet.Script
             await runner.RunLoop();
         }
 
-        private static Task<int> RunCode(string code, bool debugMode, LogFactory logFactory,  OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
-        {            
-            var sourceText = SourceText.From(code);            
+        private static Task<int> RunCode(string code, bool debugMode, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
+        {
+            var sourceText = SourceText.From(RemoveShebang(code));
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, optimizationLevel, ScriptMode.Eval, packageSources: packageSources);
             return Run(debugMode, logFactory, context);
         }
@@ -331,10 +344,10 @@ namespace Dotnet.Script
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode, LogFactory logFactory)
-        {          
+        {
             var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory);
             var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
             return compiler;
-        }       
+        }
     }
 }
