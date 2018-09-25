@@ -257,9 +257,12 @@ namespace Dotnet.Script
         // directive
         private static String RemoveShebang(String rawCode)
         {
-            if (rawCode.StartsWith("#!/usr/"))
+            if (rawCode.StartsWith("#!/usr/bin/env dotnet-script"))
             {
                 rawCode = rawCode.Substring(rawCode.IndexOf("\n") + 1);
+                // insert extra line after to allow directives to be parsed and 
+                // keep the debugger line numbers the same
+                rawCode = rawCode.Insert(rawCode.IndexOf(Environment.NewLine), Environment.NewLine);
             }
 
             return rawCode;
