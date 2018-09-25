@@ -7,9 +7,10 @@
             "request": "launch",
             "program": "dotnet",
             "args": [
-              "exec", 
-              "PATH_TO_DOTNET-SCRIPT", 
-              "${file}"
+                "exec",
+                "PATH_TO_DOTNET-SCRIPT",
+                "--nocache",
+                "${file}"
             ],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": true
