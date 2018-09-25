@@ -78,12 +78,6 @@ namespace Dotnet.Script
 
             var nocache = app.Option("--nocache", "disable DLL caching", CommandOptionType.NoValue);
 
-            CommandOption register = null;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                register = app.Option("--register", "Register .csx file extension to be executable by dotnet-script.", CommandOptionType.NoValue);
-            }
-
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
             var argsAfterDoubleHypen = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
@@ -238,25 +232,6 @@ namespace Dotnet.Script
                 {
                     Console.Write(GetEnvironmentInfo());
                     return 0;
-                }
-
-                // if request to register
-                if (register != null && register.HasValue())
-                {
-                    // and we are on windows
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    {
-                        // then register dotnet-script as the tool to process .csx files
-                        string cmdPath = Path.Combine(Path.GetTempPath(), "register.cmd");
-                        using (var textWriter = new StreamWriter(cmdPath))
-                        {
-                            textWriter.WriteLine("reg add HKCU\\Software\\classes\\.csx /f /ve /t REG_SZ -d dotnetscript");
-                            textWriter.WriteLine("reg add HKCU\\Software\\Classes\\dotnetscript\\Shell\\Open\\Command /f /ve /t REG_EXPAND_SZ /d \"%%USERPROFILE%%\\.dotnet\\tools\\dotnet-script.exe %%1 -- %%*");
-                        }
-                        Process.Start("cmd.exe", $"/c {cmdPath}").WaitForExit();
-                        Console.WriteLine("You can now execute .csx files directly.");
-                        return 0;
-                    }
                 }
 
                 var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
