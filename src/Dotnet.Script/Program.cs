@@ -289,7 +289,7 @@ namespace Dotnet.Script
                          // the hashcode has changed (meaning new content)
                          File.ReadAllText(hashFile) != sourceHash ||
                          // or if the dll is older then the file.
-                         File.GetCreationTimeUtc(pathToDll) < File.GetCreationTimeUtc(absoluteSourcePath))
+                         File.GetLastWriteTimeUtc(pathToDll) < File.GetLastWriteTimeUtc(absoluteSourcePath))
                     {
                         // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
                         var optimizationLevel = OptimizationLevel.Debug;
