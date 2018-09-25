@@ -350,7 +350,8 @@ namespace Dotnet.Script
                 {
                     var downloader = new ScriptDownloader();
                     var code = await downloader.Download(file);
-                    return await RunCode(code, debugMode, logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);
+                    var sourceText = SourceText.From(code);
+                    return await RunScript(debugMode, logFactory, optimizationLevel, args, interactive, packageSources, null, Directory.GetCurrentDirectory(), sourceText, ScriptMode.Eval);
                 }
 
                 throw new Exception($"Couldn't find file '{file}'");
@@ -359,13 +360,16 @@ namespace Dotnet.Script
             var absoluteFilePath = Path.IsPathRooted(file) ? file : Path.Combine(Directory.GetCurrentDirectory(), file);
             var directory = Path.GetDirectoryName(absoluteFilePath);
 
-            SourceText sourceText;
             using (var filestream = File.OpenRead(absoluteFilePath))
             {
-                sourceText = SourceText.From(filestream);
+                var sourceText = SourceText.From(filestream);
+                return await RunScript(debugMode, logFactory, optimizationLevel, args, interactive, packageSources, absoluteFilePath, directory, sourceText, ScriptMode.Script);
             }
+        }
 
-            var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
+        private static async Task<int> RunScript(bool debugMode, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources, string absoluteFilePath, string directory, SourceText sourceText, ScriptMode scriptMode)
+        {
+            var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources, scriptMode:scriptMode);
             if (interactive)
             {
                 var compiler = GetScriptCompiler(debugMode, logFactory);
