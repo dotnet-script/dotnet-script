@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Templates\helloworld.csx.template" />
-    <EmbeddedResource Include="Templates\launch-linux.json.template" />
     <EmbeddedResource Include="Templates\launch.json.template" />
     <EmbeddedResource Include="Templates\omnisharp.json.template" />
     <EmbeddedResource Include="Templates\program.publish.template" />

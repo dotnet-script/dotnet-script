@@ -44,9 +44,8 @@ namespace Dotnet.Script.Core
                     RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     // add a shebang to set dotnet-script as the interpreter for .csx files
-                    // add make sure we are using environment newlines, because shebang won't work with windows cr\lf
-                    scriptFileTemplate = "#!/usr/bin/env dotnet-script" + Environment.NewLine +
-                        scriptFileTemplate.Replace("\r\n", Environment.NewLine);
+                    // and make sure we are using environment newlines, because shebang won't work with windows cr\lf
+                    scriptFileTemplate = $"#!/usr/bin/env dotnet-script" + Environment.NewLine + scriptFileTemplate.Replace("\r\n", Environment.NewLine);
                 }
 
                 File.WriteAllText(pathToScriptFile, scriptFileTemplate, System.Text.Encoding.ASCII /* Linux shebang can't handle BOM */);
@@ -125,7 +124,7 @@ namespace Dotnet.Script.Core
                 using (var textWriter = new StreamWriter(cmdPath))
                 {
                     textWriter.WriteLine("@reg add HKCU\\Software\\classes\\.csx /f /ve /t REG_SZ -d dotnetscript > nul");
-                    textWriter.WriteLine("@reg add HKCU\\Software\\Classes\\dotnetscript\\Shell\\Open\\Command /f /ve /t REG_EXPAND_SZ /d \"%%USERPROFILE%%\\.dotnet\\tools\\dotnet-script.exe %%1 -- %%*\" > nul");
+                    textWriter.WriteLine($"@reg add HKCU\\Software\\Classes\\dotnetscript\\Shell\\Open\\Command /f /ve /t REG_EXPAND_SZ /d \"{_scriptEnvironment.InstallLocation}\\dotnet-script.cmd %%1 -- %%*\" > nul");
                 }
                 Process.Start("cmd.exe", $"/c {cmdPath}").WaitForExit();
             }
@@ -136,19 +135,7 @@ namespace Dotnet.Script.Core
             string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
             if (!File.Exists(pathToLaunchFile))
             {
-                string launchFileTemplate = null;
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    // since we have the shebang in the .csx file, we have to massage it to remove it when compiling
-                    // if it is massaged the debugger won't debug it because it detects it's changed, so this launch
-                    // template sets the flag which says it's ok to debug anyway
-                    launchFileTemplate = TemplateLoader.ReadTemplate("launch-linux.json.template");
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    launchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
-                }
+                string launchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
                 string launchFileContent = launchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
                 File.WriteAllText(pathToLaunchFile, launchFileContent);
                 _scriptConsole.WriteSuccess($"...'{pathToLaunchFile}' [Created]");

@@ -175,7 +175,7 @@ namespace Dotnet.Script
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                     var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
                     var rawCode = File.ReadAllText(absoluteFilePath);
-                    var code = SourceText.From(RemoveShebang(rawCode));
+                    var code = SourceText.From(rawCode);
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 
                     if (dllOption.HasValue())
@@ -251,23 +251,6 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);
         }
 
-        // on osx/linux the shebang #!/usr/bin/env dotnet-script is a text file convention 
-        // which tells the system what program to use to interpret the content of a file marked as +x
-        // this function strips that out the shebang so that the compiler doesn't try to interpet as a 
-        // directive
-        private static String RemoveShebang(String rawCode)
-        {
-            if (rawCode.StartsWith("#!/usr/bin/env dotnet-script"))
-            {
-                rawCode = rawCode.Substring(rawCode.IndexOf("\n") + 1);
-                // insert extra line after to allow directives to be parsed and 
-                // keep the debugger line numbers the same
-                rawCode = rawCode.Insert(rawCode.IndexOf(Environment.NewLine), Environment.NewLine);
-            }
-
-            return rawCode;
-        }
-
         private static async Task<int> RunScript(string file, bool debugMode, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources)
         {
             if (!File.Exists(file))
@@ -286,7 +269,7 @@ namespace Dotnet.Script
             var directory = Path.GetDirectoryName(absoluteFilePath);
 
             var rawCode = File.ReadAllText(absoluteFilePath);
-            var sourceText = SourceText.From(RemoveShebang(rawCode));
+            var sourceText = SourceText.From(rawCode);
             var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
             if (interactive)
             {
@@ -315,7 +298,7 @@ namespace Dotnet.Script
 
         private static Task<int> RunCode(string code, bool debugMode, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
         {
-            var sourceText = SourceText.From(RemoveShebang(code));
+            var sourceText = SourceText.From(code);
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, optimizationLevel, ScriptMode.Eval, packageSources: packageSources);
             return Run(debugMode, logFactory, context);
         }
