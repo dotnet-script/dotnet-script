@@ -1,14 +1,4 @@
 #define AUTOPUBLISH
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
@@ -19,13 +9,23 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Text;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Dotnet.Script
 {
     public class Program
     {
-        const string DebugFlagShort = "-d";
-        const string DebugFlagLong = "--debug";
+        private const string DebugFlagShort = "-d";
+        private const string DebugFlagLong = "--debug";
 
         public static int Main(string[] args)
         {
@@ -238,10 +238,13 @@ namespace Dotnet.Script
                     return 0;
                 }
 
+                // if request to register
                 if (register != null && register.HasValue())
                 {
+                    // and we are on windows
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
+                        // then register dotnet-script as the tool to process .csx files
                         string cmdPath = Path.Combine(Path.GetTempPath(), "register.cmd");
                         using (var textWriter = new StreamWriter(cmdPath))
                         {
@@ -259,37 +262,59 @@ namespace Dotnet.Script
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
 #if AUTOPUBLISH
-                    var absoluteSourcePath = Path.IsPathRooted(file.Value) ? file.Value : Path.Combine(Directory.GetCurrentDirectory(), file.Value);
+                    string cacheFolder = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
                     // create unique folder name based on the path
                     string uniqueFolderName = "";
                     using (var sha = SHA256.Create())
                     {
-                        uniqueFolderName = Convert.ToBase64String(sha.ComputeHash(Encoding.Unicode.GetBytes(absoluteSourcePath))).Replace("=",String.Empty).Replace("/",string.Empty);
+                        uniqueFolderName = Convert.ToBase64String(sha.ComputeHash(Encoding.Unicode.GetBytes(file.Value))).Replace("=", String.Empty).Replace("/", string.Empty);
+                    }
+
+                    string publishDirectory = Path.Combine(cacheFolder, uniqueFolderName);
+                    if (!Directory.Exists(publishDirectory))
+                    {
+                        Directory.CreateDirectory(publishDirectory);
+                    }
+
+                    string absoluteSourcePath;
+                    SourceText code;
+                    if (!File.Exists(file.Value))
+                    {
+                        if (IsHttpUri(file.Value))
+                        {
+                            var downloader = new ScriptDownloader();
+                            var rawCode = await downloader.Download(file.Value);
+                            absoluteSourcePath = Path.Combine(publishDirectory, "source.csx");
+                            File.WriteAllText(absoluteSourcePath, rawCode);
+                            code = SourceText.From(rawCode);
+                        }
+                        else
+                        {
+                            throw new Exception($"Couldn't find file '{file}'");
+                        }
+                    }
+                    else
+                    {
+                        absoluteSourcePath = Path.IsPathRooted(file.Value) ? Path.GetFullPath(file.Value) : Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), file.Value));
+                        code = SourceText.From(File.ReadAllText(absoluteSourcePath));
                     }
 
                     // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
-                    string publishDirectory = Path.Combine(Path.GetTempPath(), Path.Combine($"dotnet-scripts","{uniqueFolderName}"));
                     string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
 
-                    // compute a hash on the contents of a script
-                    string sourceHash;
-                    using (var sha256 = SHA256.Create())
-                    {
-                        sourceHash = Convert.ToBase64String(sha256.ComputeHash(File.ReadAllBytes(absoluteSourcePath)));
-                    }
+                    // source hash is the checkSum of the code
+                    string sourceHash = Convert.ToBase64String(code.GetChecksum().ToArray());
 
                     // get hash code from previous run 
-                    string hashFile = Path.Combine(publishDirectory, ".hash");
+                    string hashCache = Path.Combine(publishDirectory, ".hash");
                     var compiler = GetScriptCompiler(true, logFactory);
-                    
+
                     // if we don't have hash
-                    if (!File.Exists(hashFile) ||
+                    if (!File.Exists(hashCache) ||
                          // or we haven't created a dll
                          !Directory.Exists(publishDirectory) ||
                          // the hashcode has changed (meaning new content)
-                         File.ReadAllText(hashFile) != sourceHash ||
-                         // or if the dll is older then the file.
-                         File.GetLastWriteTimeUtc(pathToDll) < File.GetLastWriteTimeUtc(absoluteSourcePath))
+                         File.ReadAllText(hashCache) != sourceHash)
                     {
                         // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
                         var optimizationLevel = OptimizationLevel.Debug;
@@ -301,20 +326,26 @@ namespace Dotnet.Script
                         var runtimeIdentifier = ScriptEnvironment.Default.RuntimeIdentifier;
                         var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                         var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
-                        var code = SourceText.From(File.ReadAllText(absoluteSourcePath));
                         var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), absoluteSourcePath, optimizationLevel);
 
+                        // create the assembly in our cache folder
                         publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, Path.GetFileNameWithoutExtension(pathToDll));
 
                         // save sourceHash for next time, so we can know it's ok to use the generated dll next time
-                        File.WriteAllText(hashFile, sourceHash);
+                        File.WriteAllText(hashCache, sourceHash);
                     }
 
-                    // run the %temp%\dotnet-scripts\{uniqueFolderName}/package.dll
+
+                    // run the cached %temp%\dotnet-scripts\{uniqueFolderName}/package.dll
                     var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                     var result = await runner.Execute<int>(pathToDll, app.RemainingArguments.Concat(argsAfterDoubleHypen));
                     return result;
 #else
+                    var optimizationLevel = OptimizationLevel.Debug;
+                    if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                    {
+                        optimizationLevel = OptimizationLevel.Release;
+                    }
                     exitCode = await RunScript(file.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue(), packageSources.Values?.ToArray());
 #endif
                 }

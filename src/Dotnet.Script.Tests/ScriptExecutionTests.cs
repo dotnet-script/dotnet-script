@@ -1,7 +1,7 @@
-using System;
-using System.IO;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
+using System;
+using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,6 +14,11 @@ namespace Dotnet.Script.Tests
 
         public ScriptExecutionTests(ITestOutputHelper testOutputHelper)
         {
+            var dllCache = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
+            if (Directory.Exists(dllCache))
+            {
+                Directory.Delete(dllCache, true);
+            }
             testOutputHelper.Capture();
             _scriptEnvironment = ScriptEnvironment.Default;
         }
@@ -35,7 +40,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldIncludeExceptionLineNumberAndFile()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "-d");
             Assert.Contains("Exception.csx:line 1", result.output);
         }
 
@@ -60,7 +65,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldReturnStackTraceInformationWhenScriptFails()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "-d");
             Assert.Contains("die!", result.output);
             Assert.Contains("Exception.csx:line 1", result.output);
         }
@@ -163,7 +168,7 @@ namespace Dotnet.Script.Tests
 
         [Fact]
         public void ShouldCompileScriptWithReleaseConfiguration()
-        {            
+        {
             var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c release");
             Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
         }
