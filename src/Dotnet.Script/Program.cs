@@ -263,7 +263,7 @@ namespace Dotnet.Script
 
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
-                    if (nocache.HasValue())
+                    if (Debugger.IsAttached || nocache.HasValue())
                     {
                         var optimizationLevel = OptimizationLevel.Debug;
                         if (configuration.HasValue() && configuration.Value().ToLower() == "release")

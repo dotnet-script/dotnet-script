@@ -9,7 +9,6 @@
             "args": [
                 "exec",
                 "PATH_TO_DOTNET-SCRIPT",
-                "--nocache",
                 "${file}"
             ],
             "cwd": "${workspaceRoot}",
