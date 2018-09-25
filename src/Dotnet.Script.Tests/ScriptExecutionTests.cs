@@ -15,10 +15,7 @@ namespace Dotnet.Script.Tests
         public ScriptExecutionTests(ITestOutputHelper testOutputHelper)
         {
             var dllCache = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
-            if (Directory.Exists(dllCache))
-            {
-                Directory.Delete(dllCache, true);
-            }
+            FileUtils.RemoveDirectory(dllCache);
             testOutputHelper.Capture();
             _scriptEnvironment = ScriptEnvironment.Default;
         }
