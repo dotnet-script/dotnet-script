@@ -40,7 +40,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldIncludeExceptionLineNumberAndFile()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "-d");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--nocache");
             Assert.Contains("Exception.csx:line 1", result.output);
         }
 
@@ -65,7 +65,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldReturnStackTraceInformationWhenScriptFails()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "-d");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--nocache");
             Assert.Contains("die!", result.output);
             Assert.Contains("Exception.csx:line 1", result.output);
         }
