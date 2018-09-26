@@ -110,7 +110,8 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var scaffolder = new Scaffolder();
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
+                    var scaffolder = new Scaffolder(logFactory);
                     scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
                 });
@@ -123,7 +124,8 @@ namespace Dotnet.Script
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.OnExecute(() =>
                 {
-                    var scaffolder = new Scaffolder();
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
+                    var scaffolder = new Scaffolder(logFactory);
                     if (fileNameArgument.Value == null)
                     {
                         c.ShowHelp();

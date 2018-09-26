@@ -1,11 +1,14 @@
 ﻿using Dotnet.Script.Core.Templates;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.Process;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.Core
@@ -15,9 +18,11 @@ namespace Dotnet.Script.Core
         private ScriptEnvironment _scriptEnvironment;
         private const string DefaultScriptFileName = "main.csx";
         private ScriptConsole _scriptConsole = ScriptConsole.Default;
+        private CommandRunner _commandRunner;
 
-        public Scaffolder()
+        public Scaffolder(LogFactory logFactory)
         {
+            _commandRunner = new CommandRunner(logFactory);
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
@@ -48,13 +53,13 @@ namespace Dotnet.Script.Core
                     scriptFileTemplate = $"#!/usr/bin/env dotnet-script" + Environment.NewLine + scriptFileTemplate.Replace("\r\n", Environment.NewLine);
                 }
 
-                File.WriteAllText(pathToScriptFile, scriptFileTemplate, System.Text.Encoding.ASCII /* Linux shebang can't handle BOM */);
+                File.WriteAllText(pathToScriptFile, scriptFileTemplate, new UTF8Encoding(false /* Linux shebang can't handle BOM */));
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
                     RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     // mark .csx file as executable, this activates the shebang to run dotnet-script as interpreter
-                    Process.Start($"/bin/chmod", $"+x {pathToScriptFile}").WaitForExit();
+                    _commandRunner.Execute($"/bin/chmod", $"+x {pathToScriptFile}");
                 }
                 _scriptConsole.WriteSuccess($"...'{pathToScriptFile}' [Created]");
             }
@@ -115,18 +120,17 @@ namespace Dotnet.Script.Core
                 Directory.CreateDirectory(vsCodeDirectory);
             }
 
-            // on windows we use this as opportunity to make the file associate for .csx -> dotnet-script
-            // (If dotnet install gives us an install time hook this code should move there)
+            // on windows we use this as opportunity to make the file association for .csx -> dotnet-script
+            // (If/when dotnet install command provides us an install time hook this code should move there)
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // register dotnet-script as the tool to process .csx files
-                string cmdPath = Path.Combine(Path.GetTempPath(), "register.cmd");
-                using (var textWriter = new StreamWriter(cmdPath))
+                // check to see if .csx is mapped to dotnet-script
+                if (_commandRunner.Execute("reg", "query HKCU\\Software\\classes\\.csx") != 0)
                 {
-                    textWriter.WriteLine("@reg add HKCU\\Software\\classes\\.csx /f /ve /t REG_SZ -d dotnetscript > nul");
-                    textWriter.WriteLine($"@reg add HKCU\\Software\\Classes\\dotnetscript\\Shell\\Open\\Command /f /ve /t REG_EXPAND_SZ /d \"{_scriptEnvironment.InstallLocation}\\dotnet-script.cmd %%1 -- %%*\" > nul");
+                    // register dotnet-script as the tool to process .csx files
+                    _commandRunner.Execute("reg", $"add HKCU\\Software\\classes\\.csx /f /ve /t REG_SZ -d dotnetscript");
+                    _commandRunner.Execute("reg", $"add HKCU\\Software\\Classes\\dotnetscript\\Shell\\Open\\Command /f /ve /t REG_EXPAND_SZ /d \"{_scriptEnvironment.InstallLocation}\\dotnet-script.cmd %%1 -- %%*\" > nul");
                 }
-                Process.Start("cmd.exe", $"/c {cmdPath}").WaitForExit();
             }
 
             _scriptConsole.WriteNormal("Creating VS Code launch configuration file");
