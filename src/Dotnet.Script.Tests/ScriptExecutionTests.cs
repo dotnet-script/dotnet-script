@@ -1,7 +1,7 @@
-using Dotnet.Script.DependencyModel.Environment;
-using Dotnet.Script.Shared.Tests;
 using System;
 using System.IO;
+using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,8 +14,6 @@ namespace Dotnet.Script.Tests
 
         public ScriptExecutionTests(ITestOutputHelper testOutputHelper)
         {
-            var dllCache = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
-            FileUtils.RemoveDirectory(dllCache);
             testOutputHelper.Capture();
             _scriptEnvironment = ScriptEnvironment.Default;
         }
@@ -37,7 +35,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldIncludeExceptionLineNumberAndFile()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--nocache");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception");
             Assert.Contains("Exception.csx:line 1", result.output);
         }
 
@@ -62,7 +60,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldReturnStackTraceInformationWhenScriptFails()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--nocache");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception");
             Assert.Contains("die!", result.output);
             Assert.Contains("Exception.csx:line 1", result.output);
         }
@@ -81,8 +79,6 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Bad HTTP authentication header", result.output);
         }
 
-#if DISABLED
-        // This unit test does not work with DLLs.  I am not certain what it was testing.
         [Fact]
         public void ShouldHandleIssue166()
         {
@@ -94,7 +90,6 @@ namespace Dotnet.Script.Tests
                 Assert.Contains("Connection successful", result.output);
             }
         }
-#endif
 
         [Fact]
         public void ShouldPassUnknownArgumentToScript()
@@ -168,7 +163,7 @@ namespace Dotnet.Script.Tests
 
         [Fact]
         public void ShouldCompileScriptWithReleaseConfiguration()
-        {
+        {            
             var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c release");
             Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
         }
@@ -290,7 +285,7 @@ namespace Dotnet.Script.Tests
 
             string script =
     @"#r ""nuget: AgileObjects.AgileMapper, 0.25.0""
-#r ""TestLibrary.dll""
+    #r ""TestLibrary.dll""
     
     using AgileObjects.AgileMapper;
 

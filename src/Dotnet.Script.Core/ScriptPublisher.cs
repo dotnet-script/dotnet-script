@@ -54,12 +54,7 @@ namespace Dotnet.Script.Core
             var sourceNugetPropsPath = Path.Combine(tempProjectDirecory, "obj", "script.csproj.nuget.g.props");
             var destinationNugetPropsPath = Path.Combine(context.WorkingDirectory, "obj", "script.csproj.nuget.g.props");
             File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
-
-            // only display published if we aren't auto publishing to temp folder
-            if (!scriptAssemblyPath.StartsWith(Path.GetTempPath()))
-            {
-                _scriptConsole.WriteSuccess($"Published {context.FilePath} to { scriptAssemblyPath}");
-            }
+            _scriptConsole.WriteSuccess($"Published {context.FilePath} to { scriptAssemblyPath}");
         }
 
         public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier)
@@ -74,7 +69,7 @@ namespace Dotnet.Script.Core
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
-            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);
+            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);           
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion, PackageOrigin.ReferenceDirective));
             projectFile.AddAssemblyReference(scriptAssemblyPath);
@@ -85,11 +80,7 @@ namespace Dotnet.Script.Core
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors
             var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
-            if (exitcode != 0)
-            {
-                throw new Exception($"dotnet publish failed with result '{exitcode}'");
-            }
-
+            if (exitcode != 0) throw new Exception($"dotnet publish failed with result '{exitcode}'");
             _scriptConsole.WriteSuccess($"Published {context.FilePath} (executable) to {context.WorkingDirectory}");
         }
 
@@ -112,19 +103,15 @@ namespace Dotnet.Script.Core
 
                 foreach (var reference in emitResult.DirectiveReferences)
                 {
-                    if (reference.Display.EndsWith(".NuGet.dll"))
-                    {
-                        continue;
-                    }
-
+                    if (reference.Display.EndsWith(".NuGet.dll")) continue;
                     var referenceFileInfo = new FileInfo(reference.Display);
                     var fullPathToReference = Path.GetFullPath(referenceFileInfo.FullName);
                     var fullPathToNewAssembly = Path.GetFullPath(Path.Combine(outputDirectory, referenceFileInfo.Name));
-
+                                        
                     if (!Equals(fullPathToReference, fullPathToNewAssembly))
                     {
                         File.Copy(fullPathToReference, fullPathToNewAssembly, true);
-                    }
+                    }                    
                 }
 
                 return assemblyPath;
@@ -145,10 +132,7 @@ namespace Dotnet.Script.Core
             const string resourceName = "Dotnet.Script.Core.Templates.program.publish.template";
 
             var resourceStream = typeof(ScriptPublisher).GetTypeInfo().Assembly.GetManifestResourceStream(resourceName);
-            if (resourceStream == null)
-            {
-                throw new FileNotFoundException($"Unable to locate resource '{resourceName}'");
-            }
+            if (resourceStream == null) throw new FileNotFoundException($"Unable to locate resource '{resourceName}'");
 
             string program;
             using (var streamReader = new StreamReader(resourceStream))

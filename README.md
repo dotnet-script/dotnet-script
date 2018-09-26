@@ -6,21 +6,21 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ## Build status
 
-| Build server | Platform     | Build status                                                                                                                                  |
-|--------------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| AppVeyor     | Windows      | [![](https://img.shields.io/appveyor/ci/filipw/dotnet-script/master.svg)](https://ci.appveyor.com/project/filipw/dotnet-script/branch/master) |
-| Travis       | Linux / OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script)                               |
+| Build server | Platform    | Build status                             |
+| ------------ | ----------- | ---------------------------------------- |
+| AppVeyor     | Windows     | [![](https://img.shields.io/appveyor/ci/filipw/dotnet-script/master.svg)](https://ci.appveyor.com/project/filipw/dotnet-script/branch/master) |
+| Travis       | Linux / OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script) |
 
 
 ## Nuget Packages
 
-| Name                                  | Version                                                                                                                                                             | Framework        |
-|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
-| `dotnet-script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `netcoreapp2.1`  |
-| `Dotnet.Script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `netcoreapp2.1`  |
-| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `netstandard2.0` |
-| `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0` |
-| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0` |
+| Name    | Version                             | Framework | Description
+| --------| ---------------------------------------- | ---------- |-------
+| `dotnet-script` | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/) | `netcoreapp2.1` | .NET Core global tool
+| `Dotnet.Script`| [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/) | `netcoreapp2.1` | .NET Core project tool
+| `Dotnet.Script.Core` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/) | `netstandard2.0` | Core library for hosting dotnet-script logic in your own app.
+| `Dotnet.Script.DependencyModel` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/) | `netstandard2.0` | Provides runtime and compilation dependency resolution for dotnet-script based scripts.
+| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0` | A null implementation of a `MetadataReferenceResolver` that allows inline nuget references to be specified in script (csx) files.
 
 ## Installing
 
@@ -94,7 +94,7 @@ docker build -t dotnet-script -f Dockerfile ..
 
 And run:
 
-```shell
+```
 docker run -it dotnet-script --version
 ```
 
@@ -107,11 +107,16 @@ You can manually download all the releases in `zip` format from the [Github rele
 
 Our typical `helloworld.csx` might look like this:
 
-```cs
+```
+#! "netcoreapp2.1"
 Console.WriteLine("Hello world!");
 ```
 
-That is all it takes and we can execute the script. Args are accessible via the global Args array.
+Let us take a quick look at what is going on here.
+
+`#! "netcoreapp2.1"` tells OmniSharp to resolve metadata in the context of a`netcoreapp2.1` application. This will bring in all assemblies from [Microsoft.NETCore.App](https://www.nuget.org/packages/Microsoft.NETCore.App/2.0.0) and should cover most scripting needs. 
+
+That is all it takes and we can execute the script
 
 ```
 dotnet script helloworld.csx
@@ -198,39 +203,17 @@ As an alternative to maintaining a local `NuGet.Config` file we can define these
 
 It is also possible to specify packages sources when executing the script.
 
-```shell
+```
 dotnet script foo.csx -s https://SomePackageSource
 ```
 
 Multiple packages sources can be specified like this:
 
-```shell
+```
 dotnet script foo.csx -s https://SomePackageSource -s https://AnotherPackageSource
 ```
 
-### Creating DLLs or Exes from a CSX file
-Dotnet-Script can create a standalone executable or DLL for your script. 
 
-| Switch | Long switch                     | description                                                                                                          |
-|--------|---------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| -o     | --output                        | Directory where the published executable should be placed.  Defaults to a 'publish' folder in the current directory. |
-| -n     | --name                          | The name for the generated DLL (executable not supported at this time).  Defaults to the name of the script.         |
-|        | --dll                           | Publish to a .dll instead of an executable.                                                                          |
-| -c     | --configuration <configuration> | Configuration to use for publishing the script [Release/Debug]. Default is "Debug"                                   |
-| -d     | --debug                         | Enables debug output.                                                                                                |
-| -r     | --runtime                       | The runtime used when publishing the self contained executable. Defaults to your current runtime.                    |
-
-The executable you can run directly independent of dotnet install, while the DLL is can be run using the dotnet CLI like this:
-
-```shell
-dotnet publish\myscript.dll -- arg1 arg2
-```
-
-### DLL Cache
-Dotnet-Script will automatically create a DLL on first execution of a script and as long as the source code has not changed it will continue to 
-use that DLL significantlly speeding up the execution of your scripts (by 8x).  The cached DLL's are stored in the user %tmp%/dotnet-script folder. 
-
-You can override this a automatic caching by passing **--nocache** flag, which will cause your script to be dynamically compiled everytime you run it.
 
 ### Debugging
 
@@ -383,13 +366,13 @@ Using Roslyn syntax parsing, we also support multiline REPL mode. This means tha
 
 Aside from the regular C# script code, you can invoke the following commands (directives) from within the REPL:
 
-| Command  | Description                                                  |
-|----------|--------------------------------------------------------------|
-| `#load`  | Load a script into the REPL (same as `#load` usage in CSX)   |
-| `#r`     | Load an assembly into the REPL (same as `#r` usage in CSX)   |
+| Command  | Description                              |
+| -------- | ---------------------------------------- |
+| `#load`  | Load a script into the REPL (same as `#load` usage in CSX) |
+| `#r`     | Load an assembly into the REPL (same as `#r` usage in CSX) |
 | `#reset` | Reset the REPL back to initial state (without restarting it) |
-| `#cls`   | Clear the console screen without resetting the REPL state    |
-| `#exit`  | Exits the REPL                                               |
+| `#cls`   | Clear the console screen without resetting the REPL state |
+| `#exit`  | Exits the REPL                           |
 
 ### Seeding REPL with a script
 
