@@ -1,38 +1,41 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using Dotnet.Script.Core.Templates;
+﻿using Dotnet.Script.Core.Templates;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
-using Dotnet.Script.DependencyModel.ProjectSystem;
+using Dotnet.Script.DependencyModel.Process;
 using Newtonsoft.Json.Linq;
+using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.Core
 {
     public class Scaffolder
     {
-        private ScriptEnvironment _scriptEnvironment;        
+        private ScriptEnvironment _scriptEnvironment;
         private const string DefaultScriptFileName = "main.csx";
         private ScriptConsole _scriptConsole = ScriptConsole.Default;
+        private CommandRunner _commandRunner;
 
-        public Scaffolder()
+        public Scaffolder(LogFactory logFactory)
         {
-            _scriptEnvironment = ScriptEnvironment.Default;            
+            _commandRunner = new CommandRunner(logFactory);
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         public void InitializerFolder(string fileName, string currentWorkingDirectory)
-        {            
+        {
             CreateLaunchConfiguration(currentWorkingDirectory);
             CreateOmniSharpConfigurationFile(currentWorkingDirectory);
-            CreateScriptFile(fileName, currentWorkingDirectory);            
+            CreateScriptFile(fileName, currentWorkingDirectory);
         }
 
         public void CreateNewScriptFile(string fileName, string currentDirectory)
         {
             _scriptConsole.WriteNormal($"Creating '{fileName}'");
-            if(!Path.HasExtension(fileName))
+            if (!Path.HasExtension(fileName))
             {
                 fileName = Path.ChangeExtension(fileName, ".csx");
             }
@@ -40,7 +43,23 @@ namespace Dotnet.Script.Core
             if (!File.Exists(pathToScriptFile))
             {
                 var scriptFileTemplate = TemplateLoader.ReadTemplate("helloworld.csx.template");
-                File.WriteAllText(pathToScriptFile, scriptFileTemplate);
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    // add a shebang to set dotnet-script as the interpreter for .csx files
+                    // and make sure we are using environment newlines, because shebang won't work with windows cr\lf
+                    scriptFileTemplate = $"#!/usr/bin/env dotnet-script" + Environment.NewLine + scriptFileTemplate.Replace("\r\n", Environment.NewLine);
+                }
+
+                File.WriteAllText(pathToScriptFile, scriptFileTemplate, new UTF8Encoding(false /* Linux shebang can't handle BOM */));
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    // mark .csx file as executable, this activates the shebang to run dotnet-script as interpreter
+                    _commandRunner.Execute($"/bin/chmod", $"+x {pathToScriptFile}");
+                }
                 _scriptConsole.WriteSuccess($"...'{pathToScriptFile}' [Created]");
             }
             else
@@ -57,7 +76,7 @@ namespace Dotnet.Script.Core
             }
             else
             {
-                CreateNewScriptFile(fileName,currentWorkingDirectory);
+                CreateNewScriptFile(fileName, currentWorkingDirectory);
             }
         }
 
@@ -100,14 +119,27 @@ namespace Dotnet.Script.Core
                 Directory.CreateDirectory(vsCodeDirectory);
             }
 
+            // on windows we use this as opportunity to make the file association for .csx -> dotnet-script
+            // (If/when dotnet install command provides us an install time hook this code should move there)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // check to see if .csx is mapped to dotnet-script
+                if (_commandRunner.Execute("reg", "query HKCU\\Software\\classes\\.csx") != 0)
+                {
+                    // register dotnet-script as the tool to process .csx files
+                    _commandRunner.Execute("reg", $"add HKCU\\Software\\classes\\.csx /f /ve /t REG_SZ -d dotnetscript");
+                    _commandRunner.Execute("reg", $"add HKCU\\Software\\Classes\\dotnetscript\\Shell\\Open\\Command /f /ve /t REG_EXPAND_SZ /d \"{_scriptEnvironment.InstallLocation}\\dotnet-script.cmd %%1 -- %%*\" > nul");
+                }
+            }
+
             _scriptConsole.WriteNormal("Creating VS Code launch configuration file");
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             string installLocation = _scriptEnvironment.InstallLocation;
             string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
             if (!File.Exists(pathToLaunchFile))
-            {                
-                string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
-                string launchFileContent = lauchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
+            {
+                string launchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
+                string launchFileContent = launchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
                 File.WriteAllText(pathToLaunchFile, launchFileContent);
                 _scriptConsole.WriteSuccess($"...'{pathToLaunchFile}' [Created]");
             }
