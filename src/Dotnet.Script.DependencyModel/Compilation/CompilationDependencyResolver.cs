@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Logging;
@@ -91,7 +90,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             {
                 return Array.Empty<string>();
             }            
-            var referencePaths = compilationLibrary.ResolveReferencePaths(compilationAssemblyResolvers).Select(p => Path.GetFullPath(p)).ToArray();
+            var referencePaths = compilationLibrary.ResolveReferencePaths(compilationAssemblyResolvers).ToArray();
 
             foreach (var referencePath in referencePaths)
             {

@@ -26,7 +26,7 @@ namespace Dotnet.Script.Tests
         {
             var fixtureFolderPath = GetPathToTestFixtureFolder(fixture);
             var pathToFixture = Path.Combine(fixtureFolderPath, $"{Path.GetFileNameWithoutExtension(fixtureFolderPath)}.csx");
-            return Path.GetFullPath(pathToFixture);
+            return pathToFixture;
         }
     }
 }
