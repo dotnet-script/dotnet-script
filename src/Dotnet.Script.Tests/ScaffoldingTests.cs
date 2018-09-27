@@ -66,7 +66,7 @@ namespace Dotnet.Script.Tests
 
                 if (ScriptEnvironment.Default.IsWindows)
                 {
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c {scriptPath}", scriptFolderPath);
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolderPath);
                     Assert.Equal("Hello world!", output.Trim());
                 }
                 else
