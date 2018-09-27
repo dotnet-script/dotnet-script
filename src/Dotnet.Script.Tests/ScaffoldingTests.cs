@@ -58,15 +58,14 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                var scriptFolderPath = Path.Combine(Path.GetTempPath(), "xyz");
-                Directory.CreateDirectory(scriptFolderPath);
-                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolderPath);
+                Directory.CreateDirectory(scriptFolder.Path);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
 
-                var scriptPath = Path.Combine(scriptFolderPath, "main.csx");
+                var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
 
                 if (ScriptEnvironment.Default.IsWindows)
                 {
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolderPath);
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolder.Path);
                     Assert.Equal("Hello world!", output.Trim());
                 }
                 else
@@ -74,7 +73,7 @@ namespace Dotnet.Script.Tests
                     // this depends on dotnet-script being installed as a dotnet global tool because the shebang needs to 
                     // point to an executable in the environment.  If you have dotnet-script installed as a global tool this
                     // test will pass
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolderPath);
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);
                     if (exitCode == 0)
                     {
                         (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
