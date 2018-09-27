@@ -1,6 +1,6 @@
-﻿using System.IO;
-using Dotnet.Script.DependencyModel.Environment;
+﻿using Dotnet.Script.DependencyModel.Environment;
 using Newtonsoft.Json.Linq;
+using System.IO;
 using Xunit;
 
 
@@ -19,13 +19,34 @@ namespace Dotnet.Script.Tests
         public void ShouldInitializeScriptFolder()
         {
             using (var scriptFolder = new DisposableFolder())
-            {                                                
+            {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
 
                 Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "omnisharp.json")));
-                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));                
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));
+            }
+        }
+
+        [Fact]
+        public void ShouldRunCsxScriptDirectly()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+
+                var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
+
+                if (ScriptEnvironment.Default.IsWindows)
+                {
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c {scriptPath}", scriptFolder.Path);
+                }
+                else
+                {
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, string.Empty, scriptFolder.Path);
+                }
+                Assert.Equal("Hello world!", output.Trim());
             }
         }
 
@@ -70,7 +91,7 @@ namespace Dotnet.Script.Tests
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "script.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldCreateNewScriptWithExtension()
         {
@@ -82,31 +103,31 @@ namespace Dotnet.Script.Tests
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherScript.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldInitFolderWithCustomFileName()
         {
             using (var scriptFolder = new DisposableFolder())
             {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init custom.csx", scriptFolder.Path);
-                
+
                 Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "custom.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldInitFolderWithCustomFileNameAndExtension()
         {
             using (var scriptFolder = new DisposableFolder())
             {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init anotherCustom", scriptFolder.Path);
-                
+
                 Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherCustom.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldNotCreateDefaultFileForFolderWithExistingScriptFiles()
         {
