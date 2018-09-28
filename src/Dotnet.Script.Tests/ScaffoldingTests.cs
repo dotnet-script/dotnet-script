@@ -1,6 +1,6 @@
-﻿using System.IO;
-using Dotnet.Script.DependencyModel.Environment;
+﻿using Dotnet.Script.DependencyModel.Environment;
 using Newtonsoft.Json.Linq;
+using System.IO;
 using Xunit;
 
 
@@ -19,13 +19,67 @@ namespace Dotnet.Script.Tests
         public void ShouldInitializeScriptFolder()
         {
             using (var scriptFolder = new DisposableFolder())
-            {                                                
+            {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
 
                 Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "omnisharp.json")));
-                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));                
+                Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));
+            }
+        }
+
+        [Fact]
+        public void ShouldRegisterToRunCsxScriptDirectly()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+
+                var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
+                if (ScriptEnvironment.Default.IsWindows)
+                {
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("reg.exe", @"query HKCU\Software\Classes\.csx");
+                    Assert.Equal(0, exitCode);
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("reg.exe", @"query HKCU\software\classes\dotnetscript");
+                    Assert.Equal(0, exitCode);
+                }
+                else
+                {
+                    var text = File.ReadAllText(scriptPath);
+                    Assert.True(text.StartsWith("#!/usr/bin/env dotnet-script"), "should have shebang");
+                    Assert.True(text.IndexOf("\r\n") < 0, "should have not have windows cr/lf");
+                }
+            }
+        }
+
+        [Fact]
+        public void ShouldRunCsxScriptDirectly()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                Directory.CreateDirectory(scriptFolder.Path);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+
+                var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
+
+                if (ScriptEnvironment.Default.IsWindows)
+                {
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolder.Path);
+                    Assert.Equal("Hello world!", output.Trim());
+                }
+                else
+                {
+                    // this depends on dotnet-script being installed as a dotnet global tool because the shebang needs to 
+                    // point to an executable in the environment.  If you have dotnet-script installed as a global tool this
+                    // test will pass
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);
+                    if (exitCode == 0)
+                    {
+                        (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
+                        Assert.Equal("Hello world!", output.Trim());
+                    }
+                }
             }
         }
 
@@ -70,7 +124,7 @@ namespace Dotnet.Script.Tests
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "script.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldCreateNewScriptWithExtension()
         {
@@ -82,31 +136,31 @@ namespace Dotnet.Script.Tests
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherScript.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldInitFolderWithCustomFileName()
         {
             using (var scriptFolder = new DisposableFolder())
             {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init custom.csx", scriptFolder.Path);
-                
+
                 Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "custom.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldInitFolderWithCustomFileNameAndExtension()
         {
             using (var scriptFolder = new DisposableFolder())
             {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init anotherCustom", scriptFolder.Path);
-                
+
                 Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "anotherCustom.csx")));
             }
         }
-        
+
         [Fact]
         public void ShouldNotCreateDefaultFileForFolderWithExistingScriptFiles()
         {
