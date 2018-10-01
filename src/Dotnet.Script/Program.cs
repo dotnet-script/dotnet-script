@@ -359,7 +359,7 @@ namespace Dotnet.Script
             var absoluteFilePath = Path.IsPathRooted(file) ? file : Path.Combine(Directory.GetCurrentDirectory(), file);
             var directory = Path.GetDirectoryName(absoluteFilePath);
 
-            using (var filestream = new FileStream(absoluteFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var filestream = File.OpenRead(absoluteFilePath))
             {
                 var sourceText = SourceText.From(filestream);
                 var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
