@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace Dotnet.Script
 {
-    public class Program
+    public static class Program
     {
         private const string DebugFlagShort = "-d";
         private const string DebugFlagLong = "--debug";
