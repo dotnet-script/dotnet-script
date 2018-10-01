@@ -322,7 +322,7 @@ namespace Dotnet.Script
                             var runtimeIdentifier = ScriptEnvironment.Default.RuntimeIdentifier;
                             var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                             var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
-                            var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), absoluteSourcePath, optimizationLevel);
+                            var context = new ScriptContext(code, publishDirectory.FullName, Enumerable.Empty<string>(), absoluteSourcePath, optimizationLevel);
 
                             // create the assembly in our cache folder
                             publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, Path.GetFileNameWithoutExtension(pathToDll));
