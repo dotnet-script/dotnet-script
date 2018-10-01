@@ -256,7 +256,8 @@ namespace Dotnet.Script
                         string uniqueFolderName = "";
                         using (var sha = SHA256.Create())
                         {
-                            uniqueFolderName = Convert.ToBase64String(sha.ComputeHash(Encoding.Unicode.GetBytes(file.Value))).Replace("=", String.Empty).Replace("/", string.Empty);
+                            uniqueFolderName = sha.ComputeHash(Encoding.UTF8.GetBytes(file.Value))
+                                                  .ToHexadecimalString();
                         }
 
                         string publishDirectory = Path.Combine(cacheFolder, uniqueFolderName);
@@ -292,7 +293,7 @@ namespace Dotnet.Script
                         string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
 
                         // source hash is the checkSum of the code
-                        string sourceHash = Convert.ToBase64String(code.GetChecksum().ToArray());
+                        string sourceHash = code.GetChecksum().ToArray().ToHexadecimalString();
 
                         // get hash code from previous run 
                         string hashCache = Path.Combine(publishDirectory, ".hash");
