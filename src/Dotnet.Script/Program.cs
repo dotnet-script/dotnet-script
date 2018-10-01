@@ -79,7 +79,7 @@ namespace Dotnet.Script
             var nocache = app.Option("--nocache", "disable DLL caching", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
-            var argsAfterDoubleHypen = args.SkipWhile(a => a != "--").Skip(1).ToArray();
+            var argsAfterDoubleHyphen  = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
             app.HelpOption("-? | -h | --help");
 
@@ -103,7 +103,7 @@ namespace Dotnet.Script
                             optimizationLevel = OptimizationLevel.Release;
                         }
                         var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                        exitCode = await RunCode(code.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), cwd.Value(), packageSources.Values?.ToArray());
+                        exitCode = await RunCode(code.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), cwd.Value(), packageSources.Values?.ToArray());
                     }
                     return exitCode;
                 });
@@ -219,7 +219,7 @@ namespace Dotnet.Script
 
                         var compiler = GetScriptCompiler(commandDebugMode.HasValue(), logFactory);
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
-                        var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHypen));
+                        var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
                         return result;
                     }
                     return exitCode;
@@ -247,7 +247,7 @@ namespace Dotnet.Script
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
-                        exitCode = await RunScript(file.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHypen), interactive.HasValue(), packageSources.Values?.ToArray());
+                        exitCode = await RunScript(file.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
                     }
                     else
                     {
@@ -327,7 +327,7 @@ namespace Dotnet.Script
 
                         // run the cached %temp%\dotnet-scripts\{uniqueFolderName}/package.dll
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
-                        var result = await runner.Execute<int>(pathToDll, app.RemainingArguments.Concat(argsAfterDoubleHypen));
+                        var result = await runner.Execute<int>(pathToDll, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
                         return result;
                     }
                 }
