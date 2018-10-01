@@ -251,31 +251,15 @@ namespace Dotnet.Script
                     }
                     else
                     {
-                        string cacheFolder = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
-                        // create unique folder name based on the path
-                        string uniqueFolderName = "";
-                        using (var sha = SHA256.Create())
-                        {
-                            uniqueFolderName = sha.ComputeHash(Encoding.UTF8.GetBytes(file.Value))
-                                                  .ToHexadecimalString();
-                        }
-
-                        string publishDirectory = Path.Combine(cacheFolder, uniqueFolderName);
-                        if (!Directory.Exists(publishDirectory))
-                        {
-                            Directory.CreateDirectory(publishDirectory);
-                        }
-
-                        string absoluteSourcePath;
+                        string absoluteSourcePath = null;
+                        Uri scriptUrl = null;
                         SourceText code;
                         if (!File.Exists(file.Value))
                         {
-                            if (IsHttpUri(file.Value))
+                            if (TryParseHttpUrl(file.Value, out scriptUrl))
                             {
                                 var downloader = new ScriptDownloader();
                                 var rawCode = await downloader.Download(file.Value);
-                                absoluteSourcePath = Path.Combine(publishDirectory, "source.csx");
-                                File.WriteAllText(absoluteSourcePath, rawCode);
                                 code = SourceText.From(rawCode);
                             }
                             else
@@ -289,23 +273,45 @@ namespace Dotnet.Script
                             code = SourceText.From(File.ReadAllText(absoluteSourcePath));
                         }
 
-                        // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
-                        string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
-
                         // source hash is the checkSum of the code
-                        string sourceHash = code.GetChecksum().ToArray().ToHexadecimalString();
+                        string sourceHash =
+                            BitConverter.ToString(code.GetChecksum().ToArray())
+                                        .Replace("-", string.Empty)
+                                        .ToLowerInvariant();
+
+                        string cacheFolder = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
+                        string publishDirectory = Path.Combine(cacheFolder, sourceHash);
+
+                        if (scriptUrl != null) // was downloaded?
+                        {
+                            var filename = scriptUrl.AbsolutePath.Split('/').Last();
+                            if (!filename.EndsWith(".csx", StringComparison.OrdinalIgnoreCase)
+                                || filename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                            {
+                                filename = "script.csx";
+                            }
+                            absoluteSourcePath = Path.Combine(publishDirectory, filename);
+                            var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+                            using (var writer = new StreamWriter(absoluteSourcePath, append: false, encoding))
+                            {
+                                code.Write(writer);
+                            }
+                        }
+
+                        // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
+                        string pathToDll = Path.Combine(publishDirectory, "script.dll");
 
                         // get hash code from previous run 
-                        string hashCache = Path.Combine(publishDirectory, ".hash");
                         var compiler = GetScriptCompiler(true, logFactory);
 
-                        // if we don't have hash
-                        if (!File.Exists(hashCache) ||
-                             // or we haven't created a dll
-                             !Directory.Exists(publishDirectory) ||
-                             // the hashcode has changed (meaning new content)
-                             File.ReadAllText(hashCache) != sourceHash)
+                        // if we haven't created a dll
+                        if (!File.Exists(pathToDll))
                         {
+                            if (!Directory.Exists(publishDirectory))
+                            {
+                                Directory.CreateDirectory(publishDirectory);
+                            }
+
                             // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
                             var optimizationLevel = OptimizationLevel.Debug;
                             if (configuration.HasValue() && configuration.Value().ToLower() == "release")
@@ -320,9 +326,6 @@ namespace Dotnet.Script
 
                             // create the assembly in our cache folder
                             publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, Path.GetFileNameWithoutExtension(pathToDll));
-
-                            // save sourceHash for next time, so we can know it's ok to use the generated dll next time
-                            File.WriteAllText(hashCache, sourceHash);
                         }
 
 
@@ -347,7 +350,7 @@ namespace Dotnet.Script
         {
             if (!File.Exists(file))
             {
-                if (IsHttpUri(file))
+                if (TryParseHttpUrl(file, out _))
                 {
                     var downloader = new ScriptDownloader();
                     var code = await downloader.Download(file);
@@ -377,10 +380,10 @@ namespace Dotnet.Script
             }
         }
 
-        private static bool IsHttpUri(string fileName)
+        private static bool TryParseHttpUrl(string fileName, out Uri url)
         {
-            return Uri.TryCreate(fileName, UriKind.Absolute, out Uri uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+            return Uri.TryCreate(fileName, UriKind.Absolute, out url)
+                && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps);
         }
 
         private static async Task RunInteractive(bool debugMode, LogFactory logFactory, string[] packageSources)
