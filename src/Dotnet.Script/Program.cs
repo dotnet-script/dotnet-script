@@ -361,7 +361,9 @@ namespace Dotnet.Script
 
             SourceText sourceText;
             using (var filestream = File.OpenRead(absoluteFilePath))
+            {
                 sourceText = SourceText.From(filestream);
+            }
 
             var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
             if (interactive)
