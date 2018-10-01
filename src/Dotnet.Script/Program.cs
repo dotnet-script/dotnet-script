@@ -280,7 +280,7 @@ namespace Dotnet.Script
                                         .ToLowerInvariant();
 
                         string cacheFolder = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
-                        string publishDirectory = Path.Combine(cacheFolder, sourceHash);
+                        DirectoryInfo publishDirectory = new DirectoryInfo(Path.Combine(cacheFolder, sourceHash));
 
                         if (scriptUrl != null) // was downloaded?
                         {
@@ -290,7 +290,10 @@ namespace Dotnet.Script
                             {
                                 filename = "script.csx";
                             }
-                            absoluteSourcePath = Path.Combine(publishDirectory, filename);
+                            
+                            publishDirectory.CreateIfMissing();
+
+                            absoluteSourcePath = Path.Combine(publishDirectory.FullName, filename);
                             var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
                             using (var writer = new StreamWriter(absoluteSourcePath, append: false, encoding))
                             {
@@ -299,7 +302,7 @@ namespace Dotnet.Script
                         }
 
                         // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
-                        string pathToDll = Path.Combine(publishDirectory, "script.dll");
+                        string pathToDll = Path.Combine(publishDirectory.FullName, "script.dll");
 
                         // get hash code from previous run 
                         var compiler = GetScriptCompiler(true, logFactory);
@@ -307,10 +310,7 @@ namespace Dotnet.Script
                         // if we haven't created a dll
                         if (!File.Exists(pathToDll))
                         {
-                            if (!Directory.Exists(publishDirectory))
-                            {
-                                Directory.CreateDirectory(publishDirectory);
-                            }
+                            publishDirectory.CreateIfMissing();
 
                             // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
                             var optimizationLevel = OptimizationLevel.Debug;
