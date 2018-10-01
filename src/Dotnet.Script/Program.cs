@@ -359,21 +359,21 @@ namespace Dotnet.Script
             var absoluteFilePath = Path.IsPathRooted(file) ? file : Path.Combine(Directory.GetCurrentDirectory(), file);
             var directory = Path.GetDirectoryName(absoluteFilePath);
 
+            SourceText sourceText;
             using (var filestream = File.OpenRead(absoluteFilePath))
+                sourceText = SourceText.From(filestream);
+
+            var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
+            if (interactive)
             {
-                var sourceText = SourceText.From(filestream);
-                var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
-                if (interactive)
-                {
-                    var compiler = GetScriptCompiler(debugMode, logFactory);
+                var compiler = GetScriptCompiler(debugMode, logFactory);
 
-                    var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
-                    await runner.RunLoopWithSeed(context);
-                    return 0;
-                }
-
-                return await Run(debugMode, logFactory, context);
+                var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
+                await runner.RunLoopWithSeed(context);
+                return 0;
             }
+
+            return await Run(debugMode, logFactory, context);
         }
 
         private static bool IsHttpUri(string fileName)
