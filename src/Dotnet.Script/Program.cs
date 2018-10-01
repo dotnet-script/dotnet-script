@@ -69,6 +69,7 @@ namespace Dotnet.Script
             var interactive = app.Option("-i | --interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
 
             var configuration = app.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
+            var release = StringComparer.OrdinalIgnoreCase.PredicateEquals("release");
 
             var packageSources = app.Option("-s | --sources <SOURCE>", "Specifies a NuGet package source to use when resolving NuGet packages.", CommandOptionType.MultipleValue);
 
@@ -98,7 +99,7 @@ namespace Dotnet.Script
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
                         var optimizationLevel = OptimizationLevel.Debug;
-                        if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
+                        if (configuration.ValueEquals(release))
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
@@ -162,7 +163,7 @@ namespace Dotnet.Script
                     }
 
                     var optimizationLevel = OptimizationLevel.Debug;
-                    if (commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
+                    if (commandConfig.ValueEquals(release))
                     {
                         optimizationLevel = OptimizationLevel.Release;
                     }
@@ -243,7 +244,7 @@ namespace Dotnet.Script
                     if (Debugger.IsAttached || nocache.HasValue())
                     {
                         var optimizationLevel = OptimizationLevel.Debug;
-                        if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
+                        if (configuration.ValueEquals(release))
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
@@ -307,7 +308,7 @@ namespace Dotnet.Script
                         {
                             // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
                             var optimizationLevel = OptimizationLevel.Debug;
-                            if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
+                            if (configuration.ValueEquals(release))
                             {
                                 optimizationLevel = OptimizationLevel.Release;
                             }
