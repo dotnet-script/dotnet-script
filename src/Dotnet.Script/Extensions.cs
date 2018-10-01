@@ -5,7 +5,10 @@ namespace Dotnet.Script
 {
     static class Extensions
     {
-        public static bool ValueEquals(this CommandOption option, string value, StringComparison comparison) =>
-            option.HasValue() && string.Equals(option.Value(), value, comparison);
+        public static bool ValueEquals(this CommandOption option, string value, StringComparison comparison)
+        {
+            if (option == null) throw new ArgumentNullException(nameof(option));
+            return option.HasValue() && string.Equals(option.Value(), value, comparison);
+        }
     }
 }
