@@ -17,7 +17,7 @@ namespace Dotnet.Script
         public static Func<T, bool> PredicateEquals<T>(this IEqualityComparer<T> comparer, T first)
         {
             if (comparer == null) throw new ArgumentNullException(nameof(comparer));
-            return second => comparer.Equals(first, second);
+            return second => comparer.Equals(first);
         }
     }
 }
