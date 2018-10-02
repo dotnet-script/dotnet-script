@@ -59,6 +59,26 @@ namespace Dotnet.Script.Tests
             Assert.Equal("3.2.1", result.PackageReferences.Last().Version);
         }
 
+        [Theory]
+        [InlineData("\r #load\"nuget:Package, 1.2.3\"")]
+        [InlineData("#load\n\"nuget:Package, 1.2.3\"")]
+        [InlineData("#load \"nuget:\nPackage, 1.2.3\"")]
+        [InlineData("#load \"nuget:Package\n, 1.2.3\"")]
+        [InlineData("#load \"nuget:Package,\n1.2.3\"")]
+        [InlineData("\r #r\"nuget:Package, 1.2.3\"")]
+        [InlineData("#r\n\"nuget:Package, 1.2.3\"")]
+        [InlineData("#r \"nuget:\nPackage, 1.2.3\"")]
+        [InlineData("#r \"nuget:Package\n, 1.2.3\"")]
+        [InlineData("#r \"nuget:Package,\n1.2.3\"")]
+        public void ShouldNotMatchBadDirectives(string code)
+        {
+            var parser = CreateParser();
+
+            var result = parser.ParseFromCode(code);
+
+            Assert.Equal(0, result.PackageReferences.Count);
+        }
+
         [Fact]
         public void ShouldParseTargetFramework()
         {

@@ -64,9 +64,17 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return new ParseResult(allPackageReferences, currentTargetFramework);
         }
 
+        const string Hws = @"[\x20\t]"; // hws = horizontal whitespace
+
         private static IEnumerable<PackageReference> ReadPackageReferencesFromReferenceDirective(string fileContent)
         {
-            const string pattern = @"^\s*#r\s*""nuget:\s*(.+)\s*,\s*(.*)""";
+            const string pattern = @"^"
+                                 + Hws + @"*#r"
+                                 + Hws + @"*""nuget:"
+                                 + Hws + @"*(.+)"
+                                 + Hws + @"*,"
+                                 + Hws + @"*(.*)""";
+
             var matches = Regex.Matches(fileContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
             foreach (var match in matches.Cast<Match>())
@@ -80,7 +88,13 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromLoadDirective(string fileContent)
         {
-            const string pattern = @"^\s*#load\s*""nuget:\s*(.+)\s*,\s*(.*)""";
+            const string pattern = @"^"
+                                 + Hws + @"*#load"
+                                 + Hws + @"*""nuget:"
+                                 + Hws + @"*(.+)"
+                                 + Hws + @"*,"
+                                 + Hws + @"*(.*)""";
+
             var matches = Regex.Matches(fileContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
             foreach (var match in matches.Cast<Match>())
