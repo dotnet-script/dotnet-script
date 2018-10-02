@@ -1,9 +1,8 @@
+using System;
 using System.IO;
 
 namespace Dotnet.Script
 {
-    using System;
-
     static class Extensions
     {
         public static bool CreateIfMissing(this DirectoryInfo directory)
