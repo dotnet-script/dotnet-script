@@ -75,15 +75,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                                  + Hws + @"*,"
                                  + Hws + @"*(.*)""";
 
-            var matches = Regex.Matches(fileContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-            foreach (var match in matches.Cast<Match>())
-            {
-                var id = match.Groups[1].Value;
-                var version = match.Groups[2].Value;
-                var packageReference = new PackageReference(id, version, PackageOrigin.ReferenceDirective);
-                yield return packageReference;
-            }
+            return ReadPackageReferencesFromDirective(PackageOrigin.ReferenceDirective, pattern, fileContent);
         }
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromLoadDirective(string fileContent)
@@ -95,13 +87,19 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                                  + Hws + @"*,"
                                  + Hws + @"*(.*)""";
 
+            return ReadPackageReferencesFromDirective(PackageOrigin.LoadDirective, pattern, fileContent);
+        }
+
+        private static IEnumerable<PackageReference> ReadPackageReferencesFromDirective(PackageOrigin origin,
+            string pattern, string fileContent)
+        {
             var matches = Regex.Matches(fileContent, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
             foreach (var match in matches.Cast<Match>())
             {
                 var id = match.Groups[1].Value;
                 var version = match.Groups[2].Value;
-                var packageReference = new PackageReference(id, version, PackageOrigin.LoadDirective);
+                var packageReference = new PackageReference(id, version, origin);
                 yield return packageReference;
             }
         }
