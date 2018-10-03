@@ -69,9 +69,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         const string DirectivePatternPrefix = @"^"
                                             + Hws + @"*#";
         const string DirectivePatternSuffix = Hws + @"*""nuget:"
-                                            + Hws + @"*(.+)"
+                                            + Hws + @"*(.+?)"
                                             + Hws + @"*,"
-                                            + Hws + @"*(.*)""";
+                                            + Hws + @"*(.+?)""";
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromReferenceDirective(string fileContent)
         {
