@@ -102,7 +102,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static string ReadTargetFramework(string fileContent)
         {
-            const string pattern = @"^\s*#!\s*""(.*)""";
+            const string pattern = @"^" + Hws + @"*#!" + Hws + @"*""(.*)""";
             var match = Regex.Match(fileContent, pattern);
             if (match.Success)
             {

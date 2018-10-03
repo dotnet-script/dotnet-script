@@ -95,6 +95,20 @@ namespace Dotnet.Script.Tests
             Assert.Equal(_scriptEnvironment.TargetFramework, result.TargetFramework);            
         }
 
+        [Theory]
+        [InlineData("\n#! \"TARGET_FRAMEWORK\"")]
+        [InlineData("\r#! \"TARGET_FRAMEWORK\"")]
+        [InlineData("#!\n\"TARGET_FRAMEWORK\"")]
+        [InlineData("#!\r\"TARGET_FRAMEWORK\"")]
+        public void ShouldNotParseBadTargetFramework(string code)
+        {
+            var parser = CreateParser();
+
+            var result = parser.ParseFromCode(code.Replace("TARGET_FRAMEWORK", _scriptEnvironment.TargetFramework));
+
+            Assert.Null(result.TargetFramework);            
+        }
+
         private ScriptParser CreateParser()
         {
             return new ScriptParser(TestOutputHelper.CreateTestLogFactory());
