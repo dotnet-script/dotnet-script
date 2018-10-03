@@ -66,27 +66,22 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         const string Hws = @"[\x20\t]"; // hws = horizontal whitespace
 
+        const string DirectivePatternPrefix = @"^"
+                                            + Hws + @"*#";
+        const string DirectivePatternSuffix = Hws + @"*""nuget:"
+                                            + Hws + @"*(.+)"
+                                            + Hws + @"*,"
+                                            + Hws + @"*(.*)""";
+
         private static IEnumerable<PackageReference> ReadPackageReferencesFromReferenceDirective(string fileContent)
         {
-            const string pattern = @"^"
-                                 + Hws + @"*#r"
-                                 + Hws + @"*""nuget:"
-                                 + Hws + @"*(.+)"
-                                 + Hws + @"*,"
-                                 + Hws + @"*(.*)""";
-
+            const string pattern = DirectivePatternPrefix + "r" + DirectivePatternSuffix;
             return ReadPackageReferencesFromDirective(PackageOrigin.ReferenceDirective, pattern, fileContent);
         }
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromLoadDirective(string fileContent)
         {
-            const string pattern = @"^"
-                                 + Hws + @"*#load"
-                                 + Hws + @"*""nuget:"
-                                 + Hws + @"*(.+)"
-                                 + Hws + @"*,"
-                                 + Hws + @"*(.*)""";
-
+            const string pattern = DirectivePatternPrefix + "load" + DirectivePatternSuffix;
             return ReadPackageReferencesFromDirective(PackageOrigin.LoadDirective, pattern, fileContent);
         }
 
