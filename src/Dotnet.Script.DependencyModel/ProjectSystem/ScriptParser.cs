@@ -64,15 +64,15 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return new ParseResult(allPackageReferences, currentTargetFramework);
         }
 
-        const string Hws = @"[\x20\t]"; // hws = horizontal whitespace
+        const string Hws = @"[\x20\t]*"; // hws = horizontal whitespace
 
         const string DirectivePatternPrefix = @"^"
-                                            + Hws + @"*#";
-        const string DirectivePatternSuffix = Hws + @"*""nuget:"
+                                            + Hws + @"#";
+        const string DirectivePatternSuffix = Hws + @"""nuget:"
                                             // https://github.com/NuGet/docs.microsoft.com-nuget/issues/543#issue-270039223
-                                            + Hws + @"*(\w+(?:[_.-]\w+)*)"
-                                            + Hws + @"*,"
-                                            + Hws + @"*(.+?)""";
+                                            + Hws + @"(\w+(?:[_.-]\w+)*)"
+                                            + Hws + @","
+                                            + Hws + @"(.+?)""";
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromReferenceDirective(string fileContent)
         {
@@ -102,7 +102,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static string ReadTargetFramework(string fileContent)
         {
-            const string pattern = @"^" + Hws + @"*#!" + Hws + @"*""(.*)""";
+            const string pattern = @"^" + Hws + @"#!" + Hws + @"""(.*)""";
             var match = Regex.Match(fileContent, pattern);
             if (match.Success)
             {
