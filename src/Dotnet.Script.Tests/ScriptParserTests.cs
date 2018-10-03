@@ -67,6 +67,7 @@ namespace Dotnet.Script.Tests
         [InlineData("#load \"nuget:Package,\n1.2.3\"")]
         [InlineData("#load \"nuget:P a c k a g e, 1.2.3\"")]
         [InlineData("#load \"nuget:Pack/age, 1.2.3\"")]
+        [InlineData("#load \"nuget:Package,\"")]
         [InlineData("\r #r\"nuget:Package, 1.2.3\"")]
         [InlineData("#r\n\"nuget:Package, 1.2.3\"")]
         [InlineData("#r \"nuget:\nPackage, 1.2.3\"")]
@@ -74,6 +75,7 @@ namespace Dotnet.Script.Tests
         [InlineData("#r \"nuget:Package,\n1.2.3\"")]
         [InlineData("#r \"nuget:P a c k a g e, 1.2.3\"")]
         [InlineData("#r \"nuget:Pack/age, 1.2.3\"")]
+        [InlineData("#r \"nuget:Package,\"")]
         public void ShouldNotMatchBadDirectives(string code)
         {
             var parser = CreateParser();
