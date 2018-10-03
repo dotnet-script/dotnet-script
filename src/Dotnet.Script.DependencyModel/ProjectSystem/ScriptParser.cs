@@ -69,7 +69,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         const string DirectivePatternPrefix = @"^"
                                             + Hws + @"*#";
         const string DirectivePatternSuffix = Hws + @"*""nuget:"
-                                            + Hws + @"*(.+?)"
+                                            // https://github.com/NuGet/docs.microsoft.com-nuget/issues/543#issue-270039223
+                                            + Hws + @"*(\w+(?:[_.-]\w+)*)"
                                             + Hws + @"*,"
                                             + Hws + @"*(.+?)""";
 
