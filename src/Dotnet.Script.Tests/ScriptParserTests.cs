@@ -42,6 +42,24 @@ namespace Dotnet.Script.Tests
             Assert.Equal("1.2.3", result.PackageReferences.Single().Version);
         }
 
+        [Theory]
+        [InlineData("Package", "1.2.3-beta-1")]
+        [InlineData("PACKAGE", "1.2.3-beta-1")]
+        [InlineData("Package", "1.2.3-BETA-1")]
+        public void ShouldResolveUniquePackages(string id, string version)
+        {
+            var parser = CreateParser();
+            var code = new StringBuilder();
+            code.AppendLine("#r \"nuget:Package, 1.2.3-beta-1\"");
+            code.AppendLine($"#r \"nuget:{id}, {version}\"");
+
+            var result = parser.ParseFromCode(code.ToString());
+
+            Assert.Equal(1, result.PackageReferences.Count);
+            Assert.Equal("Package", result.PackageReferences.Single().Id);
+            Assert.Equal("1.2.3-beta-1", result.PackageReferences.Single().Version);
+        }
+
         [Fact]
         public void ShouldResolveMultiplePackages()
         {
