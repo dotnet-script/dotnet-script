@@ -77,6 +77,32 @@ namespace Dotnet.Script.Tests
             Assert.Equal("3.2.1", result.PackageReferences.Last().Version);
         }
 
+        [Theory]
+        [InlineData("\r #load\"nuget:Package, 1.2.3\"")]
+        [InlineData("#load\n\"nuget:Package, 1.2.3\"")]
+        [InlineData("#load \"nuget:\nPackage, 1.2.3\"")]
+        [InlineData("#load \"nuget:Package\n, 1.2.3\"")]
+        [InlineData("#load \"nuget:Package,\n1.2.3\"")]
+        [InlineData("#load \"nuget:P a c k a g e, 1.2.3\"")]
+        [InlineData("#load \"nuget:Pack/age, 1.2.3\"")]
+        [InlineData("#load \"nuget:Package,\"")]
+        [InlineData("\r #r\"nuget:Package, 1.2.3\"")]
+        [InlineData("#r\n\"nuget:Package, 1.2.3\"")]
+        [InlineData("#r \"nuget:\nPackage, 1.2.3\"")]
+        [InlineData("#r \"nuget:Package\n, 1.2.3\"")]
+        [InlineData("#r \"nuget:Package,\n1.2.3\"")]
+        [InlineData("#r \"nuget:P a c k a g e, 1.2.3\"")]
+        [InlineData("#r \"nuget:Pack/age, 1.2.3\"")]
+        [InlineData("#r \"nuget:Package,\"")]
+        public void ShouldNotMatchBadDirectives(string code)
+        {
+            var parser = CreateParser();
+
+            var result = parser.ParseFromCode(code);
+
+            Assert.Equal(0, result.PackageReferences.Count);
+        }
+
         [Fact]
         public void ShouldParseTargetFramework()
         {
@@ -85,6 +111,20 @@ namespace Dotnet.Script.Tests
             var result = parser.ParseFromCode($"#! \"{_scriptEnvironment.TargetFramework}\"");
 
             Assert.Equal(_scriptEnvironment.TargetFramework, result.TargetFramework);            
+        }
+
+        [Theory]
+        [InlineData("\n#! \"TARGET_FRAMEWORK\"")]
+        [InlineData("\r#! \"TARGET_FRAMEWORK\"")]
+        [InlineData("#!\n\"TARGET_FRAMEWORK\"")]
+        [InlineData("#!\r\"TARGET_FRAMEWORK\"")]
+        public void ShouldNotParseBadTargetFramework(string code)
+        {
+            var parser = CreateParser();
+
+            var result = parser.ParseFromCode(code.Replace("TARGET_FRAMEWORK", _scriptEnvironment.TargetFramework));
+
+            Assert.Null(result.TargetFramework);            
         }
 
         private ScriptParser CreateParser()
