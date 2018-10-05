@@ -1,2 +1,1 @@
-@echo off
-dotnet exec "%~dp0dotnet-script.dll" %*
+@dotnet exec "%~dp0dotnet-script.dll" %*
