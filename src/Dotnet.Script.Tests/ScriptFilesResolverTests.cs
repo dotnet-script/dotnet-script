@@ -1,11 +1,10 @@
 ﻿using System.IO;
+using System.Linq;
 using Xunit;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.Tests
 {
-    using System.Linq;
-
     public class ScriptFilesResolverTests
     {
         [Fact]
