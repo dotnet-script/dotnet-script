@@ -4,6 +4,8 @@ using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.Tests
 {
+    using System.Linq;
+
     public class ScriptFilesResolverTests
     {
         [Fact]
@@ -78,6 +80,20 @@ namespace Dotnet.Script.Tests
             }
         }
 
+        [Fact]
+        public void ShouldNotParseLoadDirectiveIgnoringCase()
+        {
+            using (var rootFolder = new DisposableFolder())
+            {
+                var rootScript = WriteScript("#LOAD \"Bar.csx\"", rootFolder.Path, "Foo.csx");
+                WriteScript(string.Empty, rootFolder.Path, "Bar.csx");
+                var scriptFilesResolver = new ScriptFilesResolver();
+
+                var files = scriptFilesResolver.GetScriptFiles(rootScript);
+
+                Assert.Equal(new[] { "Foo.csx" }, files.Select(Path.GetFileName));
+            }
+        }
 
         private static string WriteScript(string content, string folder, string name)
         {
