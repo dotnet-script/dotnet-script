@@ -4,6 +4,8 @@ using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.Tests
 {
+    using System.Linq;
+
     public class ScriptFilesResolverTests
     {
         [Fact]
@@ -17,7 +19,7 @@ namespace Dotnet.Script.Tests
 
                 var files = scriptFilesResolver.GetScriptFiles(rootScript);
 
-                Assert.True(files.Count == 1);
+                Assert.Single(files);
                 Assert.Contains(files, f => f.Contains("Foo.csx"));
                 Assert.Contains(files, f => !f.Contains("Bar.csx"));
             }
@@ -33,9 +35,8 @@ namespace Dotnet.Script.Tests
 
                 var files = scriptFilesResolver.GetScriptFiles(rootScript);
 
-                Assert.True(files.Count == 2);
-                Assert.Contains(files, f => f.Contains("Foo.csx"));
-                Assert.Contains(files, f => f.Contains("Bar.csx"));
+                Assert.Equal(2, files.Count);
+                Assert.Equal(new[] { "Foo.csx", "Bar.csx" }, files.Select(Path.GetFileName));
             }
         }
 
@@ -52,9 +53,8 @@ namespace Dotnet.Script.Tests
                 var scriptFilesResolver = new ScriptFilesResolver();
                 var files = scriptFilesResolver.GetScriptFiles(rootScript);
 
-                Assert.True(files.Count == 2);
-                Assert.Contains(files, f => f.Contains("Foo.csx"));
-                Assert.Contains(files, f => f.Contains("Bar.csx"));
+                Assert.Equal(2, files.Count);
+                Assert.Equal(new[] { "Foo.csx", "Bar.csx" }, files.Select(Path.GetFileName));
             }
         }
 
@@ -72,9 +72,8 @@ namespace Dotnet.Script.Tests
                 var scriptFilesResolver = new ScriptFilesResolver();
                 var files = scriptFilesResolver.GetScriptFiles(rootScript);
 
-                Assert.True(files.Count == 2);
-                Assert.Contains(files, f => f.Contains("Foo.csx"));
-                Assert.Contains(files, f => f.Contains("Bar.csx"));
+                Assert.Equal(2, files.Count);
+                Assert.Equal(new[] { "Foo.csx", "Bar.csx" }, files.Select(Path.GetFileName));
             }
         }
 

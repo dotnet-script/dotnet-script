@@ -8,55 +8,45 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     public class ScriptFilesResolver
     {
-        public HashSet<string> GetScriptFiles(string csxFile)
+        public IList<string> GetScriptFiles(string csxFile)
         {
-            HashSet<string> result = new HashSet<string>();
-            Process(csxFile, result);
-            return result;
+            return GetScriptFiles(new[] { csxFile });
         }
 
-        public HashSet<string> GetScriptFilesFromCode(string code)
+        public IList<string> GetScriptFilesFromCode(string code)
         {
-            HashSet<string> result = new HashSet<string>();
-
-            var loadDirectives = GetLoadDirectives(code);
-            foreach (var loadDirective in loadDirectives)
-            {
-                string referencedScript;
-                if (!Path.IsPathRooted(loadDirective))
-                {
-                    referencedScript = Path.GetFullPath((new Uri(Path.Combine(Directory.GetCurrentDirectory(), loadDirective))).LocalPath);
-                }
-                else
-                {
-                    referencedScript = loadDirective;
-                }
-                Process(referencedScript, result);
-            }
-
-            return result;
+            var currentDirectory = Directory.GetCurrentDirectory();
+            return GetScriptFiles(from loadDirective in GetLoadDirectives(code)
+                                  select GetFullPath(currentDirectory, loadDirective));
         }
 
-        private void Process(string csxFile, HashSet<string> result)
+        static IList<string> GetScriptFiles(IEnumerable<string> csxFiles)
         {
-            if (result.Add(csxFile))
-            {
-                var loadDirectives = GetLoadDirectives(File.ReadAllText(csxFile));
-                foreach (var loadDirective in loadDirectives)
-                {
-                    string referencedScript;
-                    if (!Path.IsPathRooted(loadDirective))
-                    {
-                        referencedScript = Path.GetFullPath((new Uri(Path.Combine(Path.GetDirectoryName(csxFile), loadDirective))).LocalPath);
-                    }
-                    else
-                    {
-                        referencedScript = loadDirective;
-                    }
+            var fileSet = new HashSet<string>(); // potentially unordered
+            var result = new List<string>();     // in depth-first order
+            WalkLoadTree(csxFiles);
+            return result;
 
-                    Process(referencedScript, result);
+            void WalkLoadTree(IEnumerable<string> files)
+            {
+                foreach (var csxFile in files)
+                {
+                    if (fileSet.Add(csxFile))
+                    {
+                        result.Add(csxFile);
+
+                        WalkLoadTree(from loadDirective in GetLoadDirectives(File.ReadAllText(csxFile))
+                                     select GetFullPath(Path.GetDirectoryName(csxFile), loadDirective));
+                    }
                 }
             }
+        }
+
+        static string GetFullPath(string basePath, string path)
+        {
+            return !Path.IsPathRooted(path)
+                 ? Path.GetFullPath(new Uri(Path.Combine(basePath, path)).LocalPath)
+                 : path;
         }
 
         private static string[] GetLoadDirectives(string content)
