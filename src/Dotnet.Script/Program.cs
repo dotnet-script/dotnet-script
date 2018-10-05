@@ -98,7 +98,7 @@ namespace Dotnet.Script
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
                         var optimizationLevel = OptimizationLevel.Debug;
-                        if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                        if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
@@ -162,7 +162,7 @@ namespace Dotnet.Script
                     }
 
                     var optimizationLevel = OptimizationLevel.Debug;
-                    if (commandConfig.HasValue() && commandConfig.Value().ToLower() == "release")
+                    if (commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
                     {
                         optimizationLevel = OptimizationLevel.Release;
                     }
@@ -243,7 +243,7 @@ namespace Dotnet.Script
                     if (Debugger.IsAttached || nocache.HasValue())
                     {
                         var optimizationLevel = OptimizationLevel.Debug;
-                        if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                        if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
                         {
                             optimizationLevel = OptimizationLevel.Release;
                         }
@@ -314,7 +314,7 @@ namespace Dotnet.Script
 
                             // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
                             var optimizationLevel = OptimizationLevel.Debug;
-                            if (configuration.HasValue() && configuration.Value().ToLower() == "release")
+                            if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
                             {
                                 optimizationLevel = OptimizationLevel.Release;
                             }

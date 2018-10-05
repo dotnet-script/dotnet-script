@@ -1,9 +1,11 @@
-﻿namespace Dotnet.Script.DependencyModel.ProjectSystem
+﻿using System;
+
+namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     /// <summary>
     /// Represents a NuGet package reference found in a script file.
     /// </summary>
-    public class PackageReference
+    public class PackageReference : IEquatable<PackageReference>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageReference"/> class.
@@ -36,14 +38,24 @@
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return Id.GetHashCode() ^ Version.GetHashCode() ^ Origin.GetHashCode();
+            var stringComparer = StringComparer.OrdinalIgnoreCase;
+            return stringComparer.GetHashCode(Id)
+                 ^ stringComparer.GetHashCode(Version)
+                 ^ Origin.GetHashCode();
         }
 
-        /// <inheritdoc />
+        public bool Equals(PackageReference other)
+        {
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Id, other.Id, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase)
+                && Origin == other.Origin;
+        }
+
         public override bool Equals(object obj)
         {
-            var other = (PackageReference)obj;
-            return other.Id == Id && other.Version == Version && other.Origin == Origin;
+            return Equals(obj as PackageReference);
         }
     }
 }
