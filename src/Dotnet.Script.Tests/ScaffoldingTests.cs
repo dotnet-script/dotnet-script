@@ -35,6 +35,7 @@ namespace Dotnet.Script.Tests
             using (var scriptFolder = new DisposableFolder())
             {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+                Assert.Equal(0, exitCode);
 
                 var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
                 if (ScriptEnvironment.Default.IsWindows)
@@ -59,13 +60,15 @@ namespace Dotnet.Script.Tests
             using (var scriptFolder = new DisposableFolder())
             {
                 Directory.CreateDirectory(scriptFolder.Path);
-                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+                var (_, initExitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+                Assert.Equal(0, initExitCode);
 
                 var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
 
                 if (ScriptEnvironment.Default.IsWindows)
                 {
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolder.Path);
+                    var (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolder.Path);
+                    Assert.Equal(0, exitCode);
                     Assert.Equal("Hello world!", output.Trim());
                 }
                 else
@@ -73,10 +76,11 @@ namespace Dotnet.Script.Tests
                     // this depends on dotnet-script being installed as a dotnet global tool because the shebang needs to 
                     // point to an executable in the environment.  If you have dotnet-script installed as a global tool this
                     // test will pass
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);
-                    if (exitCode == 0)
+                    var (_, testExitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);
+                    if (testExitCode == 0)
                     {
-                        (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
+                        var (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
+                        Assert.Equal(0, exitCode);
                         Assert.Equal("Hello world!", output.Trim());
                     }
                 }
