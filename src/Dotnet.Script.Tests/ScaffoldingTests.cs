@@ -35,7 +35,7 @@ namespace Dotnet.Script.Tests
             using (var scriptFolder = new DisposableFolder())
             {
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
-                Assert.Equal(0, exitCode);
+                Assert.True(exitCode == 0, output);
 
                 var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
                 if (ScriptEnvironment.Default.IsWindows)
@@ -98,7 +98,7 @@ namespace Dotnet.Script.Tests
 
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
 
-                Assert.True(settings.script.enableScriptNuGetReferences.Value);
+                Assert.True((bool) settings.script.enableScriptNuGetReferences.Value);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Dotnet.Script.Tests
 
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
 
-                Assert.Equal(_scriptEnvironment.TargetFramework, settings.script.defaultTargetFramework.Value);
+                Assert.Equal(_scriptEnvironment.TargetFramework, (string) settings.script.defaultTargetFramework.Value);
             }
         }
 
