@@ -22,6 +22,7 @@ namespace Dotnet.Script.Core
         private ScriptState<object> _scriptState;
         private ScriptOptions _scriptOptions;
         private InteractiveScriptGlobals _globals;
+        private string _temporaryDirectory;
 
         protected Logger Logger;
         protected ScriptCompiler ScriptCompiler;
@@ -31,13 +32,14 @@ namespace Dotnet.Script.Core
         protected InteractiveCommandProvider InteractiveCommandParser = new InteractiveCommandProvider();
         protected string CurrentDirectory = Directory.GetCurrentDirectory();
 
-        public InteractiveRunner(ScriptCompiler scriptCompiler, LogFactory logFactory, ScriptConsole console, string[] packageSources)
+        public InteractiveRunner(ScriptCompiler scriptCompiler, LogFactory logFactory, ScriptConsole console, string[] packageSources, string temporaryDirectory = null)
         {
             Logger = logFactory.CreateLogger<InteractiveRunner>();
             ScriptCompiler = scriptCompiler;
             Console = console;
             _packageSources = packageSources ?? Array.Empty<string>();
             _globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+            _temporaryDirectory = temporaryDirectory;
         }
 
         public virtual async Task RunLoop()
@@ -70,14 +72,14 @@ namespace Dotnet.Script.Core
                 if (_scriptState == null)
                 {
                     var sourceText = SourceText.From(input);
-                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(),scriptMode: ScriptMode.REPL, packageSources: _packageSources);
+                    var context = new ScriptContext(sourceText, CurrentDirectory, Enumerable.Empty<string>(),scriptMode: ScriptMode.REPL, packageSources: _packageSources, temporaryDirectory: _temporaryDirectory);
                     await RunFirstScript(context);
                 }
                 else
                 {
                     if (input.StartsWith("#r ") || input.StartsWith("#load "))
                     {
-                        var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL,_packageSources, input).ToArray();
+                        var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL,_packageSources, input, _temporaryDirectory).ToArray();
                         var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
                         var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);

@@ -43,10 +43,10 @@ namespace Dotnet.Script.DependencyModel.Compilation
             return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory), new NuGetRestorer(commandRunner, logFactory) };
         }
         
-        public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
+        public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46", string temporaryDirectory = null)
         {
             var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, defaultTargetFramework,
-                enableScriptNugetReferences);
+                enableScriptNugetReferences, temporaryDirectory);
 
             if (pathToProjectFile == null)
             {

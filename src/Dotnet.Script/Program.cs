@@ -86,6 +86,8 @@ namespace Dotnet.Script
 
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
+            var temporaryDirectory = app.Option("-t |--temporaryDirectory <temporaryDirectory>", "Temporary directory to use when generating intermediate C# project, defaults to user's temporary directory", CommandOptionType.SingleValue);
+
             app.Command("eval", c =>
             {
                 c.Description = "Execute CSX code.";
@@ -151,6 +153,7 @@ namespace Dotnet.Script
                 var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for publishing the script [Release/Debug]. Default is \"Debug\"", CommandOptionType.SingleValue);
                 var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
                 var runtime = c.Option("-r |--runtime", "The runtime used when publishing the self contained executable. Defaults to your current runtime.", CommandOptionType.SingleValue);
+                var publishTemporaryDirectory = c.Option("-t |--temporaryDirectory <temporaryDirectory>", "Temporary directory to use when generating intermediate C# project, defaults to user's temporary directory", CommandOptionType.SingleValue);
 
                 c.OnExecute(() =>
                 {
@@ -182,7 +185,7 @@ namespace Dotnet.Script
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                     var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
                     var code = SourceText.From(File.ReadAllText(absoluteFilePath));
-                    var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
+                    var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel, temporaryDirectory: publishTemporaryDirectory.Value());
 
                     if (dllOption.HasValue())
                     {
@@ -332,7 +335,7 @@ namespace Dotnet.Script
                 }
                 else
                 {
-                    await RunInteractive(debugMode.HasValue(), logFactory, packageSources.Values?.ToArray());
+                    await RunInteractive(debugMode.HasValue(), logFactory, packageSources.Values?.ToArray(), temporaryDirectory.Value());
                 }
                 return exitCode;
             });
@@ -383,10 +386,10 @@ namespace Dotnet.Script
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
-        private static async Task RunInteractive(bool debugMode, LogFactory logFactory, string[] packageSources)
+        private static async Task RunInteractive(bool debugMode, LogFactory logFactory, string[] packageSources, string temporaryDirectory = null)
         {
             var compiler = GetScriptCompiler(debugMode, logFactory);
-            var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
+            var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources, temporaryDirectory);
             await runner.RunLoop();
         }
 

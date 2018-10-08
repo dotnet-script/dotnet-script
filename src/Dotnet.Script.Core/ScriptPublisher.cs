@@ -44,7 +44,7 @@ namespace Dotnet.Script.Core
 
             assemblyFileName = assemblyFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, context.WorkingDirectory, assemblyFileName);
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), context.TemporaryDirectory);
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
             var sourceProjectAssetsPath = Path.Combine(tempProjectDirecory, "obj", "project.assets.json");
@@ -71,7 +71,7 @@ namespace Dotnet.Script.Core
 
             const string AssemblyName = "scriptAssembly";
 
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), context.TemporaryDirectory);
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);

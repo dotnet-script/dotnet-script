@@ -26,7 +26,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
         }
 
-        public string CreateProjectForRepl(string code, string targetDirectory, string defaultTargetFramework = "net46")
+        public string CreateProjectForRepl(string code, string targetDirectory, string defaultTargetFramework = "net46", string temporaryDirectory = null)
         {
             var scriptFiles = _scriptFilesResolver.GetScriptFilesFromCode(code);
             targetDirectory = Path.Combine(targetDirectory, "interactive");
@@ -46,7 +46,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             }
 
             targetDirectory = Path.Combine(targetDirectory, "interactive");
-            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
+            var pathToProjectFile = GetPathToProjectFile(targetDirectory, temporaryDirectory);
             var projectFile = new ProjectFile();
 
             foreach (var packageReference in allPackageReferences)
@@ -71,7 +71,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _logger.Debug(content);
         }
 
-        public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
+        public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false, string temporaryDirectory = null)
         {
             var pathToProjectFile = Directory.GetFiles(targetDirectory, "*.csproj").FirstOrDefault();
             if (pathToProjectFile == null && !enableNuGetScriptReferences)
@@ -82,21 +82,21 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework.");
 
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
-            return CreateProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, csxFiles);
+            return CreateProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, csxFiles, temporaryDirectory);
         }
 
-        public string CreateProjectForScriptFile(string scriptFile)
+        public string CreateProjectForScriptFile(string scriptFile, string temporaryDirectory = null)
         {
             _logger.Debug($"Creating project file for {scriptFile}");
             var scriptFiles = _scriptFilesResolver.GetScriptFiles(scriptFile);
-            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());
+            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray(), temporaryDirectory);
         }
 
-        private string CreateProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
+        private string CreateProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles, string temporaryDirectory = null)
         {
             var parseresult = _scriptParser.ParseFromFiles(csxFiles);
 
-            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
+            var pathToProjectFile = GetPathToProjectFile(targetDirectory, temporaryDirectory);
             var projectFile = new ProjectFile();
 
             foreach (var packageReference in parseresult.PackageReferences)
@@ -125,9 +125,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             }
         }
 
-        public static string GetPathToProjectFile(string targetDirectory)
-        { 
-            var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory);
+        public static string GetPathToProjectFile(string targetDirectory, string temporaryDirectory)
+        {
+            var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory, temporaryDirectory);
             var pathToProjectFile = Path.Combine(pathToProjectDirectory, "script.csproj");
             return pathToProjectFile;
         }
