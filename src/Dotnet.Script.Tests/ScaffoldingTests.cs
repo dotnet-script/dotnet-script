@@ -1,6 +1,7 @@
 ﻿using Dotnet.Script.DependencyModel.Environment;
 using Newtonsoft.Json.Linq;
 using System.IO;
+using System.Text.RegularExpressions;
 using Xunit;
 
 
@@ -41,8 +42,22 @@ namespace Dotnet.Script.Tests
                 {
                     (output, exitCode) = ProcessHelper.RunAndCaptureOutput("reg.exe", @"query HKCU\Software\Classes\.csx");
                     Assert.Equal(0, exitCode);
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("reg.exe", @"query HKCU\software\classes\dotnetscript");
+
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("reg.exe", @"query HKCU\software\classes\dotnetscript\Shell\Open\Command");
                     Assert.Equal(0, exitCode);
+
+                    Assert.Matches(new Regex(@" \b   REG_EXPAND_SZ                             # type
+                                                [ ]+ ""%ProgramFiles%\\dotnet\\dotnet.exe""    # unexpanded %ProgramFiles% + quoted
+                                                [ ]+ exec
+                                                [ ]+ ""([A-Z]:|\\)\\(.+?)\\dotnet-script.dll"" # absolute + quoted
+                                                [ ]+ ""%1""                                    # quoted
+                                                [ ]+ --
+                                                [ ]+ %\*                                       # unquoted
+                                            ",
+                                             RegexOptions.IgnoreCase |
+                                             RegexOptions.CultureInvariant |
+                                             RegexOptions.IgnorePatternWhitespace),
+                                   output);
                 }
                 else
                 {

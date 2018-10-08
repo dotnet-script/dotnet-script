@@ -132,7 +132,7 @@ namespace Dotnet.Script.Core
 
                 if (_commandRunner.Execute("reg", @"query HKCU\Software\classes\dotnetscript") != 0)
                 {
-                    _commandRunner.Execute("reg", $@"add HKCU\Software\Classes\dotnetscript\Shell\Open\Command /f /ve /t REG_EXPAND_SZ /d """"%ProgramFiles%\dotnet\dotnet.exe"" exec {_scriptEnvironment.InstallLocation}\dotnet-script.dll %1 -- %*""");
+                    _commandRunner.Execute("reg", $@"add HKCU\Software\Classes\dotnetscript\Shell\Open\Command /f /ve /t REG_EXPAND_SZ /d ""\""%ProgramFiles%\dotnet\dotnet.exe\"" exec \""{Path.Combine(_scriptEnvironment.InstallLocation, "dotnet-script.dll")}\"" \""%1\"" -- %*""");
                 }
             }
 
