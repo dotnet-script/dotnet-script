@@ -1,4 +1,3 @@
-#define AUTOPUBLISH
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
