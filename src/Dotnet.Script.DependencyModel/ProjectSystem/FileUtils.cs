@@ -27,6 +27,11 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 throw new ArgumentOutOfRangeException(nameof(targetDirectory), "Must be a root path");
             }
 
+            if (!string.IsNullOrEmpty(temporaryDirectoryRoot) && !Path.IsPathRooted(temporaryDirectoryRoot))
+            {
+                throw new ArgumentOutOfRangeException(nameof(temporaryDirectoryRoot), "Must be a root path");
+            }
+
             var tempDirectory = !string.IsNullOrEmpty(temporaryDirectoryRoot) ? temporaryDirectoryRoot : Path.GetTempPath();
             var pathRoot = Path.GetPathRoot(targetDirectory);
             var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
