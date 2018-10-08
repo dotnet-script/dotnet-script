@@ -80,7 +80,8 @@ namespace Dotnet.Script
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
             var argsAfterDoubleHyphen  = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
-            app.HelpOption("-? | -h | --help");
+            const string helpOptionTemplate = "-? | -h | --help";
+            app.HelpOption(helpOptionTemplate);
 
             app.VersionOption("-v | --version", GetVersion);
 
@@ -93,6 +94,7 @@ namespace Dotnet.Script
                 c.Description = "Execute CSX code.";
                 var code = c.Argument("code", "Code to execute.");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
+                c.HelpOption(helpOptionTemplate);
                 c.OnExecute(async () =>
                 {
                     int exitCode = 0;
@@ -115,6 +117,7 @@ namespace Dotnet.Script
                 c.Description = "Creates a sample script along with the launch.json file needed to launch and debug the script.";
                 var fileName = c.Argument("filename", "(Optional) The name of the sample script file to be created during initialization. Defaults to 'main.csx'");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for initialization. Defaults to current directory.", CommandOptionType.SingleValue);
+                c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
@@ -129,6 +132,7 @@ namespace Dotnet.Script
                 c.Description = "Creates a new script file";
                 var fileNameArgument = c.Argument("filename", "The script file name");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory the new script file to be created. Defaults to current directory.", CommandOptionType.SingleValue);
+                c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
@@ -155,6 +159,7 @@ namespace Dotnet.Script
                 var runtime = c.Option("-r |--runtime", "The runtime used when publishing the self contained executable. Defaults to your current runtime.", CommandOptionType.SingleValue);
                 var publishTemporaryDirectory = c.Option("-t |--temporaryDirectory <temporaryDirectory>", "Temporary directory to use when generating intermediate C# project, defaults to user's temporary directory", CommandOptionType.SingleValue);
 
+                c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
                     if (fileNameArgument.Value == null)
@@ -205,6 +210,7 @@ namespace Dotnet.Script
                 c.Description = "Run a script from a DLL.";
                 var dllPath = c.Argument("dll", "Path to DLL based script");
                 var commandDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
+                c.HelpOption(helpOptionTemplate);
                 c.OnExecute(async () =>
                 {
                     int exitCode = 0;
