@@ -60,15 +60,15 @@ namespace Dotnet.Script.Tests
             using (var scriptFolder = new DisposableFolder())
             {
                 Directory.CreateDirectory(scriptFolder.Path);
-                var (_, initExitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
-                Assert.Equal(0, initExitCode);
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
+                Assert.True(exitCode == 0, output);
 
                 var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
 
                 if (ScriptEnvironment.Default.IsWindows)
                 {
-                    var (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolder.Path);
-                    Assert.Equal(0, exitCode);
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolder.Path);
+                    Assert.True(exitCode == 0, output);
                     Assert.Equal("Hello world!", output.Trim());
                 }
                 else
@@ -79,8 +79,8 @@ namespace Dotnet.Script.Tests
                     var (_, testExitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);
                     if (testExitCode == 0)
                     {
-                        var (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
-                        Assert.Equal(0, exitCode);
+                        (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
+                        Assert.True(exitCode == 0, output);
                         Assert.Equal("Hello world!", output.Trim());
                     }
                 }
