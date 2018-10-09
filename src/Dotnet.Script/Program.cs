@@ -155,7 +155,6 @@ namespace Dotnet.Script
                 var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for publishing the script [Release/Debug]. Default is \"Debug\"", CommandOptionType.SingleValue);
                 var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
                 var runtime = c.Option("-r |--runtime", "The runtime used when publishing the self contained executable. Defaults to your current runtime.", CommandOptionType.SingleValue);
-
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
