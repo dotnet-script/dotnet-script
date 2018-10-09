@@ -1,3 +1,4 @@
+using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
@@ -97,7 +98,7 @@ namespace Dotnet.Script.Core
         {
             try
             {
-                CreateNuGetConfigFromLocation(context.FilePath, outputDirectory);
+                NuGetUtilities.CreateNuGetConfigFromLocation(context.FilePath, outputDirectory);
                 var emitResult = _scriptEmitter.Emit<TReturn, THost>(context);
                 if (!emitResult.Success)
                 {
@@ -158,47 +159,6 @@ namespace Dotnet.Script.Core
             }
             var programcsPath = Path.Combine(tempProjectDirecory, "Program.cs");
             File.WriteAllText(programcsPath, program);
-        }
-
-        private void CreateNuGetConfigFromLocation(string pathToEvaluate, string directoryToCopy)
-        {
-            string[] sections = new string[] 
-            {
-                "bindingRedirects", "solution",
-                "packageSources", "packageSourceCredentials", "apiKeys",
-                "disabledPackageSources", "activePackageSource"
-            };
-            string[] pathInConfig = new string[]
-            {
-                "globalPackagesFolder", "repositoryPath"
-            };
-
-            var settings = NuGet.Configuration.Settings.LoadDefaultSettings(pathToEvaluate);
-            var target = new NuGet.Configuration.Settings(directoryToCopy, "Nuget.config");
-
-            var valuesToReadOnly = new System.Collections.Generic.List<NuGet.Configuration.SettingValue>();
-            throw new NotImplementedException("Resolve path to full path for config path + packageSources paths");
-            // Special case for section "config"
-            {
-                valuesToReadOnly.Clear();
-                var values = settings.GetSettingValues("config", true);
-                for (int i = 0; i < values.Count; ++i)
-                {
-                    if (Array.IndexOf(pathInConfig, values[i].Key) != -1
-                        && !Path.IsPathRooted(values[i].Value))
-                        throw new NotImplementedException("Resolve path to full path");
-                }
-                valuesToReadOnly.AddRange(values);
-                target.SetValues("config", valuesToReadOnly);
-            }
-
-            foreach (var section in sections)
-            {
-                valuesToReadOnly.Clear();
-                var values = settings.GetSettingValues(section, true);
-                valuesToReadOnly.AddRange(values);
-                target.SetValues(section, valuesToReadOnly);
-            }
         }
     }
 }
