@@ -98,6 +98,9 @@ namespace Dotnet.Script.Core
         {
             try
             {
+                var nugetFile = Path.Combine(outputDirectory, "NuGet.config");
+                if (File.Exists(nugetFile))
+                    File.Delete(nugetFile);
                 NuGetUtilities.CreateNuGetConfigFromLocation(context.FilePath, outputDirectory);
                 var emitResult = _scriptEmitter.Emit<TReturn, THost>(context);
                 if (!emitResult.Success)
