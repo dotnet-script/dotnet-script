@@ -8,9 +8,15 @@ namespace Dotnet.Script.Core.Versioning
     public interface IVersionProvider
     {
         /// <summary>
-        /// Gets the version represented as a string.
+        /// Gets the latest available version.
+        /// </summary>
+        /// <returns><see cref="VersionInfo"/>.</returns>
+        Task<VersionInfo> GetLatestVersion();
+
+        /// <summary>
+        /// Gets the current version. 
         /// </summary>
         /// <returns></returns>
-        Task<string> GetVersion();
+        VersionInfo GetCurrentVersion();
     }
 }

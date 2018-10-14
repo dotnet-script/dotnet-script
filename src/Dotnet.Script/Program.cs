@@ -1,4 +1,5 @@
 using Dotnet.Script.Core;
+using Dotnet.Script.Core.Versioning;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
@@ -234,14 +235,15 @@ namespace Dotnet.Script
             {
                 int exitCode = 0;
 
-                if (infoOption.HasValue())
-                {
-                    Console.Write(GetEnvironmentInfo());
-                    return 0;
-                }
-
                 var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
 
+                if (infoOption.HasValue())
+                {                    
+                    var environmentReporter = new EnvironmentReporter(logFactory);
+                    await environmentReporter.ReportInfo();                    
+                    return 0;
+                }
+                
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     if (Debugger.IsAttached || nocache.HasValue())
