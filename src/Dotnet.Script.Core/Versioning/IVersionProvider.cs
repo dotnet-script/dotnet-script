@@ -14,7 +14,7 @@ namespace Dotnet.Script.Core.Versioning
         Task<VersionInfo> GetLatestVersion();
 
         /// <summary>
-        /// Gets the current version. 
+        /// Gets the current version.
         /// </summary>
         /// <returns></returns>
         VersionInfo GetCurrentVersion();

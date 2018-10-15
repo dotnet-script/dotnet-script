@@ -7,16 +7,16 @@ namespace Dotnet.Script.Core.Versioning
     /// </summary>
     /// <typeparam name="VersionInfo"></typeparam>
     public class VersionInfo : IEquatable<VersionInfo>
-    {        
+    {
         /// <summary>
         /// Returns a new <see cref="VersionInfo"/> that is considered "unresolved".
         /// </summary>
         /// <param name="false"></param>
         /// <returns></returns>
         public static VersionInfo UnResolved = new VersionInfo(string.Empty, isResolved: false);
-    
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="VersionInfo"/> class. 
+        /// Initializes a new instance of the <see cref="VersionInfo"/> class.
         /// </summary>
         /// <param name="version">The version represented a string.</param>
         /// <param name="isResolved">Indicates if the version information was successfully resolved.</param>
@@ -31,9 +31,9 @@ namespace Dotnet.Script.Core.Versioning
         /// </summary>
         /// <value></value>
         public string Version { get; }
-        
+
         /// <summary>
-        /// Gets a <see cref="bool"/> value that indicates if the version information 
+        /// Gets a <see cref="bool"/> value that indicates if the version information
         /// was successfully resolved.
         /// </summary>
         /// <value></value>
@@ -44,7 +44,7 @@ namespace Dotnet.Script.Core.Versioning
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase) 
+            return string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase)
                 && IsResolved == other.IsResolved;
         }
 
@@ -52,7 +52,7 @@ namespace Dotnet.Script.Core.Versioning
         public override int GetHashCode()
         {
             var stringComparer = StringComparer.OrdinalIgnoreCase;
-            return stringComparer.GetHashCode(Version) 
+            return stringComparer.GetHashCode(Version)
                 ^ IsResolved.GetHashCode();
         }
 

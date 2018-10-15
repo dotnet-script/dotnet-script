@@ -31,7 +31,7 @@ namespace Dotnet.Script.Core.Versioning
         public LoggedVersionProvider(LogFactory logfactory)
             :this
             (
-                new VersionProvider(), 
+                new VersionProvider(),
                 logfactory
             )
         { }
@@ -44,7 +44,7 @@ namespace Dotnet.Script.Core.Versioning
                 return _versionProvider.GetCurrentVersion();
             }
             catch (Exception ex)
-            {                
+            {
                 _logger.Error("Failed to retrieve information about the current version", ex);
                 return VersionInfo.UnResolved;
             }
@@ -58,10 +58,10 @@ namespace Dotnet.Script.Core.Versioning
                 return  await _versionProvider.GetLatestVersion();
             }
             catch (Exception ex)
-            {                
+            {
                 _logger.Error("Failed to retrieve information about the latest version", ex);
                 return VersionInfo.UnResolved;
-            }            
+            }
         }
     }
 }

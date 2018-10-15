@@ -18,25 +18,25 @@ namespace Dotnet.Script.Core.Versioning
 
          /// <inheritdoc>
         public async Task<VersionInfo> GetLatestVersion()
-        {                       
+        {
             using(var httpClient = CreateHttpClient())
-            {                
-                var response = await httpClient.GetStringAsync(RequestUri);                    
+            {
+                var response = await httpClient.GetStringAsync(RequestUri);
                 return ParseTagName(response);
             }
 
             HttpClient CreateHttpClient()
             {
                 var httpClient = new HttpClient { BaseAddress = new Uri("https://api.github.com") };
-                httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);                    
+                httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
                 return httpClient;
-            } 
+            }
 
             VersionInfo ParseTagName(string json)
             {
                 JObject jsonResult = JObject.Parse(json);
-                return new VersionInfo(jsonResult.SelectToken("tag_name").Value<string>(), isResolved:true);            
-            } 
+                return new VersionInfo(jsonResult.SelectToken("tag_name").Value<string>(), isResolved:true);
+            }
         }
 
         /// <inheritdoc>
@@ -45,6 +45,6 @@ namespace Dotnet.Script.Core.Versioning
             var versionAttribute = typeof(VersionProvider).Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().Single();
             var version = Version.Parse(versionAttribute.InformationalVersion);
             return new VersionInfo(versionAttribute.InformationalVersion, isResolved:true);
-        }   
+        }
     }
 }

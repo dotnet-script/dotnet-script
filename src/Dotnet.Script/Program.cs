@@ -238,12 +238,12 @@ namespace Dotnet.Script
                 var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
 
                 if (infoOption.HasValue())
-                {                    
+                {
                     var environmentReporter = new EnvironmentReporter(logFactory);
-                    await environmentReporter.ReportInfo();                    
+                    await environmentReporter.ReportInfo();
                     return 0;
                 }
-                
+
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     if (Debugger.IsAttached || nocache.HasValue())
@@ -300,7 +300,7 @@ namespace Dotnet.Script
                         // source hash is the checkSum of the code
                         string sourceHash = Convert.ToBase64String(code.GetChecksum().ToArray());
 
-                        // get hash code from previous run 
+                        // get hash code from previous run
                         string hashCache = Path.Combine(publishDirectory, ".hash");
                         var compiler = GetScriptCompiler(true, logFactory);
 
@@ -426,8 +426,7 @@ namespace Dotnet.Script
 
         private static string GetVersion()
         {
-            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();
-            return versionAttribute?.InformationalVersion;
+            return new VersionProvider().GetCurrentVersion().Version;
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode, LogFactory logFactory)

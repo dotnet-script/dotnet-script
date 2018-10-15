@@ -6,18 +6,18 @@ using Dotnet.Script.DependencyModel.Logging;
 namespace Dotnet.Script.Core.Versioning
 {
     /// <summary>
-    /// A class that reports environmental information to the <see cref="ScriptConsole"/>.    
+    /// A class that reports environmental information to the <see cref="ScriptConsole"/>.
     /// </summary>
     public class EnvironmentReporter
     {
-        private readonly IVersionProvider _versionProvider;        
+        private readonly IVersionProvider _versionProvider;
         private readonly ScriptConsole _scriptConsole;
         private readonly ScriptEnvironment _scriptEnvironment;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EnvironmentReporter"/> class.
         /// </summary>
-        /// <param name="versionProvider">The <see cref="IVersionProvider"/> that is 
+        /// <param name="versionProvider">The <see cref="IVersionProvider"/> that is
         /// responsible for providing the current and latest version.</param>
         /// <param name="scriptConsole">The <see cref="ScriptConsole"/> to write to.</param>
         /// <param name="scriptEnvironment">The <see cref="ScriptEnvironment"/> providing environmental information.</param>
@@ -26,7 +26,7 @@ namespace Dotnet.Script.Core.Versioning
             _versionProvider = versionProvider;
             _scriptConsole = scriptConsole;
             _scriptEnvironment = scriptEnvironment;
-        }   
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EnvironmentReporter"/> class using the default dependencies.
@@ -37,7 +37,7 @@ namespace Dotnet.Script.Core.Versioning
             (
                 new LoggedVersionProvider(logFactory),
                 ScriptConsole.Default,
-                ScriptEnvironment.Default    
+                ScriptEnvironment.Default
             )
         { }
 
