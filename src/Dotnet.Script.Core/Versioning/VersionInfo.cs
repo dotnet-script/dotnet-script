@@ -44,7 +44,7 @@ namespace Dotnet.Script.Core.Versioning
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Version, other.Version) 
+            return string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase) 
                 && IsResolved == other.IsResolved;
         }
 

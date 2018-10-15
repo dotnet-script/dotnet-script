@@ -44,11 +44,11 @@ namespace Dotnet.Script.Core.Versioning
         /// <inheritdoc/>
         public async Task ReportInfo()
         {
-            var installedVersion = _versionProvider.GetCurrentVersion();
+            var currentVersion = _versionProvider.GetCurrentVersion();
             var latestVersion = await _versionProvider.GetLatestVersion();
 
-            ReportEnvironmentalInfo(installedVersion);
-            if (latestVersion != installedVersion && latestVersion.IsResolved)
+            ReportEnvironmentalInfo(currentVersion);
+            if (!latestVersion.Equals(currentVersion) && latestVersion.IsResolved)
             {
                 ReportThatNewVersionIsAvailable(latestVersion);
             }
