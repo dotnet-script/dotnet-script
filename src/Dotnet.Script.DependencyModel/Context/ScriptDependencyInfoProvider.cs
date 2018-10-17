@@ -29,7 +29,6 @@ namespace Dotnet.Script.DependencyModel.Context
         /// <returns>The <see cref="DependencyContext"/> for a given project file (csproj).</returns>
         public ScriptDependencyInfo GetDependencyInfo(string pathToProjectFile, string[] packagesSources)
         {
-            var projectFile = new ProjectFile(File.ReadAllText(pathToProjectFile));
             Restore(pathToProjectFile, packagesSources);
             var context = ReadDependencyContext(pathToProjectFile);
             var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);
