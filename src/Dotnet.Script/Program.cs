@@ -1,4 +1,5 @@
 using Dotnet.Script.Core;
+using Dotnet.Script.Core.Versioning;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
@@ -234,13 +235,14 @@ namespace Dotnet.Script
             {
                 int exitCode = 0;
 
+                var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
+
                 if (infoOption.HasValue())
                 {
-                    Console.Write(GetEnvironmentInfo());
+                    var environmentReporter = new EnvironmentReporter(logFactory);
+                    await environmentReporter.ReportInfo();
                     return 0;
                 }
-
-                var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
 
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
@@ -298,7 +300,7 @@ namespace Dotnet.Script
                         // source hash is the checkSum of the code
                         string sourceHash = Convert.ToBase64String(code.GetChecksum().ToArray());
 
-                        // get hash code from previous run 
+                        // get hash code from previous run
                         string hashCache = Path.Combine(publishDirectory, ".hash");
                         var compiler = GetScriptCompiler(true, logFactory);
 
@@ -424,8 +426,7 @@ namespace Dotnet.Script
 
         private static string GetVersion()
         {
-            var versionAttribute = typeof(Program).GetTypeInfo().Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().SingleOrDefault();
-            return versionAttribute?.InformationalVersion;
+            return new VersionProvider().GetCurrentVersion().Version;
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode, LogFactory logFactory)
