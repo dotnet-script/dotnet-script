@@ -2,12 +2,13 @@
 using System.Linq;
 using System.Xml.Linq;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
     /// <summary>
-    /// Represents a class that is capable of providing 
+    /// Represents a class that is capable of providing
     /// the <see cref="DependencyContext"/> for a given project file (csproj).
     /// </summary>
     public class ScriptDependencyInfoProvider
@@ -28,6 +29,7 @@ namespace Dotnet.Script.DependencyModel.Context
         /// <returns>The <see cref="DependencyContext"/> for a given project file (csproj).</returns>
         public ScriptDependencyInfo GetDependencyInfo(string pathToProjectFile, string[] packagesSources)
         {
+            var projectFile = new ProjectFile(File.ReadAllText(pathToProjectFile));
             Restore(pathToProjectFile, packagesSources);
             var context = ReadDependencyContext(pathToProjectFile);
             var nugetPackageFolders = GetNuGetPackageFolders(pathToProjectFile);

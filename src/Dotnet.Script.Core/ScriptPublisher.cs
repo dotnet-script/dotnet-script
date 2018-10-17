@@ -76,8 +76,8 @@ namespace Dotnet.Script.Core
 
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
-            projectFile.AddPackageReference(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion, PackageOrigin.ReferenceDirective));
-            projectFile.AddAssemblyReference(scriptAssemblyPath);
+            projectFile.PackageReferences.Add(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion));
+            projectFile.AssemblyReferences.Add(new AssemblyReference(scriptAssemblyPath));
             projectFile.Save(tempProjectPath);
 
             CopyProgramTemplate(tempProjectDirecory);

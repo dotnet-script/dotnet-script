@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
@@ -7,16 +8,18 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     /// </summary>
     public class PackageReference : IEquatable<PackageReference>
     {
+        const string IsPinnedPattern = @"^\d+.\d+.\d+$";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageReference"/> class.
         /// </summary>
         /// <param name="id">The id of the NuGet package.</param>
         /// <param name="version">The version of the NuGet package.</param>
-        public PackageReference(string id, string version, PackageOrigin packageOrigin)
+        public PackageReference(string id, string version)
         {
             Id = id;
             Version = version;
-            Origin = packageOrigin;
+            IsPinned = Regex.IsMatch(version, IsPinnedPattern);
         }
 
         /// <summary>
@@ -30,18 +33,17 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         public string Version { get; }
 
         /// <summary>
-        /// Gets the <see cref="PackageOrigin"/> that describes where this reference originated from.
+        /// Gets a <see cref="bool"/> value that indicates whether the <see cref="Version"/> is "pinned".
         /// </summary>
-        public PackageOrigin Origin { get; }
-
+        /// <value></value>
+        public bool IsPinned {get;}
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
             var stringComparer = StringComparer.OrdinalIgnoreCase;
             return stringComparer.GetHashCode(Id)
-                 ^ stringComparer.GetHashCode(Version)
-                 ^ Origin.GetHashCode();
+                 ^ stringComparer.GetHashCode(Version);
         }
 
         public bool Equals(PackageReference other)
@@ -49,8 +51,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
             return string.Equals(Id, other.Id, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase)
-                && Origin == other.Origin;
+                && string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)

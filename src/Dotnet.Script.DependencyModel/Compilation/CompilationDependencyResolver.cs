@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyModel.Resolution;
 
 namespace Dotnet.Script.DependencyModel.Compilation
 {
-    public class CompilationDependencyResolver 
+    public class CompilationDependencyResolver
     {
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
@@ -27,22 +27,22 @@ namespace Dotnet.Script.DependencyModel.Compilation
             _logger = logFactory.CreateLogger<CompilationDependencyResolver>();
         }
 
-        public CompilationDependencyResolver(LogFactory logFactory) 
+        public CompilationDependencyResolver(LogFactory logFactory)
             : this
             (
-                new ScriptProjectProvider(logFactory), 
+                new ScriptProjectProvider(logFactory),
                 new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
-                new ScriptFilesDependencyResolver(logFactory), 
+                new ScriptFilesDependencyResolver(logFactory),
                 logFactory
             )
         { }
-        
+
         private static IRestorer[] CreateRestorers(LogFactory logFactory)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new IRestorer[] { new DotnetRestorer(commandRunner, logFactory), new NuGetRestorer(commandRunner, logFactory) };
+            return new IRestorer[] {new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory), new NuGetRestorer(commandRunner, logFactory)};
         }
-        
+
         public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
         {
             var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, defaultTargetFramework,
@@ -58,9 +58,9 @@ namespace Dotnet.Script.DependencyModel.Compilation
             var dependencyContext = dependencyInfo.DependencyContext;
 
             var compilationAssemblyResolvers = GetCompilationAssemblyResolvers(dependencyInfo.NugetPackageFolders);
-           
-            
-            List<CompilationDependency> result = new List<CompilationDependency>();            
+
+
+            List<CompilationDependency> result = new List<CompilationDependency>();
             var compileLibraries = dependencyContext.CompileLibraries;
 
             foreach (var compilationLibrary in compileLibraries)
@@ -76,8 +76,8 @@ namespace Dotnet.Script.DependencyModel.Compilation
                 }
                 var compilationDependency = new CompilationDependency(
                     compilationLibrary.Name,
-                    compilationLibrary.Version, 
-                    resolvedReferencePaths.ToList(), 
+                    compilationLibrary.Version,
+                    resolvedReferencePaths.ToList(),
                     scripts);
 
                 result.Add(compilationDependency);
@@ -90,7 +90,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             if (compilationLibrary.Assemblies.Any(a => a.EndsWith("_._")))
             {
                 return Array.Empty<string>();
-            }            
+            }
             var referencePaths = compilationLibrary.ResolveReferencePaths(compilationAssemblyResolvers).Select(p => Path.GetFullPath(p)).ToArray();
 
             foreach (var referencePath in referencePaths)
@@ -104,7 +104,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
         private ICompilationAssemblyResolver[] GetCompilationAssemblyResolvers(string[] nugetPackageFolders)
         {
             var resolvers = new List<ICompilationAssemblyResolver>();
-            
+
 
             foreach (var nugetPackageFolder in nugetPackageFolders)
             {
@@ -135,7 +135,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
         public string Version { get; }
 
         public IReadOnlyList<string> AssemblyPaths { get; }
-        
+
         public IReadOnlyList<string> Scripts { get; }
 
         public override string ToString()
