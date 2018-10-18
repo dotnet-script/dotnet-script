@@ -14,13 +14,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.DependencyMod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.DependencyModel.NuGet", "src\Dotnet.Script.DependencyModel.Nuget\Dotnet.Script.DependencyModel.NuGet.csproj", "{E361528F-178A-4489-AF01-FFD3A7122D99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Script.Desktop.Tests", "src\Dotnet.Script.Desktop.Tests\Dotnet.Script.Desktop.Tests.csproj", "{B0E5959C-6E7F-4023-96BA-5AD4A5E00541}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.Desktop.Tests", "src\Dotnet.Script.Desktop.Tests\Dotnet.Script.Desktop.Tests.csproj", "{B0E5959C-6E7F-4023-96BA-5AD4A5E00541}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Script.Shared.Tests", "src\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj", "{8FFA2816-411E-437C-AB75-FFA546780E7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Script.Shared.Tests", "src\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj", "{8FFA2816-411E-437C-AB75-FFA546780E7A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F20002BB-970C-4318-B618-58D478CAC405}"
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64

@@ -165,14 +165,9 @@ namespace Dotnet.Script
                         return 0;
                     }
 
-                    var optimizationLevel = OptimizationLevel.Debug;
-                    if (commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
-                    {
-                        optimizationLevel = OptimizationLevel.Release;
-                    }
-
+                    var optimizationLevel = commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
                     var runtimeIdentifier = runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier;
-                    var absoluteFilePath = Path.IsPathRooted(fileNameArgument.Value) ? fileNameArgument.Value : Path.Combine(Directory.GetCurrentDirectory(), fileNameArgument.Value);
+                    var absoluteFilePath = fileNameArgument.Value.GetRootedPath();
 
                     // if a publish directory has been specified, then it is used directly, otherwise:
                     // -- for EXE {current dir}/publish/{runtime ID}
@@ -180,8 +175,7 @@ namespace Dotnet.Script
                     var publishDirectory = publishDirectoryOption.Value() ??
                         (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
 
-                    var absolutePublishDirectory = Path.IsPathRooted(publishDirectory) ? publishDirectory : Path.Combine(Directory.GetCurrentDirectory(), publishDirectory);
-
+                    var absolutePublishDirectory = publishDirectory.GetRootedPath();
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue(), logFactory);
                     var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
@@ -219,9 +213,7 @@ namespace Dotnet.Script
                         }
 
                         var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-
-                        var absoluteFilePath = Path.IsPathRooted(dllPath.Value) ? dllPath.Value : Path.Combine(Directory.GetCurrentDirectory(), dllPath.Value);
-
+                        var absoluteFilePath = dllPath.Value.GetRootedPath();
                         var compiler = GetScriptCompiler(commandDebugMode.HasValue(), logFactory);
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                         var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
@@ -409,19 +401,6 @@ namespace Dotnet.Script
             var compiler = GetScriptCompiler(debugMode, logFactory);
             var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
             return runner.Execute<int>(context);
-        }
-
-        private static string GetEnvironmentInfo()
-        {
-            var netCoreVersion = ScriptEnvironment.Default.NetCoreVersion;
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Version             : {GetVersion()}");
-            sb.AppendLine($"Install location    : {ScriptEnvironment.Default.InstallLocation}");
-            sb.AppendLine($"Target framework    : {netCoreVersion.Tfm}");
-            sb.AppendLine($".NET Core version   : {netCoreVersion.Version}");
-            sb.AppendLine($"Platform identifier : {ScriptEnvironment.Default.PlatformIdentifier}");
-            sb.AppendLine($"Runtime identifier  : {ScriptEnvironment.Default.RuntimeIdentifier}");
-            return sb.ToString();
         }
 
         private static string GetVersion()
