@@ -84,7 +84,7 @@ namespace Dotnet.Script
             const string helpOptionTemplate = "-? | -h | --help";
             app.HelpOption(helpOptionTemplate);
 
-            app.VersionOption("-v | --version", GetVersion);
+            app.VersionOption("-v | --version", () => new VersionProvider().GetCurrentVersion().Version);
 
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
@@ -178,9 +178,9 @@ namespace Dotnet.Script
                     var absolutePublishDirectory = publishDirectory.GetRootedPath();
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue(), logFactory);
-                    var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
-                    var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
-                    var code = SourceText.From(File.ReadAllText(absoluteFilePath));
+                    var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
+                    var publisher = new ScriptPublisher(logFactory, scriptEmitter);
+                    var code = absoluteFilePath.ToSourceText();
                     var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
 
                     if (dllOption.HasValue())
@@ -282,8 +282,8 @@ namespace Dotnet.Script
                         }
                         else
                         {
-                            absoluteSourcePath = Path.IsPathRooted(file.Value) ? Path.GetFullPath(file.Value) : Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), file.Value));
-                            code = SourceText.From(File.ReadAllText(absoluteSourcePath));
+                            absoluteSourcePath = file.Value.GetRootedPath();
+                            code = absoluteSourcePath.ToSourceText();
                         }
 
                         // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
@@ -354,15 +354,10 @@ namespace Dotnet.Script
                 throw new Exception($"Couldn't find file '{file}'");
             }
 
-            var absoluteFilePath = Path.IsPathRooted(file) ? file : Path.Combine(Directory.GetCurrentDirectory(), file);
+            var absoluteFilePath = file.GetRootedPath();
             var directory = Path.GetDirectoryName(absoluteFilePath);
 
-            SourceText sourceText;
-            using (var filestream = File.OpenRead(absoluteFilePath))
-            {
-                sourceText = SourceText.From(filestream);
-            }
-
+            var sourceText = absoluteFilePath.ToSourceText();
             var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
             if (interactive)
             {
@@ -401,11 +396,6 @@ namespace Dotnet.Script
             var compiler = GetScriptCompiler(debugMode, logFactory);
             var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
             return runner.Execute<int>(context);
-        }
-
-        private static string GetVersion()
-        {
-            return new VersionProvider().GetCurrentVersion().Version;
         }
 
         private static ScriptCompiler GetScriptCompiler(bool debugMode, LogFactory logFactory)

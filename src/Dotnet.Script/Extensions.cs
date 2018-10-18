@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Dotnet.Script
 {
@@ -13,5 +14,13 @@ namespace Dotnet.Script
         }
 
         public static string GetRootedPath(this string path) => Path.IsPathRooted(path) ? path : Path.Combine(Directory.GetCurrentDirectory(), path);
+
+        public static SourceText ToSourceText(this string absoluteFilePath)
+        {
+            using (var filestream = File.OpenRead(absoluteFilePath))
+            {
+                return SourceText.From(filestream);
+            }
+        }
     }
 }
