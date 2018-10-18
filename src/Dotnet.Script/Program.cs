@@ -65,28 +65,24 @@ namespace Dotnet.Script
             {
                 ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
             };
+
             var file = app.Argument("script", "Path to CSX script");
             var interactive = app.Option("-i | --interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
-
             var configuration = app.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
-
             var packageSources = app.Option("-s | --sources <SOURCE>", "Specifies a NuGet package source to use when resolving NuGet packages.", CommandOptionType.MultipleValue);
-
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
-
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
-
             var nocache = app.Option("--nocache", "disable DLL caching", CommandOptionType.NoValue);
+            var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
             var argsAfterDoubleHyphen  = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
             const string helpOptionTemplate = "-? | -h | --help";
             app.HelpOption(helpOptionTemplate);
-
             app.VersionOption("-v | --version", () => new VersionProvider().GetCurrentVersion().Version);
 
-            var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
+            var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
 
             app.Command("eval", c =>
             {
@@ -99,12 +95,7 @@ namespace Dotnet.Script
                     int exitCode = 0;
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
-                        var optimizationLevel = OptimizationLevel.Debug;
-                        if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
-                        {
-                            optimizationLevel = OptimizationLevel.Release;
-                        }
-                        var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
+                        var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
                         exitCode = await RunCode(code.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), cwd.Value(), packageSources.Values?.ToArray());
                     }
                     return exitCode;
@@ -119,7 +110,6 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
-                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var scaffolder = new Scaffolder(logFactory);
                     scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
                     return 0;
@@ -134,7 +124,6 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
-                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var scaffolder = new Scaffolder(logFactory);
                     if (fileNameArgument.Value == null)
                     {
@@ -176,7 +165,6 @@ namespace Dotnet.Script
                         (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
 
                     var absolutePublishDirectory = publishDirectory.GetRootedPath();
-                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var compiler = GetScriptCompiler(publishDebugMode.HasValue(), logFactory);
                     var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
                     var publisher = new ScriptPublisher(logFactory, scriptEmitter);
@@ -212,7 +200,6 @@ namespace Dotnet.Script
                             throw new Exception($"Couldn't find file '{dllPath.Value}'");
                         }
 
-                        var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                         var absoluteFilePath = dllPath.Value.GetRootedPath();
                         var compiler = GetScriptCompiler(commandDebugMode.HasValue(), logFactory);
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
@@ -227,8 +214,6 @@ namespace Dotnet.Script
             {
                 int exitCode = 0;
 
-                var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-
                 if (infoOption.HasValue())
                 {
                     var environmentReporter = new EnvironmentReporter(logFactory);
@@ -238,13 +223,9 @@ namespace Dotnet.Script
 
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
+                    var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
                     if (Debugger.IsAttached || nocache.HasValue())
                     {
-                        var optimizationLevel = OptimizationLevel.Debug;
-                        if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
-                        {
-                            optimizationLevel = OptimizationLevel.Release;
-                        }
                         exitCode = await RunScript(file.Value, debugMode.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
                     }
                     else
@@ -304,12 +285,6 @@ namespace Dotnet.Script
                              File.ReadAllText(hashCache) != sourceHash)
                         {
                             // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
-                            var optimizationLevel = OptimizationLevel.Debug;
-                            if (configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase))
-                            {
-                                optimizationLevel = OptimizationLevel.Release;
-                            }
-
                             var runtimeIdentifier = ScriptEnvironment.Default.RuntimeIdentifier;
                             var scriptEmmiter = new ScriptEmitter(ScriptConsole.Default, compiler);
                             var publisher = new ScriptPublisher(logFactory, scriptEmmiter);
