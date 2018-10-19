@@ -30,7 +30,7 @@ namespace Dotnet.Script.Tests
             }
         }
 
-        [Fact]
+        [OnlyOnUnixFact]
         public void ShouldRegisterToRunCsxScriptDirectly()
         {
             using (var scriptFolder = new DisposableFolder())
@@ -39,37 +39,13 @@ namespace Dotnet.Script.Tests
                 Assert.True(exitCode == 0, output);
 
                 var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
-                if (ScriptEnvironment.Default.IsWindows)
-                {
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("reg.exe", @"query HKCU\Software\Classes\.csx");
-                    Assert.Equal(0, exitCode);
-
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("reg.exe", @"query HKCU\software\classes\dotnetscript\Shell\Open\Command");
-                    Assert.Equal(0, exitCode);
-
-                    Assert.Matches(new Regex(@" \b   REG_EXPAND_SZ                             # type
-                                                [ ]+ ""%ProgramFiles%\\dotnet\\dotnet.exe""    # unexpanded %ProgramFiles% + quoted
-                                                [ ]+ exec
-                                                [ ]+ ""([A-Z]:|\\)\\(.+?)\\dotnet-script.dll"" # absolute + quoted
-                                                [ ]+ ""%1""                                    # quoted
-                                                [ ]+ --
-                                                [ ]+ %\*                                       # unquoted
-                                            ",
-                                             RegexOptions.IgnoreCase |
-                                             RegexOptions.CultureInvariant |
-                                             RegexOptions.IgnorePatternWhitespace),
-                                   output);
-                }
-                else
-                {
-                    var text = File.ReadAllText(scriptPath);
-                    Assert.True(text.StartsWith("#!/usr/bin/env dotnet-script"), "should have shebang");
-                    Assert.True(text.IndexOf("\r\n") < 0, "should have not have windows cr/lf");
-                }
+                var text = File.ReadAllText(scriptPath);
+                Assert.True(text.StartsWith("#!/usr/bin/env dotnet-script"), "should have shebang");
+                Assert.True(text.IndexOf("\r\n") < 0, "should have not have windows cr/lf");
             }
         }
 
-        [Fact]
+        [OnlyOnUnixFact]
         public void ShouldRunCsxScriptDirectly()
         {
             using (var scriptFolder = new DisposableFolder())
@@ -80,24 +56,15 @@ namespace Dotnet.Script.Tests
 
                 var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
 
-                if (ScriptEnvironment.Default.IsWindows)
+                // this depends on dotnet-script being installed as a dotnet global tool because the shebang needs to 
+                // point to an executable in the environment.  If you have dotnet-script installed as a global tool this
+                // test will pass
+                var (_, testExitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);
+                if (testExitCode == 0)
                 {
-                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput("cmd.exe", $"/c \"{scriptPath}\"", scriptFolder.Path);
+                    (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
                     Assert.True(exitCode == 0, output);
                     Assert.Equal("Hello world!", output.Trim());
-                }
-                else
-                {
-                    // this depends on dotnet-script being installed as a dotnet global tool because the shebang needs to 
-                    // point to an executable in the environment.  If you have dotnet-script installed as a global tool this
-                    // test will pass
-                    var (_, testExitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);
-                    if (testExitCode == 0)
-                    {
-                        (output, exitCode) = ProcessHelper.RunAndCaptureOutput(scriptPath, "");
-                        Assert.True(exitCode == 0, output);
-                        Assert.Equal("Hello world!", output.Trim());
-                    }
                 }
             }
         }
@@ -211,5 +178,4 @@ namespace Dotnet.Script.Tests
             }
         }
     }
-
 }
