@@ -77,5 +77,14 @@ namespace Dotnet.Script.Tests
 
             Assert.NotEqual(firstFile, secondFile);
         }
+
+        [Fact]
+        public void ShouldBeCacheableWhenPackagesArePinned()
+        {
+            var projectFile = new ProjectFile();
+            projectFile.PackageReferences.Add(new PackageReference("SomePackage","1.2.3"));
+            projectFile.PackageReferences.Add(new PackageReference("AnotherPackage","3.2.1"));
+
+        }
     }
 }

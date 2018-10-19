@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
@@ -8,8 +7,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     /// </summary>
     public class PackageReference : IEquatable<PackageReference>
     {
-        const string IsPinnedPattern = @"^\d+.\d+.\d+$";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageReference"/> class.
         /// </summary>
@@ -17,43 +14,32 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <param name="version">The version of the NuGet package.</param>
         public PackageReference(string id, string version)
         {
-            Id = id;
-            Version = version;
-            IsPinned = Regex.IsMatch(version, IsPinnedPattern);
+            Id = new PackageId(id);
+            Version = new PackageVersion(version);
         }
 
         /// <summary>
-        /// Gets the id of the NuGet package
+        /// Gets the <see cref="PackageId"/> of the NuGet package
         /// </summary>
-        public string Id { get; }
+        public PackageId Id { get; }
 
         /// <summary>
-        /// Gets the version of the NuGet package.
+        /// Gets the <see cref="PackageVersion"/> of the NuGet package.
         /// </summary>
-        public string Version { get; }
-
-        /// <summary>
-        /// Gets a <see cref="bool"/> value that indicates whether the <see cref="Version"/> is "pinned".
-        /// </summary>
-        /// <value></value>
-        public bool IsPinned {get;}
+        public PackageVersion Version { get; }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            var stringComparer = StringComparer.OrdinalIgnoreCase;
-            return stringComparer.GetHashCode(Id)
-                 ^ stringComparer.GetHashCode(Version);
+           return (Id, Version).GetHashCode();
         }
 
+        /// <inheritdoc />
         public bool Equals(PackageReference other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Id, other.Id, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase);
+           return (Id, Version).Equals((other.Id, other.Version));
         }
-
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return Equals(obj as PackageReference);

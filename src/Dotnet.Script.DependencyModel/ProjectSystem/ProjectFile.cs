@@ -44,7 +44,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <summary>
         /// Gets a <see cref="bool"/> value that indicates whether this <see cref="ProjectFile"/> can be cached.
         /// </summary>
-        public bool IsCacheable { get => PackageReferences.All(reference => reference.IsPinned); }
+        public bool IsCacheable { get => PackageReferences.All(reference => reference.Version.IsPinned); }
 
         /// <summary>
         /// Gets a list of <see cref="PackageReference"/> elements for this <see cref="ProjectFile"/>.
@@ -68,8 +68,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             foreach (var packageReference in PackageReferences)
             {
                 var packageReferenceElement = new XElement("PackageReference");
-                packageReferenceElement.Add(new XAttribute("Include", packageReference.Id));
-                packageReferenceElement.Add(new XAttribute("Version", packageReference.Version));
+                packageReferenceElement.Add(new XAttribute("Include", packageReference.Id.Value));
+                packageReferenceElement.Add(new XAttribute("Version", packageReference.Version.Value));
                 itemGroupElement.Add(packageReferenceElement);
             }
 
@@ -111,7 +111,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            return Equals((ProjectFile)obj);
+            return Equals(obj as ProjectFile);
         }
 
         /// <inheritdoc/>
