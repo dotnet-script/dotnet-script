@@ -23,7 +23,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
         private readonly ScriptEnvironment _scriptEnvironment;
         private readonly Regex _runtimeMatcher;
 
-        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
+        private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment, bool useRestoreCache)
         {
             _scriptProjectProvider = scriptProjectProvider;
             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
@@ -33,22 +33,31 @@ namespace Dotnet.Script.DependencyModel.Runtime
             _runtimeMatcher = new Regex($"{_scriptEnvironment.PlatformIdentifier}.*-{_scriptEnvironment.ProccessorArchitecture}");
         }
 
-        public RuntimeDependencyResolver(LogFactory logFactory)
+        public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache)
             : this
             (
                   new ScriptProjectProvider(logFactory),
-                  new ScriptDependencyInfoProvider(CreateRestorer(logFactory), logFactory),
+                  new ScriptDependencyInfoProvider(CreateRestorer(logFactory, useRestoreCache), logFactory),
                   new ScriptFilesDependencyResolver(logFactory),
                   logFactory,
-                  ScriptEnvironment.Default
+                  ScriptEnvironment.Default,
+                  useRestoreCache
             )
         {
         }
 
-        private static IRestorer CreateRestorer(LogFactory logFactory)
+        private static IRestorer CreateRestorer(LogFactory logFactory, bool useRestoreCache)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory);
+            if (useRestoreCache)
+            {
+                return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory);
+            }
+            else
+            {
+                return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory);
+            }
+
         }
 
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string[] packagesSources, string code = null)

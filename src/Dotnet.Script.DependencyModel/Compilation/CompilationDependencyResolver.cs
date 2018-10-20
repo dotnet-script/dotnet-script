@@ -40,7 +40,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
         private static IRestorer CreateRestorer(LogFactory logFactory)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory);
+            return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory);
         }
 
         public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
