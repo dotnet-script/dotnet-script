@@ -31,16 +31,16 @@ namespace Dotnet.Script.DependencyModel.Compilation
             : this
             (
                 new ScriptProjectProvider(logFactory),
-                new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
+                new ScriptDependencyInfoProvider(CreateRestorer(logFactory), logFactory),
                 new ScriptFilesDependencyResolver(logFactory),
                 logFactory
             )
         { }
 
-        private static IRestorer[] CreateRestorers(LogFactory logFactory)
+        private static IRestorer CreateRestorer(LogFactory logFactory)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new IRestorer[] {new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory), new NuGetRestorer(commandRunner, logFactory)};
+            return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory);
         }
 
         public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")

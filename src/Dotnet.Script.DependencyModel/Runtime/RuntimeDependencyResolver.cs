@@ -37,7 +37,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             : this
             (
                   new ScriptProjectProvider(logFactory),
-                  new ScriptDependencyInfoProvider(CreateRestorers(logFactory), logFactory),
+                  new ScriptDependencyInfoProvider(CreateRestorer(logFactory), logFactory),
                   new ScriptFilesDependencyResolver(logFactory),
                   logFactory,
                   ScriptEnvironment.Default
@@ -45,10 +45,10 @@ namespace Dotnet.Script.DependencyModel.Runtime
         {
         }
 
-        private static IRestorer[] CreateRestorers(LogFactory logFactory)
+        private static IRestorer CreateRestorer(LogFactory logFactory)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new IRestorer[] {new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory), new NuGetRestorer(commandRunner, logFactory)};
+            return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory);
         }
 
         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string[] packagesSources, string code = null)
