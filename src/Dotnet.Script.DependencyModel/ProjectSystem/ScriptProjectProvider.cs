@@ -6,14 +6,14 @@ using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
-{    
-    public class ScriptProjectProvider 
+{
+    public class ScriptProjectProvider
     {
         private readonly ScriptParser _scriptParser;
         private readonly ScriptFilesResolver _scriptFilesResolver;
         private readonly ScriptEnvironment _scriptEnvironment;
         private readonly Logger _logger;
-        
+
         private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
         {
             _logger = logFactory.CreateLogger<ScriptProjectProvider>();
@@ -51,10 +51,10 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             foreach (var packageReference in allPackageReferences)
             {
-                projectFile.AddPackageReference(packageReference);
+                projectFile.PackageReferences.Add(packageReference);
             }
 
-            projectFile.SetTargetFramework(parseResultFromCode.TargetFramework ?? defaultTargetFramework);
+            projectFile.TargetFramework = parseResultFromCode.TargetFramework ?? defaultTargetFramework;
 
             projectFile.Save(pathToProjectFile);
 
@@ -101,10 +101,10 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             foreach (var packageReference in parseresult.PackageReferences)
             {
-                projectFile.AddPackageReference(packageReference);
+                projectFile.PackageReferences.Add(packageReference);
             }
 
-            projectFile.SetTargetFramework(parseresult.TargetFramework ?? defaultTargetFramework);
+            projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
 
             projectFile.Save(pathToProjectFile);
 
@@ -126,7 +126,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         }
 
         public static string GetPathToProjectFile(string targetDirectory)
-        { 
+        {
             var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory);
             var pathToProjectFile = Path.Combine(pathToProjectDirectory, "script.csproj");
             return pathToProjectFile;

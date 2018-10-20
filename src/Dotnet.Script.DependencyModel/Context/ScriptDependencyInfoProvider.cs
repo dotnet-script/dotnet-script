@@ -2,22 +2,23 @@
 using System.Linq;
 using System.Xml.Linq;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
     /// <summary>
-    /// Represents a class that is capable of providing 
+    /// Represents a class that is capable of providing
     /// the <see cref="DependencyContext"/> for a given project file (csproj).
     /// </summary>
     public class ScriptDependencyInfoProvider
     {
-        private readonly IRestorer[] _restorers;
+        private readonly IRestorer _restorer;
         private readonly Logger _logger;
 
-        public ScriptDependencyInfoProvider(IRestorer[] restorers, LogFactory logFactory)
+        public ScriptDependencyInfoProvider(IRestorer restorer, LogFactory logFactory)
         {
-            _restorers = restorers;
+            _restorer = restorer;
             _logger = logFactory.CreateLogger<ScriptDependencyInfoProvider>();
         }
 
@@ -43,13 +44,10 @@ namespace Dotnet.Script.DependencyModel.Context
 
         private void Restore(string pathToProjectFile, string[] packageSources)
         {
-            foreach (var restorer in _restorers)
+            if (_restorer.CanRestore)
             {
-                if (restorer.CanRestore)
-                {
-                    restorer.Restore(pathToProjectFile, packageSources);
-                    return;
-                }
+                _restorer.Restore(pathToProjectFile, packageSources);
+                return;
             }
         }
 

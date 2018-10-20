@@ -56,7 +56,7 @@ namespace Dotnet.Script.Tests
 
                 var scriptPath = Path.Combine(scriptFolder.Path, "main.csx");
 
-                // this depends on dotnet-script being installed as a dotnet global tool because the shebang needs to 
+                // this depends on dotnet-script being installed as a dotnet global tool because the shebang needs to
                 // point to an executable in the environment.  If you have dotnet-script installed as a global tool this
                 // test will pass
                 var (_, testExitCode) = ProcessHelper.RunAndCaptureOutput("dotnet-script", $"-h", scriptFolder.Path);

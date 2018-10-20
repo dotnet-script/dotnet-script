@@ -255,11 +255,20 @@ The executable you can run directly independent of dotnet install, while the DLL
 dotnet publish\myscript.dll -- arg1 arg2
 ```
 
-### DLL Cache
+### Caching
+
+#### Restore Cache
+
+Under the hood, Dotnet-Script performs a `dotnet restore` to resolve the dependencies needed to execute the script(s). This is an out-of-process operation and typically takes roughly one second. The `restore cache` ensures that we only do a `dotnet restore` if the dependencies has changed.  For this cache to kick in, it is required for all NuGet package references to be specified using an exact version number. 
+
+This cache an be disabled using the `--nocache` flag.
+
+#### DLL Cache
+
 Dotnet-Script will automatically create a DLL on first execution of a script and as long as the source code has not changed it will continue to 
 use that DLL significantlly speeding up the execution of your scripts (by 8x).  The cached DLL's are stored in the user %tmp%/dotnet-script folder. 
 
-You can override this a automatic caching by passing **--nocache** flag, which will cause your script to be dynamically compiled everytime you run it.
+You can override this automatic caching by passing **--nocache** flag, which will cause your script to be dynamically compiled everytime you run it.
 
 ### Debugging
 

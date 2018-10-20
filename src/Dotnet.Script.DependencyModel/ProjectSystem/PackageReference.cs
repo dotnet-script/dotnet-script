@@ -12,47 +12,34 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// </summary>
         /// <param name="id">The id of the NuGet package.</param>
         /// <param name="version">The version of the NuGet package.</param>
-        public PackageReference(string id, string version, PackageOrigin packageOrigin)
+        public PackageReference(string id, string version)
         {
-            Id = id;
-            Version = version;
-            Origin = packageOrigin;
+            Id = new PackageId(id);
+            Version = new PackageVersion(version);
         }
 
         /// <summary>
-        /// Gets the id of the NuGet package
+        /// Gets the <see cref="PackageId"/> of the NuGet package
         /// </summary>
-        public string Id { get; }
+        public PackageId Id { get; }
 
         /// <summary>
-        /// Gets the version of the NuGet package.
+        /// Gets the <see cref="PackageVersion"/> of the NuGet package.
         /// </summary>
-        public string Version { get; }
-
-        /// <summary>
-        /// Gets the <see cref="PackageOrigin"/> that describes where this reference originated from.
-        /// </summary>
-        public PackageOrigin Origin { get; }
-
+        public PackageVersion Version { get; }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            var stringComparer = StringComparer.OrdinalIgnoreCase;
-            return stringComparer.GetHashCode(Id)
-                 ^ stringComparer.GetHashCode(Version)
-                 ^ Origin.GetHashCode();
+           return (Id, Version).GetHashCode();
         }
 
+        /// <inheritdoc />
         public bool Equals(PackageReference other)
         {
-            if (other is null) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return string.Equals(Id, other.Id, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(Version, other.Version, StringComparison.OrdinalIgnoreCase)
-                && Origin == other.Origin;
+           return (Id, Version).Equals((other.Id, other.Version));
         }
-
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return Equals(obj as PackageReference);

@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 namespace Dotnet.Script.Tests
 {
     public class ScriptParserTests
-    {        
+    {
         private readonly ScriptEnvironment _scriptEnvironment;
 
         public ScriptParserTests(ITestOutputHelper testOutputHelper)
@@ -26,8 +26,8 @@ namespace Dotnet.Script.Tests
             var result = parser.ParseFromCode("#r \"nuget:Package, 1.2.3\"");
 
             Assert.Equal(1, result.PackageReferences.Count);
-            Assert.Equal("Package", result.PackageReferences.Single().Id);
-            Assert.Equal("1.2.3", result.PackageReferences.Single().Version);
+            Assert.Equal("Package", result.PackageReferences.Single().Id.Value);
+            Assert.Equal("1.2.3", result.PackageReferences.Single().Version.Value);
         }
 
         [Fact]
@@ -38,8 +38,8 @@ namespace Dotnet.Script.Tests
             var result = parser.ParseFromCode("#load \"nuget:Package, 1.2.3\"");
 
             Assert.Equal(1, result.PackageReferences.Count);
-            Assert.Equal("Package", result.PackageReferences.Single().Id);
-            Assert.Equal("1.2.3", result.PackageReferences.Single().Version);
+            Assert.Equal("Package", result.PackageReferences.Single().Id.Value);
+            Assert.Equal("1.2.3", result.PackageReferences.Single().Version.Value);
         }
 
         [Theory]
@@ -56,8 +56,8 @@ namespace Dotnet.Script.Tests
             var result = parser.ParseFromCode(code.ToString());
 
             Assert.Equal(1, result.PackageReferences.Count);
-            Assert.Equal("Package", result.PackageReferences.Single().Id);
-            Assert.Equal("1.2.3-beta-1", result.PackageReferences.Single().Version);
+            Assert.Equal("Package", result.PackageReferences.Single().Id.Value  );
+            Assert.Equal("1.2.3-beta-1", result.PackageReferences.Single().Version.Value);
         }
 
         [Fact]
@@ -71,10 +71,10 @@ namespace Dotnet.Script.Tests
             var result = parser.ParseFromCode(code.ToString());
 
             Assert.Equal(2, result.PackageReferences.Count);
-            Assert.Equal("Package", result.PackageReferences.First().Id);
-            Assert.Equal("1.2.3", result.PackageReferences.First().Version);
-            Assert.Equal("AnotherPackage", result.PackageReferences.Last().Id);
-            Assert.Equal("3.2.1", result.PackageReferences.Last().Version);
+            Assert.Equal("Package", result.PackageReferences.First().Id.Value);
+            Assert.Equal("1.2.3", result.PackageReferences.First().Version.Value);
+            Assert.Equal("AnotherPackage", result.PackageReferences.Last().Id.Value);
+            Assert.Equal("3.2.1", result.PackageReferences.Last().Version.Value);
         }
 
         [Theory]
@@ -110,7 +110,7 @@ namespace Dotnet.Script.Tests
 
             var result = parser.ParseFromCode($"#! \"{_scriptEnvironment.TargetFramework}\"");
 
-            Assert.Equal(_scriptEnvironment.TargetFramework, result.TargetFramework);            
+            Assert.Equal(_scriptEnvironment.TargetFramework, result.TargetFramework);
         }
 
         [Theory]
@@ -124,7 +124,7 @@ namespace Dotnet.Script.Tests
 
             var result = parser.ParseFromCode(code.Replace("TARGET_FRAMEWORK", _scriptEnvironment.TargetFramework));
 
-            Assert.Null(result.TargetFramework);            
+            Assert.Null(result.TargetFramework);
         }
 
         private ScriptParser CreateParser()
