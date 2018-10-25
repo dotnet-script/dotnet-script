@@ -32,7 +32,7 @@ namespace Dotnet.Script.DependencyModel.Context
         {
             var projectFile = new ProjectFile(File.ReadAllText(pathToProjectFile));
             var pathToCachedProjectFile = $"{pathToProjectFile}.cache";
-            if (File.Exists(pathToCachedProjectFile))
+            if (File.Exists(pathToCachedProjectFile) && false)
             {
                 _logger.Debug($"Found cached csproj file at: {pathToCachedProjectFile}");
                 var cachedProjectFile = new ProjectFile(File.ReadAllText(pathToCachedProjectFile));

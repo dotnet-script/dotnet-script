@@ -3,6 +3,7 @@ using Dotnet.Script.Core.Versioning;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.DependencyModel.Runtime;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.CodeAnalysis;
@@ -222,8 +223,9 @@ namespace Dotnet.Script
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
-                    if (Debugger.IsAttached || nocache.HasValue())
+                    if (nocache.HasValue())
                     {
+                        //ScriptConsole.Default.WriteHighlighted("NoCache");
                         exitCode = await RunScript(file.Value, debugMode.HasValue(), !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
                     }
                     else
@@ -235,6 +237,8 @@ namespace Dotnet.Script
                         {
                             uniqueFolderName = Convert.ToBase64String(sha.ComputeHash(Encoding.Unicode.GetBytes(file.Value))).Replace("=", String.Empty).Replace("/", string.Empty);
                         }
+
+
 
                         string publishDirectory = Path.Combine(cacheFolder, uniqueFolderName);
                         if (!Directory.Exists(publishDirectory))
@@ -265,6 +269,10 @@ namespace Dotnet.Script
                             code = absoluteSourcePath.ToSourceText();
                         }
 
+                        var pathToProjectFile = FileUtils.GetPathToTempFolder(absoluteSourcePath);
+                        publishDirectory = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "publish");
+
+
                         // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
                         string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
 
@@ -280,14 +288,14 @@ namespace Dotnet.Script
                              // or we haven't created a dll
                              !Directory.Exists(publishDirectory) ||
                              // the hashcode has changed (meaning new content)
-                             File.ReadAllText(hashCache) != sourceHash)
+                             File.ReadAllText(hashCache) != sourceHash || true)
                         {
                             // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
                             var runtimeIdentifier = ScriptEnvironment.Default.RuntimeIdentifier;
                             var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
                             var publisher = new ScriptPublisher(logFactory, scriptEmitter);
                             var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), absoluteSourcePath, optimizationLevel);
-
+                            //ScriptConsole.Default.WriteHighlighted("Creating DLL");
                             // create the assembly in our cache folder
                             publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, Path.GetFileNameWithoutExtension(pathToDll));
 
@@ -295,7 +303,7 @@ namespace Dotnet.Script
                             File.WriteAllText(hashCache, sourceHash);
                         }
 
-
+                        //ScriptConsole.Default.WriteHighlighted("Running from dll");
                         // run the cached %temp%\dotnet-scripts\{uniqueFolderName}/package.dll
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                         var result = await runner.Execute<int>(pathToDll, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
