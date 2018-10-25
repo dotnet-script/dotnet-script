@@ -250,7 +250,7 @@ Dotnet-Script can create a standalone executable or DLL for your script.
 The executable you can run directly independent of dotnet install, while the DLL is can be run using the dotnet CLI like this:
 
 ```shell
-dotnet publish\myscript.dll -- arg1 arg2
+dotnet script exec {path_to_dll} -- arg1 arg2
 ```
 
 ### Caching
