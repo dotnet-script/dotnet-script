@@ -1,7 +1,7 @@
-using Dotnet.Script.DependencyModel.Environment;
-using Dotnet.Script.Shared.Tests;
 using System;
 using System.IO;
+using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,8 +23,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixtureInProcess("HelloWorld");
-            //Assert.Contains("Hello World", result.output);
+            var result = ScriptTestRunner.Default.ExecuteFixture("HelloWorld");
+            Assert.Contains("Hello World", result.output);
         }
 
         [Fact]
@@ -44,12 +44,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            // We have no story for this on *nix yet
-            //if (_scriptEnvironment.IsWindows)
-            {
-                var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
-                Assert.Contains("Connection successful", result.output);
-            }
+            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
+            Assert.Contains("Connection successful", result.output);
         }
 
         [Fact]

@@ -62,13 +62,13 @@ namespace Dotnet.Script.Core
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
-        
+
 
         public ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
-            RuntimeDependencyResolver = runtimeDependencyResolver;           
+            RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
@@ -107,7 +107,7 @@ namespace Dotnet.Script.Core
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            _logger.Info($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");                      
+            _logger.Info($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");
             RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
             var encoding = context.Code.Encoding ?? Encoding.UTF8; // encoding is required when emitting debug information
@@ -135,7 +135,7 @@ namespace Dotnet.Script.Core
 
             EvaluateDiagnostics(script);
 
-            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions);
+            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions, runtimeDependencies);
         }
 
         private RuntimeDependency[] GetRuntimeDependencies(ScriptContext context)
@@ -173,9 +173,9 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    //Add the reference from the AssemblyLoadContext if present. 
+                    //Add the reference from the AssemblyLoadContext if present.
                     scriptOptions = scriptOptions.AddReferences(loadedAssembly);
-                    _logger.Trace("Already loaded => " + loadedAssembly);                    
+                    _logger.Trace("Already loaded => " + loadedAssembly);
                 }
             }
 
@@ -188,7 +188,7 @@ namespace Dotnet.Script.Core
 
             var suppressedDiagnostics = orderedDiagnostics.Where(d => SuppressedDiagnosticIds.Contains(d.Id));
             foreach (var suppressedDiagnostic in suppressedDiagnostics)
-            {                
+            {
                 _logger.Debug($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
             }
 

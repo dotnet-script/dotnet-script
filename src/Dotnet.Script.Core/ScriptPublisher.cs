@@ -127,6 +127,17 @@ namespace Dotnet.Script.Core
                     }
                 }
 
+                foreach (var runtimeDependency in emitResult.RuntimeDependencies)
+                {
+                    foreach (var nativeAsset in runtimeDependency.NativeAssets)
+                    {
+                        if (!runtimeDependency.Name.Contains("microsoft.netcore", StringComparison.OrdinalIgnoreCase))
+                        {
+                            File.Copy(nativeAsset,Path.Combine(outputDirectory, Path.GetFileName(nativeAsset)), true);
+                        }
+                    }
+                }
+
                 return assemblyPath;
             }
             catch (CompilationErrorException ex)
