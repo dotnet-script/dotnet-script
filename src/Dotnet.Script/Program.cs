@@ -172,10 +172,12 @@ namespace Dotnet.Script
 
                     if (dllOption.HasValue())
                     {
+                        ScriptConsole.Default.WriteHighlighted("Create dll");
                         publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, dllName.Value());
                     }
                     else
                     {
+                        ScriptConsole.Default.WriteHighlighted("Create executable");
                         publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtimeIdentifier);
                     }
 
