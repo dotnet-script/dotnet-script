@@ -129,11 +129,15 @@ namespace Dotnet.Script.Core
 
                 foreach (var runtimeDependency in emitResult.RuntimeDependencies)
                 {
-                    foreach (var nativeAsset in runtimeDependency.NativeAssets)
+                    if (!runtimeDependency.Name.Contains("microsoft.netcore", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!runtimeDependency.Name.Contains("microsoft.netcore", StringComparison.OrdinalIgnoreCase))
+                        foreach (var nativeAsset in runtimeDependency.NativeAssets)
                         {
-                            File.Copy(nativeAsset,Path.Combine(outputDirectory, Path.GetFileName(nativeAsset)), true);
+                            File.Copy(nativeAsset, Path.Combine(outputDirectory, Path.GetFileName(nativeAsset)), true);
+                        }
+                        foreach (var runtimeAssembly in runtimeDependency.Assemblies)
+                        {
+                            File.Copy(runtimeAssembly.Path, Path.Combine(outputDirectory, Path.GetFileName(runtimeAssembly.Path)), true);
                         }
                     }
                 }

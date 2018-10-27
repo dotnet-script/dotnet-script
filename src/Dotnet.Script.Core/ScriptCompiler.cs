@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Script.Core.Internal;
@@ -24,10 +23,6 @@ namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
-        // Note: Windows only, Mac and Linux needs something else?
-        [DllImport("Kernel32.dll")]
-        private static extern IntPtr LoadLibrary(string path);
-
         private ScriptEnvironment _scriptEnvironment;
 
         private Logger _logger;
@@ -120,8 +115,6 @@ namespace Dotnet.Script.Core
 
             scriptOptions = AddScriptReferences(scriptOptions, loadedAssembliesMap, scriptDependenciesMap);
 
-            LoadNativeAssets(runtimeDependencies);
-
             AppDomain.CurrentDomain.AssemblyResolve +=
                 (sender, args) => MapUnresolvedAssemblyToRuntimeLibrary(scriptDependenciesMap, loadedAssembliesMap, args);
 
@@ -147,17 +140,6 @@ namespace Dotnet.Script.Core
             else
             {
                 return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
-            }
-        }
-
-        private void LoadNativeAssets(RuntimeDependency[] runtimeDependencies)
-        {
-            foreach (var nativeAsset in runtimeDependencies.SelectMany(rtd => rtd.NativeAssets).Distinct())
-            {
-                if (_scriptEnvironment.IsWindows)
-                {
-                    LoadLibrary(nativeAsset);
-                }
             }
         }
 
