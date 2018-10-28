@@ -176,9 +176,20 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(async () =>
                 {
-                    int exitCode = 0;
-                    if (!string.IsNullOrWhiteSpace(dllPath.Value))
+                    if (string.IsNullOrWhiteSpace(dllPath.Value))
                     {
+                        c.ShowHelp();
+                        return 0;
+                    }
+
+                    var options = new ExecuteLibraryCommandOptions
+                    (
+                        dllPath.Value,
+                        app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
+                        nocache.HasValue()
+                    );
+                    return await new ExecuteLibraryCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
+
                         if (!File.Exists(dllPath.Value))
                         {
                             throw new Exception($"Couldn't find file '{dllPath.Value}'");
@@ -189,8 +200,8 @@ namespace Dotnet.Script
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                         var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
                         return result;
-                    }
-                    return exitCode;
+
+
                 });
             });
 

@@ -38,12 +38,12 @@ namespace Dotnet.Script.Core.Commands
 
             if (options.PublishType == PublishType.Library)
             {
-                ScriptConsole.Default.WriteHighlighted("Create dll");
+                _scriptConsole.WriteHighlighted("Create dll");
                 publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, _logFactory, options.LibraryName);
             }
             else
             {
-                ScriptConsole.Default.WriteHighlighted("Create executable");
+                _scriptConsole.WriteHighlighted("Create executable");
                 publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier);
             }
         }
