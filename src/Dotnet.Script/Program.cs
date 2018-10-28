@@ -1,4 +1,5 @@
 using Dotnet.Script.Core;
+using Dotnet.Script.Core.Commands;
 using Dotnet.Script.Core.Versioning;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
@@ -95,7 +96,7 @@ namespace Dotnet.Script
                     if (!string.IsNullOrWhiteSpace(code.Value))
                     {
                         var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
-                        exitCode = await RunCode(code.Value, debugMode.HasValue(), !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), cwd.Value(), packageSources.Values?.ToArray());
+                        exitCode = await RunCode(code.Value, !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), cwd.Value(), packageSources.Values?.ToArray());
                     }
                     return exitCode;
                 });
@@ -109,8 +110,7 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
-                    var scaffolder = new Scaffolder(logFactory);
-                    scaffolder.InitializerFolder(fileName.Value, cwd.Value() ?? Directory.GetCurrentDirectory());
+                    new InitCommand(logFactory).Execute(new InitCommandOptions(fileName.Value, cwd.Value()));
                     return 0;
                 });
             });
@@ -142,7 +142,6 @@ namespace Dotnet.Script
                 var dllName = c.Option("-n |--name", "The name for the generated DLL (executable not supported at this time).  Defaults to the name of the script.", CommandOptionType.SingleValue);
                 var dllOption = c.Option("--dll", "Publish to a .dll instead of an executable.", CommandOptionType.NoValue);
                 var commandConfig = c.Option("-c | --configuration <configuration>", "Configuration to use for publishing the script [Release/Debug]. Default is \"Debug\"", CommandOptionType.SingleValue);
-                var publishDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
                 var runtime = c.Option("-r |--runtime", "The runtime used when publishing the self contained executable. Defaults to your current runtime.", CommandOptionType.SingleValue);
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
@@ -153,34 +152,18 @@ namespace Dotnet.Script
                         return 0;
                     }
 
-                    var optimizationLevel = commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
-                    var runtimeIdentifier = runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier;
-                    var absoluteFilePath = fileNameArgument.Value.GetRootedPath();
+                    var options = new PublishCommandOptions
+                    (
+                        new ScriptFile(fileNameArgument.Value),
+                        publishDirectoryOption.Value(),
+                        dllName.Value(),
+                        dllOption.HasValue() ? PublishType.Library : PublishType.Executable,
+                        commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug,
+                        runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier,
+                        nocache.HasValue()
+                    );
 
-                    // if a publish directory has been specified, then it is used directly, otherwise:
-                    // -- for EXE {current dir}/publish/{runtime ID}
-                    // -- for DLL {current dir}/publish
-                    var publishDirectory = publishDirectoryOption.Value() ??
-                        (dllOption.HasValue() ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", runtimeIdentifier));
-
-                    var absolutePublishDirectory = publishDirectory.GetRootedPath();
-                    var compiler = GetScriptCompiler(publishDebugMode.HasValue(), !nocache.HasValue(), logFactory);
-                    var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
-                    var publisher = new ScriptPublisher(logFactory, scriptEmitter);
-                    var code = absoluteFilePath.ToSourceText();
-                    var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, optimizationLevel);
-
-                    if (dllOption.HasValue())
-                    {
-                        ScriptConsole.Default.WriteHighlighted("Create dll");
-                        publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, dllName.Value());
-                    }
-                    else
-                    {
-                        ScriptConsole.Default.WriteHighlighted("Create executable");
-                        publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, logFactory, runtimeIdentifier);
-                    }
-
+                    new PublishCommand(ScriptConsole.Default, logFactory).Execute(options);
                     return 0;
                 });
             });
@@ -202,7 +185,7 @@ namespace Dotnet.Script
                         }
 
                         var absoluteFilePath = dllPath.Value.GetRootedPath();
-                        var compiler = GetScriptCompiler(commandDebugMode.HasValue(), !nocache.HasValue(), logFactory);
+                        var compiler = GetScriptCompiler(!nocache.HasValue(), logFactory);
                         var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
                         var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
                         return result;
@@ -221,14 +204,48 @@ namespace Dotnet.Script
                     await environmentReporter.ReportInfo();
                     return 0;
                 }
-
                 if (!string.IsNullOrWhiteSpace(file.Value))
                 {
                     var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
+                    if (File.Exists(file.Value))
+                    {
+                        if (interactive.HasValue())
+                        {
+
+                        }
+                        // exitCode = await RunScript(file.Value, debugMode.HasValue(), !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
+                        // return exitCode;
+                        var fileCommandOptions = new FileCommandOptions
+                        (
+                            new ScriptFile(file.Value),
+                            app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
+                            optimizationLevel,
+                            packageSources.Values?.ToArray(),
+                            nocache.HasValue()
+                        );
+
+                        var fileCommand = new FileCommand(ScriptConsole.Default, logFactory);
+                        return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
+
+                    }
+                    else
+                    {
+                        if (IsHttpUri(file.Value))
+                        {
+                            var downloader = new ScriptDownloader();
+                            var code = await downloader.Download(file.Value);
+                            return await RunCode(code, !nocache.HasValue(), logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources.Values?.ToArray());
+                        }
+                        else
+                        {
+                            throw new Exception($"Couldn't find file '{file}'");
+                        }
+                    }
+
+
                     if (nocache.HasValue())
                     {
-                        //ScriptConsole.Default.WriteHighlighted("NoCache");
-                        exitCode = await RunScript(file.Value, debugMode.HasValue(), !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
+                        exitCode = await RunScript(file.Value, !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
                     }
                     else
                     {
@@ -283,7 +300,7 @@ namespace Dotnet.Script
 
                         // get hash code from previous run
                         string hashCache = Path.Combine(publishDirectory, ".hash");
-                        var compiler = GetScriptCompiler(true, !nocache.HasValue(), logFactory);
+                        var compiler = GetScriptCompiler(!nocache.HasValue(), logFactory);
 
                         // if we don't have hash
                         if (!File.Exists(hashCache) ||
@@ -314,7 +331,7 @@ namespace Dotnet.Script
                 }
                 else
                 {
-                    await RunInteractive(debugMode.HasValue(), !nocache.HasValue(), logFactory, packageSources.Values?.ToArray());
+                    await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray());
                 }
                 return exitCode;
             });
@@ -323,7 +340,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);
         }
 
-        private static async Task<int> RunScript(string file, bool debugMode, bool useRestoreCache, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources)
+        private static async Task<int> RunScript(string file, bool useRestoreCache, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources)
         {
             if (!File.Exists(file))
             {
@@ -331,7 +348,7 @@ namespace Dotnet.Script
                 {
                     var downloader = new ScriptDownloader();
                     var code = await downloader.Download(file);
-                    return await RunCode(code, debugMode, useRestoreCache, logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);
+                    return await RunCode(code, useRestoreCache, logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);
                 }
 
                 throw new Exception($"Couldn't find file '{file}'");
@@ -344,14 +361,13 @@ namespace Dotnet.Script
             var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
             if (interactive)
             {
-                var compiler = GetScriptCompiler(debugMode, useRestoreCache, logFactory);
-
+                var compiler = GetScriptCompiler(useRestoreCache, logFactory);
                 var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
                 await runner.RunLoopWithSeed(context);
                 return 0;
             }
 
-            return await Run(debugMode, useRestoreCache, logFactory, context);
+            return await Run(useRestoreCache, logFactory, context);
         }
 
         private static bool IsHttpUri(string fileName)
@@ -360,28 +376,28 @@ namespace Dotnet.Script
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
-        private static async Task RunInteractive(bool debugMode, bool useRestoreCache, LogFactory logFactory, string[] packageSources)
+        private static async Task RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources)
         {
-            var compiler = GetScriptCompiler(debugMode, useRestoreCache, logFactory);
+            var compiler = GetScriptCompiler(useRestoreCache, logFactory);
             var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
             await runner.RunLoop();
         }
 
-        private static Task<int> RunCode(string code, bool debugMode, bool useRestoreCache, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
+        private static Task<int> RunCode(string code, bool useRestoreCache, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
         {
             var sourceText = SourceText.From(code);
             var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, optimizationLevel, ScriptMode.Eval, packageSources: packageSources);
-            return Run(debugMode, useRestoreCache, logFactory, context);
+            return Run(useRestoreCache, logFactory, context);
         }
 
-        private static Task<int> Run(bool debugMode, bool useRestoreCache,LogFactory logFactory, ScriptContext context)
+        private static Task<int> Run(bool useRestoreCache,LogFactory logFactory, ScriptContext context)
         {
-            var compiler = GetScriptCompiler(debugMode, useRestoreCache, logFactory);
+            var compiler = GetScriptCompiler(useRestoreCache, logFactory);
             var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
             return runner.Execute<int>(context);
         }
 
-        private static ScriptCompiler GetScriptCompiler(bool debugMode, bool useRestoreCache, LogFactory logFactory)
+        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
         {
             var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory, useRestoreCache);
             var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);

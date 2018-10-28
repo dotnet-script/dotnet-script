@@ -49,7 +49,7 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
-        public void ShouldReturnExitCodeOnenWhenScriptFails()
+        public void ShouldReturnExitCodeOneWhenScriptFails()
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("Exception");
             Assert.Equal(1, result.exitCode);
