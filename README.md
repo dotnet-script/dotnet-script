@@ -2,8 +2,6 @@
 
 Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug them in VS Code - all of that with full language services support from OmniSharp.
 
-> ⚠️ If you are using C# for VS Code version [1.15.0](https://github.com/OmniSharp/omnisharp-vscode/releases/tag/v1.15.0) on Linux or Mac, make sure to update to [1.15.2](https://github.com/OmniSharp/omnisharp-vscode/releases/tag/v1.15.2). There is a [bug](https://github.com/OmniSharp/omnisharp-roslyn/issues/1184) in the version of OmniSharp that shipped with 1.15.0, that prevents C# scripting from working in non-Windows environments. You can also go to VS Code settings and set `"omnisharp.path":"latest"`. This change will allow you to use C# 7.3 already.
-
 ## Build status
 
 | Build server | Platform     | Build status                                                                                                                                  |
@@ -252,14 +250,23 @@ Dotnet-Script can create a standalone executable or DLL for your script.
 The executable you can run directly independent of dotnet install, while the DLL is can be run using the dotnet CLI like this:
 
 ```shell
-dotnet publish\myscript.dll -- arg1 arg2
+dotnet script exec {path_to_dll} -- arg1 arg2
 ```
 
-### DLL Cache
+### Caching
+
+#### Restore Cache
+
+Under the hood, Dotnet-Script performs a `dotnet restore` to resolve the dependencies needed to execute the script(s). This is an out-of-process operation and typically takes roughly one second. The `restore cache` ensures that we only do a `dotnet restore` if the dependencies has changed.  For this cache to kick in, it is required for all NuGet package references to be specified using an exact version number. 
+
+This cache an be disabled using the `--nocache` flag.
+
+#### DLL Cache
+
 Dotnet-Script will automatically create a DLL on first execution of a script and as long as the source code has not changed it will continue to 
 use that DLL significantlly speeding up the execution of your scripts (by 8x).  The cached DLL's are stored in the user %tmp%/dotnet-script folder. 
 
-You can override this a automatic caching by passing **--nocache** flag, which will cause your script to be dynamically compiled everytime you run it.
+You can override this automatic caching by passing **--nocache** flag, which will cause your script to be dynamically compiled everytime you run it.
 
 ### Debugging
 

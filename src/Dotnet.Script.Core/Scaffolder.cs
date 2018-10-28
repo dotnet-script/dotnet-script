@@ -119,23 +119,6 @@ namespace Dotnet.Script.Core
                 Directory.CreateDirectory(vsCodeDirectory);
             }
 
-            // on windows we use this as opportunity to make the file association for .csx -> dotnet-script
-            // (If/when dotnet install command provides us an install time hook this code should move there)
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // check to see if .csx is mapped to dotnet-script
-                if (_commandRunner.Execute("reg", @"query HKCU\Software\classes\.csx") != 0)
-                {
-                    // register dotnet-script as the tool to process .csx files
-                    _commandRunner.Execute("reg", @"add HKCU\Software\classes\.csx /f /ve /t REG_SZ -d dotnetscript");
-                }
-
-                if (_commandRunner.Execute("reg", @"query HKCU\Software\classes\dotnetscript") != 0)
-                {
-                    _commandRunner.Execute("reg", $@"add HKCU\Software\Classes\dotnetscript\Shell\Open\Command /f /ve /t REG_EXPAND_SZ /d ""\""%ProgramFiles%\dotnet\dotnet.exe\"" exec \""{Path.Combine(_scriptEnvironment.InstallLocation, "dotnet-script.dll")}\"" \""%1\"" -- %*""");
-                }
-            }
-
             _scriptConsole.WriteNormal("Creating VS Code launch configuration file");
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             string installLocation = _scriptEnvironment.InstallLocation;

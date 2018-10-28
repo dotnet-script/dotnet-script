@@ -15,13 +15,13 @@ namespace Dotnet.Script.Tests
         {
             _scriptEnvironment = ScriptEnvironment.Default;
             ClearGlobalPackagesFolder();
-            BuildScriptPackages();            
+            BuildScriptPackages();
         }
 
         private void ClearGlobalPackagesFolder()
         {
-            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();            
-            var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder).Select(f => f.ToLower()).Where(f => f.Contains("scriptpackage"));            
+            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
+            var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder).Select(f => f.ToLower()).Where(f => f.Contains("scriptpackage"));
             foreach (var scriptPackageFolder in scriptPackageFolders)
             {
                 RemoveDirectory(scriptPackageFolder);
@@ -35,21 +35,21 @@ namespace Dotnet.Script.Tests
             Directory.CreateDirectory(pathToPackagesOutputFolder);
             var specFiles = GetSpecFiles();
             var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            var pathtoNuget430 = Path.Combine("../../../../Dotnet.Script.DependencyModel/NuGet/NuGet430.exe");
+            var pathtoNuget430 = Path.Combine("../../../NuGet/NuGet430.exe");
             foreach (var specFile in specFiles)
             {
                 string command;
                 if (_scriptEnvironment.IsWindows)
-                {                    
-                    command = pathtoNuget430;                    
+                {
+                    command = pathtoNuget430;
                     var result = ProcessHelper.RunAndCaptureOutput(command, $"pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}" );
                 }
                 else
                 {
-                    command = "mono";                     
+                    command = "mono";
                     var result = ProcessHelper.RunAndCaptureOutput(command, $"{pathtoNuget430} pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}");
                 }
-                
+
             }
         }
 
