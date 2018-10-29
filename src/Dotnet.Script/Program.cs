@@ -92,13 +92,16 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(async () =>
                 {
-                    int exitCode = 0;
-                    if (!string.IsNullOrWhiteSpace(code.Value))
+                    if (string.IsNullOrWhiteSpace(code.Value))
                     {
-                        var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
-                        exitCode = await RunCode(code.Value, !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), cwd.Value(), packageSources.Values?.ToArray());
+                        c.ShowHelp();
+                        return 0;
                     }
-                    return exitCode;
+
+                    int exitCode = 0;
+
+                    var options = new ExecuteCodeCommandOptions(code.Value,cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
+                    return await new ExecuteCodeCommmand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
 
