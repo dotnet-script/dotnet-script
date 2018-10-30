@@ -98,10 +98,8 @@ namespace Dotnet.Script
                         return 0;
                     }
 
-                    int exitCode = 0;
-
                     var options = new ExecuteCodeCommandOptions(code.Value,cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
-                    return await new ExecuteCodeCommmand(ScriptConsole.Default, logFactory).Execute<int>(options);
+                    return await new ExecuteCodeCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
 
@@ -191,20 +189,8 @@ namespace Dotnet.Script
                         app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
                         nocache.HasValue()
                     );
+
                     return await new ExecuteLibraryCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
-
-                        if (!File.Exists(dllPath.Value))
-                        {
-                            throw new Exception($"Couldn't find file '{dllPath.Value}'");
-                        }
-
-                        var absoluteFilePath = dllPath.Value.GetRootedPath();
-                        var compiler = GetScriptCompiler(!nocache.HasValue(), logFactory);
-                        var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
-                        var result = await runner.Execute<int>(absoluteFilePath, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
-                        return result;
-
-
                 });
             });
 
@@ -225,20 +211,20 @@ namespace Dotnet.Script
                     {
                         if (interactive.HasValue())
                         {
-
+                            return await RunInteractiveWithSeed(file.Value, logFactory, app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), packageSources.Values?.ToArray());
                         }
-                        // exitCode = await RunScript(file.Value, debugMode.HasValue(), !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
-                        // return exitCode;
-                        var fileCommandOptions = new FileCommandOptions
+
+                        var fileCommandOptions = new ExecuteScriptCommandOptions
                         (
                             new ScriptFile(file.Value),
                             app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
                             optimizationLevel,
                             packageSources.Values?.ToArray(),
+                            interactive.HasValue(),
                             nocache.HasValue()
                         );
 
-                        var fileCommand = new FileCommand(ScriptConsole.Default, logFactory);
+                        var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
                         return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
 
                     }
@@ -257,91 +243,91 @@ namespace Dotnet.Script
                     }
 
 
-                    if (nocache.HasValue())
-                    {
-                        exitCode = await RunScript(file.Value, !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
-                    }
-                    else
-                    {
-                        string cacheFolder = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
-                        // create unique folder name based on the path
-                        string uniqueFolderName = "";
-                        using (var sha = SHA256.Create())
-                        {
-                            uniqueFolderName = Convert.ToBase64String(sha.ComputeHash(Encoding.Unicode.GetBytes(file.Value))).Replace("=", String.Empty).Replace("/", string.Empty);
-                        }
+                    // if (nocache.HasValue())
+                    // {
+                    //     exitCode = await RunScript(file.Value, !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
+                    // }
+                    // else
+                    // {
+                    //     string cacheFolder = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
+                    //     // create unique folder name based on the path
+                    //     string uniqueFolderName = "";
+                    //     using (var sha = SHA256.Create())
+                    //     {
+                    //         uniqueFolderName = Convert.ToBase64String(sha.ComputeHash(Encoding.Unicode.GetBytes(file.Value))).Replace("=", String.Empty).Replace("/", string.Empty);
+                    //     }
 
 
 
-                        string publishDirectory = Path.Combine(cacheFolder, uniqueFolderName);
-                        if (!Directory.Exists(publishDirectory))
-                        {
-                            Directory.CreateDirectory(publishDirectory);
-                        }
+                    //     string publishDirectory = Path.Combine(cacheFolder, uniqueFolderName);
+                    //     if (!Directory.Exists(publishDirectory))
+                    //     {
+                    //         Directory.CreateDirectory(publishDirectory);
+                    //     }
 
-                        string absoluteSourcePath;
-                        SourceText code;
-                        if (!File.Exists(file.Value))
-                        {
-                            if (IsHttpUri(file.Value))
-                            {
-                                var downloader = new ScriptDownloader();
-                                var rawCode = await downloader.Download(file.Value);
-                                absoluteSourcePath = Path.Combine(publishDirectory, "source.csx");
-                                File.WriteAllText(absoluteSourcePath, rawCode);
-                                code = SourceText.From(rawCode);
-                            }
-                            else
-                            {
-                                throw new Exception($"Couldn't find file '{file}'");
-                            }
-                        }
-                        else
-                        {
-                            absoluteSourcePath = file.Value.GetRootedPath();
-                            code = absoluteSourcePath.ToSourceText();
-                        }
+                    //     string absoluteSourcePath;
+                    //     SourceText code;
+                    //     if (!File.Exists(file.Value))
+                    //     {
+                    //         if (IsHttpUri(file.Value))
+                    //         {
+                    //             var downloader = new ScriptDownloader();
+                    //             var rawCode = await downloader.Download(file.Value);
+                    //             absoluteSourcePath = Path.Combine(publishDirectory, "source.csx");
+                    //             File.WriteAllText(absoluteSourcePath, rawCode);
+                    //             code = SourceText.From(rawCode);
+                    //         }
+                    //         else
+                    //         {
+                    //             throw new Exception($"Couldn't find file '{file}'");
+                    //         }
+                    //     }
+                    //     else
+                    //     {
+                    //         absoluteSourcePath = file.Value.GetRootedPath();
+                    //         code = absoluteSourcePath.ToSourceText();
+                    //     }
 
-                        var pathToProjectFile = FileUtils.GetPathToTempFolder(absoluteSourcePath);
-                        publishDirectory = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "publish");
+                    //     var pathToProjectFile = FileUtils.GetPathToTempFolder(absoluteSourcePath);
+                    //     publishDirectory = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "publish");
 
 
-                        // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
-                        string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
+                    //     // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
+                    //     string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
 
-                        // source hash is the checkSum of the code
-                        string sourceHash = Convert.ToBase64String(code.GetChecksum().ToArray());
+                    //     // source hash is the checkSum of the code
+                    //     string sourceHash = Convert.ToBase64String(code.GetChecksum().ToArray());
 
-                        // get hash code from previous run
-                        string hashCache = Path.Combine(publishDirectory, ".hash");
-                        var compiler = GetScriptCompiler(!nocache.HasValue(), logFactory);
+                    //     // get hash code from previous run
+                    //     string hashCache = Path.Combine(publishDirectory, ".hash");
+                    //     var compiler = GetScriptCompiler(!nocache.HasValue(), logFactory);
 
-                        // if we don't have hash
-                        if (!File.Exists(hashCache) ||
-                             // or we haven't created a dll
-                             !Directory.Exists(publishDirectory) ||
-                             // the hashcode has changed (meaning new content)
-                             File.ReadAllText(hashCache) != sourceHash || true)
-                        {
-                            // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
-                            var runtimeIdentifier = ScriptEnvironment.Default.RuntimeIdentifier;
-                            var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
-                            var publisher = new ScriptPublisher(logFactory, scriptEmitter);
-                            var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), absoluteSourcePath, optimizationLevel);
-                            //ScriptConsole.Default.WriteHighlighted("Creating DLL");
-                            // create the assembly in our cache folder
-                            publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, Path.GetFileNameWithoutExtension(pathToDll));
+                    //     // if we don't have hash
+                    //     if (!File.Exists(hashCache) ||
+                    //          // or we haven't created a dll
+                    //          !Directory.Exists(publishDirectory) ||
+                    //          // the hashcode has changed (meaning new content)
+                    //          File.ReadAllText(hashCache) != sourceHash || true)
+                    //     {
+                    //         // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
+                    //         var runtimeIdentifier = ScriptEnvironment.Default.RuntimeIdentifier;
+                    //         var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
+                    //         var publisher = new ScriptPublisher(logFactory, scriptEmitter);
+                    //         var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), absoluteSourcePath, optimizationLevel);
+                    //         //ScriptConsole.Default.WriteHighlighted("Creating DLL");
+                    //         // create the assembly in our cache folder
+                    //         publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, Path.GetFileNameWithoutExtension(pathToDll));
 
-                            // save sourceHash for next time, so we can know it's ok to use the generated dll next time
-                            File.WriteAllText(hashCache, sourceHash);
-                        }
+                    //         // save sourceHash for next time, so we can know it's ok to use the generated dll next time
+                    //         File.WriteAllText(hashCache, sourceHash);
+                    //     }
 
-                        //ScriptConsole.Default.WriteHighlighted("Running from dll");
-                        // run the cached %temp%\dotnet-scripts\{uniqueFolderName}/package.dll
-                        var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
-                        var result = await runner.Execute<int>(pathToDll, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
-                        return result;
-                    }
+                    //     //ScriptConsole.Default.WriteHighlighted("Running from dll");
+                    //     // run the cached %temp%\dotnet-scripts\{uniqueFolderName}/package.dll
+                    //     var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
+                    //     var result = await runner.Execute<int>(pathToDll, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
+                    //     return result;
+                    // }
                 }
                 else
                 {
@@ -390,12 +376,20 @@ namespace Dotnet.Script
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
-        private static async Task RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources)
+        private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources)
         {
-            var compiler = GetScriptCompiler(useRestoreCache, logFactory);
-            var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
-            await runner.RunLoop();
+            var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources);
+            await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
+            return 0;
         }
+
+        private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources)
+        {
+            var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources);
+            await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
+            return 0;
+        }
+
 
         private static Task<int> RunCode(string code, bool useRestoreCache, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
         {

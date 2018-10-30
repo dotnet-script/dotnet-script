@@ -162,11 +162,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello World!", result.output);
         }
 
-        [Fact]
-        public void ShouldCompileScriptWithReleaseConfiguration()
+        [Theory]
+        [InlineData("release","false")]
+        [InlineData("debug","true")]
+        public void ShouldCompileScriptWithReleaseConfiguration(string configuration, string expected)
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c release");
-            Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
+            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", $"-c {configuration}");
+            Assert.Contains(expected, result.output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]

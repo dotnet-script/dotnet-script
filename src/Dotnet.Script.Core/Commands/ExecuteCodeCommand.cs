@@ -7,12 +7,12 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Dotnet.Script.Core.Commands
 {
-    public class ExecuteCodeCommmand
+    public class ExecuteCodeCommand
     {
         private readonly ScriptConsole _scriptConsole;
         private readonly LogFactory _logFactory;
 
-        public ExecuteCodeCommmand(ScriptConsole scriptConsole, LogFactory logFactory)
+        public ExecuteCodeCommand(ScriptConsole scriptConsole, LogFactory logFactory)
         {
             _scriptConsole = scriptConsole;
             _logFactory = logFactory;

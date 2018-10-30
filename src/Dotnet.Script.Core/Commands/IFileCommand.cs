@@ -8,6 +8,6 @@ namespace Dotnet.Script.Core.Commands
     /// </summary>
     public interface IFileCommand
     {
-        Task<TReturn> Run<TReturn, THost>(FileCommandOptions options);
+        Task<TReturn> Run<TReturn, THost>(ExecuteScriptCommandOptions options);
     }
 }

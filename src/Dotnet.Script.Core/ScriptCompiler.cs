@@ -57,7 +57,11 @@ namespace Dotnet.Script.Core
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
+        public ScriptCompiler(LogFactory logFactory, bool useRestoreCache)
+            :this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
+        {
 
+        }
 
         public ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
         {
