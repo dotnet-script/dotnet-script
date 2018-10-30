@@ -77,20 +77,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Bad HTTP authentication header", result.output);
         }
 
-#if DISABLED
-        // This unit test does not work with DLLs.  I am not certain what it was testing.
         [Fact]
         public void ShouldHandleIssue166()
         {
-            // System.Data.SqlClient loads native assets
-            // No story on *nix yet.
-            if (_scriptEnvironment.IsWindows)
-            {
-                var result = ScriptTestRunner.Default.ExecuteFixture("Issue166");
-                Assert.Contains("Connection successful", result.output);
-            }
+            var result = ScriptTestRunner.Default.ExecuteFixture("Issue166", "--nocache");
+            Assert.Contains("Connection successful", result.output);
+
         }
-#endif
 
         [Fact]
         public void ShouldPassUnknownArgumentToScript()

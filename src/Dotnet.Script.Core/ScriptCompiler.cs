@@ -258,6 +258,7 @@ namespace Dotnet.Script.Core
                         return loadedAssembly;
                     }
                     _logger.Trace($"Redirecting {assemblyName} to {runtimeAssembly.Name}");
+
                     return Assembly.LoadFrom(runtimeAssembly.Path);
                 }
             }

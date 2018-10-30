@@ -1,17 +1,13 @@
 using Dotnet.Script.Core;
 using Dotnet.Script.Core.Commands;
 using Dotnet.Script.Core.Versioning;
-using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
-using Dotnet.Script.DependencyModel.Runtime;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
-using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -206,42 +202,24 @@ namespace Dotnet.Script
 
                 if (scriptFile.HasValue)
                 {
+                    if (interactive.HasValue())
+                    {
+                        return await RunInteractiveWithSeed(file.Value, logFactory, app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), packageSources.Values?.ToArray());
+                    }
 
-                    // if (File.Exists(file.Value))
-                    // {
-                        if (interactive.HasValue())
-                        {
-                            return await RunInteractiveWithSeed(file.Value, logFactory, app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), packageSources.Values?.ToArray());
-                        }
+                    var fileCommandOptions = new ExecuteScriptCommandOptions
+                    (
+                        new ScriptFile(file.Value),
+                        app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
+                        optimizationLevel,
+                        packageSources.Values?.ToArray(),
+                        interactive.HasValue(),
+                        nocache.HasValue()
+                    );
 
-                        var fileCommandOptions = new ExecuteScriptCommandOptions
-                        (
-                            new ScriptFile(file.Value),
-                            app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
-                            optimizationLevel,
-                            packageSources.Values?.ToArray(),
-                            interactive.HasValue(),
-                            nocache.HasValue()
-                        );
-
-                        var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
-                        return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
-
-                    // }
-                    // else
-                    // {
-                    //     if (IsHttpUri(file.Value))
-                    //     {
-                    //         var downloader = new ScriptDownloader();
-                    //         var code = await downloader.Download(file.Value);
-                    //         return await RunCode(code, !nocache.HasValue(), logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources.Values?.ToArray());
-                    //     }
-                    //     else
-                    //     {
-                    //         throw new Exception($"Couldn't find file '{file}'");
-                    //     }
-                    // }
-                }
+                    var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
+                    return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
+            }
                 else
                 {
                     await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray());
@@ -249,16 +227,7 @@ namespace Dotnet.Script
                 return exitCode;
             });
 
-
             return app.Execute(argsBeforeDoubleHyphen);
-        }
-
-
-
-        private static bool IsHttpUri(string fileName)
-        {
-            return Uri.TryCreate(fileName, UriKind.Absolute, out Uri uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
         private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources)
@@ -273,28 +242,6 @@ namespace Dotnet.Script
             var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources);
             await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
             return 0;
-        }
-
-
-        private static Task<int> RunCode(string code, bool useRestoreCache, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, string currentWorkingDirectory, string[] packageSources)
-        {
-            var sourceText = SourceText.From(code);
-            var context = new ScriptContext(sourceText, currentWorkingDirectory ?? Directory.GetCurrentDirectory(), args, null, optimizationLevel, ScriptMode.Eval, packageSources: packageSources);
-            return Run(useRestoreCache, logFactory, context);
-        }
-
-        private static Task<int> Run(bool useRestoreCache,LogFactory logFactory, ScriptContext context)
-        {
-            var compiler = GetScriptCompiler(useRestoreCache, logFactory);
-            var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
-            return runner.Execute<int>(context);
-        }
-
-        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
-        {
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory, useRestoreCache);
-            var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
-            return compiler;
         }
     }
 }
