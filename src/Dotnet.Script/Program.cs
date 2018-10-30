@@ -4,7 +4,6 @@ using Dotnet.Script.Core.Versioning;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
-using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.DependencyModel.Runtime;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.CodeAnalysis;
@@ -13,11 +12,8 @@ using Microsoft.CodeAnalysis.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Dotnet.Script
@@ -198,17 +194,21 @@ namespace Dotnet.Script
             {
                 int exitCode = 0;
 
+                var scriptFile = new ScriptFile(file.Value);
+                var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
+
                 if (infoOption.HasValue())
                 {
                     var environmentReporter = new EnvironmentReporter(logFactory);
                     await environmentReporter.ReportInfo();
                     return 0;
                 }
-                if (!string.IsNullOrWhiteSpace(file.Value))
+
+                if (scriptFile.HasValue)
                 {
-                    var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
-                    if (File.Exists(file.Value))
-                    {
+
+                    // if (File.Exists(file.Value))
+                    // {
                         if (interactive.HasValue())
                         {
                             return await RunInteractiveWithSeed(file.Value, logFactory, app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), packageSources.Values?.ToArray());
@@ -227,106 +227,19 @@ namespace Dotnet.Script
                         var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
                         return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
 
-                    }
-                    else
-                    {
-                        if (IsHttpUri(file.Value))
-                        {
-                            var downloader = new ScriptDownloader();
-                            var code = await downloader.Download(file.Value);
-                            return await RunCode(code, !nocache.HasValue(), logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources.Values?.ToArray());
-                        }
-                        else
-                        {
-                            throw new Exception($"Couldn't find file '{file}'");
-                        }
-                    }
-
-
-                    // if (nocache.HasValue())
-                    // {
-                    //     exitCode = await RunScript(file.Value, !nocache.HasValue(), logFactory, optimizationLevel, app.RemainingArguments.Concat(argsAfterDoubleHyphen), interactive.HasValue(), packageSources.Values?.ToArray());
                     // }
                     // else
                     // {
-                    //     string cacheFolder = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
-                    //     // create unique folder name based on the path
-                    //     string uniqueFolderName = "";
-                    //     using (var sha = SHA256.Create())
+                    //     if (IsHttpUri(file.Value))
                     //     {
-                    //         uniqueFolderName = Convert.ToBase64String(sha.ComputeHash(Encoding.Unicode.GetBytes(file.Value))).Replace("=", String.Empty).Replace("/", string.Empty);
-                    //     }
-
-
-
-                    //     string publishDirectory = Path.Combine(cacheFolder, uniqueFolderName);
-                    //     if (!Directory.Exists(publishDirectory))
-                    //     {
-                    //         Directory.CreateDirectory(publishDirectory);
-                    //     }
-
-                    //     string absoluteSourcePath;
-                    //     SourceText code;
-                    //     if (!File.Exists(file.Value))
-                    //     {
-                    //         if (IsHttpUri(file.Value))
-                    //         {
-                    //             var downloader = new ScriptDownloader();
-                    //             var rawCode = await downloader.Download(file.Value);
-                    //             absoluteSourcePath = Path.Combine(publishDirectory, "source.csx");
-                    //             File.WriteAllText(absoluteSourcePath, rawCode);
-                    //             code = SourceText.From(rawCode);
-                    //         }
-                    //         else
-                    //         {
-                    //             throw new Exception($"Couldn't find file '{file}'");
-                    //         }
+                    //         var downloader = new ScriptDownloader();
+                    //         var code = await downloader.Download(file.Value);
+                    //         return await RunCode(code, !nocache.HasValue(), logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources.Values?.ToArray());
                     //     }
                     //     else
                     //     {
-                    //         absoluteSourcePath = file.Value.GetRootedPath();
-                    //         code = absoluteSourcePath.ToSourceText();
+                    //         throw new Exception($"Couldn't find file '{file}'");
                     //     }
-
-                    //     var pathToProjectFile = FileUtils.GetPathToTempFolder(absoluteSourcePath);
-                    //     publishDirectory = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "publish");
-
-
-                    //     // given the path to a script we create a %temp%\dotnet-scripts\{uniqueFolderName} path
-                    //     string pathToDll = Path.Combine(publishDirectory, Path.GetFileNameWithoutExtension(absoluteSourcePath) + ".dll");
-
-                    //     // source hash is the checkSum of the code
-                    //     string sourceHash = Convert.ToBase64String(code.GetChecksum().ToArray());
-
-                    //     // get hash code from previous run
-                    //     string hashCache = Path.Combine(publishDirectory, ".hash");
-                    //     var compiler = GetScriptCompiler(!nocache.HasValue(), logFactory);
-
-                    //     // if we don't have hash
-                    //     if (!File.Exists(hashCache) ||
-                    //          // or we haven't created a dll
-                    //          !Directory.Exists(publishDirectory) ||
-                    //          // the hashcode has changed (meaning new content)
-                    //          File.ReadAllText(hashCache) != sourceHash || true)
-                    //     {
-                    //         // then we autopublish into the %temp%\dotnet-scripts\{uniqueFolderName} path
-                    //         var runtimeIdentifier = ScriptEnvironment.Default.RuntimeIdentifier;
-                    //         var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
-                    //         var publisher = new ScriptPublisher(logFactory, scriptEmitter);
-                    //         var context = new ScriptContext(code, publishDirectory, Enumerable.Empty<string>(), absoluteSourcePath, optimizationLevel);
-                    //         //ScriptConsole.Default.WriteHighlighted("Creating DLL");
-                    //         // create the assembly in our cache folder
-                    //         publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, logFactory, Path.GetFileNameWithoutExtension(pathToDll));
-
-                    //         // save sourceHash for next time, so we can know it's ok to use the generated dll next time
-                    //         File.WriteAllText(hashCache, sourceHash);
-                    //     }
-
-                    //     //ScriptConsole.Default.WriteHighlighted("Running from dll");
-                    //     // run the cached %temp%\dotnet-scripts\{uniqueFolderName}/package.dll
-                    //     var runner = new ScriptRunner(compiler, logFactory, ScriptConsole.Default);
-                    //     var result = await runner.Execute<int>(pathToDll, app.RemainingArguments.Concat(argsAfterDoubleHyphen));
-                    //     return result;
                     // }
                 }
                 else
@@ -340,35 +253,7 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);
         }
 
-        private static async Task<int> RunScript(string file, bool useRestoreCache, LogFactory logFactory, OptimizationLevel optimizationLevel, IEnumerable<string> args, bool interactive, string[] packageSources)
-        {
-            if (!File.Exists(file))
-            {
-                if (IsHttpUri(file))
-                {
-                    var downloader = new ScriptDownloader();
-                    var code = await downloader.Download(file);
-                    return await RunCode(code, useRestoreCache, logFactory, optimizationLevel, args, Directory.GetCurrentDirectory(), packageSources);
-                }
 
-                throw new Exception($"Couldn't find file '{file}'");
-            }
-
-            var absoluteFilePath = file.GetRootedPath();
-            var directory = Path.GetDirectoryName(absoluteFilePath);
-
-            var sourceText = absoluteFilePath.ToSourceText();
-            var context = new ScriptContext(sourceText, directory, args, absoluteFilePath, optimizationLevel, packageSources: packageSources);
-            if (interactive)
-            {
-                var compiler = GetScriptCompiler(useRestoreCache, logFactory);
-                var runner = new InteractiveRunner(compiler, logFactory, ScriptConsole.Default, packageSources);
-                await runner.RunLoopWithSeed(context);
-                return 0;
-            }
-
-            return await Run(useRestoreCache, logFactory, context);
-        }
 
         private static bool IsHttpUri(string fileName)
         {

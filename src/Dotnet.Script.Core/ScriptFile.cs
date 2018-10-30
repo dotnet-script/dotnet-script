@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace Dotnet.Script.Core
 {
@@ -6,12 +7,15 @@ namespace Dotnet.Script.Core
     {
         public ScriptFile(string path)
         {
-            IsRemote = IsHttpUri(Path);
-            if (IsRemote)
+            Path = path;
+            IsRemote = IsHttpUri(path);
+
+            if (!IsRemote && HasValue && !File.Exists(path))
             {
-                Path = path;
+                throw new Exception($"Couldn't find file '{path}'");
             }
-            else
+
+            if (!IsRemote && HasValue)
             {
                 Path = path.GetRootedPath();
                 Directory = System.IO.Path.GetDirectoryName(Path);
@@ -23,6 +27,8 @@ namespace Dotnet.Script.Core
         public string Directory {get;}
 
         public bool IsRemote {get;}
+
+        public bool HasValue { get => !string.IsNullOrWhiteSpace(Path); }
 
         private static bool IsHttpUri(string fileName)
         {
