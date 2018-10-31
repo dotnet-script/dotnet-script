@@ -192,6 +192,7 @@ namespace Dotnet.Script
 
                 var scriptFile = new ScriptFile(file.Value);
                 var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
+                var scriptArguments = app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray();
 
                 if (infoOption.HasValue())
                 {
@@ -204,13 +205,13 @@ namespace Dotnet.Script
                 {
                     if (interactive.HasValue())
                     {
-                        return await RunInteractiveWithSeed(file.Value, logFactory, app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), packageSources.Values?.ToArray());
+                        return await RunInteractiveWithSeed(file.Value, logFactory, scriptArguments, packageSources.Values?.ToArray());
                     }
 
                     var fileCommandOptions = new ExecuteScriptCommandOptions
                     (
                         new ScriptFile(file.Value),
-                        app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
+                        scriptArguments,
                         optimizationLevel,
                         packageSources.Values?.ToArray(),
                         interactive.HasValue(),

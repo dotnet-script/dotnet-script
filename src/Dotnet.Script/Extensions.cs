@@ -12,15 +12,5 @@ namespace Dotnet.Script
             if (option == null) throw new ArgumentNullException(nameof(option));
             return option.HasValue() && string.Equals(option.Value(), value, comparison);
         }
-
-        public static string GetRootedPath(this string path) => Path.IsPathRooted(path) ? path : Path.Combine(Directory.GetCurrentDirectory(), path);
-
-        public static SourceText ToSourceText(this string absoluteFilePath)
-        {
-            using (var filestream = File.OpenRead(absoluteFilePath))
-            {
-                return SourceText.From(filestream);
-            }
-        }
     }
 }

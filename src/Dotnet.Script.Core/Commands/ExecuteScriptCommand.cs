@@ -1,23 +1,25 @@
 using System;
 using System.IO;
-using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
-using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.ProjectSystem;
-using Dotnet.Script.DependencyModel.Runtime;
 
 namespace Dotnet.Script.Core.Commands
 {
-    public class ExecuteScriptCommand : IFileCommand
+    public class ExecuteScriptCommand
     {
         private readonly ScriptConsole _scriptConsole;
         private readonly LogFactory _logFactory;
+        private readonly Logger _logger;
 
         public ExecuteScriptCommand(ScriptConsole scriptConsole, LogFactory logFactory)
         {
             _scriptConsole = scriptConsole;
             _logFactory = logFactory;
+            _logger = logFactory.CreateLogger<ExecuteScriptCommand>();
+
         }
 
         public async Task<TReturn> Run<TReturn, THost>(ExecuteScriptCommandOptions options)
@@ -27,7 +29,7 @@ namespace Dotnet.Script.Core.Commands
                 return await DownloadAndRunCode<TReturn>(options);
             }
 
-            var pathToLibrary = CreateLibrary(options);
+            var pathToLibrary = GetLibrary(options);
             return await ExecuteLibrary<TReturn>(pathToLibrary, options.Arguments, options.NoCache);
         }
 
@@ -39,13 +41,90 @@ namespace Dotnet.Script.Core.Commands
             return await new ExecuteCodeCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
 
-        private string CreateLibrary(ExecuteScriptCommandOptions executeOptions)
+
+        private string GetLibrary(ExecuteScriptCommandOptions executeOptions)
         {
             var projectFolder = FileUtils.GetPathToTempFolder(Path.GetDirectoryName(executeOptions.File.Path));
             var publishDirectory = Path.Combine(projectFolder, "publish");
-            var options = new PublishCommandOptions(executeOptions.File,publishDirectory, "script", PublishType.Library,executeOptions.OptimizationLevel, null, executeOptions.NoCache);
-            new PublishCommand(_scriptConsole, _logFactory).Execute(options);
-            return Path.Combine(publishDirectory, "script.dll");
+            var pathToLibrary = Path.Combine(publishDirectory, "script.dll");
+
+            if (!TryCreateHash(executeOptions, out var hash) || !TryGetHash(publishDirectory, out var cachedHash))
+            {
+                return CreateLibrary();
+            }
+
+            if (!string.Equals(hash,cachedHash))
+            {
+                return CreateLibrary();
+            }
+
+            return pathToLibrary;
+
+            string CreateLibrary()
+            {
+                var options = new PublishCommandOptions(executeOptions.File,publishDirectory, "script", PublishType.Library,executeOptions.OptimizationLevel, null, executeOptions.NoCache);
+                new PublishCommand(_scriptConsole, _logFactory).Execute(options);
+                if (hash != null)
+                {
+                    File.WriteAllText(Path.Combine(publishDirectory, "script.sha256"), hash);
+                }
+                return Path.Combine(publishDirectory, "script.dll");
+            }
+        }
+
+        public bool TryCreateHash(ExecuteScriptCommandOptions options, out string hash)
+        {
+            if (options.NoCache)
+            {
+                _logger.Debug($"The script {options.File.Path} was executed with the '--nocache' flag. Skipping cache.");
+                hash = null;
+                return false;
+            }
+
+            var projectFolder = FileUtils.GetPathToTempFolder(Path.GetDirectoryName(options.File.Path));
+            var pathToProjectFile = Path.Combine(projectFolder, "script.csproj");
+            var projectFile = new ProjectFile(File.ReadAllText(pathToProjectFile));
+            if (!projectFile.IsCacheable)
+            {
+                _logger.Warning($"The script {options.File.Path} is not cacheable. For caching and optimal performance, ensure that the script only contains NuGet references with pinned/exact versions.");
+                hash = null;
+                return false;
+            }
+
+            var scriptFilesProvider = new ScriptFilesResolver();
+            var allScriptFiles = scriptFilesProvider.GetScriptFiles(options.File.Path);
+            IncrementalHash incrementalHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            foreach (var scriptFile in allScriptFiles)
+            {
+                incrementalHash.AppendData(File.ReadAllBytes(scriptFile));
+            }
+
+            var configuration = options.OptimizationLevel.ToString();
+            incrementalHash.AppendData(Encoding.UTF8.GetBytes(configuration));
+
+            hash = Convert.ToBase64String(incrementalHash.GetHashAndReset());
+            return true;
+        }
+
+
+        public bool TryGetHash(string cacheFolder, out string hash)
+        {
+            if (!Directory.Exists(cacheFolder))
+            {
+                hash = null;
+                return false;
+            }
+
+            var pathToHashFile = Path.Combine(cacheFolder, "script.sha256");
+
+            if (!File.Exists(Path.Combine(cacheFolder, "script.sha256")))
+            {
+                hash = null;
+                return false;
+            }
+
+            hash = File.ReadAllText(pathToHashFile);
+            return true;
         }
 
         private async Task<TReturn> ExecuteLibrary<TReturn>(string pathToLibrary, string[] arguments, bool noCache)
