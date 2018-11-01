@@ -23,7 +23,7 @@ namespace Dotnet.Script.Core.Commands
             var sourceText = SourceText.From(options.Code);
             var context = new ScriptContext(sourceText, options.WorkingDirectory ?? Directory.GetCurrentDirectory(), options.Arguments, null, options.OptimizationLevel, ScriptMode.Eval, options.PackageSources);
             var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
-            var runner = new ScriptRunner(compiler, _logFactory, ScriptConsole.Default);
+            var runner = new ScriptRunner(compiler, _logFactory, _scriptConsole);
             return await runner.Execute<TReturn>(context);
         }
 

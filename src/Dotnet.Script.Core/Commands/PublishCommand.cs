@@ -31,7 +31,7 @@ namespace Dotnet.Script.Core.Commands
 
             var absolutePublishDirectory = publishDirectory.GetRootedPath();
             var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
-            var scriptEmitter = new ScriptEmitter(ScriptConsole.Default, compiler);
+            var scriptEmitter = new ScriptEmitter(_scriptConsole, compiler);
             var publisher = new ScriptPublisher(_logFactory, scriptEmitter);
             var code = absoluteFilePath.ToSourceText();
             var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, options.OptimizationLevel);
