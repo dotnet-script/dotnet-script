@@ -58,7 +58,7 @@ namespace Dotnet.Script.Tests
             {
                 var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
-                WriteScript(pathToScript, "#r \"nuget:AutoMapper, 7.0\"" ,"WriteLine(42);");
+                WriteScript(pathToScript, "#r \"nuget:AutoMapper, *\"" ,"WriteLine(42);");
 
                 var result = Execute(pathToScript);
                 Assert.Contains("42", result.output);
@@ -66,7 +66,6 @@ namespace Dotnet.Script.Tests
                 Assert.Null(result.hash);
             }
         }
-
 
         private static (string output, string hash) Execute(string pathToScript)
         {

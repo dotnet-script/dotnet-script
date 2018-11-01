@@ -43,7 +43,6 @@ namespace Dotnet.Script.Core.Commands
             return await new ExecuteCodeCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
 
-
         private string GetLibrary(ExecuteScriptCommandOptions executeOptions)
         {
             var projectFolder = FileUtils.GetPathToTempFolder(Path.GetDirectoryName(executeOptions.File.Path));
