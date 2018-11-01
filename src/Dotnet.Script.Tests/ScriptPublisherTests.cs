@@ -30,7 +30,6 @@ namespace Dotnet.Script.Tests
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
                 File.WriteAllText(mainPath, code);
-                var test = ScriptTestRunner.Default.ExecuteInProcess($"publish {mainPath}");
 
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath}", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);

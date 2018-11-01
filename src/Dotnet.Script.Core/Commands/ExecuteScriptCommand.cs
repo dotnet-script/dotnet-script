@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 
@@ -45,10 +47,10 @@ namespace Dotnet.Script.Core.Commands
         private string GetLibrary(ExecuteScriptCommandOptions executeOptions)
         {
             var projectFolder = FileUtils.GetPathToTempFolder(Path.GetDirectoryName(executeOptions.File.Path));
-            var publishDirectory = Path.Combine(projectFolder, "publish");
-            var pathToLibrary = Path.Combine(publishDirectory, "script.dll");
+            var executionCacheFolder = Path.Combine(projectFolder, "execution-cache");
+            var pathToLibrary = Path.Combine(executionCacheFolder, "script.dll");
 
-            if (!TryCreateHash(executeOptions, out var hash) || !TryGetHash(publishDirectory, out var cachedHash))
+            if (!TryCreateHash(executeOptions, out var hash) || !TryGetHash(executionCacheFolder, out var cachedHash))
             {
                 return CreateLibrary();
             }
@@ -62,13 +64,13 @@ namespace Dotnet.Script.Core.Commands
 
             string CreateLibrary()
             {
-                var options = new PublishCommandOptions(executeOptions.File,publishDirectory, "script", PublishType.Library,executeOptions.OptimizationLevel, null, executeOptions.NoCache);
+                var options = new PublishCommandOptions(executeOptions.File,executionCacheFolder, "script", PublishType.Library,executeOptions.OptimizationLevel, null, executeOptions.NoCache);
                 new PublishCommand(_scriptConsole, _logFactory).Execute(options);
                 if (hash != null)
                 {
-                    File.WriteAllText(Path.Combine(publishDirectory, "script.sha256"), hash);
+                    File.WriteAllText(Path.Combine(executionCacheFolder, "script.sha256"), hash);
                 }
-                return Path.Combine(publishDirectory, "script.dll");
+                return Path.Combine(executionCacheFolder, "script.dll");
             }
         }
 
@@ -81,9 +83,10 @@ namespace Dotnet.Script.Core.Commands
                 return false;
             }
 
-            var projectFolder = FileUtils.GetPathToTempFolder(Path.GetDirectoryName(options.File.Path));
-            var pathToProjectFile = Path.Combine(projectFolder, "script.csproj");
-            var projectFile = new ProjectFile(File.ReadAllText(pathToProjectFile));
+            var scriptFilesProvider = new ScriptFilesResolver();
+            var allScriptFiles = scriptFilesProvider.GetScriptFiles(options.File.Path);
+            var projectFile = new ScriptProjectProvider(_logFactory).CreateProjectFileFromScriptFiles(ScriptEnvironment.Default.TargetFramework, allScriptFiles.ToArray());
+
             if (!projectFile.IsCacheable)
             {
                 _logger.Warning($"The script {options.File.Path} is not cacheable. For caching and optimal performance, ensure that the script only contains NuGet references with pinned/exact versions.");
@@ -91,8 +94,7 @@ namespace Dotnet.Script.Core.Commands
                 return false;
             }
 
-            var scriptFilesProvider = new ScriptFilesResolver();
-            var allScriptFiles = scriptFilesProvider.GetScriptFiles(options.File.Path);
+
             IncrementalHash incrementalHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             foreach (var scriptFile in allScriptFiles)
             {
