@@ -1,7 +1,7 @@
-using Dotnet.Script.DependencyModel.Environment;
-using Dotnet.Script.Shared.Tests;
 using System;
 using System.IO;
+using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -44,16 +44,12 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            // We have no story for this on *nix yet
-            if (_scriptEnvironment.IsWindows)
-            {
-                var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
-                Assert.Contains("Connection successful", result.output);
-            }
+            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
+            Assert.Contains("Connection successful", result.output);
         }
 
         [Fact]
-        public void ShouldReturnExitCodeOnenWhenScriptFails()
+        public void ShouldReturnExitCodeOneWhenScriptFails()
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("Exception");
             Assert.Equal(1, result.exitCode);
@@ -81,20 +77,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Bad HTTP authentication header", result.output);
         }
 
-#if DISABLED
-        // This unit test does not work with DLLs.  I am not certain what it was testing.
         [Fact]
         public void ShouldHandleIssue166()
         {
-            // System.Data.SqlClient loads native assets
-            // No story on *nix yet.
-            if (_scriptEnvironment.IsWindows)
-            {
-                var result = ScriptTestRunner.Default.ExecuteFixture("Issue166");
-                Assert.Contains("Connection successful", result.output);
-            }
+            var result = ScriptTestRunner.Default.ExecuteFixture("Issue166", "--nocache");
+            Assert.Contains("Connection successful", result.output);
+
         }
-#endif
 
         [Fact]
         public void ShouldPassUnknownArgumentToScript()
@@ -166,11 +155,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello World!", result.output);
         }
 
-        [Fact]
-        public void ShouldCompileScriptWithReleaseConfiguration()
+        [Theory]
+        [InlineData("release","false")]
+        [InlineData("debug","true")]
+        public void ShouldCompileScriptWithReleaseConfiguration(string configuration, string expected)
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c release");
-            Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
+            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", $"-c {configuration}");
+            Assert.Contains(expected, result.output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -291,7 +282,7 @@ namespace Dotnet.Script.Tests
             string script =
     @"#r ""nuget: AgileObjects.AgileMapper, 0.25.0""
 #r ""TestLibrary.dll""
-    
+
     using AgileObjects.AgileMapper;
 
     IMapper mapper = Mapper.CreateNew();

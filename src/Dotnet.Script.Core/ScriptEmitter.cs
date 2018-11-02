@@ -21,6 +21,7 @@ namespace Dotnet.Script.Core
             try
             {
                 var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
+
                 var compilation = compilationContext.Script.GetCompilation();
 
                 var peStream = new MemoryStream();
@@ -35,7 +36,7 @@ namespace Dotnet.Script.Core
 
                 if (result.Success)
                 {
-                    return new ScriptEmitResult(peStream, compilation.DirectiveReferences);
+                    return new ScriptEmitResult(peStream, compilation.DirectiveReferences, compilationContext.RuntimeDependencies);
                 }
 
                 return ScriptEmitResult.Error(result.Diagnostics);

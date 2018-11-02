@@ -82,21 +82,33 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework.");
 
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
-            return CreateProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, csxFiles);
+            return SaveProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, csxFiles);
         }
 
         public string CreateProjectForScriptFile(string scriptFile)
         {
             _logger.Debug($"Creating project file for {scriptFile}");
             var scriptFiles = _scriptFilesResolver.GetScriptFiles(scriptFile);
-            return CreateProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());
+            return SaveProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());
         }
 
-        private string CreateProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
+        private string SaveProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
+        {
+            ProjectFile projectFile = CreateProjectFileFromScriptFiles(defaultTargetFramework, csxFiles);
+
+            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
+            projectFile.Save(pathToProjectFile);
+
+            LogProjectFileInfo(pathToProjectFile);
+
+            CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
+            return pathToProjectFile;
+        }
+
+        public ProjectFile CreateProjectFileFromScriptFiles(string defaultTargetFramework, string[] csxFiles)
         {
             var parseresult = _scriptParser.ParseFromFiles(csxFiles);
 
-            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
             var projectFile = new ProjectFile();
 
             foreach (var packageReference in parseresult.PackageReferences)
@@ -105,13 +117,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             }
 
             projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
-
-            projectFile.Save(pathToProjectFile);
-
-            LogProjectFileInfo(pathToProjectFile);
-
-            CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
-            return pathToProjectFile;
+            return projectFile;
         }
 
         private void CopyNuGetConfigFile(string targetDirectory, string pathToProjectFileFolder)

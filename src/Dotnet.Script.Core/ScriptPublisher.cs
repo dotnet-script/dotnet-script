@@ -132,6 +132,26 @@ namespace Dotnet.Script.Core
                     }
                 }
 
+                /*  The following is needed to make native assets work.
+                    During a regular "dotnet publish" we find these assets in a "runtimes" folder.
+                    We must copy these binaries up to the same folder as the script library so
+                    that they can be found during execution.
+                */
+                foreach (var runtimeDependency in emitResult.RuntimeDependencies)
+                {
+                    if (!runtimeDependency.Name.Contains("microsoft.netcore", StringComparison.OrdinalIgnoreCase))
+                    {
+                        foreach (var nativeAsset in runtimeDependency.NativeAssets)
+                        {
+                            File.Copy(nativeAsset, Path.Combine(outputDirectory, Path.GetFileName(nativeAsset)), true);
+                        }
+                        foreach (var runtimeAssembly in runtimeDependency.Assemblies)
+                        {
+                            File.Copy(runtimeAssembly.Path, Path.Combine(outputDirectory, Path.GetFileName(runtimeAssembly.Path)), true);
+                        }
+                    }
+                }
+
                 return assemblyPath;
             }
             catch (CompilationErrorException ex)

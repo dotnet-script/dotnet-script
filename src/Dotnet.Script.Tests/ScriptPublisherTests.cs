@@ -29,7 +29,8 @@ namespace Dotnet.Script.Tests
             {
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);                
+                File.WriteAllText(mainPath, code);
+
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath}", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
@@ -48,7 +49,7 @@ namespace Dotnet.Script.Tests
                 var runtimeId = _scriptEnvironment.RuntimeIdentifier == "win10-x64" ? "osx-x64" : "win10-x64";
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);               
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} --runtime {runtimeId}");
 
                 Assert.Equal(0, publishResult.exitCode);
@@ -71,7 +72,7 @@ namespace Dotnet.Script.Tests
             {
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);                
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} -o {publishRootFolder.Path}");
                 Assert.Equal(0, publishResult.exitCode);
 
@@ -89,7 +90,7 @@ namespace Dotnet.Script.Tests
             {
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);               
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute("publish main.csx", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
@@ -107,7 +108,7 @@ namespace Dotnet.Script.Tests
             {
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);                
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute("publish main.csx -o publish", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
@@ -125,11 +126,11 @@ namespace Dotnet.Script.Tests
             {
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);                
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} --dll", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var dllPath = Path.Combine("publish", "main.dll");                
+                var dllPath = Path.Combine("publish", "main.dll");
                 var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", workspaceFolder.Path);
 
                 Assert.Equal(0, dllRunResult.exitCode);
@@ -143,12 +144,12 @@ namespace Dotnet.Script.Tests
             {
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);                
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute("publish main.csx --dll", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
                 var dllPath = Path.Combine(workspaceFolder.Path, "publish", "main.dll");
-                
+
                 var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", workspaceFolder.Path);
 
                 Assert.Equal(0, dllRunResult.exitCode);
@@ -163,11 +164,11 @@ namespace Dotnet.Script.Tests
             {
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);                
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} --dll -o {publishFolder.Path}", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var dllPath = Path.Combine(publishFolder.Path, "main.dll");                
+                var dllPath = Path.Combine(publishFolder.Path, "main.dll");
                 var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", publishFolder.Path);
 
                 Assert.Equal(0, dllRunResult.exitCode);
@@ -183,11 +184,11 @@ namespace Dotnet.Script.Tests
                 var assemblyName = $"{outputName}.dll";
                 var code = @"WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);                
+                File.WriteAllText(mainPath, code);
                 var publishResult = ScriptTestRunner.Default.Execute($"publish main.csx --dll -n {outputName}", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var dllPath = Path.Combine(workspaceFolder.Path, "publish", assemblyName);               
+                var dllPath = Path.Combine(workspaceFolder.Path, "publish", assemblyName);
                 var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", workspaceFolder.Path);
 
                 Assert.Equal(0, dllRunResult.exitCode);
@@ -217,7 +218,7 @@ namespace Dotnet.Script.Tests
         public void ShouldHandleReferencingAssemblyFromScriptFolder()
         {
             using (var workspaceFolder = new DisposableFolder())
-            {               
+            {
                 ProcessHelper.RunAndCaptureOutput($"dotnet",$" new classlib -n MyCustomLibrary -o {workspaceFolder.Path}");
                 ProcessHelper.RunAndCaptureOutput($"dotnet", $" build -o {workspaceFolder.Path}", workspaceFolder.Path);
                 var code = $@"#r ""MyCustomLibrary.dll"" {Environment.NewLine} WriteLine(""hello world"");";
