@@ -255,18 +255,20 @@ dotnet script exec {path_to_dll} -- arg1 arg2
 
 ### Caching
 
-#### Restore Cache
+We provide two types of caching, the `dependency cache` and the `execution cache` which is explained in detail below. In order for any of these caches to be enabled, it is required that all NuGet package references are specified using an exact version number. The reason for this constraint is that we need to make sure that we don't execute a script with a stale dependency graph. 
 
-Under the hood, Dotnet-Script performs a `dotnet restore` to resolve the dependencies needed to execute the script(s). This is an out-of-process operation and typically takes roughly one second. The `restore cache` ensures that we only do a `dotnet restore` if the dependencies has changed.  For this cache to kick in, it is required for all NuGet package references to be specified using an exact version number. 
+#### Dependency Cache
 
-This cache an be disabled using the `--nocache` flag.
+In order to resolve the dependencies for a script, a `dotnet restore` is executed under the hood to produce a `project.assets.json` file from which we can figure out all the dependencies we need to add to the compilation.
+This is an out-of-process operation and represents a significant overhead to the script execution. So this cache works by looking at all the dependencies specified in the script(s) either in the form of NuGet package references or assembly file references. If these dependencies matches the dependencies from the last script execution, we skip the restore and read the dependencies from the already generated `project.assets.json` file. If any of the dependencies has changed, we must restore again to obtain the new dependency graph.
 
-#### DLL Cache
+#### Execution cache
 
-Dotnet-Script will automatically create a DLL on first execution of a script and as long as the source code has not changed it will continue to 
-use that DLL significantlly speeding up the execution of your scripts (by 8x).  The cached DLL's are stored in the user %tmp%/dotnet-script folder. 
+In order to execute a script it needs to be compiled first and since that is a CPU and time consuming operation, we make sure that we only compile when the source code has changed. This works by creating a SHA256 hash from all the script files involved in the execution. This hash is written to a temporary location along with the DLL that represents the result of the script compilation. When a script is executed the hash is computed and compared with the hash from the previous compilation. If they match there is no need to recompile and we run from the already compiled DLL. If the hashes don't match, the cache is invalidated and we recompile. 
 
-You can override this automatic caching by passing **--nocache** flag, which will cause your script to be dynamically compiled everytime you run it.
+> You can override this automatic caching by passing **--nocache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script. 
+
+### 
 
 ### Debugging
 
