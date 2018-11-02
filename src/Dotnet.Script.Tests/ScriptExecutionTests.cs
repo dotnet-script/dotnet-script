@@ -267,6 +267,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleNuGetVersionRange()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("VersionRange");
+            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
+        [Fact]
         public void ShouldHandleIssue235()
         {
             string code =
