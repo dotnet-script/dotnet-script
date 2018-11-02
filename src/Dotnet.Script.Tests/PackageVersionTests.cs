@@ -27,6 +27,7 @@ namespace Dotnet.Script.Tests
         [InlineData("(1.0,2.0)")]
         [InlineData("[1.0,2.0)")]
         [InlineData("(1.0)")]
+        [InlineData("")]
         public void ShouldNotBePinned(string version)
         {
             Assert.False(new PackageVersion(version).IsPinned);

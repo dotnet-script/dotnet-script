@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Script.Core.Internal;
@@ -24,10 +23,6 @@ namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
-        // Note: Windows only, Mac and Linux needs something else?
-        [DllImport("Kernel32.dll")]
-        private static extern IntPtr LoadLibrary(string path);
-
         private ScriptEnvironment _scriptEnvironment;
 
         private Logger _logger;
@@ -62,13 +57,17 @@ namespace Dotnet.Script.Core
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
-        
+        public ScriptCompiler(LogFactory logFactory, bool useRestoreCache)
+            :this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
+        {
+
+        }
 
         public ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
-            RuntimeDependencyResolver = runtimeDependencyResolver;           
+            RuntimeDependencyResolver = runtimeDependencyResolver;
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
@@ -107,7 +106,7 @@ namespace Dotnet.Script.Core
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            _logger.Info($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");                      
+            _logger.Info($"Current runtime is '{_scriptEnvironment.PlatformIdentifier}'.");
             RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
             var encoding = context.Code.Encoding ?? Encoding.UTF8; // encoding is required when emitting debug information
@@ -119,8 +118,6 @@ namespace Dotnet.Script.Core
             var scriptDependenciesMap = CreateScriptDependenciesMap(runtimeDependencies);
 
             scriptOptions = AddScriptReferences(scriptOptions, loadedAssembliesMap, scriptDependenciesMap);
-
-            LoadNativeAssets(runtimeDependencies);
 
             AppDomain.CurrentDomain.AssemblyResolve +=
                 (sender, args) => MapUnresolvedAssemblyToRuntimeLibrary(scriptDependenciesMap, loadedAssembliesMap, args);
@@ -135,7 +132,7 @@ namespace Dotnet.Script.Core
 
             EvaluateDiagnostics(script);
 
-            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions);
+            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions, runtimeDependencies);
         }
 
         private RuntimeDependency[] GetRuntimeDependencies(ScriptContext context)
@@ -147,17 +144,6 @@ namespace Dotnet.Script.Core
             else
             {
                 return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
-            }
-        }
-
-        private void LoadNativeAssets(RuntimeDependency[] runtimeDependencies)
-        {
-            foreach (var nativeAsset in runtimeDependencies.SelectMany(rtd => rtd.NativeAssets).Distinct())
-            {
-                if (_scriptEnvironment.IsWindows)
-                {
-                    LoadLibrary(nativeAsset);
-                }
             }
         }
 
@@ -173,9 +159,9 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    //Add the reference from the AssemblyLoadContext if present. 
+                    //Add the reference from the AssemblyLoadContext if present.
                     scriptOptions = scriptOptions.AddReferences(loadedAssembly);
-                    _logger.Trace("Already loaded => " + loadedAssembly);                    
+                    _logger.Trace("Already loaded => " + loadedAssembly);
                 }
             }
 
@@ -188,7 +174,7 @@ namespace Dotnet.Script.Core
 
             var suppressedDiagnostics = orderedDiagnostics.Where(d => SuppressedDiagnosticIds.Contains(d.Id));
             foreach (var suppressedDiagnostic in suppressedDiagnostics)
-            {                
+            {
                 _logger.Debug($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
             }
 
@@ -272,6 +258,7 @@ namespace Dotnet.Script.Core
                         return loadedAssembly;
                     }
                     _logger.Trace($"Redirecting {assemblyName} to {runtimeAssembly.Name}");
+
                     return Assembly.LoadFrom(runtimeAssembly.Path);
                 }
             }

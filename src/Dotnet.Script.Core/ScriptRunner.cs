@@ -52,6 +52,17 @@ namespace Dotnet.Script.Core
             submissionStates[0] = globals;
 
             var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
+            TReturn returnValue;
+            try
+            {
+                returnValue = await resultTask;
+            }
+            catch (System.Exception ex)
+            {
+                ScriptConsole.WriteError(ex.ToString());
+                throw new ScriptRuntimeException("Script execution resulted in an exception.", ex);
+            }
+
             return await resultTask;
         }
 
