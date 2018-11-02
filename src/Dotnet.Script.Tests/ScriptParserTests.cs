@@ -30,6 +30,20 @@ namespace Dotnet.Script.Tests
             Assert.Equal("1.2.3", result.PackageReferences.Single().Version.Value);
         }
 
+        [Theory]
+        [InlineData("#r \"nuget:Package\"")]
+        [InlineData("#load \"nuget:Package\"")]
+        public void ShouldResolveSingleVersionlessPackage(string code)
+        {
+            var parser = CreateParser();
+
+            var result = parser.ParseFromCode(code);
+
+            Assert.Equal(1, result.PackageReferences.Count);
+            Assert.Equal("Package", result.PackageReferences.Single().Id.Value);
+            Assert.Equal(string.Empty, result.PackageReferences.Single().Version.Value);
+        }
+
         [Fact]
         public void ShouldResolveSinglePackageFromLoadDirective()
         {
@@ -86,6 +100,9 @@ namespace Dotnet.Script.Tests
         [InlineData("#load \"nuget:P a c k a g e, 1.2.3\"")]
         [InlineData("#load \"nuget:Pack/age, 1.2.3\"")]
         [InlineData("#load \"nuget:Package,\"")]
+        [InlineData("#load \"nuget:Package \"")]
+        [InlineData("#load \"nuget:Package\t\"")]
+        [InlineData("#load \"nuget:Package\n\"")]
         [InlineData("\r #r\"nuget:Package, 1.2.3\"")]
         [InlineData("#r\n\"nuget:Package, 1.2.3\"")]
         [InlineData("#r \"nuget:\nPackage, 1.2.3\"")]
@@ -94,6 +111,9 @@ namespace Dotnet.Script.Tests
         [InlineData("#r \"nuget:P a c k a g e, 1.2.3\"")]
         [InlineData("#r \"nuget:Pack/age, 1.2.3\"")]
         [InlineData("#r \"nuget:Package,\"")]
+        [InlineData("#r \"nuget:Package \"")]
+        [InlineData("#r \"nuget:Package\t\"")]
+        [InlineData("#r \"nuget:Package\n\"")]
         public void ShouldNotMatchBadDirectives(string code)
         {
             var parser = CreateParser();
