@@ -63,6 +63,8 @@ namespace Dotnet.Script.Core.Commands
 
             string CreateLibrary()
             {
+                 //Clear the outout folder to ensure that old dependencies are deleted.
+                FileUtils.RemoveDirectory(executionCacheFolder);
                 var options = new PublishCommandOptions(executeOptions.File,executionCacheFolder, "script", PublishType.Library,executeOptions.OptimizationLevel, null, executeOptions.NoCache);
                 new PublishCommand(_scriptConsole, _logFactory).Execute(options);
                 if (hash != null)

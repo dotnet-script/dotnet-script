@@ -39,9 +39,6 @@ namespace Dotnet.Script.Core
 
         public void CreateAssembly<TReturn, THost>(ScriptContext context, LogFactory logFactory, string assemblyFileName = null)
         {
-            //Clear the outout folder to ensure that old dependencies are deleted.
-            FileUtils.RemoveDirectory(context.WorkingDirectory);
-
             Directory.CreateDirectory(context.WorkingDirectory);
             Directory.CreateDirectory(Path.Combine(context.WorkingDirectory, "obj"));
 
