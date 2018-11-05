@@ -89,9 +89,7 @@ namespace Dotnet.Script.Tests
 
         private string GetPathToGlobalPackagesFolder()
         {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", "nuget locals global-packages --list");
-            var match = Regex.Match(result.output, @"^.*global-packages:\s*(.*)$");
-            return match.Groups[1].Value;
+            return TestPathUtils.GetPathToGlobalPackagesFolder();
         }
 
         private static IReadOnlyList<string> GetSpecFiles()

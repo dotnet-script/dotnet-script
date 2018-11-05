@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
@@ -270,6 +272,16 @@ namespace Dotnet.Script.Tests
         public void ShouldHandleNuGetVersionRange()
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("VersionRange");
+            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
+        [Fact]
+        public void ShouldHandleClearingNuGetCache()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("InlineNugetPackage","--nocache");
+            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+            TestPathUtils.RemovePackageFromGlobalNugetCache("automapper");
+            result = ScriptTestRunner.Default.ExecuteFixture("InlineNugetPackage","--nocache");
             Assert.Contains("AutoMapper.MapperConfiguration", result.output);
         }
 

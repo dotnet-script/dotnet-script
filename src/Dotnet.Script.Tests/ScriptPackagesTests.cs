@@ -101,7 +101,7 @@ namespace Dotnet.Script.Tests
                 Console.SetError(stringWriter);
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-                Program.Main(new[] { fullPathToScriptFile , "--nocache"});
+                Program.Main(new[] { fullPathToScriptFile });
                 return output.ToString();
 
             }

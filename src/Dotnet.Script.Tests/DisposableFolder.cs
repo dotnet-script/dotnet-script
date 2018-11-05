@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.Tests
 {

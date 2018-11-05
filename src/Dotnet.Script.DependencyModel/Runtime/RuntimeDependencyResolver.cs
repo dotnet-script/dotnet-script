@@ -85,9 +85,14 @@ namespace Dotnet.Script.DependencyModel.Runtime
             packageSources = packageSources ?? new string[0];
             ScriptDependencyInfo dependencyInfo;
             if (restorePackages)
+            {
                 dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll, packageSources);
+            }
             else
+            {
                 dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll);
+            }
+
 
             var dependencyContext = dependencyInfo.DependencyContext;
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
@@ -100,9 +105,9 @@ namespace Dotnet.Script.DependencyModel.Runtime
             foreach (var runtimeLibrary in runtimeLibraries)
             {
                 var runtimeDependency = new RuntimeDependency(runtimeLibrary.Name, runtimeLibrary.Version,
-                    ProcessRuntimeAssemblies(runtimeLibrary, nuGetPackageFolders.ToArray()),
-                    ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray()),
-                    ProcessScriptFiles(runtimeLibrary, nuGetPackageFolders.ToArray()));
+                    ProcessRuntimeAssemblies(runtimeLibrary, nuGetPackageFolders.ToArray(), Path.GetDirectoryName(pathToProjectOrDll)),
+                    ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray(), Path.GetDirectoryName(pathToProjectOrDll)),
+                    ProcessScriptFiles(runtimeLibrary, nuGetPackageFolders.ToArray(), restorePackages));
 
                 runtimeDependencies.Add(runtimeDependency);
             }
@@ -110,12 +115,20 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return runtimeDependencies;
         }
 
-        private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
+        private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders, bool restorePackages)
         {
-            return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);
+            if (!restorePackages)
+            {
+                // no need to process script files here as they are already compiled into the cached library/DLL.
+                return Array.Empty<string>();
+            }
+            else
+            {
+                return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);
+            }
         }
 
-        private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
+        private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders, string pathToExecutionCache)
         {
             List<string> result = new List<string>();
             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(
@@ -124,14 +137,14 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
                 {
-                    var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders);
+                    var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders, pathToExecutionCache);
                     _logger.Trace($"Loading native library from {fullPath}");
                     result.Add(fullPath);
                 }
             }
             return result.ToArray();
         }
-        private RuntimeAssembly[] ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
+        private RuntimeAssembly[] ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders, string pathToExecutionCache)
         {
             var result = new List<RuntimeAssembly>();
 
@@ -153,7 +166,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 var path = Path.Combine(runtimeLibrary.Path, assetPath);
                 if (!path.EndsWith("_._"))
                 {
-                    var fullPath = GetFullPath(path, nugetPackageFolders);
+                    var fullPath = GetFullPath(path, nugetPackageFolders, pathToExecutionCache);
 
                     _logger.Trace($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
                     result.Add(new RuntimeAssembly(AssemblyName.GetAssemblyName(fullPath), fullPath));
@@ -162,7 +175,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return result.ToArray();
         }
 
-        private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)
+        private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders, string pathToExecutionCache)
         {
             foreach (var possibleLocation in nugetPackageFolders)
             {
@@ -172,6 +185,13 @@ namespace Dotnet.Script.DependencyModel.Runtime
                     return fullPath;
                 }
             }
+
+            var pathToCachedDependency = Path.Combine(pathToExecutionCache, Path.GetFileName(relativePath));
+            if (File.Exists(pathToCachedDependency))
+            {
+                return pathToCachedDependency;
+            }
+
             throw new InvalidOperationException("Not found");
         }
 
