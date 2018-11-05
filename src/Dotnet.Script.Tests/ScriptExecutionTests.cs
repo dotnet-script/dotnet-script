@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
 using Xunit;
@@ -271,6 +272,41 @@ namespace Dotnet.Script.Tests
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("VersionRange");
             Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
+        [Fact]
+        public void ShouldThrowMeaningfulErrorMessageWhenDependencyIsNotFound()
+        {
+            using(var libraryFolder = new DisposableFolder())
+            {
+                // Create a package that we can reference
+
+                ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n SampleLibrary", libraryFolder.Path);
+                ProcessHelper.RunAndCaptureOutput("dotnet", "pack", libraryFolder.Path);
+
+                using(var scriptFolder = new DisposableFolder())
+                {
+                    var code = new StringBuilder();
+                    code.AppendLine("#r \"nuget:SampleLibrary, 1.0.0\"");
+                    code.AppendLine("WriteLine(42)");
+                    var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
+                    File.WriteAllText(pathToScript, code.ToString());
+
+                    // Run once to ensure that it is cached.
+                    var result = ScriptTestRunner.Default.Execute(pathToScript);
+                    Assert.Contains("42", result.output);
+
+                    // Remove the package from the global NuGet cache
+                    TestPathUtils.RemovePackageFromGlobalNugetCache("SampleLibrary");
+
+                    result = ScriptTestRunner.Default.Execute(pathToScript);
+                    Assert.Contains("Try executing/publishing the script", result.output);
+
+                    // Run again with the '--nocache' option to assert that the advice actually worked.
+                    result = ScriptTestRunner.Default.Execute($"{pathToScript} --nocache");
+                    Assert.Contains("42", result.output);
+                }
+            }
         }
 
         [Fact]

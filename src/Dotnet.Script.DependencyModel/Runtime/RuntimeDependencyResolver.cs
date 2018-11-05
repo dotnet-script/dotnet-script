@@ -172,7 +172,9 @@ namespace Dotnet.Script.DependencyModel.Runtime
                     return fullPath;
                 }
             }
-            throw new InvalidOperationException("Not found");
+            string message = $@"The requested dependency ({relativePath}) was not found in the global Nuget cache(s).
+. Try executing/publishing the script again with the '--nocache' option";
+            throw new InvalidOperationException(message);
         }
 
         private bool AppliesToCurrentRuntime(string runtime)

@@ -69,7 +69,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
         {
-            var resolver = CreateResolverCompilationDependencyResolver();
+            var resolver = CreateCompilationDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
             var dependencies = resolver.GetDependencies(fixture, true, _scriptEnvironment.TargetFramework);
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
@@ -83,7 +83,7 @@ namespace Dotnet.Script.Tests
         }
 
 
-        private CompilationDependencyResolver CreateResolverCompilationDependencyResolver()
+        private CompilationDependencyResolver CreateCompilationDependencyResolver()
         {
             var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
             return resolver;
