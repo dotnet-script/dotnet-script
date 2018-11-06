@@ -19,15 +19,15 @@ namespace Dotnet.Script.Core.Commands
         public async Task<int> Execute(ExecuteInteractiveCommandOptions options)
         {
             var compiler = new ScriptCompiler(_logFactory, useRestoreCache: false);
-                var runner = new InteractiveRunner(compiler, _logFactory, _scriptConsole, options.PackageSources);
+            var runner = new InteractiveRunner(compiler, _logFactory, _scriptConsole, options.PackageSources);
 
-            if (options.ScriptFile != null)
+            if (options.ScriptFile == null)
             {
                 await runner.RunLoop();
             }
             else
             {
-                var context = new ScriptContext(options.ScriptFile.Path.ToSourceText(), Path.GetDirectoryName(options.ScriptFile.Path), options.Arguments, options.ScriptFile.Path, OptimizationLevel.Debug , packageSources: options.PackageSources);
+                var context = new ScriptContext(options.ScriptFile.Path.ToSourceText(), Path.GetDirectoryName(options.ScriptFile.Path), options.Arguments, options.ScriptFile.Path, OptimizationLevel.Debug, packageSources: options.PackageSources);
                 await runner.RunLoopWithSeed(context);
             }
 
