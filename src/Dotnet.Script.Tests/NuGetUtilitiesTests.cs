@@ -2,6 +2,7 @@ using Dotnet.Script.Core.Internal;
 using NuGet.Configuration;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Dotnet.Script.Tests
@@ -19,7 +20,7 @@ namespace Dotnet.Script.Tests
 <configuration>
     <config>
         <add key=""dependencyVersion"" value=""Highest"" />
-        <add key=""globalPackagesFolder"" value=""c:\packages"" />
+        <add key=""globalPackagesFolder"" value=""{0}\packages"" />
         <add key=""repositoryPath"" value=""..\installed_packages"" />
         <add key=""http_proxy"" value=""http://company-squid:3128@contoso.com"" />
     </config>
@@ -31,7 +32,7 @@ namespace Dotnet.Script.Tests
                         new SettingsValues
                         {
                             { "dependencyVersion", "Highest" },
-                            { "globalPackagesFolder", @"c:\packages" },
+                            { "globalPackagesFolder", @"{1}\packages" },
                             { "repositoryPath", @"{0}..\installed_packages" },
                             { "http_proxy", @"http://company-squid:3128@contoso.com" },
                         }
@@ -104,7 +105,7 @@ namespace Dotnet.Script.Tests
     <packageSources>
         <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" protocolVersion=""3"" />
         <add key=""Contoso"" value=""https://contoso.com/packages/"" />
-        <add key=""Test Source"" value=""c:\packages"" />
+        <add key=""Test Source"" value=""{0}\packages"" />
         <add key=""Relative Test Source"" value=""..\packages"" />
     </packageSources>
 </configuration>",
@@ -116,7 +117,7 @@ namespace Dotnet.Script.Tests
                         {
                             { "nuget.org", "https://api.nuget.org/v3/index.json" },
                             { "Contoso", "https://contoso.com/packages/" },
-                            { "Test Source", "c:\\packages" },
+                            { "Test Source", "{1}\\packages" },
                             { "Relative Test Source", "{0}..\\packages" },
                         }
                     },
@@ -193,14 +194,18 @@ namespace Dotnet.Script.Tests
                 var targetFolder = Path.Combine(projectFolder.Path, "Target");
                 Directory.CreateDirectory(targetFolder);
                 Directory.CreateDirectory(sourceFolder);
-                File.WriteAllText(Path.Combine(sourceFolder, "NuGet.config"), sourceNuGet);
+
+                var rootTokens = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "c:" : string.Empty;
+
+                var resolvedSourceNuGet = string.Format(sourceNuGet, rootTokens);
+                File.WriteAllText(Path.Combine(sourceFolder, "NuGet.config"), resolvedSourceNuGet);
 
                 // Evaluate and generate the NuGet config file
                 NuGetUtilities.CreateNuGetConfigFromLocation(sourceScript, targetFolder);
 
                 // Validate the generated NuGet config file
                 var targetNuGetPath = Path.Combine(targetFolder, "NuGet.config");
-                Assert.True(File.Exists(targetNuGetPath));
+                Assert.True(File.Exists(targetNuGetPath), $"NuGet.config file was not generated at {targetNuGetPath}");
 
                 sourceFolder += "\\";
                 var settings = new Settings(targetFolder, "NuGet.config");
@@ -209,7 +214,7 @@ namespace Dotnet.Script.Tests
                     foreach (var expectedSetting in expectedSettings.Value)
                     {
                         var value = settings.GetValue(expectedSettings.Key, expectedSetting.Key);
-                        var resolvedExpectedSetting = string.Format(expectedSetting.Value, sourceFolder);
+                        var resolvedExpectedSetting = string.Format(expectedSetting.Value, sourceFolder, rootTokens);
                         Assert.Equal(resolvedExpectedSetting, value);
                     }
                 }
