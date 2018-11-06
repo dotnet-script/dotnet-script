@@ -14,7 +14,7 @@ namespace Dotnet.Script.Core
         {
             Code = code;
             WorkingDirectory = workingDirectory;
-            Args = new ReadOnlyCollection<string>(args.ToArray());
+            Args = new ReadOnlyCollection<string>(args != null ? args.ToArray() : Array.Empty<string>());
             FilePath = filePath;
             OptimizationLevel = optimizationLevel;
             ScriptMode = filePath != null ? ScriptMode.Script : scriptMode;
