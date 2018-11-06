@@ -29,7 +29,7 @@ namespace Dotnet.Script.Core.Internal
         public static void CreateNuGetConfigFromLocation(string pathToEvaluate, string directoryToCopy)
         {
             var settings = Settings.LoadDefaultSettings(pathToEvaluate);
-            var target = new Settings(directoryToCopy, "Nuget.config");
+            var target = new Settings(directoryToCopy);
 
             var valuesToSet = new List<SettingValue>();
             foreach (var section in NuGetSections)

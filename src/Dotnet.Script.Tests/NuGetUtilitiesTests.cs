@@ -198,17 +198,17 @@ namespace Dotnet.Script.Tests
                 var rootTokens = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "c:" : string.Empty;
 
                 var resolvedSourceNuGet = string.Format(sourceNuGet, rootTokens);
-                File.WriteAllText(Path.Combine(sourceFolder, "NuGet.config"), resolvedSourceNuGet);
+                File.WriteAllText(Path.Combine(sourceFolder, Settings.DefaultSettingsFileName), resolvedSourceNuGet);
 
                 // Evaluate and generate the NuGet config file
                 NuGetUtilities.CreateNuGetConfigFromLocation(sourceScript, targetFolder);
 
                 // Validate the generated NuGet config file
-                var targetNuGetPath = Path.Combine(targetFolder, "NuGet.config");
+                var targetNuGetPath = Path.Combine(targetFolder, Settings.DefaultSettingsFileName);
                 Assert.True(File.Exists(targetNuGetPath), $"NuGet.config file was not generated at {targetNuGetPath}");
 
                 sourceFolder += Path.DirectorySeparatorChar;
-                var settings = new Settings(targetFolder, "NuGet.config");
+                var settings = new Settings(targetFolder);
                 foreach (var expectedSettings in targetSettings)
                 {
                     foreach (var expectedSetting in expectedSettings.Value)
