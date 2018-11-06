@@ -85,9 +85,13 @@ namespace Dotnet.Script.DependencyModel.Runtime
             packageSources = packageSources ?? new string[0];
             ScriptDependencyInfo dependencyInfo;
             if (restorePackages)
+            {
                 dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll, packageSources);
+            }
             else
+            {
                 dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll);
+            }
 
             var dependencyContext = dependencyInfo.DependencyContext;
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
@@ -102,7 +106,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 var runtimeDependency = new RuntimeDependency(runtimeLibrary.Name, runtimeLibrary.Version,
                     ProcessRuntimeAssemblies(runtimeLibrary, nuGetPackageFolders.ToArray()),
                     ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray()),
-                    ProcessScriptFiles(runtimeLibrary, nuGetPackageFolders.ToArray()));
+                    ProcessScriptFiles(runtimeLibrary, nuGetPackageFolders.ToArray(), restorePackages));
 
                 runtimeDependencies.Add(runtimeDependency);
             }
@@ -110,9 +114,20 @@ namespace Dotnet.Script.DependencyModel.Runtime
             return runtimeDependencies;
         }
 
-        private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
+        private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders, bool restorePackages)
         {
-            return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);
+            if (restorePackages)
+            {
+                return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);
+            }
+            else
+            {
+                // If restorePackages are false, it means we are running from a DLL
+                // and the scripts from the script packages are already compiled into the DLL
+                // NOTE: This whole class needs some cleanup.
+                return Array.Empty<string>();
+            }
+
         }
 
         private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)

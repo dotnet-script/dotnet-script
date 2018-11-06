@@ -5,13 +5,14 @@ namespace Dotnet.Script.Core.Commands
 {
     public class PublishCommandOptions
     {
-        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel,string runtimeIdentifier, bool noCache)
+        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, bool noCache)
         {
             File = file;
             OutputDirectory = outputDirectory;
             LibraryName = libraryName;
             PublishType = publishType;
             OptimizationLevel = optimizationLevel;
+            PackageSources = packageSources;
             RuntimeIdentifier = runtimeIdentifier ?? ScriptEnvironment.Default.RuntimeIdentifier;
             NoCache = noCache;
         }
@@ -21,6 +22,7 @@ namespace Dotnet.Script.Core.Commands
         public string LibraryName { get; }
         public PublishType PublishType { get; }
         public OptimizationLevel OptimizationLevel { get; }
+        public string[] PackageSources { get; }
         public string RuntimeIdentifier { get; }
         public bool NoCache { get; }
     }

@@ -152,6 +152,7 @@ namespace Dotnet.Script
                         dllName.Value(),
                         dllOption.HasValue() ? PublishType.Library : PublishType.Executable,
                         commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug,
+                        packageSources.Values?.ToArray(),
                         runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier,
                         nocache.HasValue()
                     );
