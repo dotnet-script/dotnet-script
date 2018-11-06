@@ -34,7 +34,7 @@ namespace Dotnet.Script.Core.Commands
             var scriptEmitter = new ScriptEmitter(_scriptConsole, compiler);
             var publisher = new ScriptPublisher(_logFactory, scriptEmitter);
             var code = absoluteFilePath.ToSourceText();
-            var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, options.OptimizationLevel);
+            var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, options.OptimizationLevel, packageSources: options.PackageSources);
 
             if (options.PublishType == PublishType.Library)
             {

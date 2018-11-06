@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Compilation;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
@@ -28,6 +26,34 @@ namespace Dotnet.Script.Tests
         {
             var result = Execute("WithMainCsx/WithMainCsx.csx");
             Assert.StartsWith("Hello from netstandard2.0", result);
+        }
+
+        [Fact]
+        public void ShouldThrowMeaningfulExceptionWhenScriptPackageIsMissing()
+        {
+            using(var scriptFolder = new DisposableFolder())
+            {
+                var code = new StringBuilder();
+                code.AppendLine("#load \"nuget:ScriptPackageWithMainCsx, 1.0.0\"");
+                code.AppendLine("SayHello();");
+                var pathToScriptFile = Path.Combine(scriptFolder.Path, "main.csx");
+                File.WriteAllText(pathToScriptFile, code.ToString());
+                var pathToScriptPackages = Path.GetFullPath(TestPathUtils.GetPathToScriptPackages("ScriptPackage/WithMainCsx"));
+
+                // Run once to ensure that it is cached.
+                var result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
+                Assert.StartsWith("Hello from netstandard2.0", result.output);
+
+                // Remove the package from the global NuGet cache
+                TestPathUtils.RemovePackageFromGlobalNugetCache("ScriptPackageWithMainCsx");
+
+                //Change the source to force a recompile, now with the missing package.
+                code.Append("return 0");
+                File.WriteAllText(pathToScriptFile, code.ToString());
+
+                result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
+                Assert.Contains("Try executing/publishing the script", result.output);
+            }
         }
 
         [Fact]
@@ -69,7 +95,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
         {
-            var resolver = CreateResolverCompilationDependencyResolver();
+            var resolver = CreateCompilationDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
             var dependencies = resolver.GetDependencies(fixture, true, _scriptEnvironment.TargetFramework);
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
@@ -83,7 +109,7 @@ namespace Dotnet.Script.Tests
         }
 
 
-        private CompilationDependencyResolver CreateResolverCompilationDependencyResolver()
+        private CompilationDependencyResolver CreateCompilationDependencyResolver()
         {
             var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
             return resolver;
@@ -101,7 +127,7 @@ namespace Dotnet.Script.Tests
                 Console.SetError(stringWriter);
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-                Program.Main(new[] { fullPathToScriptFile , "--nocache"});
+                Program.Main(new[] { fullPathToScriptFile });
                 return output.ToString();
 
             }

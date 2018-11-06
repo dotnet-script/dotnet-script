@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.Tests
 {
@@ -27,6 +29,20 @@ namespace Dotnet.Script.Tests
             var fixtureFolderPath = GetPathToTestFixtureFolder(fixture);
             var pathToFixture = Path.Combine(fixtureFolderPath, $"{Path.GetFileNameWithoutExtension(fixtureFolderPath)}.csx");
             return Path.GetFullPath(pathToFixture);
+        }
+
+        public static string GetPathToGlobalPackagesFolder()
+        {
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", "nuget locals global-packages --list");
+            var match = Regex.Match(result.output, @"^.*global-packages:\s*(.*)$");
+            return match.Groups[1].Value;
+        }
+
+        public static void RemovePackageFromGlobalNugetCache(string packageName)
+        {
+            var pathToGlobalPackagesFolder = TestPathUtils.GetPathToGlobalPackagesFolder();
+            var pathToAutoMapperPackage = Directory.GetDirectories(pathToGlobalPackagesFolder).Single(d => d.Contains(packageName, StringComparison.OrdinalIgnoreCase));
+            FileUtils.RemoveDirectory(pathToAutoMapperPackage);
         }
     }
 }
