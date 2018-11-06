@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Dotnet.Script.Core;
 using Dotnet.Script.Core.Commands;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
