@@ -20,7 +20,7 @@ namespace Dotnet.Script.Tests
 
         private void ClearGlobalPackagesFolder()
         {
-            var pathToGlobalPackagesFolder = GetPathToGlobalPackagesFolder();
+            var pathToGlobalPackagesFolder = TestPathUtils.GetPathToGlobalPackagesFolder();
             var scriptPackageFolders = Directory.GetDirectories(pathToGlobalPackagesFolder).Select(f => f.ToLower()).Where(f => f.Contains("scriptpackage"));
             foreach (var scriptPackageFolder in scriptPackageFolders)
             {
@@ -84,14 +84,6 @@ namespace Dotnet.Script.Tests
             {
                 Directory.Delete(path, true);
             }
-        }
-
-
-        private string GetPathToGlobalPackagesFolder()
-        {
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", "nuget locals global-packages --list");
-            var match = Regex.Match(result.output, @"^.*global-packages:\s*(.*)$");
-            return match.Groups[1].Value;
         }
 
         private static IReadOnlyList<string> GetSpecFiles()

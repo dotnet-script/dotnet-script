@@ -20,7 +20,7 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
                 RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public ScriptFilesDependencyResolver(LogFactory logFactory)
-        {            
+        {
             _logger = logFactory.CreateLogger<ScriptFilesDependencyResolver>();
         }
 
@@ -34,20 +34,20 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
             {
                 return Array.Empty<string>();
             }
-            
+
             _logger.Debug($"Processing script file dependencies from '{path}'");
 
-            var scriptFilesPerTargetFramework = GetScriptFilesPerTargetFramework(allScriptFiles);               
+            var scriptFilesPerTargetFramework = GetScriptFilesPerTargetFramework(allScriptFiles);
             var scriptFiles = GetScriptFilesMatchingCurrentRuntime(scriptFilesPerTargetFramework);
             if (scriptFiles.Length == 0)
             {
                 _logger.Debug("No script files found matching the current runtime.");
                 return Array.Empty<string>();
             }
-            
+
             var rootPath = GetRootPath(scriptFiles[0]);
             string entryPointScriptFile = GetEntryPointScript(rootPath);
-            if (entryPointScriptFile != null)            
+            if (entryPointScriptFile != null)
             {
                 _logger.Debug($"Adding entry point script file '{entryPointScriptFile}'");
                 result.Add(entryPointScriptFile);
@@ -62,15 +62,15 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
 
         private string GetEntryPointScript(string rootPath)
         {
-            var rootfiles = Directory.GetFiles(rootPath, "*.csx");            
+            var rootfiles = Directory.GetFiles(rootPath, "*.csx");
             if (rootfiles.Length == 1)
-            {                
+            {
                 return rootfiles[0];
             }
 
             if (rootfiles.Length > 1)
             {
-                return rootfiles.SingleOrDefault(rf => rf.ToLower() == "main.csx");                
+                return rootfiles.SingleOrDefault(rf => rf.ToLower() == "main.csx");
             }
 
             return null;
@@ -79,9 +79,9 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
         private string[] GetScriptFilesMatchingCurrentRuntime(IDictionary<string, List<string>> filesPerTargetFramework)
         {
             //We keep this super simple for now
-           
+
             if (filesPerTargetFramework.TryGetValue("any", out var files))
-            {                
+            {
                 return files.ToArray();
             }
 
@@ -97,7 +97,7 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
         private static IDictionary<string, List<string>> GetScriptFilesPerTargetFramework(string[] scriptFiles)
         {
             var result = new Dictionary<string, List<string>>(StringComparer.InvariantCultureIgnoreCase);
-                        
+
             foreach (var scriptFile in scriptFiles)
             {
                 var match = TargetFrameworkMatcher.Match(scriptFile);
@@ -116,11 +116,11 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
         }
 
         private static string GetRootPath(string pathToScriptFile)
-        {           
+        {
             var match = RootPathMatcher.Match(pathToScriptFile);
             return match.Groups[1].Value;
         }
-     
+
         private static string GetPackageFullPath(string packagePath, string[] nugetPackageFolders)
         {
             foreach (var nugetPackageFolder in nugetPackageFolders)
@@ -132,7 +132,10 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
                 }
             }
 
-            throw new InvalidOperationException("Not found");
+            string message = $@"The requested script package path ({packagePath}) was not found in the global Nuget cache(s).
+. Try executing/publishing the script again with the '--nocache' option";
+
+            throw new InvalidOperationException(message);
         }
     }
 }
