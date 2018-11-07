@@ -53,10 +53,10 @@ namespace Dotnet.Script.Tests
             }
         }
 
-        private static string GetPathToPackagesFolder()
+        internal static string GetPathToPackagesFolder()
         {
-            var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder(Path.Combine("ScriptPackage", "packages"));
-            return DependencyModel.ProjectSystem.FileUtils.CreateTempFolder(targetDirectory);
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            return Path.Combine(baseDirectory, "..", "..", "..", "obj", "packages");
         }
 
         private static void RemoveDirectory(string path)

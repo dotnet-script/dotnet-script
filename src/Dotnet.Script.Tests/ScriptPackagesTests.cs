@@ -38,7 +38,7 @@ namespace Dotnet.Script.Tests
                 code.AppendLine("SayHello();");
                 var pathToScriptFile = Path.Combine(scriptFolder.Path, "main.csx");
                 File.WriteAllText(pathToScriptFile, code.ToString());
-                var pathToScriptPackages = Path.GetFullPath(TestPathUtils.GetPathToScriptPackages("ScriptPackage/WithMainCsx"));
+                var pathToScriptPackages = Path.GetFullPath(ScriptPackagesFixture.GetPathToPackagesFolder());
 
                 // Run once to ensure that it is cached.
                 var result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");

@@ -1,4 +1,4 @@
-using Dotnet.Script.Core.Internal;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using NuGet.Configuration;
 using System.Collections.Generic;
 using System.IO;

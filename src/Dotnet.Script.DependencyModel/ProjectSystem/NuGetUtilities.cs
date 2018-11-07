@@ -1,7 +1,7 @@
 using NuGet.Configuration;
 using System.Collections.Generic;
 
-namespace Dotnet.Script.Core.Internal
+namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     internal static class NuGetUtilities
     {
@@ -26,10 +26,10 @@ namespace Dotnet.Script.Core.Internal
         };
 
         // Create a NuGet file containing all properties with resolved absolute paths
-        public static void CreateNuGetConfigFromLocation(string pathToEvaluate, string directoryToCopy)
+        public static void CreateNuGetConfigFromLocation(string pathToEvaluate, string targetDirectory)
         {
             var settings = Settings.LoadDefaultSettings(pathToEvaluate);
-            var target = new Settings(directoryToCopy);
+            var target = new Settings(targetDirectory);
 
             var valuesToSet = new List<SettingValue>();
             foreach (var section in NuGetSections)
