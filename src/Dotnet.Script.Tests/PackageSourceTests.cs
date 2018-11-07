@@ -1,4 +1,4 @@
-﻿using Dotnet.Script.Shared.Tests;
+using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,7 +16,7 @@ namespace Dotnet.Script.Tests
         public void ShouldHandleSpecifyingPackageSource()
         {
             var fixture = "ScriptPackage/WithNoNuGetConfig";
-            var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);
+            var pathToScriptPackages = ScriptPackagesFixture.GetPathToPackagesFolder();
             var result = ScriptTestRunner.Default.ExecuteFixture(fixture, $"--nocache -s {pathToScriptPackages}");
             Assert.Contains("Hello", result.output);
             Assert.Equal(0, result.exitCode);
@@ -25,8 +25,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleSpecifyingPackageSourceWhenEvaluatingCode()
         {
-            var fixture = "ScriptPackage/WithNoNuGetConfig";
-            var pathToScriptPackages = TestPathUtils.GetPathToScriptPackages(fixture);
+            var pathToScriptPackages = ScriptPackagesFixture.GetPathToPackagesFolder();
             var code = @"#load \""nuget:ScriptPackageWithMainCsx,1.0.0\"" SayHello();";
             var result = ScriptTestRunner.Default.Execute($"--nocache -s {pathToScriptPackages} eval \"{code}\"");
             Assert.Contains("Hello", result.output);
