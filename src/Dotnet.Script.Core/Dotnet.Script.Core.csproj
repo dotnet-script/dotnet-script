@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A cross platform library allowing you to run C# (CSX) scripts with support for debugging and inline NuGet packages. Based on Roslyn.</Description>
-    <VersionPrefix>0.27.0</VersionPrefix>
+    <VersionPrefix>0.27.1</VersionPrefix>
     <Authors>filipw</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dotnet.Script.Core</AssemblyName>

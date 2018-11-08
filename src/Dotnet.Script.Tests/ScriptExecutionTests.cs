@@ -38,7 +38,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldIncludeExceptionLineNumberAndFile()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--nocache");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--no-cache");
             Assert.Contains("Exception.csx:line 1", result.output);
         }
 
@@ -59,7 +59,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldReturnStackTraceInformationWhenScriptFails()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--nocache");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--no-cache");
             Assert.Contains("die!", result.output);
             Assert.Contains("Exception.csx:line 1", result.output);
         }
@@ -81,7 +81,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleIssue166()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue166", "--nocache");
+            var result = ScriptTestRunner.Default.ExecuteFixture("Issue166", "--no-cache");
             Assert.Contains("Connection successful", result.output);
 
         }
@@ -302,8 +302,8 @@ namespace Dotnet.Script.Tests
                     result = ScriptTestRunner.Default.Execute(pathToScript);
                     Assert.Contains("Try executing/publishing the script", result.output);
 
-                    // Run again with the '--nocache' option to assert that the advice actually worked.
-                    result = ScriptTestRunner.Default.Execute($"{pathToScript} --nocache");
+                    // Run again with the '--no-cache' option to assert that the advice actually worked.
+                    result = ScriptTestRunner.Default.Execute($"{pathToScript} --no-cache");
                     Assert.Contains("42", result.output);
                 }
             }

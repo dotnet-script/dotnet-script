@@ -133,7 +133,7 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
             }
 
             string message = $@"The requested script package path ({packagePath}) was not found in the global Nuget cache(s).
-. Try executing/publishing the script again with the '--nocache' option";
+. Try executing/publishing the script again with the '--no-cache' option";
 
             throw new InvalidOperationException(message);
         }

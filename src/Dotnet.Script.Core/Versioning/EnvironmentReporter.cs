@@ -74,7 +74,7 @@ namespace Dotnet.Script.Core.Versioning
             var updateInfo = new StringBuilder();
             updateInfo.AppendLine($"Version {latestVersion} is now available");
             updateInfo.AppendLine("Depending on how dotnet-script was installed, execute on of the following commands to update.");
-            updateInfo.AppendLine("Global tool : dotnet tool update dotnet-script");
+            updateInfo.AppendLine("Global tool : dotnet tool update dotnet-script -g");
             if (ScriptEnvironment.Default.IsWindows)
             {
                 updateInfo.AppendLine("Chocolatey  : choco upgrade Dotnet.Script");

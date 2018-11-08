@@ -77,7 +77,7 @@ namespace Dotnet.Script.Core.Commands
         {
             if (options.NoCache)
             {
-                _logger.Debug($"The script {options.File.Path} was executed with the '--nocache' flag. Skipping cache.");
+                _logger.Debug($"The script {options.File.Path} was executed with the '--no-cache' flag. Skipping cache.");
                 hash = null;
                 return false;
             }
