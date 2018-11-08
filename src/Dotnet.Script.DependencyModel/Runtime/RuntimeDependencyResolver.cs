@@ -188,7 +188,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
                 }
             }
             string message = $@"The requested dependency ({relativePath}) was not found in the global Nuget cache(s).
-. Try executing/publishing the script again with the '--nocache' option";
+. Try executing/publishing the script again with the '--no-cache' option";
             throw new InvalidOperationException(message);
         }
 
