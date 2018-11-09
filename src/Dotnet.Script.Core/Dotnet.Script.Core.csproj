@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A cross platform library allowing you to run C# (CSX) scripts with support for debugging and inline NuGet packages. Based on Roslyn.</Description>
-    <VersionPrefix>0.27.1</VersionPrefix>
+    <VersionPrefix>0.28.0</VersionPrefix>
     <Authors>filipw</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dotnet.Script.Core</AssemblyName>
@@ -36,6 +36,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="2.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
