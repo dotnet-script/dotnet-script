@@ -143,6 +143,13 @@ namespace Dotnet.Script.Core
                         foreach (var runtimeAssembly in runtimeDependency.Assemblies)
                         {
                             File.Copy(runtimeAssembly.Path, Path.Combine(outputDirectory, Path.GetFileName(runtimeAssembly.Path)), true);
+                            var pathToRuntimeAssemblyFolder = Path.GetDirectoryName(runtimeAssembly.Path);
+                            var pdbFileName = $"{Path.GetFileNameWithoutExtension(runtimeAssembly.Path)}.pdb";
+                            var pathToPdb = Path.Combine(pathToRuntimeAssemblyFolder, pdbFileName);
+                            if (File.Exists(pathToPdb))
+                            {
+                                File.Copy(pathToPdb, Path.Combine(outputDirectory, Path.GetFileName(pathToPdb)), true);
+                            }
                         }
                     }
                 }
