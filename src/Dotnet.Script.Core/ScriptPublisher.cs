@@ -1,4 +1,5 @@
-﻿using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Core.Internal;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
@@ -72,15 +73,15 @@ namespace Dotnet.Script.Core
             const string AssemblyName = "scriptAssembly";
 
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath));
-            var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
+            var tempProjectDirectory = Path.GetDirectoryName(tempProjectPath);
 
-            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirecory, AssemblyName);
+            var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirectory, AssemblyName);
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.PackageReferences.Add(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion));
             projectFile.AssemblyReferences.Add(new AssemblyReference(scriptAssemblyPath));
             projectFile.Save(tempProjectPath);
 
-            CopyProgramTemplate(tempProjectDirecory);
+            CopyProgramTemplate(tempProjectDirectory);
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors

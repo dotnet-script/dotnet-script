@@ -126,7 +126,7 @@ namespace Dotnet.Script.Core
 
             while (true)
             {
-                var line = Console.In.ReadLine();
+                var line = Console.ReadLine();
                 input.AppendLine(line);
 
                 var syntaxTree = SyntaxFactory.ParseSyntaxTree(input.ToString(), ParseOptions);

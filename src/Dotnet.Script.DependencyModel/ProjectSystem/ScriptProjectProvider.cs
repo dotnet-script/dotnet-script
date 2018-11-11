@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
+using NuGet.Configuration;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
@@ -60,7 +61,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             LogProjectFileInfo(pathToProjectFile);
 
-            CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
+            EvaluateAndGenerateNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return pathToProjectFile;
         }
 
@@ -101,7 +102,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             LogProjectFileInfo(pathToProjectFile);
 
-            CopyNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
+            EvaluateAndGenerateNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return pathToProjectFile;
         }
 
@@ -120,15 +121,15 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return projectFile;
         }
 
-        private void CopyNuGetConfigFile(string targetDirectory, string pathToProjectFileFolder)
+        private void EvaluateAndGenerateNuGetConfigFile(string targetDirectory, string pathToProjectFileFolder)
         {
-            var pathToNuGetConfigFile = Path.Combine(targetDirectory, "NuGet.Config");
-            if (File.Exists(pathToNuGetConfigFile))
-            {
-                var pathToDestinationNuGetConfigFile = Path.Combine(pathToProjectFileFolder, "NuGet.Config");
-                _logger.Debug($"Copying {pathToNuGetConfigFile} to {pathToDestinationNuGetConfigFile}");
-                File.Copy(pathToNuGetConfigFile, Path.Combine(pathToProjectFileFolder, "NuGet.Config"), true);
-            }
+            var pathToDestinationNuGetConfigFile = Path.Combine(pathToProjectFileFolder, Settings.DefaultSettingsFileName);
+
+            if (File.Exists(pathToDestinationNuGetConfigFile))
+                File.Delete(pathToDestinationNuGetConfigFile);
+
+            _logger.Debug($"Generating NuGet config evaluated at {targetDirectory} to {pathToDestinationNuGetConfigFile}");
+            NuGetUtilities.CreateNuGetConfigFromLocation(targetDirectory, pathToProjectFileFolder);
         }
 
         public static string GetPathToProjectFile(string targetDirectory)

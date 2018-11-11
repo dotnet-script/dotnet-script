@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using RL = System.ReadLine;
 
 namespace Dotnet.Script.Core
 {
     public class ScriptConsole
     {
-        public static readonly ScriptConsole Default = new ScriptConsole(Console.Out, Console.In, Console.Error);
+        public static readonly ScriptConsole Default = new ScriptConsole(Console.Out, null, Console.Error);
 
         public virtual TextWriter Error { get; }
         public virtual TextWriter Out { get; }
@@ -39,8 +40,18 @@ namespace Dotnet.Script.Core
             Out.WriteLine(value.TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
+        public virtual string ReadLine()
+        {
+            return In == null ? RL.Read() : In.ReadLine();
+        }
+
         public ScriptConsole(TextWriter output, TextReader input, TextWriter error)
         {
+            if (input == null)
+            {
+                RL.HistoryEnabled = true;
+            }
+
             Out = output;
             Error = error;
             In = input;
