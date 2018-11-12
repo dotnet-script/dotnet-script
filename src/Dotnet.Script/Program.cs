@@ -74,8 +74,6 @@ namespace Dotnet.Script
             app.HelpOption(helpOptionTemplate);
             app.VersionOption("-v | --version", () => new VersionProvider().GetCurrentVersion().Version);
 
-            var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-
             app.Command("eval", c =>
             {
                 c.Description = "Execute CSX code.";
@@ -89,7 +87,7 @@ namespace Dotnet.Script
                         c.ShowHelp();
                         return 0;
                     }
-
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var options = new ExecuteCodeCommandOptions(code.Value,cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
                     return await new ExecuteCodeCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
@@ -103,6 +101,7 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     new InitCommand(logFactory).Execute(new InitCommandOptions(fileName.Value, cwd.Value()));
                     return 0;
                 });
@@ -116,6 +115,7 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(() =>
                 {
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var scaffolder = new Scaffolder(logFactory);
                     if (fileNameArgument.Value == null)
                     {
@@ -157,6 +157,7 @@ namespace Dotnet.Script
                         nocache.HasValue()
                     );
 
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     new PublishCommand(ScriptConsole.Default, logFactory).Execute(options);
                     return 0;
                 });
@@ -182,7 +183,7 @@ namespace Dotnet.Script
                         app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
                         nocache.HasValue()
                     );
-
+                    var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     return await new ExecuteLibraryCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
@@ -194,7 +195,7 @@ namespace Dotnet.Script
                 var scriptFile = new ScriptFile(file.Value);
                 var optimizationLevel = configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug;
                 var scriptArguments = app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray();
-
+                var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                 if (infoOption.HasValue())
                 {
                     var environmentReporter = new EnvironmentReporter(logFactory);
