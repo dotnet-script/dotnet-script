@@ -43,10 +43,17 @@ namespace Dotnet.Script.DependencyModel.Compilation
             return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory);
         }
 
+        [Obsolete("Please use the overload that takes in a list of script files")]
         public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
         {
-            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, defaultTargetFramework,
-                enableScriptNugetReferences);
+            return GetDependencies(targetDirectory, null, enableScriptNugetReferences, defaultTargetFramework);
+        }
+
+        public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, IEnumerable<string> scriptFiles, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
+        {
+            var pathToProjectFile = scriptFiles == null ?
+                _scriptProjectProvider.CreateProject(targetDirectory, defaultTargetFramework, enableScriptNugetReferences) :
+                _scriptProjectProvider.CreateProject(targetDirectory, scriptFiles, defaultTargetFramework, enableScriptNugetReferences);
 
             if (pathToProjectFile == null)
             {
@@ -54,11 +61,8 @@ namespace Dotnet.Script.DependencyModel.Compilation
             }
 
             var dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectFile, Array.Empty<string>());
-
             var dependencyContext = dependencyInfo.DependencyContext;
-
             var compilationAssemblyResolvers = GetCompilationAssemblyResolvers(dependencyInfo.NugetPackageFolders);
-
 
             List<CompilationDependency> result = new List<CompilationDependency>();
             var compileLibraries = dependencyContext.CompileLibraries;

@@ -74,6 +74,16 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
         {
+            return CreateProject(targetDirectory, Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories), defaultTargetFramework, enableNuGetScriptReferences);
+        }
+
+        public string CreateProject(string targetDirectory, IEnumerable<string> scriptFiles, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
+        {
+            if (scriptFiles == null || !scriptFiles.Any())
+            {
+                return null;
+            }
+
             var pathToProjectFile = Directory.GetFiles(targetDirectory, "*.csproj").FirstOrDefault();
             if (pathToProjectFile == null && !enableNuGetScriptReferences)
             {
@@ -82,8 +92,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework.");
 
-            var csxFiles = Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories);
-            return SaveProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, csxFiles);
+            return SaveProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, scriptFiles.ToArray());
         }
 
         public string CreateProjectForScriptFile(string scriptFile)
