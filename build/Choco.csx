@@ -56,7 +56,7 @@ public static class Choco
         var tags = projectFile.Descendants("PackageTags").SingleOrDefault()?.Value;
         var iconUrl = projectFile.Descendants("PackageIconUrl").SingleOrDefault()?.Value;   
         var projectUrl = projectFile.Descendants("PackageProjectUrl").SingleOrDefault()?.Value;  
-        var licenseUrl = projectFile.Descendants("PackageLicenseUrl").SingleOrDefault()?.Value;
+        var licenseUrl = projectFile.Descendants("PackageLicenseExpression").SingleOrDefault()?.Value;
         var repositoryUrl = projectFile.Descendants("RepositoryUrl").SingleOrDefault()?.Value;
 
         var packageElement = new XElement("package");
