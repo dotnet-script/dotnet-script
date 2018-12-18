@@ -11,7 +11,7 @@
         <PackageTags>dotnet;cli;script;csx;csharp;roslyn</PackageTags>
         <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
         <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/filipw/dotnet-script/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
         <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>

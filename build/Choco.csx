@@ -56,7 +56,6 @@ public static class Choco
         var tags = projectFile.Descendants("PackageTags").SingleOrDefault()?.Value;
         var iconUrl = projectFile.Descendants("PackageIconUrl").SingleOrDefault()?.Value;   
         var projectUrl = projectFile.Descendants("PackageProjectUrl").SingleOrDefault()?.Value;  
-        var licenseUrl = projectFile.Descendants("PackageLicenseUrl").SingleOrDefault()?.Value;
         var repositoryUrl = projectFile.Descendants("RepositoryUrl").SingleOrDefault()?.Value;
 
         var packageElement = new XElement("package");
@@ -68,7 +67,7 @@ public static class Choco
         metadataElement.Add(new XElement("id", packageId.ToLower()));    
         metadataElement.Add(new XElement("version", version));                
         metadataElement.Add(new XElement("authors", authors));        
-        metadataElement.Add(new XElement("licenseUrl", licenseUrl));
+        metadataElement.Add(new XElement("licenseUrl", "https://licenses.nuget.org/MIT"));
         metadataElement.Add(new XElement("projectUrl", projectUrl));
         metadataElement.Add(new XElement("iconUrl", iconUrl));
         metadataElement.Add(new XElement("description", description));                
