@@ -15,6 +15,12 @@ namespace Dotnet.Script.Tests
         public void ShouldPrintVersionNumber(string versionFlag)
         {
             var result = ScriptTestRunner.Default.Execute(versionFlag);
+
+            if (result.exitCode != 0)
+            {
+                Console.WriteLine(result.output);
+            }
+
             Assert.Equal(0, result.exitCode);
             // TODO test that version appears on first line of output!
             Assert.Matches(@"^[0-9]+(\.[0-9]+){2}$", result.output);

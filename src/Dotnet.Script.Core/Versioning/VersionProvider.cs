@@ -43,7 +43,6 @@ namespace Dotnet.Script.Core.Versioning
         public VersionInfo GetCurrentVersion()
         {
             var versionAttribute = typeof(VersionProvider).Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().Single();
-            var version = Version.Parse(versionAttribute.InformationalVersion);
             return new VersionInfo(versionAttribute.InformationalVersion, isResolved:true);
         }
     }
