@@ -15,15 +15,10 @@ namespace Dotnet.Script.Tests
         public void ShouldPrintVersionNumber(string versionFlag)
         {
             var result = ScriptTestRunner.Default.Execute(versionFlag);
-
-            if (result.exitCode != 0)
-            {
-                Console.WriteLine(result.output);
-            }
-
             Assert.Equal(0, result.exitCode);
             // TODO test that version appears on first line of output!
-            Assert.Matches(@"^[0-9]+(\.[0-9]+){2}$", result.output);
+            // semver regex from https://github.com/semver/semver/issues/232#issue-48635632
+            Assert.Matches(@"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(\.(0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(\.[0-9a-zA-Z-]+)*)?$", result.output);
         }
 
         [Fact]
