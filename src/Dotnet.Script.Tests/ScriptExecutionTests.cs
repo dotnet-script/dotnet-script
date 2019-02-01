@@ -187,6 +187,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleCSharp80()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("CSharp80");
+            Assert.Equal(0, result.exitCode);
+
+        }
+
+        [Fact]
         public void ShouldEvaluateCode()
         {
             var code = "Console.WriteLine(12345);";
