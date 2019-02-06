@@ -27,6 +27,10 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
         }
 
+        public ScriptProjectProvider(LogFactory logFactory, ScriptEnvironment scriptEnvironment) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, scriptEnvironment)
+        {
+        }
+
         public string CreateProjectForRepl(string code, string targetDirectory, string defaultTargetFramework = "net46")
         {
             var scriptFiles = _scriptFilesResolver.GetScriptFilesFromCode(code);

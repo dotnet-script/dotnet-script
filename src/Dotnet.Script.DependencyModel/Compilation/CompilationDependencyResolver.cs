@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
@@ -30,7 +31,15 @@ namespace Dotnet.Script.DependencyModel.Compilation
         public CompilationDependencyResolver(LogFactory logFactory)
             : this
             (
-                new ScriptProjectProvider(logFactory),
+                logFactory,
+                ScriptEnvironment.Default
+            )
+        { }
+
+        public CompilationDependencyResolver(LogFactory logFactory, ScriptEnvironment scriptEnvironment)
+            : this
+            (
+                new ScriptProjectProvider(logFactory, scriptEnvironment),
                 new ScriptDependencyInfoProvider(CreateRestorer(logFactory), logFactory),
                 new ScriptFilesDependencyResolver(logFactory),
                 logFactory

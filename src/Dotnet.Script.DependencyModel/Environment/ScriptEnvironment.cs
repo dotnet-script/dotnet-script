@@ -26,6 +26,11 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private string _overrriddenTargetFramework;
 
+        public ScriptEnvironment(string targetFramework) : this()
+        {
+            _targetFramework = new Lazy<string>(() => targetFramework);
+        }
+
         private ScriptEnvironment()
         {
             _netCoreVersion = new Lazy<DotnetVersion>(GetNetCoreAppVersion);
