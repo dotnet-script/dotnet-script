@@ -63,7 +63,7 @@ namespace Dotnet.Script.Core
             await RunLoop();
         }
 
-        protected virtual async Task Execute(string input)
+        public virtual async Task Execute(string input)
         {
             await HandleScriptErrors(async () =>
             {
