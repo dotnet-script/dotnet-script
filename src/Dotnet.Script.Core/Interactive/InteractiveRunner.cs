@@ -63,9 +63,9 @@ namespace Dotnet.Script.Core
             await RunLoop();
         }
 
-        public virtual async Task Execute(string input)
+        public virtual async Task<object> Execute(string input)
         {
-            await HandleScriptErrors(async () =>
+            return await HandleScriptErrors(async () =>
             {
                 if (_scriptState == null)
                 {
@@ -143,7 +143,7 @@ namespace Dotnet.Script.Core
             return input.ToString();
         }
 
-        private async Task HandleScriptErrors(Func<Task> doWork)
+        private async Task<object> HandleScriptErrors(Func<Task> doWork)
         {
             try
             {
@@ -157,6 +157,8 @@ namespace Dotnet.Script.Core
                 {
                     _globals.Print(_scriptState.ReturnValue);
                 }
+
+                return _scriptState.ReturnValue;
             }
             catch (CompilationErrorException e)
             {
@@ -169,6 +171,8 @@ namespace Dotnet.Script.Core
             {
                 Console.WriteError(CSharpObjectFormatter.Instance.FormatException(e));
             }
+
+            return null;
         }
     }
 }
