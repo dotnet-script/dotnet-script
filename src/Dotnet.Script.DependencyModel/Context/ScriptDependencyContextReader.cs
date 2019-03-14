@@ -102,16 +102,12 @@ namespace Dotnet.Script.DependencyModel.Context
                 return Array.Empty<string>();
             }
 
-            List<string> allScriptFilesInPackage = new List<string>();
-            foreach (var scriptContentFile in targetLibrary.ContentFiles.Where(c => c.Path.EndsWith("csx", StringComparison.OrdinalIgnoreCase)))
-            {
-                var fullPath = ResolveFullPath(packageFolders, targetLibrary.Name, targetLibrary.Version.ToString(), scriptContentFile.Path);
-                allScriptFilesInPackage.Add(fullPath);
-            }
+            // Note that we can't use content files directly here since that only works for
+            // script packages directly referenced by the script and not script packages having
+            // dependencies to other script packages.
 
-            var scriptFiles = _scriptFilesDependencyResolver.GetScriptFileDependencies(allScriptFilesInPackage.ToArray());
-            return scriptFiles;
-
+            var files = _scriptFilesDependencyResolver.GetScriptFileDependencies(Path.Combine(targetLibrary.Name, targetLibrary.Version.ToString()), packageFolders);
+            return files;
         }
 
         private string[] GetRuntimeSpecificDependencyPaths(string[] packageFolders, string[] runtimes, LockFileTargetLibrary targetLibrary)

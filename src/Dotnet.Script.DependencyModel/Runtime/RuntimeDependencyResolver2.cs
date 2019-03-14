@@ -58,7 +58,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
         private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile, string[] packageSources)
         {
             // TODO: base this on pathToAssetsFile?
-
+            var fullpath = Path.GetFullPath(pathToProjectFile);
             _restorer.Restore(pathToProjectFile, packageSources);
             var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
             var context = _dependencyContextReader.ReadDependencyContext(pathToAssetsFile);
