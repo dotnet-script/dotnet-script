@@ -63,6 +63,8 @@ namespace Dotnet.Script.Core
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
+        public RuntimeDependencyResolver2 RuntimeDependencyResolver2 { get; }
+
         public ScriptCompiler(LogFactory logFactory, bool useRestoreCache)
             :this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
         {
@@ -74,6 +76,7 @@ namespace Dotnet.Script.Core
             _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
             RuntimeDependencyResolver = runtimeDependencyResolver;
+            RuntimeDependencyResolver2 = new RuntimeDependencyResolver2(logFactory, true);
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
@@ -145,7 +148,7 @@ namespace Dotnet.Script.Core
         {
             if (context.ScriptMode == ScriptMode.Script)
             {
-                return RuntimeDependencyResolver.GetDependencies(context.FilePath, context.PackageSources).ToArray();
+                return RuntimeDependencyResolver2.GetDependencies(context.FilePath, context.PackageSources).ToArray();
             }
             else
             {

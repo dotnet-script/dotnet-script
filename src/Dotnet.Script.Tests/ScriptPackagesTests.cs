@@ -127,7 +127,7 @@ namespace Dotnet.Script.Tests
                 Console.SetError(stringWriter);
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-                Program.Main(new[] { fullPathToScriptFile });
+                Program.Main(new[] { fullPathToScriptFile , "--no-cache"});
                 return output.ToString();
 
             }

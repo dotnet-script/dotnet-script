@@ -24,9 +24,14 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
             _logger = logFactory.CreateLogger<ScriptFilesDependencyResolver>();
         }
 
+        public string[] GetScriptFileDependencies(string[] scriptFiles)
+        {
+            return ProcessScriptFiles(scriptFiles);
+        }
+
         public string[] GetScriptFileDependencies(string path, string[] nugetPackageFolders)
         {
-            var result = new List<string>();
+
             var packagePath = GetPackageFullPath(path, nugetPackageFolders);
             var allScriptFiles = Directory.GetFiles(packagePath, "*.csx", SearchOption.AllDirectories);
 
@@ -36,7 +41,12 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
             }
 
             _logger.Debug($"Processing script file dependencies from '{path}'");
+            return ProcessScriptFiles(allScriptFiles);
+        }
 
+        private string[] ProcessScriptFiles(string[] allScriptFiles)
+        {
+            var result = new List<string>();
             var scriptFilesPerTargetFramework = GetScriptFilesPerTargetFramework(allScriptFiles);
             var scriptFiles = GetScriptFilesMatchingCurrentRuntime(scriptFilesPerTargetFramework);
             if (scriptFiles.Length == 0)

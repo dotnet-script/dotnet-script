@@ -26,6 +26,7 @@ namespace Dotnet.Script.DependencyModel.Context
 
              _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" -r {runtimeIdentifier} {packageSourcesArgument}");
+            //var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" {packageSourcesArgument}");
             if (exitcode != 0)
             {
                 // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'
