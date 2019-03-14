@@ -5,12 +5,31 @@
     "args": [],
     "tasks": [
         {
+            "label": "build",
             "taskName": "build",
             "args": [
                 "${workspaceRoot}/Dotnet.Script/Dotnet.Script.csproj"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"
-        }
+        },
+        {
+            "taskName": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "-c",
+                "release",
+                "-f",
+                "netcoreapp2.1",
+                "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
     ]
 }

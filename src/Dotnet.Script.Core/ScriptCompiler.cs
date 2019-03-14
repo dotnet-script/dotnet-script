@@ -68,15 +68,14 @@ namespace Dotnet.Script.Core
         public ScriptCompiler(LogFactory logFactory, bool useRestoreCache)
             :this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
         {
-
+            RuntimeDependencyResolver2 = new RuntimeDependencyResolver2(logFactory, useRestoreCache);
         }
 
-        public ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
+        private ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
             RuntimeDependencyResolver = runtimeDependencyResolver;
-            RuntimeDependencyResolver2 = new RuntimeDependencyResolver2(logFactory, true);
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
