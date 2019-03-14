@@ -48,7 +48,7 @@ namespace Dotnet.Script.Tests
                 TestPathUtils.RemovePackageFromGlobalNugetCache("ScriptPackageWithMainCsx");
 
                 //Change the source to force a recompile, now with the missing package.
-                code.Append("return 0");
+                code.Append("return 0;");
                 File.WriteAllText(pathToScriptFile, code.ToString());
 
                 result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");

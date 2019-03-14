@@ -174,8 +174,9 @@ namespace Dotnet.Script.DependencyModel.Context
                 }
             }
 
-            // TODO: Inform about the no-cache option
-            throw new InvalidOperationException($"Unable to resolve the full path {referencePath}");
+            string message = $@"The requested dependency ({referencePath}) was not found in the global Nuget cache(s).
+. Try executing/publishing the script again with the '--no-cache' option";
+            throw new InvalidOperationException(message);
         }
 
 
