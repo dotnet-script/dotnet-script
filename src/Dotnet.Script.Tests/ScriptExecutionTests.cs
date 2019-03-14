@@ -45,7 +45,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
+            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary", "--no-cache");
             Assert.Contains("Connection successful", result.output);
         }
 

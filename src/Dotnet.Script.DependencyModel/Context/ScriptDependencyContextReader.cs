@@ -132,13 +132,10 @@ namespace Dotnet.Script.DependencyModel.Context
         private string[] GetNativeAssetPaths(string[] packageFolders, string[] runtimes, LockFileTargetLibrary targetLibrary)
         {
             List<string> nativeAssetPaths = new List<string>();
-            foreach (var runtimeTarget in targetLibrary.RuntimeTargets.Where(rt => rt.AssetType.Equals("native")))
+            foreach (var runtimeTarget in targetLibrary.NativeLibraries)
             {
-                if (runtimes.Contains(runtimeTarget.Runtime, StringComparer.OrdinalIgnoreCase) && !runtimeTarget.Path.EndsWith("_._"))
-                {
                     var fullPath = ResolveFullPath(packageFolders, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
                     nativeAssetPaths.Add(fullPath);
-                }
             }
 
             return nativeAssetPaths.ToArray();
