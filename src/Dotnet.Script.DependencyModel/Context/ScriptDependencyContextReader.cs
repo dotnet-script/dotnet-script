@@ -16,7 +16,6 @@ namespace Dotnet.Script.DependencyModel.Context
     public class ScriptDependencyContextReader
     {
         private readonly Logger _logger;
-
         private readonly ILogger _nuGetLogger;
         private readonly ScriptFilesDependencyResolver _scriptFilesDependencyResolver;
         private const string RuntimeJsonFileName = "runtime.json";
@@ -38,15 +37,17 @@ namespace Dotnet.Script.DependencyModel.Context
             var lockFile = LockFileUtilities.GetLockFile(pathToAssetsFile, _nuGetLogger);
                 var runtimeGraph = Collect(lockFile);
                 var runtimes = runtimeGraph.ExpandRuntime(RuntimeEnvironment.GetRuntimeIdentifier()).ToArray();
-
-                //var libs = lockFile.Targets.SelectMany(t => t.Libraries).ToArray();
                 var libs = lockFile.Targets[1].Libraries;
                 var target = lockFile.Targets[1];
                 var packageFolders = lockFile.PackageFolders.Select(lfi => lfi.Path).ToArray();
+                var userPackageFolder = packageFolders.First();
+                var fallbackFolders = packageFolders.Skip(1);
+                var packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackFolders);
+
                 List<ScriptDependency> scriptDependencies = new List<ScriptDependency>();
                 foreach (var targetLibrary in libs)
                 {
-                    var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packageFolders, runtimes, targetLibrary);
+                    var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packageFolders, packagePathResolver, runtimes, targetLibrary);
                     if (scriptDependency.CompileTimeDependencyPaths.Any() ||
                         scriptDependency.NativeAssetPaths.Any() ||
                         scriptDependency.RuntimeDependencyPaths.Any() ||
@@ -83,12 +84,12 @@ namespace Dotnet.Script.DependencyModel.Context
             }
 
 
-        private ScriptDependency CreateScriptDependency(string name, string version, string[] packageFolders, string[] runtimes, LockFileTargetLibrary targetLibrary)
+        private ScriptDependency CreateScriptDependency(string name, string version, string[] packageFolders, FallbackPackagePathResolver packagePathResolver, string[] runtimes, LockFileTargetLibrary targetLibrary)
         {
-            var runtimeDependencyPaths = GetRuntimeDependencyPaths(packageFolders, targetLibrary);
-            var compileTimeDependencyPaths = GetCompileTimeDependencyPaths(packageFolders, targetLibrary);
-            var runtimeSpecificDependencyPaths = GetRuntimeSpecificDependencyPaths(packageFolders, runtimes, targetLibrary);
-            var nativeAssetPaths = GetNativeAssetPaths(packageFolders, runtimes, targetLibrary);
+            var runtimeDependencyPaths = GetRuntimeDependencyPaths(packagePathResolver, targetLibrary);
+            var compileTimeDependencyPaths = GetCompileTimeDependencyPaths(packagePathResolver, targetLibrary);
+            var runtimeSpecificDependencyPaths = GetRuntimeSpecificDependencyPaths(packagePathResolver, runtimes, targetLibrary);
+            var nativeAssetPaths = GetNativeAssetPaths(packagePathResolver, runtimes, targetLibrary);
             var scriptPaths = GetScriptPaths(packageFolders, targetLibrary);
             var allRuntimeDependencyPaths = runtimeDependencyPaths.Concat(runtimeSpecificDependencyPaths).ToArray();
 
@@ -110,14 +111,14 @@ namespace Dotnet.Script.DependencyModel.Context
             return files;
         }
 
-        private string[] GetRuntimeSpecificDependencyPaths(string[] packageFolders, string[] runtimes, LockFileTargetLibrary targetLibrary)
+        private string[] GetRuntimeSpecificDependencyPaths(FallbackPackagePathResolver packagePathResolver, string[] runtimes, LockFileTargetLibrary targetLibrary)
         {
             List<string> runtimeSpecificDependencyPaths = new List<string>();
             foreach (var runtimeTarget in targetLibrary.RuntimeTargets.Where(rt => rt.AssetType.Equals("runtime")))
             {
                 if (runtimes.Contains(runtimeTarget.Runtime, StringComparer.OrdinalIgnoreCase) && !runtimeTarget.Path.EndsWith("_._"))
                 {
-                    var fullPath = ResolveFullPath(packageFolders, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
+                    var fullPath = ResolveFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
                     runtimeSpecificDependencyPaths.Add(fullPath);
                 }
             }
@@ -125,25 +126,25 @@ namespace Dotnet.Script.DependencyModel.Context
             return runtimeSpecificDependencyPaths.ToArray();;
         }
 
-        private string[] GetNativeAssetPaths(string[] packageFolders, string[] runtimes, LockFileTargetLibrary targetLibrary)
+        private string[] GetNativeAssetPaths(FallbackPackagePathResolver packagePathResolver, string[] runtimes, LockFileTargetLibrary targetLibrary)
         {
             List<string> nativeAssetPaths = new List<string>();
             foreach (var runtimeTarget in targetLibrary.NativeLibraries)
             {
-                    var fullPath = ResolveFullPath(packageFolders, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
+                    var fullPath = ResolveFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
                     nativeAssetPaths.Add(fullPath);
             }
 
             return nativeAssetPaths.ToArray();
         }
 
-        private static string[] GetRuntimeDependencyPaths(string[] packageFolders, LockFileTargetLibrary targetLibrary)
+        private static string[] GetRuntimeDependencyPaths(FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
             List<string> runtimeDependencyPaths = new List<string>();
 
             foreach (var lockFileItem in targetLibrary.RuntimeAssemblies.Where(lfi => !lfi.Path.EndsWith("_._")))
             {
-                var fullPath = ResolveFullPath(packageFolders, targetLibrary.Name, targetLibrary.Version.ToString(), lockFileItem.Path);
+                var fullPath = ResolveFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString(), lockFileItem.Path);
                 runtimeDependencyPaths.Add(fullPath);
             }
 
@@ -151,29 +152,29 @@ namespace Dotnet.Script.DependencyModel.Context
         }
 
 
-        private static string[] GetCompileTimeDependencyPaths(string[] packageFolders, LockFileTargetLibrary targetLibrary)
+        private static string[] GetCompileTimeDependencyPaths(FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
             var compileTimeDependencyPaths = new List<string>();
 
             foreach (var lockFileItem in targetLibrary.CompileTimeAssemblies.Where(cta => !cta.Path.EndsWith("_._")))
             {
-                var fullPath = ResolveFullPath(packageFolders, targetLibrary.Name, targetLibrary.Version.ToString(), lockFileItem.Path);
+                var fullPath = ResolveFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString(), lockFileItem.Path);
                 compileTimeDependencyPaths.Add(fullPath);
             }
             return compileTimeDependencyPaths.ToArray();
         }
 
-        private static string ResolveFullPath(string[] nugetPackageFolders, string name, string version, string referencePath)
+        private static string ResolveFullPath(FallbackPackagePathResolver packagePathResolver, string name, string version, string referencePath)
         {
-            foreach (var packageFolder in nugetPackageFolders)
+            var packageFolder = packagePathResolver.GetPackageDirectory(name, version);
+            if (packageFolder != null)
             {
-                var fullPath = Path.Combine(packageFolder, name, version, referencePath);
+                var fullPath = Path.Combine(packageFolder, referencePath);
                 if (File.Exists(fullPath))
                 {
                     return fullPath;
                 }
             }
-
             string message = $@"The requested dependency ({referencePath}) was not found in the global Nuget cache(s).
 . Try executing/publishing the script again with the '--no-cache' option";
             throw new InvalidOperationException(message);
