@@ -9,6 +9,7 @@ using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.DependencyModel.ScriptPackage;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
+using NuGet.Packaging;
 
 namespace Dotnet.Script.DependencyModel.Compilation
 {
@@ -72,8 +73,14 @@ namespace Dotnet.Script.DependencyModel.Compilation
                 var resolvedReferencePaths = new HashSet<string>();
                 _logger.Trace($"Resolving compilation reference paths for {compilationLibrary.Name}");
                 var referencePaths = ResolveReferencePaths(compilationLibrary, compilationAssemblyResolvers);
+                var userPackageFolder = dependencyInfo.NugetPackageFolders.First();
+                var fallbackFolders = dependencyInfo.NugetPackageFolders.Skip(1);
+                var packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackFolders);
+
+                var packagePath = packagePathResolver.GetPackageDirectory(compilationLibrary.Name, compilationLibrary.Version);
+
                 var scripts =
-                    _scriptFilesDependencyResolver.GetScriptFileDependencies(compilationLibrary.Path, dependencyInfo.NugetPackageFolders);
+                    _scriptFilesDependencyResolver.GetScriptFileDependencies(packagePath);
                 foreach (var referencePath in referencePaths)
                 {
                     resolvedReferencePaths.Add(referencePath);

@@ -11,6 +11,7 @@ using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.DependencyModel.ScriptPackage;
 using Microsoft.Extensions.DependencyModel;
+using NuGet.Packaging;
 
 namespace Dotnet.Script.DependencyModel.Runtime
 {
@@ -119,7 +120,13 @@ namespace Dotnet.Script.DependencyModel.Runtime
         {
             if (restorePackages)
             {
-                return _scriptFilesDependencyResolver.GetScriptFileDependencies(runtimeLibrary.Path, nugetPackageFolders);
+                 var userPackageFolder = nugetPackageFolders.First();
+                var fallbackFolders = nugetPackageFolders.Skip(1);
+                var packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackFolders);
+
+                var packagePath = packagePathResolver.GetPackageDirectory(runtimeLibrary.Name, runtimeLibrary.Version);
+
+                return _scriptFilesDependencyResolver.GetScriptFileDependencies(packagePath);
             }
             else
             {

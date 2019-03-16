@@ -90,24 +90,27 @@ namespace Dotnet.Script.DependencyModel.Context
             var compileTimeDependencyPaths = GetCompileTimeDependencyPaths(packagePathResolver, targetLibrary);
             var runtimeSpecificDependencyPaths = GetRuntimeSpecificDependencyPaths(packagePathResolver, runtimes, targetLibrary);
             var nativeAssetPaths = GetNativeAssetPaths(packagePathResolver, runtimes, targetLibrary);
-            var scriptPaths = GetScriptPaths(packageFolders, targetLibrary);
+            var scriptPaths = GetScriptPaths(packagePathResolver, targetLibrary);
             var allRuntimeDependencyPaths = runtimeDependencyPaths.Concat(runtimeSpecificDependencyPaths).ToArray();
 
             return new ScriptDependency(name, version, allRuntimeDependencyPaths, nativeAssetPaths, compileTimeDependencyPaths.ToArray(), scriptPaths);
         }
 
-        private string[] GetScriptPaths(string[] packageFolders, LockFileTargetLibrary targetLibrary)
+        private string[] GetScriptPaths(FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
             if (targetLibrary.ContentFiles.Count == 0)
             {
                 return Array.Empty<string>();
             }
 
+            var packageFolder = ResolvePackageFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString());
+
+
             // Note that we can't use content files directly here since that only works for
             // script packages directly referenced by the script and not script packages having
             // dependencies to other script packages.
 
-            var files = _scriptFilesDependencyResolver.GetScriptFileDependencies(Path.Combine(targetLibrary.Name, targetLibrary.Version.ToString()), packageFolders);
+            var files = _scriptFilesDependencyResolver.GetScriptFileDependencies(packageFolder);
             return files;
         }
 
@@ -166,20 +169,32 @@ namespace Dotnet.Script.DependencyModel.Context
 
         private static string ResolveFullPath(FallbackPackagePathResolver packagePathResolver, string name, string version, string referencePath)
         {
-            var packageFolder = packagePathResolver.GetPackageDirectory(name, version);
-            if (packageFolder != null)
+            var packageFolder = ResolvePackageFullPath(packagePathResolver, name, version);
+
+            var fullPath = Path.Combine(packageFolder, referencePath);
+            if (File.Exists(fullPath))
             {
-                var fullPath = Path.Combine(packageFolder, referencePath);
-                if (File.Exists(fullPath))
-                {
-                    return fullPath;
-                }
+                return fullPath;
             }
+
             string message = $@"The requested dependency ({referencePath}) was not found in the global Nuget cache(s).
 . Try executing/publishing the script again with the '--no-cache' option";
             throw new InvalidOperationException(message);
         }
 
+
+        private static string ResolvePackageFullPath(FallbackPackagePathResolver packagePathResolver, string name, string version)
+        {
+            var packageFolder = packagePathResolver.GetPackageDirectory(name, version);
+            if (packageFolder != null)
+            {
+                return packageFolder;
+            }
+
+             string message = $@"The requested package ({name},{version}) was not found in the global Nuget cache(s).
+. Try executing/publishing the script again with the '--no-cache' option";
+            throw new InvalidOperationException(message);
+        }
 
         private class NuGetLogger : LoggerBase
         {
