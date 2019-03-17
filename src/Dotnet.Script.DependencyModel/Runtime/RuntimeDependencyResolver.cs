@@ -97,7 +97,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
 
             var dependencyContext = dependencyInfo.DependencyContext;
             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
-            nuGetPackageFolders.Add(_scriptEnvironment.NuGetStoreFolder);
+            //nuGetPackageFolders.Add(_scriptEnvironment.NuGetStoreFolder);
 
             var runtimeDependencies = new List<RuntimeDependency>();
 
