@@ -1,36 +1,57 @@
 {
-    "version": "0.1.0",
-    "command": "dotnet",
-    "isShellCommand": true,
-    "args": [],
-    "tasks": [
-        {
-            "label": "build",
-            "taskName": "build",
-            "args": [
-                "${workspaceRoot}/Dotnet.Script/Dotnet.Script.csproj",
-                "/property:GenerateFullPaths=true"
-            ],
-            "isBuildCommand": true,
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "taskName": "test",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "test",
-                "-c",
-                "release",
-                "-f",
-                "netcoreapp2.1",
-                "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
-            ],
-            "problemMatcher": "$msCompile",
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            }
-        },
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "command": "dotnet",
+      "args": [
+        "${workspaceRoot}/Dotnet.Script/Dotnet.Script.csproj",
+        "/property:GenerateFullPaths=true"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "test",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "-c",
+        "release",
+        "-f",
+        "netcoreapp2.1",
+        "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "test with code coverage",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "test",
+        "-c",
+        "release",
+        "-f",
+        "netcoreapp2.1",
+        "/p:CollectCoverage=true",
+        "/p:Exclude=\"[xunit*]*\"",
+        "/p:CoverletOutputFormat=lcov",
+        "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    }
+  ]
 }
