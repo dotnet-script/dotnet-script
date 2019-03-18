@@ -8,7 +8,8 @@
             "label": "build",
             "taskName": "build",
             "args": [
-                "${workspaceRoot}/Dotnet.Script/Dotnet.Script.csproj"
+                "${workspaceRoot}/Dotnet.Script/Dotnet.Script.csproj",
+                "/property:GenerateFullPaths=true"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"
