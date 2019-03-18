@@ -34,15 +34,17 @@ namespace Dotnet.Script.DependencyModel.Context
         public ScriptDependencyContext ReadDependencyContext(string pathToAssetsFile)
         {
             var lockFile = LockFileUtilities.GetLockFile(pathToAssetsFile, _nuGetLogger);
-            var libs = lockFile.Targets[1].Libraries;
-            var target = lockFile.Targets[1];
+
+            // Since we execute "dotnet restore -r [rid]" we get two targets in the lock file.
+            // The second target is the one containing the runtime deps for the given RID.
+            var targetLibraries = lockFile.Targets[1].Libraries;
             var packageFolders = lockFile.PackageFolders.Select(lfi => lfi.Path).ToArray();
             var userPackageFolder = packageFolders.First();
             var fallbackFolders = packageFolders.Skip(1);
             var packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackFolders);
 
             List<ScriptDependency> scriptDependencies = new List<ScriptDependency>();
-            foreach (var targetLibrary in libs)
+            foreach (var targetLibrary in targetLibraries)
             {
                 var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packageFolders, packagePathResolver, targetLibrary);
                 if (scriptDependency.CompileTimeDependencyPaths.Any() ||
