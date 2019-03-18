@@ -61,21 +61,21 @@ namespace Dotnet.Script.Core
 
         public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
 
-        public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
+       //public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
         public RuntimeDependencyResolver2 RuntimeDependencyResolver2 { get; }
 
         public ScriptCompiler(LogFactory logFactory, bool useRestoreCache)
-            :this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
+            :this(logFactory, new RuntimeDependencyResolver2(logFactory, useRestoreCache))
         {
-            RuntimeDependencyResolver2 = new RuntimeDependencyResolver2(logFactory, useRestoreCache);
+
         }
 
-        private ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
+        private ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver2 runtimeDependencyResolver)
         {
             _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
-            RuntimeDependencyResolver = runtimeDependencyResolver;
+            RuntimeDependencyResolver2 = runtimeDependencyResolver;
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
@@ -151,7 +151,7 @@ namespace Dotnet.Script.Core
             }
             else
             {
-                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
+                return RuntimeDependencyResolver2.GetDependenciesForCode(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
             }
         }
 

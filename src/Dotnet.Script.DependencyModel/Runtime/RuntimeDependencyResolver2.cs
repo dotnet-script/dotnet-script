@@ -14,7 +14,6 @@ namespace Dotnet.Script.DependencyModel.Runtime
     {
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptEnvironment _scriptEnvironment;
-        private readonly bool _useRestoreCache;
 
         private readonly ScriptDependencyContextReader _dependencyContextReader;
 
@@ -24,7 +23,6 @@ namespace Dotnet.Script.DependencyModel.Runtime
         {
             _scriptProjectProvider = scriptProjectProvider;
             _scriptEnvironment = scriptEnvironment;
-            _useRestoreCache = useRestoreCache;
             _dependencyContextReader = new ScriptDependencyContextReader(logFactory);
             _restorer = CreateRestorer(logFactory, useRestoreCache);
         }
@@ -47,20 +45,30 @@ namespace Dotnet.Script.DependencyModel.Runtime
             }
         }
 
-        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packagesSources)
+        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packageSources)
         {
             var pathToProjectFile = _scriptProjectProvider.CreateProjectForScriptFile(scriptFile);
-            return GetDependenciesInternal(pathToProjectFile, packagesSources);
-        }
-
-
-
-        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectFile, string[] packageSources)
-        {
-            // TODO: base this on pathToAssetsFile?
-            var fullpath = Path.GetFullPath(pathToProjectFile);
             _restorer.Restore(pathToProjectFile, packageSources);
             var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
+            return GetDependenciesInternal(pathToAssetsFile);
+        }
+
+        public IEnumerable<RuntimeDependency> GetDependenciesForLibrary(string pathToLibrary)
+        {
+            var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToLibrary), "obj", "project.assets.json");
+            return GetDependenciesInternal(pathToAssetsFile);
+        }
+
+        public IEnumerable<RuntimeDependency> GetDependenciesForCode(string targetDirectory, ScriptMode scriptMode, string[] packageSources, string code = null)
+        {
+            var pathToProjectFile = _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), ScriptEnvironment.Default.TargetFramework);
+            _restorer.Restore(pathToProjectFile, packageSources);
+            var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
+            return GetDependenciesInternal(pathToAssetsFile);
+        }
+
+        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToAssetsFile)
+        {
             var context = _dependencyContextReader.ReadDependencyContext(pathToAssetsFile);
             var result = new List<RuntimeDependency>();
             foreach (var scriptDependency in context.Dependencies)
