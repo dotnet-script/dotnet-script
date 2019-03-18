@@ -5,6 +5,7 @@
       "label": "build",
       "command": "dotnet",
       "args": [
+        "build",
         "${workspaceRoot}/Dotnet.Script/Dotnet.Script.csproj",
         "/property:GenerateFullPaths=true"
       ],
