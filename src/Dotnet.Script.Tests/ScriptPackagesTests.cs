@@ -97,7 +97,8 @@ namespace Dotnet.Script.Tests
         {
             var resolver = CreateCompilationDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
-            var dependencies = resolver.GetDependencies(fixture, true, _scriptEnvironment.TargetFramework);
+            var csxFiles = Directory.GetFiles(fixture, "*.csx");
+            var dependencies = resolver.GetDependencies(fixture, csxFiles,  true, _scriptEnvironment.TargetFramework);
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
             Assert.NotEmpty(scriptFiles);
         }

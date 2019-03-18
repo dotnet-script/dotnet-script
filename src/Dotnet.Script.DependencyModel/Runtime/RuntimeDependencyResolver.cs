@@ -1,208 +1,84 @@
-﻿// using System;
-// using System.Collections.Generic;
-// using System.IO;
-// using System.Linq;
-// using System.Reflection;
-// using System.Text.RegularExpressions;
-// using Dotnet.Script.DependencyModel.Context;
-// using Dotnet.Script.DependencyModel.Environment;
-// using Dotnet.Script.DependencyModel.Logging;
-// using Dotnet.Script.DependencyModel.Process;
-// using Dotnet.Script.DependencyModel.ProjectSystem;
-// using Dotnet.Script.DependencyModel.ScriptPackage;
-// using Microsoft.Extensions.DependencyModel;
-// using NuGet.Packaging;
+using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.Process;
+using Dotnet.Script.DependencyModel.ProjectSystem;
+using System.Reflection;
 
-// namespace Dotnet.Script.DependencyModel.Runtime
-// {
-//     public class RuntimeDependencyResolver
-//     {
-//         private readonly ScriptProjectProvider _scriptProjectProvider;
-//         private readonly ScriptDependencyInfoProvider _scriptDependencyInfoProvider;
-//         private readonly ScriptFilesDependencyResolver _scriptFilesDependencyResolver;
-//         private readonly Logger _logger;
-//         private readonly ScriptEnvironment _scriptEnvironment;
-//         private readonly Regex _runtimeMatcher;
+namespace Dotnet.Script.DependencyModel.Runtime
+{
+    public class RuntimeDependencyResolver
+    {
+        private readonly ScriptProjectProvider _scriptProjectProvider;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
-//         private RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, ScriptDependencyInfoProvider scriptDependencyInfoProvider, ScriptFilesDependencyResolver scriptFilesDependencyResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment, bool useRestoreCache)
-//         {
-//             _scriptProjectProvider = scriptProjectProvider;
-//             _scriptDependencyInfoProvider = scriptDependencyInfoProvider;
-//             _scriptFilesDependencyResolver = scriptFilesDependencyResolver;
-//             _logger = logFactory.CreateLogger<RuntimeDependencyResolver>();
-//             _scriptEnvironment = scriptEnvironment;
-//             _runtimeMatcher = new Regex($"{_scriptEnvironment.PlatformIdentifier}.*-{_scriptEnvironment.ProccessorArchitecture}");
-//         }
+        private readonly ScriptDependencyContextReader _dependencyContextReader;
 
-//         public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache)
-//             : this
-//             (
-//                   new ScriptProjectProvider(logFactory),
-//                   new ScriptDependencyInfoProvider(CreateRestorer(logFactory, useRestoreCache), logFactory),
-//                   new ScriptFilesDependencyResolver(logFactory),
-//                   logFactory,
-//                   ScriptEnvironment.Default,
-//                   useRestoreCache
-//             )
-//         {
-//         }
+        private readonly IRestorer _restorer;
 
-//         private static IRestorer CreateRestorer(LogFactory logFactory, bool useRestoreCache)
-//         {
-//             var commandRunner = new CommandRunner(logFactory);
-//             if (useRestoreCache)
-//             {
-//                 return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory);
-//             }
-//             else
-//             {
-//                 return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory);
-//             }
-//         }
+        public RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, LogFactory logFactory, ScriptEnvironment scriptEnvironment, bool useRestoreCache)
+        {
+            _scriptProjectProvider = scriptProjectProvider;
+            _scriptEnvironment = scriptEnvironment;
+            _dependencyContextReader = new ScriptDependencyContextReader(logFactory);
+            _restorer = CreateRestorer(logFactory, useRestoreCache);
+        }
 
-//         public IEnumerable<RuntimeDependency> GetDependencies(string targetDirectory, ScriptMode scriptMode, string[] packagesSources, string code = null)
-//         {
-//             //TODO : Does not seem that this is ever called with ScriptMode.Script
-//             // Should pro
-//             var pathToProjectFile = scriptMode == ScriptMode.Script
-//                 ? _scriptProjectProvider.CreateProject(targetDirectory, _scriptEnvironment.TargetFramework, true)
-//                 : _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), ScriptEnvironment.Default.TargetFramework);
+         public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache) : this(new ScriptProjectProvider(logFactory), logFactory, ScriptEnvironment.Default, useRestoreCache)
+         {
 
-//             return GetDependenciesInternal(pathToProjectFile, packagesSources);
-//         }
+         }
 
-//         public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packagesSources)
-//         {
-//             var pathToProjectFile = _scriptProjectProvider.CreateProjectForScriptFile(scriptFile);
-//             return GetDependenciesInternal(pathToProjectFile, packagesSources);
-//         }
+        private static IRestorer CreateRestorer(LogFactory logFactory, bool useRestoreCache)
+        {
+            var commandRunner = new CommandRunner(logFactory);
+            if (useRestoreCache)
+            {
+                return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory),logFactory);
+            }
+            else
+            {
+                return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory);
+            }
+        }
 
-//         public IEnumerable<RuntimeDependency> GetDependencies(string dllPath)
-//         {
-//             return GetDependenciesInternal(dllPath, restorePackages: false);
-//         }
+        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packageSources)
+        {
+            var pathToProjectFile = _scriptProjectProvider.CreateProjectForScriptFile(scriptFile);
+            _restorer.Restore(pathToProjectFile, packageSources);
+            var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
+            return GetDependenciesInternal(pathToAssetsFile);
+        }
 
-//         private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToProjectOrDll, string[] packageSources = null, bool restorePackages = true)
-//         {
-//             packageSources = packageSources ?? new string[0];
-//             ScriptDependencyInfo dependencyInfo;
-//             if (restorePackages)
-//             {
-//                 dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll, packageSources);
-//             }
-//             else
-//             {
-//                 dependencyInfo = _scriptDependencyInfoProvider.GetDependencyInfo(pathToProjectOrDll);
-//             }
+        public IEnumerable<RuntimeDependency> GetDependenciesForLibrary(string pathToLibrary)
+        {
+            var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToLibrary), "obj", "project.assets.json");
+            return GetDependenciesInternal(pathToAssetsFile);
+        }
 
-//             var dependencyContext = dependencyInfo.DependencyContext;
-//             List<string> nuGetPackageFolders = dependencyInfo.NugetPackageFolders.ToList();
-//             //nuGetPackageFolders.Add(_scriptEnvironment.NuGetStoreFolder);
+        public IEnumerable<RuntimeDependency> GetDependenciesForCode(string targetDirectory, ScriptMode scriptMode, string[] packageSources, string code = null)
+        {
+            var pathToProjectFile = _scriptProjectProvider.CreateProjectForRepl(code, Path.Combine(targetDirectory, scriptMode.ToString()), ScriptEnvironment.Default.TargetFramework);
+            _restorer.Restore(pathToProjectFile, packageSources);
+            var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
+            return GetDependenciesInternal(pathToAssetsFile);
+        }
 
-//             var runtimeDependencies = new List<RuntimeDependency>();
+        private IEnumerable<RuntimeDependency> GetDependenciesInternal(string pathToAssetsFile)
+        {
+            var context = _dependencyContextReader.ReadDependencyContext(pathToAssetsFile);
+            var result = new List<RuntimeDependency>();
+            foreach (var scriptDependency in context.Dependencies)
+            {
+                var runtimeAssemblies = scriptDependency.RuntimeDependencyPaths.Select(rdp => new RuntimeAssembly(AssemblyName.GetAssemblyName(rdp), rdp)).ToList();
+                var runtimeDependency = new RuntimeDependency(scriptDependency.Name, scriptDependency.Version,runtimeAssemblies, scriptDependency.NativeAssetPaths,scriptDependency.ScriptPaths);
+                result.Add(runtimeDependency);
+            }
 
-//             var runtimeLibraries = dependencyContext.RuntimeLibraries;
-
-//             foreach (var runtimeLibrary in runtimeLibraries)
-//             {
-//                 var runtimeDependency = new RuntimeDependency(runtimeLibrary.Name, runtimeLibrary.Version,
-//                     ProcessRuntimeAssemblies(runtimeLibrary, nuGetPackageFolders.ToArray()),
-//                     ProcessNativeLibraries(runtimeLibrary, nuGetPackageFolders.ToArray()),
-//                     ProcessScriptFiles(runtimeLibrary, nuGetPackageFolders.ToArray(), restorePackages));
-
-//                 runtimeDependencies.Add(runtimeDependency);
-//             }
-
-//             return runtimeDependencies;
-//         }
-
-//         private string[] ProcessScriptFiles(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders, bool restorePackages)
-//         {
-//             if (restorePackages)
-//             {
-//                  var userPackageFolder = nugetPackageFolders.First();
-//                 var fallbackFolders = nugetPackageFolders.Skip(1);
-//                 var packagePathResolver = new FallbackPackagePathResolver(userPackageFolder, fallbackFolders);
-
-//                 var packagePath = packagePathResolver.GetPackageDirectory(runtimeLibrary.Name, runtimeLibrary.Version);
-
-//                 return _scriptFilesDependencyResolver.GetScriptFileDependencies(packagePath);
-//             }
-//             else
-//             {
-//                 // If restorePackages are false, it means we are running from a DLL
-//                 // and the scripts from the script packages are already compiled into the DLL
-//                 // NOTE: This whole class needs some cleanup.
-//                 return Array.Empty<string>();
-//             }
-
-//         }
-
-//         private string[] ProcessNativeLibraries(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
-//         {
-//             List<string> result = new List<string>();
-//             foreach (var nativeLibraryGroup in runtimeLibrary.NativeLibraryGroups.Where(
-//                 nlg => AppliesToCurrentRuntime(nlg.Runtime)))
-//             {
-
-//                 foreach (var assetPath in nativeLibraryGroup.AssetPaths)
-//                 {
-//                     var fullPath = GetFullPath(Path.Combine(runtimeLibrary.Path, assetPath), nugetPackageFolders);
-//                     _logger.Trace($"Loading native library from {fullPath}");
-//                     result.Add(fullPath);
-//                 }
-//             }
-//             return result.ToArray();
-//         }
-//         private RuntimeAssembly[] ProcessRuntimeAssemblies(RuntimeLibrary runtimeLibrary, string[] nugetPackageFolders)
-//         {
-//             var result = new List<RuntimeAssembly>();
-
-//             var runtimeAssemblyGroup =
-//                 runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag =>
-//                     rag.Runtime == _scriptEnvironment.RuntimeIdentifier);
-
-//             if (runtimeAssemblyGroup == null)
-//             {
-//                 runtimeAssemblyGroup =
-//                     runtimeLibrary.RuntimeAssemblyGroups.FirstOrDefault(rag => string.IsNullOrWhiteSpace(rag.Runtime));
-//             }
-//             if (runtimeAssemblyGroup == null)
-//             {
-//                 return Array.Empty<RuntimeAssembly>();
-//             }
-//             foreach (var assetPath in runtimeAssemblyGroup.AssetPaths)
-//             {
-//                 var path = Path.Combine(runtimeLibrary.Path, assetPath);
-//                 if (!path.EndsWith("_._"))
-//                 {
-//                     var fullPath = GetFullPath(path, nugetPackageFolders);
-
-//                     _logger.Trace($"Resolved runtime library {runtimeLibrary.Name} located at {fullPath}");
-//                     result.Add(new RuntimeAssembly(AssemblyName.GetAssemblyName(fullPath), fullPath));
-//                 }
-//             }
-//             return result.ToArray();
-//         }
-
-//         private static string GetFullPath(string relativePath, IEnumerable<string> nugetPackageFolders)
-//         {
-//             foreach (var possibleLocation in nugetPackageFolders)
-//             {
-//                 var fullPath = Path.Combine(possibleLocation, relativePath);
-//                 if (File.Exists(fullPath))
-//                 {
-//                     return fullPath;
-//                 }
-//             }
-//             string message = $@"The requested dependency ({relativePath}) was not found in the global Nuget cache(s).
-// . Try executing/publishing the script again with the '--no-cache' option";
-//             throw new InvalidOperationException(message);
-//         }
-
-//         private bool AppliesToCurrentRuntime(string runtime)
-//         {
-//             return string.IsNullOrWhiteSpace(runtime) || _runtimeMatcher.IsMatch(runtime);
-//         }
-//     }
-// }
+            return result;
+        }
+    }
+}
