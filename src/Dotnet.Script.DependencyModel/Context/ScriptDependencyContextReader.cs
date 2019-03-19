@@ -33,11 +33,12 @@ namespace Dotnet.Script.DependencyModel.Context
 
         public ScriptDependencyContext ReadDependencyContext(string pathToAssetsFile)
         {
-            var lockFile = LockFileUtilities.GetLockFile(pathToAssetsFile, _nuGetLogger);
+            var lockFile = GetLockFile(pathToAssetsFile);
 
             // Since we execute "dotnet restore -r [rid]" we get two targets in the lock file.
             // The second target is the one containing the runtime deps for the given RID.
-            var targetLibraries = lockFile.Targets[1].Libraries;
+            var target = GetLockFileTarget(lockFile);
+            var targetLibraries = target.Libraries;
             var packageFolders = lockFile.PackageFolders.Select(lfi => lfi.Path).ToArray();
             var userPackageFolder = packageFolders.First();
             var fallbackFolders = packageFolders.Skip(1);
@@ -57,6 +58,31 @@ namespace Dotnet.Script.DependencyModel.Context
             }
 
             return new ScriptDependencyContext(scriptDependencies.ToArray());
+        }
+
+        private static LockFileTarget GetLockFileTarget(LockFile lockFile)
+        {
+            if (lockFile.Targets.Count < 2)
+            {
+                string message = $@"The lock file {lockFile.Path} does not contain a runtime target.
+ Make sure that the project file was restored using a RID (runtime identifier).";
+                throw new InvalidOperationException(message);
+            }
+
+            return lockFile.Targets[1];
+        }
+
+        private LockFile GetLockFile(string pathToAssetsFile)
+        {
+            var lockFile = LockFileUtilities.GetLockFile(pathToAssetsFile, _nuGetLogger);
+            if (lockFile == null)
+            {
+                string message = $@"Unable to read lockfile {pathToAssetsFile}.
+Make sure that the file exists and that it is a valid 'project.assets.json' file.";
+                throw new InvalidOperationException(message);
+            }
+
+            return lockFile;
         }
 
         private ScriptDependency CreateScriptDependency(string name, string version, string[] packageFolders, FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
