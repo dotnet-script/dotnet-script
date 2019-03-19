@@ -28,7 +28,7 @@ namespace Dotnet.Script.Core
 
         public async Task<TReturn> Execute<TReturn>(string dllPath, IEnumerable<string> commandLineArgs)
         {
-            var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(dllPath);
+            var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesForLibrary(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
             var assembly = Assembly.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
 

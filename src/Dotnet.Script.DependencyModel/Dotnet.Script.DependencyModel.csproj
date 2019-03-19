@@ -24,8 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
-    <PackageReference Include="NuGet.Configuration" Version="4.8.0" />
+    <PackageReference Include="NuGet.ProjectModel" Version="4.9.3" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
+
   </ItemGroup>
 
 </Project>

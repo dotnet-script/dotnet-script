@@ -38,9 +38,8 @@ namespace Dotnet.Script.Shared.Tests
             var console = new ScriptConsole(writer, reader, error);
 
             var logFactory = TestOutputHelper.CreateTestLogFactory();
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory, useRestoreCache: false);
 
-            var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
+            var compiler = new ScriptCompiler(logFactory, useRestoreCache: false);
             var runner = new InteractiveRunner(compiler, logFactory, console, Array.Empty<string>());
             return new InteractiveTestContext(console, runner);
         }

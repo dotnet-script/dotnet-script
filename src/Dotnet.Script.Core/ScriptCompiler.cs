@@ -69,7 +69,7 @@ namespace Dotnet.Script.Core
 
         }
 
-        public ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
+        private ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
@@ -149,7 +149,7 @@ namespace Dotnet.Script.Core
             }
             else
             {
-                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
+                return RuntimeDependencyResolver.GetDependenciesForCode(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
             }
         }
 

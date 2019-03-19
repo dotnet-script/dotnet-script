@@ -48,7 +48,7 @@ namespace Dotnet.Script.Tests
                 TestPathUtils.RemovePackageFromGlobalNugetCache("ScriptPackageWithMainCsx");
 
                 //Change the source to force a recompile, now with the missing package.
-                code.Append("return 0");
+                code.Append("return 0;");
                 File.WriteAllText(pathToScriptFile, code.ToString());
 
                 result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
@@ -97,7 +97,8 @@ namespace Dotnet.Script.Tests
         {
             var resolver = CreateCompilationDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
-            var dependencies = resolver.GetDependencies(fixture, true, _scriptEnvironment.TargetFramework);
+            var csxFiles = Directory.GetFiles(fixture, "*.csx");
+            var dependencies = resolver.GetDependencies(fixture, csxFiles,  true, _scriptEnvironment.TargetFramework);
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
             Assert.NotEmpty(scriptFiles);
         }
@@ -127,7 +128,7 @@ namespace Dotnet.Script.Tests
                 Console.SetError(stringWriter);
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-                Program.Main(new[] { fullPathToScriptFile });
+                Program.Main(new[] { fullPathToScriptFile , "--no-cache"});
                 return output.ToString();
 
             }

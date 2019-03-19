@@ -45,7 +45,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
+            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary", "--no-cache");
             Assert.Contains("Connection successful", result.output);
         }
 
@@ -322,19 +322,24 @@ namespace Dotnet.Script.Tests
         {
             string code =
             @"using AgileObjects.AgileMapper;
-    public class TestClass
+    namespace TestLibrary
     {
-        public TestClass()
+        public class TestClass
         {
-            IMapper mapper = Mapper.CreateNew();
+            public TestClass()
+            {
+                IMapper mapper = Mapper.CreateNew();
+            }
         }
-    }";
+    }
+    ";
 
             string script =
     @"#r ""nuget: AgileObjects.AgileMapper, 0.25.0""
-#r ""TestLibrary.dll""
+#r ""testlib/TestLibrary.dll""
 
     using AgileObjects.AgileMapper;
+    using TestLibrary;
 
     IMapper mapper = Mapper.CreateNew();
     var testClass = new TestClass();
@@ -348,7 +353,7 @@ namespace Dotnet.Script.Tests
                 ProcessHelper.RunAndCaptureOutput("dotnet", "add TestLibrary.csproj package AgileObjects.AgileMapper -v 0.25.0", projectFolder);
                 File.WriteAllText(Path.Combine(projectFolder, "Class1.cs"), code);
                 File.WriteAllText(Path.Combine(projectFolder, "script.csx"), script);
-                ProcessHelper.RunAndCaptureOutput("dotnet", "build -c release -o ./", projectFolder);
+                ProcessHelper.RunAndCaptureOutput("dotnet", "build -c release -o testlib", projectFolder);
 
                 var result = ScriptTestRunner.Default.Execute(Path.Combine(projectFolder, "script.csx"));
 
