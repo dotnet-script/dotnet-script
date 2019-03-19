@@ -29,7 +29,7 @@ namespace Dotnet.Script.Shared.Tests
             public InteractiveRunner Runner { get; }
         }
 
-        private InteractiveTestContext GetRunner(string[] commands)
+        private InteractiveTestContext GetRunner(params string[] commands)
         {
             var reader = new StringReader(string.Join(Environment.NewLine, commands));
             var writer = new StringWriter();
@@ -42,6 +42,15 @@ namespace Dotnet.Script.Shared.Tests
             var compiler = new ScriptCompiler(logFactory, useRestoreCache: false);
             var runner = new InteractiveRunner(compiler, logFactory, console, Array.Empty<string>());
             return new InteractiveTestContext(console, runner);
+        }
+
+        [Fact]
+        public async Task ReturnValue()
+        {
+            var ctx = GetRunner();
+            await ctx.Runner.Execute("1+1");
+            var result = ctx.Console.Out.ToString();
+            Assert.Contains("2", result);
         }
 
         [Fact]
