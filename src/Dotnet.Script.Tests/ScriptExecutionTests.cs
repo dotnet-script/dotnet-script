@@ -307,6 +307,8 @@ namespace Dotnet.Script.Tests
                     // Remove the package from the global NuGet cache
                     TestPathUtils.RemovePackageFromGlobalNugetCache("SampleLibrary");
 
+                    //ScriptTestRunner.Default.ExecuteInProcess(pathToScript);
+
                     result = ScriptTestRunner.Default.Execute(pathToScript);
                     Assert.Contains("Try executing/publishing the script", result.output);
 

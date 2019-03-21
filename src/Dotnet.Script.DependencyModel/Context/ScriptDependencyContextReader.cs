@@ -10,6 +10,7 @@ using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.ProjectModel;
 using NuGet.RuntimeModel;
+using NuGet.Versioning;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
@@ -115,7 +116,7 @@ Make sure that the file exists and that it is a valid 'project.assets.json' file
         private string[] GetNativeAssetPaths(FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
             List<string> nativeAssetPaths = new List<string>();
-            foreach (var runtimeTarget in targetLibrary.NativeLibraries)
+            foreach (var runtimeTarget in targetLibrary.NativeLibraries.Where(lfi => !lfi.Path.EndsWith("_._")))
             {
                 var fullPath = ResolveFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
                 nativeAssetPaths.Add(fullPath);

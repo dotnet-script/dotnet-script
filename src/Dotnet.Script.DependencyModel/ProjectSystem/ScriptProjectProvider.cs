@@ -57,6 +57,11 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             projectFile.TargetFramework = parseResultFromCode.TargetFramework ?? defaultTargetFramework;
 
+            if (defaultTargetFramework == "netcoreapp3.0")
+            {
+                projectFile.PackageReferences.Add(new PackageReference("Microsoft.NetCore.App", "[3.0.0-preview-27324-5]"));
+            }
+
             projectFile.Save(pathToProjectFile);
 
             LogProjectFileInfo(pathToProjectFile);
@@ -124,6 +129,11 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             foreach (var packageReference in parseresult.PackageReferences)
             {
                 projectFile.PackageReferences.Add(packageReference);
+            }
+
+            if (defaultTargetFramework == "netcoreapp3.0")
+            {
+                projectFile.PackageReferences.Add(new PackageReference("Microsoft.NetCore.App", "[3.0.0-preview-27324-5]"));
             }
 
             projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;

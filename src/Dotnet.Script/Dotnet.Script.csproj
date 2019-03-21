@@ -4,7 +4,7 @@
         <VersionPrefix>0.29.0-beta1</VersionPrefix>
         <Authors>filipw</Authors>
         <PackageId>Dotnet.Script</PackageId>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
         <DebugType>portable</DebugType>
         <AssemblyName>dotnet-script</AssemblyName>
         <OutputType>Exe</OutputType>
