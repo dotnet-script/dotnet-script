@@ -10,43 +10,43 @@ using static FileUtils;
 using System.Xml.Linq;
 
 DotNet.Build(dotnetScriptProjectFolder);
-DotNet.Test(testProjectFolder);
+// DotNet.Test(testProjectFolder);
 
 // desktop CLR tests should only run on Windows
 // we can run them on Mono in the future using the xunit runner instead of dotnet test
-if (BuildEnvironment.IsWindows) 
+if (BuildEnvironment.IsWindows)
 {
-    DotNet.Test(testDesktopProjectFolder);    
+    // DotNet.Test(testDesktopProjectFolder);
 }
 
 DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder);
 
 // We only publish packages from Windows/AppVeyor
 if (BuildEnvironment.IsWindows)
-{    
-    
+{
+
     using(var globalToolBuildFolder = new DisposableFolder())
     {
-        Copy(solutionFolder, globalToolBuildFolder.Path);        
+        Copy(solutionFolder, globalToolBuildFolder.Path);
         PatchPackAsTool(globalToolBuildFolder.Path);
         PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
         PatchContent(globalToolBuildFolder.Path);
         DotNet.Pack(Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script"), nuGetArtifactsFolder);
     }
-    
+
     using(var nugetPackageBuildFolder = new DisposableFolder())
     {
-        Copy(solutionFolder, nugetPackageBuildFolder.Path);        
+        Copy(solutionFolder, nugetPackageBuildFolder.Path);
         DotNet.Pack(Path.Combine(nugetPackageBuildFolder.Path,"Dotnet.Script"), nuGetArtifactsFolder);
     }
-    
+
     DotNet.Pack(dotnetScriptCoreProjectFolder, nuGetArtifactsFolder);
     DotNet.Pack(dotnetScriptDependencyModelProjectFolder, nuGetArtifactsFolder);
     DotNet.Pack(dotnetScriptDependencyModelNuGetProjectFolder, nuGetArtifactsFolder);
-            
+
     Choco.Pack(dotnetScriptProjectFolder, publishArtifactsFolder, chocolateyArtifactsFolder);
     Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
-    
+
     if (BuildEnvironment.IsSecure)
     {
         await CreateReleaseNotes();
@@ -64,7 +64,7 @@ if (BuildEnvironment.IsWindows)
 
 private async Task CreateReleaseNotes()
 {
-    Logger.Log("Creating release notes");        
+    Logger.Log("Creating release notes");
     var generator = ChangeLogFrom(owner, projectName, BuildEnvironment.GitHubAccessToken).SinceLatestTag();
     if (!Git.Default.IsTagCommit())
     {
@@ -78,8 +78,8 @@ private void PatchPackAsTool(string solutionFolder)
     var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
     var projectFile = XDocument.Load(pathToDotnetScriptProject);
     var packAsToolElement = projectFile.Descendants("PackAsTool").Single();
-    packAsToolElement.Value = "true";   
-    projectFile.Save(pathToDotnetScriptProject); 
+    packAsToolElement.Value = "true";
+    projectFile.Save(pathToDotnetScriptProject);
 }
 
 private void PatchPackageId(string solutionFolder, string packageId)
@@ -87,8 +87,8 @@ private void PatchPackageId(string solutionFolder, string packageId)
     var pathToDotnetScriptProject = Path.Combine(solutionFolder,"Dotnet.Script","Dotnet.Script.csproj");
     var projectFile = XDocument.Load(pathToDotnetScriptProject);
     var packAsToolElement = projectFile.Descendants("PackageId").Single();
-    packAsToolElement.Value = packageId;   
-    projectFile.Save(pathToDotnetScriptProject); 
+    packAsToolElement.Value = packageId;
+    projectFile.Save(pathToDotnetScriptProject);
 }
 
 private void PatchContent(string solutionFolder)
