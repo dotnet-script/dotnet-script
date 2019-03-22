@@ -22,7 +22,6 @@ bld/
 [Oo]bj/
 [Ll]og/
 build/Chocolatey/*.nuspec
-build/Chocolatey/tools/LICENSE.TXT
 build/.vscode
 build/Artifacts
 coverage.info
