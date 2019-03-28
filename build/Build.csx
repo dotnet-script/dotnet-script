@@ -1,5 +1,5 @@
-#! "netcoreapp2.0"
 #load "nuget:Dotnet.Build, 0.3.1"
+#load "nuget:dotnet-steps, 0.0.1"
 #load "nuget:github-changelog, 0.1.5"
 #load "Choco.csx"
 #load "BuildContext.csx"
@@ -9,56 +9,96 @@ using static ChangeLog;
 using static FileUtils;
 using System.Xml.Linq;
 
-DotNet.Build(dotnetScriptProjectFolder);
-// DotNet.Test(testProjectFolder);
+[StepDescription("Runs all tests. Note: Desktop tests are only executed on Windows.")]
+Step test = () => RunTests();
 
-// desktop CLR tests should only run on Windows
-// we can run them on Mono in the future using the xunit runner instead of dotnet test
-if (BuildEnvironment.IsWindows)
+[StepDescription("Creates all NuGet packages and the release zip for GitHub releases")]
+Step pack = () =>
 {
-    // DotNet.Test(testDesktopProjectFolder);
+    CreateGitHubReleaseAsset();
+    CreateNuGetPackages();
+    CreateChocoPackage();
+    CreateGlobalToolPackage();
+};
+
+
+AsyncStep release = async () =>
+{
+    //test();
+    pack();
+    await PublishRelease();
+};
+
+await StepRunner.Execute(Args);
+
+
+
+private void CreateGitHubReleaseAsset()
+{
+    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "netcoreapp2.1");
+    Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
 }
 
-DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "netcoreapp3.0");
 
-// We only publish packages from Windows/AppVeyor
-if (BuildEnvironment.IsWindows)
+private void CreateChocoPackage()
 {
+    if (BuildEnvironment.IsWindows)
+    {
+        Choco.Pack(dotnetScriptProjectFolder, publishArtifactsFolder, chocolateyArtifactsFolder);
+    }
+    else
+    {
+        Logger.Log("The choco package is only built on Windows");
+    }
+}
 
+private void CreateGlobalToolPackage()
+{
     using(var globalToolBuildFolder = new DisposableFolder())
     {
         Copy(solutionFolder, globalToolBuildFolder.Path);
         PatchPackAsTool(globalToolBuildFolder.Path);
         PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
         PatchContent(globalToolBuildFolder.Path);
-        DotNet.Pack(Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script"), nuGetArtifactsFolder);
+        Command.Capture("dotnet",$"pack --configuration release --output {nuGetArtifactsFolder}", Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script")).Dump();
+    }
+}
+
+private void CreateNuGetPackages()
+{
+    Command.Execute("dotnet",$"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptProjectFolder);
+    Command.Execute("dotnet",$"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptCoreProjectFolder);
+    Command.Execute("dotnet",$"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptDependencyModelProjectFolder);
+    Command.Execute("dotnet",$"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptDependencyModelNuGetProjectFolder);
+}
+
+
+private void RunTests()
+{
+    DotNet.Test(testProjectFolder);
+    if (BuildEnvironment.IsWindows)
+    {
+        DotNet.Test(testDesktopProjectFolder);
+    }
+}
+
+private async Task PublishRelease()
+{
+    if (!BuildEnvironment.IsSecure)
+    {
+        Logger.Log("Pushing a new release can only be done in a secure build environment");
+        return;
     }
 
-    using(var nugetPackageBuildFolder = new DisposableFolder())
+    await CreateReleaseNotes();
+
+    if (Git.Default.IsTagCommit())
     {
-        Copy(solutionFolder, nugetPackageBuildFolder.Path);
-        DotNet.Pack(Path.Combine(nugetPackageBuildFolder.Path,"Dotnet.Script"), nuGetArtifactsFolder);
-    }
-
-    DotNet.Pack(dotnetScriptCoreProjectFolder, nuGetArtifactsFolder);
-    DotNet.Pack(dotnetScriptDependencyModelProjectFolder, nuGetArtifactsFolder);
-    DotNet.Pack(dotnetScriptDependencyModelNuGetProjectFolder, nuGetArtifactsFolder);
-
-    Choco.Pack(dotnetScriptProjectFolder, publishArtifactsFolder, chocolateyArtifactsFolder);
-    Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
-
-    if (BuildEnvironment.IsSecure)
-    {
-        await CreateReleaseNotes();
-
-        if (Git.Default.IsTagCommit())
-        {
-            Git.Default.RequreCleanWorkingTree();
-            await ReleaseManagerFor(owner, projectName,BuildEnvironment.GitHubAccessToken)
-            .CreateRelease(Git.Default.GetLatestTag(), pathToReleaseNotes, new [] { new ZipReleaseAsset(pathToGitHubReleaseAsset) });
-            NuGet.TryPush(nuGetArtifactsFolder);
-            Choco.TryPush(chocolateyArtifactsFolder, BuildEnvironment.ChocolateyApiKey);
-        }
+        Git.Default.RequreCleanWorkingTree();
+        await ReleaseManagerFor(owner, projectName,BuildEnvironment.GitHubAccessToken)
+        .CreateRelease(Git.Default.GetLatestTag(), pathToReleaseNotes, new [] { new ZipReleaseAsset(pathToGitHubReleaseAsset) });
+        NuGet.TryPush(nuGetArtifactsFolder);
+        Choco.TryPush(chocolateyArtifactsFolder, BuildEnvironment.ChocolateyApiKey);
     }
 }
 
