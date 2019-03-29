@@ -21,10 +21,10 @@ Step pack = () =>
     CreateGlobalToolPackage();
 };
 
-
+[DefaultStep]
 AsyncStep release = async () =>
 {
-    //test();
+    test();
     pack();
     await PublishRelease();
 };
