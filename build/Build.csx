@@ -84,6 +84,12 @@ private void RunTests()
 
 private async Task PublishRelease()
 {
+    if (!BuildEnvironment.IsWindows)
+    {
+        Logger.Log("Pushing a release can only be done from Windows because of Chocolatey");
+        return;
+    }
+
     if (!BuildEnvironment.IsSecure)
     {
         Logger.Log("Pushing a new release can only be done in a secure build environment");
