@@ -5,6 +5,7 @@
         <Authors>filipw</Authors>
         <PackageId>Dotnet.Script</PackageId>
         <TargetFrameworks>netcoreapp2.1;netcoreapp3.0</TargetFrameworks>
+        <!-- <TargetFrameworks>netcoreapp3.0</TargetFrameworks> -->
         <DebugType>portable</DebugType>
         <AssemblyName>dotnet-script</AssemblyName>
         <OutputType>Exe</OutputType>
