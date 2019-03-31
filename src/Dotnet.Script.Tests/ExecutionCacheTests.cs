@@ -7,9 +7,12 @@ namespace Dotnet.Script.Tests
 {
     public class ExecutionCacheTests
     {
+        private readonly ITestOutputHelper testOutputHelper;
+
         public ExecutionCacheTests(ITestOutputHelper testOutputHelper)
         {
             testOutputHelper.Capture();
+            this.testOutputHelper = testOutputHelper;
         }
 
         [Fact]
@@ -82,9 +85,10 @@ namespace Dotnet.Script.Tests
             }
         }
 
-        private static (string output, string hash) Execute(string pathToScript)
+        private (string output, string hash) Execute(string pathToScript)
         {
             var result = ScriptTestRunner.Default.Execute(pathToScript);
+            testOutputHelper.WriteLine(result.output);
             Assert.Equal(0, result.exitCode);
             string pathToExecutionCache = GetPathToExecutionCache(pathToScript);
             var pathToCacheFile = Path.Combine(pathToExecutionCache, "script.sha256");
@@ -93,6 +97,7 @@ namespace Dotnet.Script.Tests
             {
                 cachedhash = File.ReadAllText(pathToCacheFile);
             }
+
             return (result.output, cachedhash);
         }
 
