@@ -68,6 +68,20 @@ namespace Dotnet.Script.Core
             }
         }
 
+        /// <summary>
+        /// Platform specific registeration of .csx files to be executable
+        /// </summary>
+        public void RegisterFileHandler()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // register dotnet-script as the tool to process .csx files 
+                _commandRunner.Execute("reg", @"add HKCU\Software\classes\.csx /f /ve /t REG_SZ -d dotnetscript");
+                _commandRunner.Execute("reg", $@"add HKCU\Software\Classes\dotnetscript\Shell\Open\Command /f /ve /t REG_EXPAND_SZ /d ""\""%ProgramFiles%\dotnet\dotnet.exe\"" exec \""{Path.Combine(_scriptEnvironment.InstallLocation, "dotnet-script.dll")}\"" \""%1\"" -- %*""");
+            }
+            _scriptConsole.WriteSuccess($"...[Registered]");
+        }
+
         private void CreateScriptFile(string fileName, string currentWorkingDirectory)
         {
             if (string.IsNullOrWhiteSpace(fileName))
