@@ -77,7 +77,7 @@ namespace Dotnet.Script.Core
             {
                 // register dotnet-script as the tool to process .csx files 
                 _commandRunner.Execute("reg", @"add HKCU\Software\classes\.csx /f /ve /t REG_SZ -d dotnetscript");
-                _commandRunner.Execute("reg", $@"add HKCU\Software\Classes\dotnetscript\Shell\Open\Command /f /ve /t REG_EXPAND_SZ /d ""\""%ProgramFiles%\dotnet\dotnet.exe\"" exec \""{Path.Combine(_scriptEnvironment.InstallLocation, "dotnet-script.dll")}\"" \""%1\"" -- %*""");
+                _commandRunner.Execute("reg", $@"add HKCU\Software\Classes\dotnetscript\Shell\Open\Command /f /ve /t REG_EXPAND_SZ /d ""\""%ProgramFiles%\dotnet\dotnet.exe\"" script \""%1\"" -- %*""");
             }
             _scriptConsole.WriteSuccess($"...[Registered]");
         }
