@@ -29,17 +29,17 @@ namespace Dotnet.Script.Core
 
         static ScriptCompiler()
         {
-            // force Roslyn to use ReferenceManager for the first time
-            Task.Run(() =>
-            {
-                CSharpScript.Create<object>("1", ScriptOptions.Default, typeof(CommandLineScriptGlobals), new InteractiveAssemblyLoader()).RunAsync(new CommandLineScriptGlobals(Console.Out, CSharpObjectFormatter.Instance)).GetAwaiter().GetResult();
-            });
-
             // reset default scripting mode to latest language version to enable C# 8.0 features
             // this is not needed once Roslyn 3.0 stable ships
             var csharpScriptCompilerType = typeof(CSharpScript).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScriptCompiler");
             var parseOptionsField = csharpScriptCompilerType?.GetField("s_defaultOptions", BindingFlags.Static | BindingFlags.NonPublic);
             parseOptionsField?.SetValue(null, new CSharpParseOptions(LanguageVersion.CSharp8, kind: SourceCodeKind.Script));
+            
+            // force Roslyn to use ReferenceManager for the first time
+            Task.Run(() =>
+            {
+                CSharpScript.Create<object>("1", ScriptOptions.Default, typeof(CommandLineScriptGlobals), new InteractiveAssemblyLoader()).RunAsync(new CommandLineScriptGlobals(Console.Out, CSharpObjectFormatter.Instance)).GetAwaiter().GetResult();
+            });
         }
 
         protected virtual IEnumerable<string> ImportedNamespaces => new[]
