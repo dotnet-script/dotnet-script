@@ -60,7 +60,7 @@ private void CreateGlobalToolPackage()
         PatchPackAsTool(globalToolBuildFolder.Path);
         PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
         PatchContent(globalToolBuildFolder.Path);
-        Command.Capture("dotnet",$"pack --configuration release --output {nuGetArtifactsFolder}", Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script")).Dump();
+        Command.Execute("dotnet",$"pack --configuration release --output {nuGetArtifactsFolder}", Path.Combine(globalToolBuildFolder.Path,"Dotnet.Script"));
     }
 }
 
