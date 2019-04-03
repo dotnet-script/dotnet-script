@@ -542,4 +542,4 @@ dotnet script foo.csx -c release
 
 ## License
 
-[MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE)
+[MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE) 
