@@ -89,8 +89,4 @@ jobs:
     NUGET_APIKEY: $(NUGET_APIKEY)
     CHOCOLATEY_APIKEY: $(CHOCOLATEY_APIKEY)
 
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Pipeline Artifact'
-    inputs:
-      targetPath: build/Artifacts
 
