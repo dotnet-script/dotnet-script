@@ -4,10 +4,7 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ## Build status
 
-| Build server | Platform     | Build status                                                                                                                                  |
-|--------------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| AppVeyor     | Windows      | [![](https://img.shields.io/appveyor/ci/filipw/dotnet-script/master.svg)](https://ci.appveyor.com/project/filipw/dotnet-script/branch/master) |
-| Travis       | Linux / OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script)                               |
+[![Build Status](https://bernhardrichter.visualstudio.com/dotnet-script/_apis/build/status/filipw.dotnet-script?branchName=master)](https://bernhardrichter.visualstudio.com/dotnet-script/_build/latest?definitionId=4&branchName=master)
 
 
 ## Nuget Packages
@@ -24,7 +21,7 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ### Prerequisites
 
-The only thing we need to install is [.Net Core 2.1+ SDK](https://www.microsoft.com/net/download/core). 
+The only thing we need to install is [.Net Core 2.1+ SDK](https://www.microsoft.com/net/download/core).
 
 ### .Net Core 2.1 Global Tool
 
@@ -159,8 +156,8 @@ foo.csx arg1 arg2 arg3
 ```
 > OSX/Linux
 >
-> Just like all scripts, on OSX/Linux you need to have a !# and mark the file as executable via **chmod +x foo.csx**.  
-> If you use **dotnet script init**  to create your csx it will automatically have the !# directive and be marked as 
+> Just like all scripts, on OSX/Linux you need to have a !# and mark the file as executable via **chmod +x foo.csx**.
+> If you use **dotnet script init**  to create your csx it will automatically have the !# directive and be marked as
 > executable.
 
 The OSX/Linux shebang directive should be **#!/usr/bin/env dotnet-script**
@@ -236,7 +233,7 @@ dotnet script foo.csx -s https://SomePackageSource -s https://AnotherPackageSour
 ```
 
 ### Creating DLLs or Exes from a CSX file
-Dotnet-Script can create a standalone executable or DLL for your script. 
+Dotnet-Script can create a standalone executable or DLL for your script.
 
 | Switch | Long switch                     | description                                                                                                          |
 |--------|---------------------------------|----------------------------------------------------------------------------------------------------------------------|
@@ -255,7 +252,7 @@ dotnet script exec {path_to_dll} -- arg1 arg2
 
 ### Caching
 
-We provide two types of caching, the `dependency cache` and the `execution cache` which is explained in detail below. In order for any of these caches to be enabled, it is required that all NuGet package references are specified using an exact version number. The reason for this constraint is that we need to make sure that we don't execute a script with a stale dependency graph. 
+We provide two types of caching, the `dependency cache` and the `execution cache` which is explained in detail below. In order for any of these caches to be enabled, it is required that all NuGet package references are specified using an exact version number. The reason for this constraint is that we need to make sure that we don't execute a script with a stale dependency graph.
 
 #### Dependency Cache
 
@@ -264,11 +261,11 @@ This is an out-of-process operation and represents a significant overhead to the
 
 #### Execution cache
 
-In order to execute a script it needs to be compiled first and since that is a CPU and time consuming operation, we make sure that we only compile when the source code has changed. This works by creating a SHA256 hash from all the script files involved in the execution. This hash is written to a temporary location along with the DLL that represents the result of the script compilation. When a script is executed the hash is computed and compared with the hash from the previous compilation. If they match there is no need to recompile and we run from the already compiled DLL. If the hashes don't match, the cache is invalidated and we recompile. 
+In order to execute a script it needs to be compiled first and since that is a CPU and time consuming operation, we make sure that we only compile when the source code has changed. This works by creating a SHA256 hash from all the script files involved in the execution. This hash is written to a temporary location along with the DLL that represents the result of the script compilation. When a script is executed the hash is computed and compared with the hash from the previous compilation. If they match there is no need to recompile and we run from the already compiled DLL. If the hashes don't match, the cache is invalidated and we recompile.
 
-> You can override this automatic caching by passing **--nocache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script. 
+> You can override this automatic caching by passing **--nocache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script.
 
-### 
+###
 
 ### Debugging
 
@@ -277,7 +274,7 @@ The days of debugging scripts using `Console.WriteLine` are over. One major feat
 ![debug](https://user-images.githubusercontent.com/1034073/30173509-2f31596c-93f8-11e7-9124-ca884cf6564e.gif)
 ### Script Packages
 
-Script packages are a way of organizing reusable scripts into NuGet packages that can be consumed by other scripts. This means that we now can leverage scripting infrastructure without the need for any kind of bootstrapping. 
+Script packages are a way of organizing reusable scripts into NuGet packages that can be consumed by other scripts. This means that we now can leverage scripting infrastructure without the need for any kind of bootstrapping.
 
 #### Creating a script package
 
@@ -292,16 +289,16 @@ The following example shows how the scripts are laid out inside the NuGet packag
             └── main.csx
 ```
 
-This example contains just the `main.csx` file in the root folder, but packages may have multiple script files either in the root folder or in subfolders below the root folder. 
+This example contains just the `main.csx` file in the root folder, but packages may have multiple script files either in the root folder or in subfolders below the root folder.
 
 When loading a script package we will look for an entry point script to be loaded. This entry point script is identified by one of the following.
 
-- A script called `main.csx` in the root folder  
+- A script called `main.csx` in the root folder
 - A single script file in the root folder
 
 If the entry point script cannot be determined, we will simply load all the scripts files in the package.
 
-> The advantage with using an entry point script is that we can control loading other scripts from the package. 
+> The advantage with using an entry point script is that we can control loading other scripts from the package.
 
 #### Consuming a script package
 
@@ -321,19 +318,19 @@ targets.Add("default", () => Console.WriteLine("Hello, world!"));
 Run(Args, targets);
 ```
 
-> Note: Debugging also works for script packages so that we can easily step into the scripts that are brought in using the `#load` directive. 
+> Note: Debugging also works for script packages so that we can easily step into the scripts that are brought in using the `#load` directive.
 
 
 
 ### Remote Scripts
 
-Scripts don't actually have to exist locally on the machine. We can also execute scripts that are made available on an `http(s)` endpoint.  
+Scripts don't actually have to exist locally on the machine. We can also execute scripts that are made available on an `http(s)` endpoint.
 
 This means that we can create a Gist on Github and execute it just by providing the URL to the Gist.
 
 This [Gist](https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx) contains a script that prints out "Hello World"
 
-We can execute the script like this 
+We can execute the script like this
 
 ```shell
 dotnet script https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx
@@ -354,7 +351,7 @@ public static string GetScriptPath([CallerFilePath] string path = null) => path;
 public static string GetScriptFolder([CallerFilePath] string path = null) => Path.GetDirectoryName(path);
 ```
 
-> Tip: Put these methods as top level methods in a separate script file and `#load` that file wherever access to the script path and/or folder is needed. 
+> Tip: Put these methods as top level methods in a separate script file and `#load` that file wherever access to the script path and/or folder is needed.
 
 
 
@@ -445,7 +442,7 @@ When you run this with the `-i` flag, `Hello World` is printed, REPL starts and 
 ```
 ~$ dotnet script foo.csx -i
 Hello World
-> 
+>
 ```
 
 You can also seed the REPL from inside the REPL - at any point - by invoking a `#load` directive pointed at a specific file. For example:
@@ -457,7 +454,7 @@ Hello World
 >
 ```
 
-## Piping 
+## Piping
 
 The following example shows how we can pipe data in and out of a script.
 
@@ -466,15 +463,15 @@ The `UpperCase.csx` script simply converts the standard input to upper case and 
 ```csharp
 #! "netcoreapp2.1"
 using (var streamReader = new StreamReader(Console.OpenStandardInput()))
-{    
-    Write(streamReader.ReadToEnd().ToUpper()); 
+{
+    Write(streamReader.ReadToEnd().ToUpper());
 }
 ```
 
 We can now simply pipe the output from one command into our script like this.
 
 ```shell
-echo "This is some text" | dotnet script UpperCase.csx 
+echo "This is some text" | dotnet script UpperCase.csx
 THIS IS SOME TEXT
 ```
 
@@ -503,26 +500,26 @@ public static void WaitForDebugger()
 }
 ```
 
-To debug the script when executing it from the command line we can do something like 
+To debug the script when executing it from the command line we can do something like
 
 ````c#
 #! "netcoreapp2.0"
 #r "nuget: NetStandard.Library, 2.0.0"
 WaitForDebugger();
 using (var streamReader = new StreamReader(Console.OpenStandardInput()))
-{    
+{
     Write(streamReader.ReadToEnd().ToUpper()); // <- SET BREAKPOINT HERE
 }
 ````
 
-Now when we run the script from the command line we will get 
+Now when we run the script from the command line we will get
 
 ```shell
 $ echo "This is some text" | dotnet script UpperCase.csx
 Attach Debugger (VS Code)
 ```
 
-This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the  `.NET Core Attach` debugger and pick the process that represents the executing script. 
+This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the  `.NET Core Attach` debugger and pick the process that represents the executing script.
 
 Once that is done we should see out breakpoint being hit.
 
@@ -543,6 +540,6 @@ dotnet script foo.csx -c release
 * [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
 * [Filip W](https://github.com/filipw) ([@filip_woj](https://twitter.com/filip_woj))
 
-## License 
+## License
 
 [MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE)
