@@ -1,0 +1,96 @@
+resources:
+- repo: self
+
+jobs:
+
+- job: Job_3
+  displayName: Ubuntu Agent
+  condition: succeeded()
+  pool:
+    name: Hosted Ubuntu 1604
+  steps:
+  - bash: 'curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.0.100-preview-010184'
+    displayName: 'Install 3.0.100-preview-010184'
+
+  - bash: 'curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 2.1.402'
+    displayName: 'Install 2.1.402'
+
+  - bash: |
+       export PATH=/home/vsts/.dotnet:$PATH
+       curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
+       unzip -o dotnet-script.zip -d ./
+    displayName: 'Install dotnet-script'
+
+  - bash: |
+       export PATH=/home/vsts/.dotnet:$PATH
+       dotnet dotnet-script/dotnet-script.dll build/Build.csx
+    displayName: 'Run build.csx'
+
+
+- job: Job_1
+  displayName: Mac Agent
+  condition: succeeded()
+  pool:
+    name: Hosted macOS
+  steps:
+  - bash: |
+       curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.0.100-preview-010184
+
+    displayName: 'Install 3.0.100-preview-010184'
+
+  - bash: |
+       curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
+       unzip -o dotnet-script.zip -d ./
+    displayName: 'Install dotnet-script'
+
+  - bash: 'dotnet dotnet-script/dotnet-script.dll build/build.csx'
+    displayName: 'Run build.csx'
+
+
+- job: Job_2
+  displayName: Windows Agent
+  condition: succeeded()
+  pool:
+    name: Hosted Windows 2019 with VS2019
+  steps:
+  - powershell: |
+       iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1
+       .\dotnet-install.ps1 -Version  3.0.100-preview-010184
+
+    displayName: 'Install 3.0.100-preview-010184 SDK'
+
+  - powershell: |
+       iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1
+       .\dotnet-install.ps1 -Version  2.1.402
+
+    displayName: 'Install 3.0.100-preview-010184 2.1.402 SDK'
+
+  - bash: |
+       export PATH=/c/Users/VssAdministrator/AppData/Local/Microsoft/dotnet:$PATH
+       dotnet --info
+
+    displayName: 'Show installed sdk'
+
+  - bash: |
+       export PATH=/c/Users/VssAdministrator/AppData/Local/Microsoft/dotnet:$PATH
+       cd build
+       curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
+       unzip -o dotnet-script.zip -d ./
+    displayName: 'Install dotnet-script'
+
+  - bash: |
+       export PATH=/c/Users/VssAdministrator/AppData/Local/Microsoft/dotnet:$PATH
+       cd build
+       dotnet dotnet-script/dotnet-script.dll build.csx
+    displayName: 'Run build.csx'
+    env:
+      IS_SECURE_BUILDENVIRONMENT: $(IS_SECURE_BUILDENVIRONMENT)
+      GITHUB_REPO_TOKEN: $(GITHUB_REPO_TOKEN)
+      NUGET_APIKEY: $(NUGET_APIKEY)
+      CHOCOLATEY_APIKEY: $(CHOCOLATEY_APIKEY)
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Pipeline Artifact'
+    inputs:
+      targetPath: build/Artifacts
+

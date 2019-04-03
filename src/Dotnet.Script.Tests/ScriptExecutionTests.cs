@@ -250,6 +250,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleIssue435()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("Issue435");
+            Assert.Contains("value:Microsoft.Extensions.Configuration.ConfigurationBuilder", result.output);
+        }
+
+        [Fact]
         public void ShouldThrowExceptionOnInvalidMediaType()
         {
             var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
