@@ -4,12 +4,13 @@ using Microsoft.CodeAnalysis.Scripting.Hosting;
 using System.Threading.Tasks;
 using static System.Console;
 using System.Reflection;
+using System.IO;
 
 namespace dotnetPublishCode
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             try
             {
@@ -17,14 +18,21 @@ namespace dotnetPublishCode
                 foreach (var arg in args)
                     globals.Args.Add(arg);
 
-                var assembly = Assembly.LoadFrom("scriptAssembly.dll");
+                var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                var assembly = Assembly.LoadFrom(Path.Combine(path, "scriptAssembly.dll"));
                 var type = assembly.GetType("Submission#0");
                 var factoryMethod = type.GetMethod("<Factory>");
                 if (factoryMethod == null) throw new Exception("couldn't find factory method to initiate script");
 
                 var invokeTask = factoryMethod.Invoke(null, new object[] { new object[] { globals, null } }) as Task<int>;
                 var invokeResult = await invokeTask;
-                if (invokeResult != 0) WritePrettyError($"Error result: '{invokeResult}'");
+                if (invokeResult != 0) 
+                {
+                    WritePrettyError($"Error result: '{invokeResult}'");
+                    return 0x1;
+                }
+
+                return 0;
             }
             catch (Exception ex)
             {
@@ -33,6 +41,7 @@ namespace dotnetPublishCode
                     ex = aggregateEx.Flatten().InnerException;
                 }
                 WritePrettyError(ex.ToString());
+                return 0x1;
             }
         }
 
