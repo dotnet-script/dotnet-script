@@ -150,7 +150,7 @@ namespace Dotnet.Script.Core
                 await doWork();
                 if (_scriptState?.Exception != null)
                 {
-                    Console.WriteError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                    Console.WriteError(CSharpObjectFormatter.Instance.ToDisplayString(_scriptState.Exception));
                 }
 
                 if (_scriptState?.ReturnValue != null)
@@ -169,7 +169,7 @@ namespace Dotnet.Script.Core
             }
             catch (Exception e)
             {
-                Console.WriteError(CSharpObjectFormatter.Instance.FormatException(e));
+                Console.WriteError(CSharpObjectFormatter.Instance.ToDisplayString(e));
             }
 
             return null;
