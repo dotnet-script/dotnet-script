@@ -118,7 +118,7 @@ namespace Dotnet.Script.Shared.Tests
             var errorResult = ctx.Console.Error.ToString();
             var result = ctx.Console.Out.ToString();
             Assert.Contains("2", result);
-            Assert.Contains("die!", errorResult);
+            Assert.Contains("System.Exception: die!", errorResult);
         }
 
         [Fact]
