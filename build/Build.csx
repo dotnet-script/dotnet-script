@@ -9,7 +9,7 @@ using static ChangeLog;
 using static FileUtils;
 using System.Xml.Linq;
 
-[StepDescription("Runs all tests. Note: Desktop tests are only executed on Windows.")]
+[StepDescription("Runs all tests.")]
 Step test = () => RunTests();
 
 [StepDescription("Creates all NuGet packages and the release zip for GitHub releases")]
@@ -76,10 +76,7 @@ private void CreateNuGetPackages()
 private void RunTests()
 {
     DotNet.Test(testProjectFolder);
-    if (BuildEnvironment.IsWindows)
-    {
-        DotNet.Test(testDesktopProjectFolder);
-    }
+    DotNet.Test(testDesktopProjectFolder);
 }
 
 private async Task PublishRelease()
