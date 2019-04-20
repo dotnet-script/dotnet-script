@@ -4,6 +4,8 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
+  <Import Project="../../build/netfx.props" />
+
     <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
@@ -18,6 +20,12 @@
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
     <ProjectReference Include="..\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj" />
     <ProjectReference Include="..\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   
 </Project>
