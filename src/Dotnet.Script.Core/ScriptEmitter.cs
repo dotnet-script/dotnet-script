@@ -1,7 +1,9 @@
 ﻿using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
+using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 
 namespace Dotnet.Script.Core
 {
@@ -18,38 +20,40 @@ namespace Dotnet.Script.Core
 
         public virtual ScriptEmitResult Emit<TReturn, THost>(ScriptContext context)
         {
-            try
+            var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
+            foreach (var warning in compilationContext.Warnings)
             {
-                var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
-
-                var compilation = compilationContext.Script.GetCompilation();
-
-                var peStream = new MemoryStream();
-                EmitOptions emitOptions = null;
-                if (context.OptimizationLevel == Microsoft.CodeAnalysis.OptimizationLevel.Debug)
-                {
-                    emitOptions = new EmitOptions()
-                        .WithDebugInformationFormat(DebugInformationFormat.Embedded);
-                }
-
-                var result = compilation.Emit(peStream, options: emitOptions);
-
-                if (result.Success)
-                {
-                    return new ScriptEmitResult(peStream, compilation.DirectiveReferences, compilationContext.RuntimeDependencies);
-                }
-
-                return ScriptEmitResult.Error(result.Diagnostics);
+                _scriptConsole.WriteHighlighted(warning.ToString());
             }
-            catch (CompilationErrorException e)
+
+            if (compilationContext.Errors.Any())
             {
-                foreach (var diagnostic in e.Diagnostics)
+                foreach (var diagnostic in compilationContext.Errors)
                 {
                     _scriptConsole.WriteError(diagnostic.ToString());
                 }
 
-                throw;
+                throw new CompilationErrorException("Script compilation failed due to one or more errors.", compilationContext.Errors.ToImmutableArray());
             }
+
+            var compilation = compilationContext.Script.GetCompilation();
+
+            var peStream = new MemoryStream();
+            EmitOptions emitOptions = null;
+            if (context.OptimizationLevel == Microsoft.CodeAnalysis.OptimizationLevel.Debug)
+            {
+                emitOptions = new EmitOptions()
+                    .WithDebugInformationFormat(DebugInformationFormat.Embedded);
+            }
+
+            var result = compilation.Emit(peStream, options: emitOptions);
+
+            if (result.Success)
+            {
+                return new ScriptEmitResult(peStream, compilation.DirectiveReferences, compilationContext.RuntimeDependencies);
+            }
+
+            return ScriptEmitResult.Error(result.Diagnostics);
         }
     }
 }

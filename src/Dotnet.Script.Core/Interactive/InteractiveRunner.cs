@@ -116,6 +116,21 @@ namespace Dotnet.Script.Core
                 _globals.Args.Add(arg);
 
             var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
+            foreach (var warning in compilationContext.Warnings)
+            {
+                Console.WriteHighlighted(warning.ToString());
+            }
+
+            if (compilationContext.Errors.Any())
+            {
+                foreach (var diagnostic in compilationContext.Errors)
+                {
+                    Console.WriteError(diagnostic.ToString());
+                }
+
+                throw new CompilationErrorException("Script compilation failed due to one or more errors.", compilationContext.Errors.ToImmutableArray());
+            }
+
             _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
             _scriptOptions = compilationContext.ScriptOptions;
         }

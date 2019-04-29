@@ -96,76 +96,59 @@ namespace Dotnet.Script.Core
 
         private string CreateScriptAssembly<TReturn, THost>(ScriptContext context, string outputDirectory, string assemblyFileName)
         {
-            try
+            var emitResult = _scriptEmitter.Emit<TReturn, THost>(context);
+            var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
+            using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
+            using (emitResult.PeStream)
             {
-                var emitResult = _scriptEmitter.Emit<TReturn, THost>(context);
-                if (!emitResult.Success)
+                emitResult.PeStream.WriteTo(peFileStream);
+            }
+
+            foreach (var reference in emitResult.DirectiveReferences)
+            {
+                if (reference.Display.EndsWith(".NuGet.dll"))
                 {
-                    throw new CompilationErrorException("One or more errors occurred when emitting the assembly", emitResult.Diagnostics);
+                    continue;
                 }
 
-                var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
-                using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
-                using (emitResult.PeStream)
-                {
-                    emitResult.PeStream.WriteTo(peFileStream);
-                }
+                var referenceFileInfo = new FileInfo(reference.Display);
+                var fullPathToReference = Path.GetFullPath(referenceFileInfo.FullName);
+                var fullPathToNewAssembly = Path.GetFullPath(Path.Combine(outputDirectory, referenceFileInfo.Name));
 
-                foreach (var reference in emitResult.DirectiveReferences)
+                if (!Equals(fullPathToReference, fullPathToNewAssembly))
                 {
-                    if (reference.Display.EndsWith(".NuGet.dll"))
+                    File.Copy(fullPathToReference, fullPathToNewAssembly, true);
+                }
+            }
+
+            /*  The following is needed to make native assets work.
+                During a regular "dotnet publish" we find these assets in a "runtimes" folder.
+                We must copy these binaries up to the same folder as the script library so
+                that they can be found during execution.
+            */
+            foreach (var runtimeDependency in emitResult.RuntimeDependencies)
+            {
+                if (!runtimeDependency.Name.Contains("microsoft.netcore", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var nativeAsset in runtimeDependency.NativeAssets)
                     {
-                        continue;
+                        File.Copy(nativeAsset, Path.Combine(outputDirectory, Path.GetFileName(nativeAsset)), true);
                     }
-
-                    var referenceFileInfo = new FileInfo(reference.Display);
-                    var fullPathToReference = Path.GetFullPath(referenceFileInfo.FullName);
-                    var fullPathToNewAssembly = Path.GetFullPath(Path.Combine(outputDirectory, referenceFileInfo.Name));
-
-                    if (!Equals(fullPathToReference, fullPathToNewAssembly))
+                    foreach (var runtimeAssembly in runtimeDependency.Assemblies)
                     {
-                        File.Copy(fullPathToReference, fullPathToNewAssembly, true);
-                    }
-                }
-
-                /*  The following is needed to make native assets work.
-                    During a regular "dotnet publish" we find these assets in a "runtimes" folder.
-                    We must copy these binaries up to the same folder as the script library so
-                    that they can be found during execution.
-                */
-                foreach (var runtimeDependency in emitResult.RuntimeDependencies)
-                {
-                    if (!runtimeDependency.Name.Contains("microsoft.netcore", StringComparison.OrdinalIgnoreCase))
-                    {
-                        foreach (var nativeAsset in runtimeDependency.NativeAssets)
+                        File.Copy(runtimeAssembly.Path, Path.Combine(outputDirectory, Path.GetFileName(runtimeAssembly.Path)), true);
+                        var pathToRuntimeAssemblyFolder = Path.GetDirectoryName(runtimeAssembly.Path);
+                        var pdbFileName = $"{Path.GetFileNameWithoutExtension(runtimeAssembly.Path)}.pdb";
+                        var pathToPdb = Path.Combine(pathToRuntimeAssemblyFolder, pdbFileName);
+                        if (File.Exists(pathToPdb))
                         {
-                            File.Copy(nativeAsset, Path.Combine(outputDirectory, Path.GetFileName(nativeAsset)), true);
-                        }
-                        foreach (var runtimeAssembly in runtimeDependency.Assemblies)
-                        {
-                            File.Copy(runtimeAssembly.Path, Path.Combine(outputDirectory, Path.GetFileName(runtimeAssembly.Path)), true);
-                            var pathToRuntimeAssemblyFolder = Path.GetDirectoryName(runtimeAssembly.Path);
-                            var pdbFileName = $"{Path.GetFileNameWithoutExtension(runtimeAssembly.Path)}.pdb";
-                            var pathToPdb = Path.Combine(pathToRuntimeAssemblyFolder, pdbFileName);
-                            if (File.Exists(pathToPdb))
-                            {
-                                File.Copy(pathToPdb, Path.Combine(outputDirectory, Path.GetFileName(pathToPdb)), true);
-                            }
+                            File.Copy(pathToPdb, Path.Combine(outputDirectory, Path.GetFileName(pathToPdb)), true);
                         }
                     }
                 }
+            }
 
-                return assemblyPath;
-            }
-            catch (CompilationErrorException ex)
-            {
-                _scriptConsole.WriteError(ex.Message);
-                foreach (var diagnostic in ex.Diagnostics)
-                {
-                    _scriptConsole.WriteError(diagnostic.ToString());
-                }
-                throw;
-            }
+            return assemblyPath;
         }
 
         private void CopyProgramTemplate(string tempProjectDirecory)

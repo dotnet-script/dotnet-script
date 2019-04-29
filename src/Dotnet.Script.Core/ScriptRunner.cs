@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
@@ -78,20 +80,23 @@ namespace Dotnet.Script.Core
 
         public virtual Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
         {
-            try
+            var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
+            foreach (var warning in compilationContext.Warnings)
             {
-                var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
-                return Execute(compilationContext, host);
+                ScriptConsole.WriteHighlighted(warning.ToString());
             }
-            catch (CompilationErrorException e)
+
+            if (compilationContext.Errors.Any())
             {
-                foreach (var diagnostic in e.Diagnostics)
+                foreach (var diagnostic in compilationContext.Errors)
                 {
                     ScriptConsole.WriteError(diagnostic.ToString());
                 }
 
-                throw;
+                throw new CompilationErrorException("Script compilation failed due to one or more errors.", compilationContext.Errors.ToImmutableArray());
             }
+
+            return Execute(compilationContext, host);
         }
 
         public virtual async Task<TReturn> Execute<TReturn, THost>(ScriptCompilationContext<TReturn> compilationContext, THost host)

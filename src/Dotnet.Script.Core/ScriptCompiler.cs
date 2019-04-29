@@ -34,7 +34,7 @@ namespace Dotnet.Script.Core
             var csharpScriptCompilerType = typeof(CSharpScript).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScriptCompiler");
             var parseOptionsField = csharpScriptCompilerType?.GetField("s_defaultOptions", BindingFlags.Static | BindingFlags.NonPublic);
             parseOptionsField?.SetValue(null, new CSharpParseOptions(LanguageVersion.CSharp8, kind: SourceCodeKind.Script));
-            
+
             // force Roslyn to use ReferenceManager for the first time
             Task.Run(() =>
             {
@@ -59,7 +59,7 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
-        public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+        public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.CSharp8, kind: SourceCodeKind.Script);
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
@@ -136,9 +136,16 @@ namespace Dotnet.Script.Core
 
             SetOptimizationLevel(context, script);
 
-            EvaluateDiagnostics(script);
+            var orderedDiagnostics = script.GetDiagnostics();
+            var suppressedDiagnostics = orderedDiagnostics.Where(d => SuppressedDiagnosticIds.Contains(d.Id));
+            foreach (var suppressedDiagnostic in suppressedDiagnostics)
+            {
+                _logger.Debug($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
+            }
 
-            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions, runtimeDependencies);
+            var nonSuppressedDiagnostics = orderedDiagnostics.Except(suppressedDiagnostics).ToArray();
+
+            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions, runtimeDependencies, nonSuppressedDiagnostics);
         }
 
         private RuntimeDependency[] GetRuntimeDependencies(ScriptContext context)
@@ -184,6 +191,10 @@ namespace Dotnet.Script.Core
                 _logger.Debug($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
             }
 
+            var nonSuppressedDiagnostics = orderedDiagnostics.Except(suppressedDiagnostics);
+            var warningDiagnostics = orderedDiagnostics.Where(x => x.Severity == DiagnosticSeverity.Warning);
+            var errorDiagnostics = orderedDiagnostics.Where(x => x.Severity == DiagnosticSeverity.Error);
+
             if (orderedDiagnostics.Except(suppressedDiagnostics).Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.",
@@ -193,10 +204,16 @@ namespace Dotnet.Script.Core
 
         private void SetOptimizationLevel<TReturn>(ScriptContext context, Script<TReturn> script)
         {
+            var compilationOptionsField = typeof(CSharpCompilation).GetTypeInfo().GetDeclaredField("_options");
+            var compilation = script.GetCompilation();
+            var compilationOptions = (CSharpCompilationOptions)compilationOptionsField.GetValue(compilation);
+            compilationOptions = compilationOptions.WithNullableContextOptions(NullableContextOptions.Enable);
+            compilationOptionsField.SetValue(compilation, compilationOptions);
+
             if (context.OptimizationLevel == OptimizationLevel.Release)
             {
                 _logger.Debug("Configuration/Optimization mode: Release");
-                SetReleaseOptimizationLevel(script.GetCompilation());
+                SetReleaseOptimizationLevel(compilation);
             }
             else
             {
