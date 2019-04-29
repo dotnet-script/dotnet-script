@@ -29,12 +29,6 @@ namespace Dotnet.Script.Core
 
         static ScriptCompiler()
         {
-            // reset default scripting mode to latest language version to enable C# 8.0 features
-            // this is not needed once Roslyn 3.0 stable ships
-            var csharpScriptCompilerType = typeof(CSharpScript).GetTypeInfo().Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScriptCompiler");
-            var parseOptionsField = csharpScriptCompilerType?.GetField("s_defaultOptions", BindingFlags.Static | BindingFlags.NonPublic);
-            parseOptionsField?.SetValue(null, new CSharpParseOptions(LanguageVersion.CSharp8, kind: SourceCodeKind.Script));
-
             // force Roslyn to use ReferenceManager for the first time
             Task.Run(() =>
             {
@@ -59,7 +53,7 @@ namespace Dotnet.Script.Core
         // see: https://github.com/dotnet/roslyn/issues/5501
         protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
 
-        public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.CSharp8, kind: SourceCodeKind.Script);
+        public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Preview, kind: SourceCodeKind.Script);
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
@@ -83,6 +77,7 @@ namespace Dotnet.Script.Core
                 .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
+                .WithLanguageVersion(LanguageVersion.Preview)
                 .WithFileEncoding(context.Code.Encoding);
 
             // if the framework is not Core CLR, add GAC references
