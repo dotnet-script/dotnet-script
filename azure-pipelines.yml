@@ -1,6 +1,15 @@
 resources:
 - repo: self
 
+trigger:
+  tags:
+    include:
+      - refs/tags/*
+  branches:
+    include:
+    - '*'
+
+
 jobs:
 
 - job: Job_3
