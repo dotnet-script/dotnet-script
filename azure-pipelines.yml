@@ -1,6 +1,17 @@
 resources:
 - repo: self
 
+trigger:
+  tags:
+    include:
+      - refs/tags/*
+  branches:
+    include:
+    - '*'
+
+variables:
+- group: dotnet-script-api-keys
+
 jobs:
 
 - job: Job_3
