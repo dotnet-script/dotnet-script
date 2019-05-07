@@ -9,6 +9,8 @@ trigger:
     include:
     - '*'
 
+variables:
+- group: dotnet-script-api-keys
 
 jobs:
 
