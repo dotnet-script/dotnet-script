@@ -94,6 +94,23 @@ namespace Dotnet.Script.Tests
             }
         }
 
+        [Fact]
+        public void ShouldParseFilesStartingWithNuGet()
+        {
+            using (var rootFolder = new DisposableFolder())
+            {
+                var rootScript = WriteScript("#load \"NuGet.csx\"", rootFolder.Path, "Foo.csx");
+                WriteScript(string.Empty, rootFolder.Path, "NuGet.csx");
+                var scriptFilesResolver = new ScriptFilesResolver();
+
+                var files = scriptFilesResolver.GetScriptFiles(rootScript);
+
+                Assert.True(files.Count == 2);
+                Assert.Contains(files, f => f.Contains("Foo.csx"));
+                Assert.Contains(files, f => f.Contains("NuGet.csx"));
+            }
+        }
+
         private static string WriteScript(string content, string folder, string name)
         {
             var fullPath = Path.Combine(folder, name);
