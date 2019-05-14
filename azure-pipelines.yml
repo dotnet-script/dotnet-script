@@ -76,6 +76,13 @@ jobs:
 
     displayName: 'Install 3.0.100-preview-010184 2.1.402 SDK'
 
+  # NuGet Tool Installer
+# Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
+  - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '4.8.2'
+    #checkLatest: false # Optional
+
   - bash: |
        export PATH=/c/Users/VssAdministrator/AppData/Local/Microsoft/dotnet:$PATH
        dotnet --info

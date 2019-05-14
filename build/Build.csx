@@ -10,7 +10,7 @@ using static FileUtils;
 using System.Xml.Linq;
 
 Command.Execute("nuget", "");
-
+return 0;
 [StepDescription("Runs all tests.")]
 Step test = () => RunTests();
 
