@@ -9,8 +9,9 @@ using static ChangeLog;
 using static FileUtils;
 using System.Xml.Linq;
 
-Command.Execute("nuget", "");
-return 0;
+Command.Execute("choco.exe", "");
+return;
+
 [StepDescription("Runs all tests.")]
 Step test = () => RunTests();
 
