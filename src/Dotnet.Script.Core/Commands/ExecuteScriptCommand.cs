@@ -32,6 +32,11 @@ namespace Dotnet.Script.Core.Commands
             }
 
             var pathToLibrary = GetLibrary(options);
+            if (pathToLibrary == null)
+            {
+                return default(TReturn);
+            }
+
             return await ExecuteLibrary<TReturn>(pathToLibrary, options.Arguments, options.NoCache);
         }
 
@@ -64,7 +69,12 @@ namespace Dotnet.Script.Core.Commands
             string CreateLibrary()
             {
                 var options = new PublishCommandOptions(executeOptions.File,executionCacheFolder, "script", PublishType.Library,executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
-                new PublishCommand(_scriptConsole, _logFactory).Execute(options);
+                var success = new PublishCommand(_scriptConsole, _logFactory).Execute(options);
+                if (!success)
+                {
+                    return null;
+                }
+
                 if (hash != null)
                 {
                     File.WriteAllText(Path.Combine(executionCacheFolder, "script.sha256"), hash);

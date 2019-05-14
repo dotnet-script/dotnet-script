@@ -19,7 +19,7 @@ namespace Dotnet.Script.Core.Commands
             _logger = logFactory.CreateLogger<PublishCommand>();
         }
 
-        public void Execute(PublishCommandOptions options)
+        public bool Execute(PublishCommandOptions options)
         {
             var absoluteFilePath = options.File.Path;
 
@@ -34,6 +34,13 @@ namespace Dotnet.Script.Core.Commands
             var scriptEmitter = new ScriptEmitter(_scriptConsole, compiler);
             var publisher = new ScriptPublisher(_logFactory, scriptEmitter);
             var code = absoluteFilePath.ToSourceText();
+
+            // Ignore blank files to prevent erorr in `CreateAssembly`
+            if (code.Length == 0)
+            {
+                return false;
+            }
+
             var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, options.OptimizationLevel, packageSources: options.PackageSources);
 
             if (options.PublishType == PublishType.Library)
@@ -44,6 +51,8 @@ namespace Dotnet.Script.Core.Commands
             {
                 publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier);
             }
+
+            return true;
         }
 
         private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
