@@ -9,6 +9,8 @@ using static ChangeLog;
 using static FileUtils;
 using System.Xml.Linq;
 
+Command.Execute("nuget", "");
+
 [StepDescription("Runs all tests.")]
 Step test = () => RunTests();
 
