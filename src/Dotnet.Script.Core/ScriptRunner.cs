@@ -81,18 +81,10 @@ namespace Dotnet.Script.Core
         public virtual Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
         {
             var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
-            foreach (var warning in compilationContext.Warnings)
-            {
-                ScriptConsole.WriteHighlighted(warning.ToString());
-            }
+            ScriptConsole.WriteDiagnostics(compilationContext.Warnings, compilationContext.Errors);
 
             if (compilationContext.Errors.Any())
             {
-                foreach (var diagnostic in compilationContext.Errors)
-                {
-                    ScriptConsole.WriteError(diagnostic.ToString());
-                }
-
                 throw new CompilationErrorException("Script compilation failed due to one or more errors.", compilationContext.Errors.ToImmutableArray());
             }
 
