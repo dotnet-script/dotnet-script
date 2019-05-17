@@ -21,8 +21,7 @@ namespace Dotnet.Script.Core
         private bool _shouldExit = false;
         private ScriptState<object> _scriptState;
         private ScriptOptions _scriptOptions;
-        private InteractiveScriptGlobals _globals;
-
+        private readonly InteractiveScriptGlobals _globals;
         protected Logger Logger;
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole Console;
@@ -113,9 +112,18 @@ namespace Dotnet.Script.Core
         private async Task RunFirstScript(ScriptContext scriptContext)
         {
             foreach (var arg in scriptContext.Args)
+            {
                 _globals.Args.Add(arg);
+            }
 
             var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
+            Console.WriteDiagnostics(compilationContext.Warnings, compilationContext.Errors);
+
+            if (compilationContext.Errors.Any())
+            {
+                throw new CompilationErrorException("Script compilation failed due to one or more errors.", compilationContext.Errors.ToImmutableArray());
+            }
+
             _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
             _scriptOptions = compilationContext.ScriptOptions;
         }
