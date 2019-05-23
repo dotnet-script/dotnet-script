@@ -16,9 +16,11 @@ namespace Dotnet.Script
         {
             var logLevel = (LogLevel)LevelMapper.FromString(verbosity);
 
-            var loggerFactory = new LoggerFactory();
+            var loggerFilterOptions = new LoggerFilterOptions() { MinLevel = logLevel };
 
-            loggerFactory.AddProvider(new ConsoleLoggerProvider(new ConsoleOptionsMonitor()));
+            var consoleLoggerProvider = new ConsoleLoggerProvider(new ConsoleOptionsMonitor());
+
+            var loggerFactory = new LoggerFactory(new[] { consoleLoggerProvider }, loggerFilterOptions);
 
             return type =>
             {
