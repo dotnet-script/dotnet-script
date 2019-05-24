@@ -59,8 +59,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <summary>
         /// Gets or sets the target framework for this <see cref="ProjectFile"/>.
         /// </summary>
-        //public string TargetFramework { get; set;} = ScriptEnvironment.Default.TargetFramework;
-        public string TargetFramework { get; set; } = "netcoreapp2.1";
+        public string TargetFramework { get; set; } = ScriptEnvironment.Default.TargetFramework;
 
         public void Save(string pathToProjectFile)
         {
