@@ -10,7 +10,6 @@ namespace Dotnet.Script.Desktop.Tests
     {
         public InteractiveRunnerTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
-            ScriptEnvironment.Default.OverrideTargetFramework("net461");
         }
     }
 }
