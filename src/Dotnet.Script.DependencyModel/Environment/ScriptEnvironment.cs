@@ -55,6 +55,16 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         public bool IsNetCore => _netCoreVersion.Value != DotnetVersion.Unknown;
 
+        public void OverrideTargetFramework(string targetFramework)
+        {
+            if (_targetFramework.IsValueCreated)
+            {
+                throw new InvalidOperationException($"Cannot override target framework because a value {_targetFramework.Value} has already been resolved and used.");
+            }
+
+            _overrriddenTargetFramework = targetFramework;
+        }
+
         private static string GetPlatformIdentifier()
         {
             if (RuntimeEnvironment.OperatingSystemPlatform == Platform.Darwin) return "osx";
