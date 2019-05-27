@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Dotnet.Script.Shared.Tests;
 
 namespace Dotnet.Script.Tests
 {

@@ -24,7 +24,7 @@ namespace Dotnet.Script.Tests
             var resolver = CreateResolver();
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("InlineNugetPackage");
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
-            var dependencies =  resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
+            var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
             Assert.Contains(dependencies, d => d.Name == "AutoMapper");
         }
 
