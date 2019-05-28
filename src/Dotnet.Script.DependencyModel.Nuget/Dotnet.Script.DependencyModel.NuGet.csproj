@@ -8,7 +8,7 @@
     <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script;csx;csharp;roslyn;nuget</PackageTags>
-    <Version>0.8.0</Version>
+    <Version>0.9.0</Version>
     <Description>A MetadataReferenceResolver that allows inline nuget references to be specified in script(csx) files.</Description>
     <Authors>dotnet-script</Authors>
     <Company>dotnet-script</Company>

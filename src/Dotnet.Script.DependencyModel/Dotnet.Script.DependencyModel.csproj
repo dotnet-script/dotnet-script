@@ -11,7 +11,7 @@
     <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script;csx;csharp;roslyn;omnisharp</PackageTags>
-    <Version>0.9.0</Version>
+    <Version>0.10.0</Version>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel" Version="4.9.3" />
+    <PackageReference Include="NuGet.ProjectModel" Version="5.0.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
 
   </ItemGroup>
