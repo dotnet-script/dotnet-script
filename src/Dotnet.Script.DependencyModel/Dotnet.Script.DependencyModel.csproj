@@ -26,6 +26,7 @@
   <ItemGroup>
     <PackageReference Include="NuGet.ProjectModel" Version="5.0.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-preview.2" PrivateAssets="All"/>
 
   </ItemGroup>
 
