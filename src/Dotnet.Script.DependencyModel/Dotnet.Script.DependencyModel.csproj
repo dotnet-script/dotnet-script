@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <Authors>dotnet-script</Authors>
     <Company>dotnet-script</Company>
     <Description>Provides runtime and compilation dependency resolution for dotnet-script based scripts.</Description>
