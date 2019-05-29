@@ -101,6 +101,16 @@ namespace Dotnet.Script.Core
                     "System.Xml.Linq",
                     "System.Net.Http",
                     "Microsoft.CSharp");
+
+                // on *nix load netstandard
+                if (!ScriptEnvironment.Default.IsWindows)
+                {
+                    var netstandard = Assembly.Load("netstandard");
+                    if (netstandard != null)
+                    {
+                        opts = opts.AddReferences(MetadataReference.CreateFromFile(netstandard.Location));
+                    }
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(context.FilePath))
