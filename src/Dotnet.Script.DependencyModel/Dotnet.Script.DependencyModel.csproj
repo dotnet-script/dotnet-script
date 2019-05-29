@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Authors>dotnet-script</Authors>
     <Company>dotnet-script</Company>
     <Description>Provides runtime and compilation dependency resolution for dotnet-script based scripts.</Description>
@@ -26,8 +26,6 @@
   <ItemGroup>
     <PackageReference Include="NuGet.ProjectModel" Version="5.0.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-preview.2" PrivateAssets="All"/>
-
   </ItemGroup>
 
 </Project>
