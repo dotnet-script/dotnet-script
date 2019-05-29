@@ -26,7 +26,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static void CopySection(ISettings sourceSettings, ISettings targetSettings, string sectionName)
         {
-            var existingAddItems = sourceSettings.GetSection(sectionName)?.Items.Where(item => item is object && item is SourceItem && item.ElementName.ToLowerInvariant() == "add").Cast<AddItem>();
+            var existingAddItems = sourceSettings.GetSection(sectionName)?.Items.Where(item => item is object && (item is SourceItem || item is AddItem) && item.ElementName.ToLowerInvariant() == "add").Cast<AddItem>();
 
             if (existingAddItems == null)
             {
