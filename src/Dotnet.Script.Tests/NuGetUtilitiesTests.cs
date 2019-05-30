@@ -2,6 +2,7 @@ using Dotnet.Script.DependencyModel.ProjectSystem;
 using NuGet.Configuration;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -213,9 +214,9 @@ namespace Dotnet.Script.Tests
                 {
                     foreach (var expectedSetting in expectedSettings.Value)
                     {
-                        var value = settings.GetValue(expectedSettings.Key, expectedSetting.Key);
+                        var value = settings.GetSection(expectedSettings.Key).Items.Cast<AddItem>().First(i => i.Key == expectedSetting.Key);
                         var resolvedExpectedSetting = string.Format(expectedSetting.Value, sourceFolder, rootTokens);
-                        Assert.Equal(resolvedExpectedSetting, value);
+                        Assert.Equal(resolvedExpectedSetting, value.Value);
                     }
                 }
             }
