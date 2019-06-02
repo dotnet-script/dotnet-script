@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 
 namespace Dotnet.Script.Tests
 {
@@ -42,7 +43,7 @@ namespace Dotnet.Script.Tests
                 if (_scriptEnvironment.IsWindows)
                 {
                     command = pathtoNuget430;
-                    var result = ProcessHelper.RunAndCaptureOutput(command, $"pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}" );
+                    var result = ProcessHelper.RunAndCaptureOutput(command, $"pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}");
                 }
                 else
                 {

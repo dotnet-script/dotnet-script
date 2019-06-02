@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace Dotnet.Script.Tests
+namespace Dotnet.Script.Shared.Tests
 {
     public static class ProcessHelper
     {

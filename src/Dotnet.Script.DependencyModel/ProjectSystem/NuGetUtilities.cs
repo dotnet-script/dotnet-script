@@ -1,70 +1,64 @@
 using NuGet.Configuration;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     internal static class NuGetUtilities
     {
-        struct NuGetConfigSection
-        {
-            public string Name;
-            public HashSet<string> KeysForPathValues;
-            public bool AreAllValuesPaths;
-        }
-
-        static readonly NuGetConfigSection[] NuGetSections = 
-        {
-            new NuGetConfigSection { Name = "config", KeysForPathValues = new HashSet<string> { "globalPackagesFolder", "repositoryPath" } },
-            new NuGetConfigSection { Name = "bindingRedirects" },
-            new NuGetConfigSection { Name = "packageRestore" },
-            new NuGetConfigSection { Name = "solution" },
-            new NuGetConfigSection { Name = "packageSources", AreAllValuesPaths = true },
-            new NuGetConfigSection { Name = "packageSourceCredentials" },
-            new NuGetConfigSection { Name = "apikeys" },
-            new NuGetConfigSection { Name = "disabledPackageSources" },
-            new NuGetConfigSection { Name = "activePackageSource" },
-        };
-
-        // Create a NuGet file containing all properties with resolved absolute paths
         public static void CreateNuGetConfigFromLocation(string pathToEvaluate, string targetDirectory)
         {
-            var settings = Settings.LoadDefaultSettings(pathToEvaluate);
-            var target = new Settings(targetDirectory);
+            var sourceSettings = Settings.LoadDefaultSettings(pathToEvaluate);
+            var targetSettings = new Settings(targetDirectory);
 
-            var valuesToSet = new List<SettingValue>();
-            foreach (var section in NuGetSections)
+            CopySection(sourceSettings, targetSettings, "config");
+            CopySection(sourceSettings, targetSettings, "bindingRedirects");
+            CopySection(sourceSettings, targetSettings, "packageRestore");
+            CopySection(sourceSettings, targetSettings, "solution");
+            CopySection(sourceSettings, targetSettings, "packageSources");
+            CopySection(sourceSettings, targetSettings, "packageSourceCredentials");
+            CopySection(sourceSettings, targetSettings, "apikeys");
+            CopySection(sourceSettings, targetSettings, "disabledPackageSources");
+            CopySection(sourceSettings, targetSettings, "activePackageSource");
+
+            targetSettings.SaveToDisk();
+        }
+
+        private static void CopySection(ISettings sourceSettings, ISettings targetSettings, string sectionName)
+        {
+            var existingAddItems = sourceSettings.GetSection(sectionName)?.Items.Where(item => item is object && (item is SourceItem || item is AddItem) && item.ElementName.ToLowerInvariant() == "add").Cast<AddItem>();
+
+            if (existingAddItems == null)
             {
-                // Resolve properly path values
-                valuesToSet.Clear();
-                if (section.AreAllValuesPaths)
+                return;
+            }
+
+            foreach (var addItem in existingAddItems)
+            {
+                if (ShouldResolvePath(sectionName, addItem.Key))
                 {
-                    // All values are paths
-                    var values = settings.GetSettingValues(section.Name, true);
-                    valuesToSet.AddRange(values);
+                    targetSettings.AddOrUpdate(sectionName, new AddItem(addItem.Key, addItem.GetValueAsPath()));
                 }
                 else
                 {
-                    var values = settings.GetSettingValues(section.Name, false);
-                    if (section.KeysForPathValues != null)
-                    {
-                        // Some values are path
-                        foreach (var value in values)
-                        {
-                            if (section.KeysForPathValues.Contains(value.Key))
-                            {
-                                var val = settings.GetValue(section.Name, value.Key, true);
-                                value.Value = val;
-                            }
-
-                            valuesToSet.Add(value);
-                        }
-                    }
-                    else
-                        // All values are not path
-                        valuesToSet.AddRange(values);
+                    targetSettings.AddOrUpdate(sectionName, addItem);
                 }
-                target.SetValues(section.Name, valuesToSet);
             }
+        }
+
+        private static bool ShouldResolvePath(string sectionName, string key)
+        {
+            if (sectionName == "packageSources")
+            {
+                return true;
+            }
+
+            if (sectionName == "config")
+            {
+                return key == "globalPackagesFolder" || key == "repositoryPath";
+            }
+
+            return false;
         }
     }
 }

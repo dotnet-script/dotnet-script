@@ -1,4 +1,5 @@
 ﻿using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.Shared.Tests;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -80,7 +81,7 @@ namespace Dotnet.Script.Tests
 
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
 
-                Assert.True((bool) settings.script.enableScriptNuGetReferences.Value);
+                Assert.True((bool)settings.script.enableScriptNuGetReferences.Value);
             }
         }
 
@@ -95,7 +96,7 @@ namespace Dotnet.Script.Tests
 
                 dynamic settings = JObject.Parse(File.ReadAllText(Path.Combine(scriptFolder.Path, "omnisharp.json")));
 
-                Assert.Equal(_scriptEnvironment.TargetFramework, (string) settings.script.defaultTargetFramework.Value);
+                Assert.Equal(_scriptEnvironment.TargetFramework, (string)settings.script.defaultTargetFramework.Value);
             }
         }
 

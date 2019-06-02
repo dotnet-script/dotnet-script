@@ -1,4 +1,4 @@
-#load "nuget:Dotnet.Build, 0.3.1"
+#load "nuget:Dotnet.Build, 0.3.9"
 using static FileUtils;
 using System.Xml.Linq;
 
