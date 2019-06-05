@@ -29,8 +29,10 @@ namespace Dotnet.Script.DependencyModel.Process
             var startInformation = CreateProcessStartInfo(commandPath, arguments, workingDirectory);
             var process = CreateProcess(startInformation);
             process.Start();
+            var standardOut = process.StandardOutput.ReadToEnd();
+            var standardError = process.StandardError.ReadToEnd();
             process.WaitForExit();
-            return new CommandResult(process.ExitCode, process.StandardOutput.ReadToEnd(), process.StandardError.ReadToEnd());
+            return new CommandResult(process.ExitCode, standardOut, standardError);
         }
 
         private static ProcessStartInfo CreateProcessStartInfo(string commandPath, string arguments, string workingDirectory)
