@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.Process;
 using NuGet.Configuration;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
@@ -13,17 +15,19 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         private readonly ScriptParser _scriptParser;
         private readonly ScriptFilesResolver _scriptFilesResolver;
         private readonly ScriptEnvironment _scriptEnvironment;
+        private readonly CommandRunner _commandRunner;
         private readonly Logger _logger;
 
-        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
+        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment, CommandRunner commandRunner)
         {
             _logger = logFactory.CreateLogger<ScriptProjectProvider>();
             _scriptParser = scriptParser;
             _scriptFilesResolver = scriptFilesResolver;
             _scriptEnvironment = scriptEnvironment;
+            _commandRunner = commandRunner;
         }
 
-        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, ScriptEnvironment.Default)
+        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, ScriptEnvironment.Default, new CommandRunner(logFactory))
         {
         }
 
@@ -59,7 +63,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             if (defaultTargetFramework == "netcoreapp3.0")
             {
-                projectFile.PackageReferences.Add(new PackageReference("Microsoft.NetCore.App", $"[{_scriptEnvironment.NetCoreVersion.Version}]"));
+                AddNetCoreAppReference(projectFile);
             }
 
             projectFile.Save(pathToProjectFile);
@@ -133,11 +137,33 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             if (defaultTargetFramework == "netcoreapp3.0")
             {
-                projectFile.PackageReferences.Add(new PackageReference("Microsoft.NetCore.App", $"[{_scriptEnvironment.NetCoreVersion.Version}]"));
+                AddNetCoreAppReference(projectFile);
             }
 
             projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
             return projectFile;
+        }
+
+        private void AddNetCoreAppReference(ProjectFile projectFile)
+        {
+            string dotnetRuntimeVersion;
+            if (!_scriptEnvironment.IsNetCore)
+            {
+                // We only go here if the host is desktop (OmniSharp)
+
+                _logger.Debug("Trying to determine .Net Core runtime version using dotnet --info");
+                var workingDirectory = Path.GetDirectoryName(new Uri(typeof(ScriptProjectProvider).Assembly.CodeBase).LocalPath);
+                var dotnetInfo = _commandRunner.Capture("dotnet", "--info", workingDirectory)
+                    .EnsureSuccessfulExitCode().StandardOut;
+                dotnetRuntimeVersion = Regex.Match(dotnetInfo, @"^Host.*\n\s*Version:\s*(.*)$", RegexOptions.Multiline).Groups[1].Value;
+                _logger.Debug($"dotnet --info reported runtime version : {dotnetRuntimeVersion}");
+            }
+            else
+            {
+                dotnetRuntimeVersion = _scriptEnvironment.NetCoreVersion.Version;
+            }
+
+            projectFile.PackageReferences.Add(new PackageReference("Microsoft.NetCore.App", $"[{dotnetRuntimeVersion}]"));
         }
 
         private void EvaluateAndGenerateNuGetConfigFile(string targetDirectory, string pathToProjectFileFolder)

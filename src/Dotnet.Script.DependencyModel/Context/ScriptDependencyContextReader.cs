@@ -35,7 +35,6 @@ namespace Dotnet.Script.DependencyModel.Context
         public ScriptDependencyContext ReadDependencyContext(string pathToAssetsFile)
         {
             var lockFile = GetLockFile(pathToAssetsFile);
-
             // Since we execute "dotnet restore -r [rid]" we get two targets in the lock file.
             // The second target is the one containing the runtime deps for the given RID.
             var target = GetLockFileTarget(lockFile);

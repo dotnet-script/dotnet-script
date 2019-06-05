@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.Process
@@ -13,25 +15,36 @@ namespace Dotnet.Script.DependencyModel.Process
             _logger = logFactory.CreateLogger<CommandRunner>();
         }
 
-        public int Execute(string commandPath, string arguments = null)
+        public int Execute(string commandPath, string arguments = null, string workingDirectory = null)
         {
             _logger.Debug($"Executing '{commandPath} {arguments}'");
-            var startInformation = CreateProcessStartInfo(commandPath, arguments);            
+            var startInformation = CreateProcessStartInfo(commandPath, arguments, workingDirectory);
             var process = CreateProcess(startInformation);
             RunAndWait(process);
             return process.ExitCode;
         }
 
-        private static ProcessStartInfo CreateProcessStartInfo(string commandPath, string arguments)
+        public CommandResult Capture(string commandPath, string arguments, string workingDirectory = null)
+        {
+            var startInformation = CreateProcessStartInfo(commandPath, arguments, workingDirectory);
+            var process = CreateProcess(startInformation);
+            process.Start();
+            process.WaitForExit();
+            return new CommandResult(process.ExitCode, process.StandardOutput.ReadToEnd(), process.StandardError.ReadToEnd());
+        }
+
+        private static ProcessStartInfo CreateProcessStartInfo(string commandPath, string arguments, string workingDirectory)
         {
             var startInformation = new ProcessStartInfo($"{commandPath}")
             {
                 CreateNoWindow = true,
                 Arguments = arguments ?? "",
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,                
-                UseShellExecute = false
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                WorkingDirectory = workingDirectory ?? System.Environment.CurrentDirectory
             };
+
             RemoveMsBuildEnvironmentVariables(startInformation.Environment);
             return startInformation;
         }
@@ -53,7 +66,7 @@ namespace Dotnet.Script.DependencyModel.Process
         }
         private System.Diagnostics.Process CreateProcess(ProcessStartInfo startInformation)
         {
-            var process = new System.Diagnostics.Process {StartInfo = startInformation};
+            var process = new System.Diagnostics.Process { StartInfo = startInformation };
             process.OutputDataReceived += (s, e) =>
             {
                 if (!string.IsNullOrWhiteSpace(e.Data))
@@ -71,4 +84,27 @@ namespace Dotnet.Script.DependencyModel.Process
             return process;
         }
     }
+
+    public class CommandResult
+    {
+        public CommandResult(int exitCode, string standardOut, string standardError)
+        {
+            ExitCode = exitCode;
+            StandardOut = standardOut;
+            StandardError = standardError;
+        }
+        public string StandardOut { get; }
+        public string StandardError { get; }
+        public int ExitCode { get; }
+
+        public CommandResult EnsureSuccessfulExitCode(int success = 0)
+        {
+            if (ExitCode != success)
+            {
+                throw new InvalidOperationException(StandardError);
+            }
+            return this;
+        }
+    }
+
 }
