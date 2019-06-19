@@ -135,16 +135,4 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return pathToProjectFile;
         }
     }
-
-    public class ProjectFileInfo
-    {
-        public ProjectFileInfo(string path, string nugetConfigFile)
-        {
-            Path = path;
-            NuGetConfigFile = nugetConfigFile;
-        }
-
-        public string Path { get; }
-        public string NuGetConfigFile { get; }
-    }
 }
