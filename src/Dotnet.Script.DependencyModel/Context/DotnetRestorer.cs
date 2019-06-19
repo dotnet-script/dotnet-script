@@ -1,6 +1,7 @@
 ﻿using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using System;
 using System.Linq;
 
@@ -19,18 +20,18 @@ namespace Dotnet.Script.DependencyModel.Context
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
-        public void Restore(string pathToProjectFile, string[] packageSources)
+        public void Restore(ProjectFileInfo projectFileInfo, string[] packageSources)
         {
             var packageSourcesArgument = CreatePackageSourcesArguments();
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
 
-             _logger.Debug($"Restoring {pathToProjectFile} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");
-            var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" -r {runtimeIdentifier} {packageSourcesArgument}");
+            _logger.Debug($"Restoring {projectFileInfo.Path} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");
+            var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" -r {runtimeIdentifier} {packageSourcesArgument}");
             //var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" {packageSourcesArgument}");
             if (exitcode != 0)
             {
                 // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'
-                throw new Exception($"Unable to restore packages from '{pathToProjectFile}'. Make sure that all script files contains valid NuGet references");
+                throw new Exception($"Unable to restore packages from '{projectFileInfo.Path}'. Make sure that all script files contains valid NuGet references");
             }
 
             string CreatePackageSourcesArguments()

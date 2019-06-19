@@ -35,9 +35,9 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
         public IEnumerable<CompilationDependency> GetDependencies(string targetDirectory, IEnumerable<string> scriptFiles, bool enableScriptNugetReferences, string defaultTargetFramework = "net46")
         {
-            var pathToProjectFile = _scriptProjectProvider.CreateProject(targetDirectory, scriptFiles,defaultTargetFramework, enableScriptNugetReferences);
-            _restorer.Restore(pathToProjectFile, packageSources: Array.Empty<string>());
-            var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(pathToProjectFile), "obj", "project.assets.json");
+            var projectFileInfo = _scriptProjectProvider.CreateProject(targetDirectory, scriptFiles, defaultTargetFramework, enableScriptNugetReferences);
+            _restorer.Restore(projectFileInfo, packageSources: Array.Empty<string>());
+            var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(projectFileInfo.Path), "obj", "project.assets.json");
             var dependencyContext = _scriptDependencyContextReader.ReadDependencyContext(pathToAssetsFile);
             var result = new List<CompilationDependency>();
             foreach (var scriptDependency in dependencyContext.Dependencies)
@@ -51,7 +51,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
         private static IRestorer CreateRestorer(LogFactory logFactory)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory),logFactory);
+            return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory), logFactory);
         }
     }
 }

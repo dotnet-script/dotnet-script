@@ -25,21 +25,23 @@ namespace Dotnet.Script.Tests
             using (var projectFolder = new DisposableFolder())
             {
 
-                var pathToProjectFile = Path.Combine(projectFolder.Path ,"script.csproj");
-                var pathToCachedProjectFile = Path.Combine(projectFolder.Path ,"script.csproj.cache");
+                var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
+                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, "script.csproj.cache");
 
                 var projectFile = new ProjectFile();
                 projectFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
                 projectFile.PackageReferences.Add(new PackageReference("AnotherPackage", "3.2.1"));
                 projectFile.Save(pathToProjectFile);
 
-                cachedRestorer.Restore(pathToProjectFile, NoPackageSources);
-                restorerMock.Verify(m => m.Restore(pathToProjectFile, NoPackageSources), Times.Once);
+                var projectFileInfo = new ProjectFileInfo(pathToProjectFile, string.Empty);
+
+                cachedRestorer.Restore(projectFileInfo, NoPackageSources);
+                restorerMock.Verify(m => m.Restore(projectFileInfo, NoPackageSources), Times.Once);
                 Assert.True(Directory.GetFiles(projectFolder.Path).Contains(pathToCachedProjectFile));
                 restorerMock.Reset();
 
-                cachedRestorer.Restore(pathToProjectFile, NoPackageSources);
-                restorerMock.Verify(m => m.Restore(pathToProjectFile, NoPackageSources), Times.Never);
+                cachedRestorer.Restore(projectFileInfo, NoPackageSources);
+                restorerMock.Verify(m => m.Restore(projectFileInfo, NoPackageSources), Times.Never);
                 Assert.True(Directory.GetFiles(projectFolder.Path).Contains(pathToCachedProjectFile));
             }
         }
@@ -53,21 +55,23 @@ namespace Dotnet.Script.Tests
             using (var projectFolder = new DisposableFolder())
             {
                 var projectFile = new ProjectFile();
-                var pathToProjectFile = Path.Combine(projectFolder.Path ,"script.csproj");
-                var pathToCachedProjectFile = Path.Combine(projectFolder.Path ,"script.csproj.cache");
+                var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
+                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, "script.csproj.cache");
 
                 projectFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
                 projectFile.PackageReferences.Add(new PackageReference("AnotherPackage", "3.2"));
                 projectFile.Save(pathToProjectFile);
 
-                cachedRestorer.Restore(pathToProjectFile, NoPackageSources);
+                var projectFileInfo = new ProjectFileInfo(pathToProjectFile, string.Empty);
 
-                restorerMock.Verify(m => m.Restore(pathToProjectFile, NoPackageSources), Times.Once);
+                cachedRestorer.Restore(projectFileInfo, NoPackageSources);
+
+                restorerMock.Verify(m => m.Restore(projectFileInfo, NoPackageSources), Times.Once);
                 Assert.False(Directory.GetFiles(projectFolder.Path).Contains(pathToCachedProjectFile));
                 restorerMock.Reset();
 
-                cachedRestorer.Restore(pathToProjectFile, NoPackageSources);
-                restorerMock.Verify(m => m.Restore(pathToProjectFile, NoPackageSources), Times.Once);
+                cachedRestorer.Restore(projectFileInfo, NoPackageSources);
+                restorerMock.Verify(m => m.Restore(projectFileInfo, NoPackageSources), Times.Once);
                 Assert.False(Directory.GetFiles(projectFolder.Path).Contains(pathToCachedProjectFile));
             }
         }
@@ -81,24 +85,26 @@ namespace Dotnet.Script.Tests
             using (var projectFolder = new DisposableFolder())
             {
                 var projectFile = new ProjectFile();
-                var pathToProjectFile = Path.Combine(projectFolder.Path ,"script.csproj");
-                var pathToCachedProjectFile = Path.Combine(projectFolder.Path ,"script.csproj.cache");
+                var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
+                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, "script.csproj.cache");
 
                 projectFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
                 projectFile.PackageReferences.Add(new PackageReference("AnotherPackage", "1.2.3"));
                 projectFile.Save(pathToProjectFile);
 
-                cachedRestorer.Restore(pathToProjectFile, NoPackageSources);
+                var projectFileInfo = new ProjectFileInfo(pathToProjectFile, string.Empty);
 
-                restorerMock.Verify(m => m.Restore(pathToProjectFile, NoPackageSources), Times.Once);
+                cachedRestorer.Restore(projectFileInfo, NoPackageSources);
+
+                restorerMock.Verify(m => m.Restore(projectFileInfo, NoPackageSources), Times.Once);
                 Assert.True(Directory.GetFiles(projectFolder.Path).Contains(pathToCachedProjectFile));
                 restorerMock.Reset();
 
                 projectFile.PackageReferences.Add(new PackageReference("YetAnotherPackage", "1.2.3"));
                 projectFile.Save(pathToProjectFile);
-                cachedRestorer.Restore(pathToProjectFile, NoPackageSources);
+                cachedRestorer.Restore(projectFileInfo, NoPackageSources);
 
-                restorerMock.Verify(m => m.Restore(pathToProjectFile, NoPackageSources), Times.Once);
+                restorerMock.Verify(m => m.Restore(projectFileInfo, NoPackageSources), Times.Once);
                 Assert.True(Directory.GetFiles(projectFolder.Path).Contains(pathToCachedProjectFile));
             }
         }

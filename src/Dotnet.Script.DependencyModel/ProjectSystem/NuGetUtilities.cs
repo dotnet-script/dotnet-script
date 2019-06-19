@@ -6,6 +6,13 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     internal static class NuGetUtilities
     {
+
+        public static string GetNearestConfigPath(string pathToEvaluate)
+        {
+            var settings = Settings.LoadDefaultSettings(pathToEvaluate);
+            return settings.GetConfigFilePaths().FirstOrDefault();
+        }
+
         public static void CreateNuGetConfigFromLocation(string pathToEvaluate, string targetDirectory)
         {
             var sourceSettings = Settings.LoadDefaultSettings(pathToEvaluate);
