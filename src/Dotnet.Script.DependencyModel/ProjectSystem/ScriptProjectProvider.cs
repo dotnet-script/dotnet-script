@@ -61,9 +61,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             LogProjectFileInfo(pathToProjectFile);
 
-            EvaluateAndGenerateNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
-            //return ret pathToProjectFile;
-
             return new ProjectFileInfo(pathToProjectFile, NuGetUtilities.GetNearestConfigPath(targetDirectory));
         }
 
@@ -113,7 +110,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             LogProjectFileInfo(pathToProjectFile);
 
-            EvaluateAndGenerateNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
             return new ProjectFileInfo(pathToProjectFile, NuGetUtilities.GetNearestConfigPath(targetDirectory));
         }
 
@@ -132,17 +128,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return projectFile;
         }
 
-        private void EvaluateAndGenerateNuGetConfigFile(string targetDirectory, string pathToProjectFileFolder)
-        {
-            var pathToDestinationNuGetConfigFile = Path.Combine(pathToProjectFileFolder, Settings.DefaultSettingsFileName);
-
-            if (File.Exists(pathToDestinationNuGetConfigFile))
-                File.Delete(pathToDestinationNuGetConfigFile);
-
-            _logger.Debug($"Generating NuGet config evaluated at {targetDirectory} to {pathToDestinationNuGetConfigFile}");
-            NuGetUtilities.CreateNuGetConfigFromLocation(targetDirectory, pathToProjectFileFolder);
-        }
-
         public static string GetPathToProjectFile(string targetDirectory)
         {
             var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory);
@@ -153,13 +138,13 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
     public class ProjectFileInfo
     {
-        public ProjectFileInfo(string path, string configPath)
+        public ProjectFileInfo(string path, string nugetConfigFile)
         {
             Path = path;
-            ConfigPath = configPath;
+            NuGetConfigFile = nugetConfigFile;
         }
 
         public string Path { get; }
-        public string ConfigPath { get; }
+        public string NuGetConfigFile { get; }
     }
 }

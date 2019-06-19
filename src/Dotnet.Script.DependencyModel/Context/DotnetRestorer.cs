@@ -23,11 +23,11 @@ namespace Dotnet.Script.DependencyModel.Context
         public void Restore(ProjectFileInfo projectFileInfo, string[] packageSources)
         {
             var packageSourcesArgument = CreatePackageSourcesArguments();
+            var configFileArgument = CreateConfigFileArgument();
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
 
             _logger.Debug($"Restoring {projectFileInfo.Path} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");
-            var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" -r {runtimeIdentifier} {packageSourcesArgument}");
-            //var exitcode = _commandRunner.Execute("dotnet", $"restore \"{pathToProjectFile}\" {packageSourcesArgument}");
+            var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" -r {runtimeIdentifier} {packageSourcesArgument} {configFileArgument}");
             if (exitcode != 0)
             {
                 // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'
@@ -40,6 +40,14 @@ namespace Dotnet.Script.DependencyModel.Context
                     ? string.Empty
                     : packageSources.Select(s => $"-s {s}")
                         .Aggregate((current, next) => $"{current} {next}");
+            }
+
+            string CreateConfigFileArgument()
+            {
+                return string.IsNullOrWhiteSpace(projectFileInfo.NuGetConfigFile)
+                    ? string.Empty
+                    : $"--configfile {projectFileInfo.NuGetConfigFile}";
+
             }
         }
 
