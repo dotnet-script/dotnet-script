@@ -14,15 +14,20 @@ namespace Dotnet.Script.Core
 {
     public class Scaffolder
     {
-        private ScriptEnvironment _scriptEnvironment;
+        private readonly ScriptEnvironment _scriptEnvironment;
         private const string DefaultScriptFileName = "main.csx";
-        private ScriptConsole _scriptConsole = ScriptConsole.Default;
-        private CommandRunner _commandRunner;
+        private readonly ScriptConsole _scriptConsole;
+        private readonly CommandRunner _commandRunner;
 
-        public Scaffolder(LogFactory logFactory)
+        public Scaffolder(LogFactory logFactory) : this(logFactory, ScriptConsole.Default, ScriptEnvironment.Default)
+        {
+        }
+
+        public Scaffolder(LogFactory logFactory, ScriptConsole scriptConsole, ScriptEnvironment scriptEnvironment)
         {
             _commandRunner = new CommandRunner(logFactory);
-            _scriptEnvironment = ScriptEnvironment.Default;
+            _scriptConsole = scriptConsole;
+            _scriptEnvironment = scriptEnvironment;
         }
 
         public void InitializerFolder(string fileName, string currentWorkingDirectory)
