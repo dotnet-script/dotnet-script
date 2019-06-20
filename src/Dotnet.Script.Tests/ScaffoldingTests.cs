@@ -1,10 +1,13 @@
-﻿using Dotnet.Script.DependencyModel.Environment;
+﻿using Dotnet.Script.Core;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
 using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
-
+using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
@@ -12,9 +15,10 @@ namespace Dotnet.Script.Tests
     {
         private readonly ScriptEnvironment _scriptEnvironment;
 
-        public ScaffoldingTests()
+        public ScaffoldingTests(ITestOutputHelper testOutputHelper)
         {
             _scriptEnvironment = ScriptEnvironment.Default;
+            testOutputHelper.Capture();
         }
 
         [Fact]
@@ -177,6 +181,47 @@ namespace Dotnet.Script.Tests
                 config = JObject.Parse(File.ReadAllText(pathToLaunchConfiguration));
                 Assert.NotEqual("InvalidPath/dotnet-script.dll", config.SelectToken("configurations[0].args[1]").Value<string>());
             }
+        }
+
+        [Fact]
+        public void ShouldCreateUnifiedLaunchFileWhenInstalledAsGlobalTool()
+        {
+            Scaffolder scaffolder = CreateTestScaffolder("somefolder/.dotnet/tools/dotnet-script");
+
+            using (var scriptFolder = new DisposableFolder())
+            {
+                scaffolder.InitializerFolder("main.csx", scriptFolder.Path);
+                var fileContent = File.ReadAllText(Path.Combine(scriptFolder.Path, ".vscode", "launch.json"));
+                Assert.Contains("{env:HOME}/.dotnet/tools/dotnet-script", fileContent);
+            }
+        }
+
+        [Fact]
+        public void ShouldUpdateToUnifiedLaunchFileWhenInstalledAsGlobalTool()
+        {
+            Scaffolder scaffolder = CreateTestScaffolder("some-install-folder");
+            Scaffolder globalToolScaffolder = CreateTestScaffolder("somefolder/.dotnet/tools/dotnet-script");
+            using (var scriptFolder = new DisposableFolder())
+            {
+                scaffolder.InitializerFolder("main.csx", scriptFolder.Path);
+                var fileContent = File.ReadAllText(Path.Combine(scriptFolder.Path, ".vscode", "launch.json"));
+                Assert.Contains("some-install-folder", fileContent);
+                globalToolScaffolder.InitializerFolder("main.csx", scriptFolder.Path);
+                fileContent = File.ReadAllText(Path.Combine(scriptFolder.Path, ".vscode", "launch.json"));
+                Assert.Contains("{env:HOME}/.dotnet/tools/dotnet-script", fileContent);
+            }
+        }
+
+        private static Scaffolder CreateTestScaffolder(string installLocation)
+        {
+            var scriptEnvironment = (ScriptEnvironment)Activator.CreateInstance(typeof(ScriptEnvironment), nonPublic: true);
+            var installLocationField = typeof(ScriptEnvironment).GetField("_installLocation", BindingFlags.NonPublic | BindingFlags.Instance);
+            installLocationField.SetValue(scriptEnvironment, new Lazy<string>(() => installLocation));
+            StringWriter output = new StringWriter();
+            StringWriter error = new StringWriter();
+            var scriptConsole = new ScriptConsole(output, StringReader.Null, error);
+            var scaffolder = new Scaffolder(TestOutputHelper.CreateTestLogFactory(), scriptConsole, scriptEnvironment);
+            return scaffolder;
         }
     }
 }
