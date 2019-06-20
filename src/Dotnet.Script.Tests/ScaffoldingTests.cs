@@ -216,9 +216,7 @@ namespace Dotnet.Script.Tests
             var scriptEnvironment = (ScriptEnvironment)Activator.CreateInstance(typeof(ScriptEnvironment), nonPublic: true);
             var installLocationField = typeof(ScriptEnvironment).GetField("_installLocation", BindingFlags.NonPublic | BindingFlags.Instance);
             installLocationField.SetValue(scriptEnvironment, new Lazy<string>(() => installLocation));
-            StringWriter output = new StringWriter();
-            StringWriter error = new StringWriter();
-            var scriptConsole = new ScriptConsole(output, StringReader.Null, error);
+            var scriptConsole = new ScriptConsole(StringWriter.Null, StringReader.Null, StreamWriter.Null);
             var scaffolder = new Scaffolder(TestOutputHelper.CreateTestLogFactory(), scriptConsole, scriptEnvironment);
             return scaffolder;
         }

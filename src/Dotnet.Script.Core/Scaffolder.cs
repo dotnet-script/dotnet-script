@@ -169,7 +169,7 @@ namespace Dotnet.Script.Core
                     if (template != launchFileContent)
                     {
                         File.WriteAllText(pathToLaunchFile, template);
-                        _scriptConsole.WriteHighlighted("...Use global tool [Updated]");
+                        _scriptConsole.WriteHighlighted("...Use global tool launch config [Updated]");
                     }
                 }
                 else
