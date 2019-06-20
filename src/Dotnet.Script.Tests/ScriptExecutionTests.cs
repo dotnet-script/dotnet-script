@@ -172,8 +172,8 @@ namespace Dotnet.Script.Tests
         }
 
         [Theory]
-        [InlineData("release","false")]
-        [InlineData("debug","true")]
+        [InlineData("release", "false")]
+        [InlineData("debug", "true")]
         public void ShouldCompileScriptWithReleaseConfiguration(string configuration, string expected)
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", $"-c {configuration}");
@@ -307,14 +307,14 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowMeaningfulErrorMessageWhenDependencyIsNotFound()
         {
-            using(var libraryFolder = new DisposableFolder())
+            using (var libraryFolder = new DisposableFolder())
             {
                 // Create a package that we can reference
 
                 ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n SampleLibrary", libraryFolder.Path);
                 ProcessHelper.RunAndCaptureOutput("dotnet", "pack", libraryFolder.Path);
 
-                using(var scriptFolder = new DisposableFolder())
+                using (var scriptFolder = new DisposableFolder())
                 {
                     var code = new StringBuilder();
                     code.AppendLine("#r \"nuget:SampleLibrary, 1.0.0\"");
@@ -381,6 +381,68 @@ namespace Dotnet.Script.Tests
 
                 Assert.Contains("Hello World!", result.output);
             }
+        }
+
+
+        [Fact]
+        public void ShouldHandleLocalNuGetConfigWithRelativePath()
+        {
+            TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
+
+            using (var packageLibraryFolder = new DisposableFolder())
+            {
+                CreateTestPackage(packageLibraryFolder);
+
+                string pathToScriptFile = CreateTestScript(packageLibraryFolder.Path);
+
+                var result = ScriptTestRunner.Default.Execute(pathToScriptFile);
+                Assert.Contains("Success", result.output);
+            }
+        }
+
+        [Fact]
+        public void ShouldHandleLocalNuGetConfigWithRelativePathInParentFolder()
+        {
+            TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
+
+            using (var packageLibraryFolder = new DisposableFolder())
+            {
+                CreateTestPackage(packageLibraryFolder);
+
+                var scriptFolder = Path.Combine(packageLibraryFolder.Path, "ScriptFolder");
+                Directory.CreateDirectory(scriptFolder);
+                string pathToScriptFile = CreateTestScript(scriptFolder);
+
+                var result = ScriptTestRunner.Default.Execute(pathToScriptFile);
+                Assert.Contains("Success", result.output);
+            }
+        }
+
+        private static string CreateTestScript(string scriptFolder)
+        {
+            string script = @"
+#r ""nuget:NuGetConfigTestLibrary, 1.0.0""
+WriteLine(""Success"");
+                ";
+            string pathToScriptFile = Path.Combine(scriptFolder, "testscript.csx");
+            File.WriteAllText(pathToScriptFile, script);
+            return pathToScriptFile;
+        }
+
+        private static void CreateTestPackage(DisposableFolder packageLibraryFolder)
+        {
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary", packageLibraryFolder.Path);
+            var projectFolder = Path.Combine(packageLibraryFolder.Path, "NuGetConfigTestLibrary");
+            ProcessHelper.RunAndCaptureOutput("dotnet", $"pack -o {Path.Combine(packageLibraryFolder.Path, "packagePath")}", projectFolder);
+            string nugetConfig = @"
+<configuration>
+    <packageSources>
+        <clear/>
+        <add key=""localSource"" value=""packagePath""/>
+    </packageSources>
+></configuration>
+                ";
+            File.WriteAllText(Path.Combine(packageLibraryFolder.Path, "NuGet.Config"), nugetConfig);
         }
     }
 }

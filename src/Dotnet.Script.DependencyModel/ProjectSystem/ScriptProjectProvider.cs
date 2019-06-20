@@ -27,7 +27,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
         }
 
-        public string CreateProjectForRepl(string code, string targetDirectory, string defaultTargetFramework = "net46")
+        public ProjectFileInfo CreateProjectForRepl(string code, string targetDirectory, string defaultTargetFramework = "net46")
         {
             var scriptFiles = _scriptFilesResolver.GetScriptFilesFromCode(code);
             targetDirectory = Path.Combine(targetDirectory, "interactive");
@@ -61,8 +61,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             LogProjectFileInfo(pathToProjectFile);
 
-            EvaluateAndGenerateNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
-            return pathToProjectFile;
+            return new ProjectFileInfo(pathToProjectFile, NuGetUtilities.GetNearestConfigPath(targetDirectory));
         }
 
         private void LogProjectFileInfo(string pathToProjectFile)
@@ -72,12 +71,12 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             _logger.Debug(content);
         }
 
-        public string CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
+        public ProjectFileInfo CreateProject(string targetDirectory, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
         {
             return CreateProject(targetDirectory, Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories), defaultTargetFramework, enableNuGetScriptReferences);
         }
 
-        public string CreateProject(string targetDirectory, IEnumerable<string> scriptFiles, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
+        public ProjectFileInfo CreateProject(string targetDirectory, IEnumerable<string> scriptFiles, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
         {
             if (scriptFiles == null || !scriptFiles.Any())
             {
@@ -95,14 +94,14 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return SaveProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, scriptFiles.ToArray());
         }
 
-        public string CreateProjectForScriptFile(string scriptFile)
+        public ProjectFileInfo CreateProjectForScriptFile(string scriptFile)
         {
             _logger.Debug($"Creating project file for {scriptFile}");
             var scriptFiles = _scriptFilesResolver.GetScriptFiles(scriptFile);
             return SaveProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());
         }
 
-        private string SaveProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
+        private ProjectFileInfo SaveProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
         {
             ProjectFile projectFile = CreateProjectFileFromScriptFiles(defaultTargetFramework, csxFiles);
 
@@ -111,8 +110,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             LogProjectFileInfo(pathToProjectFile);
 
-            EvaluateAndGenerateNuGetConfigFile(targetDirectory, Path.GetDirectoryName(pathToProjectFile));
-            return pathToProjectFile;
+            return new ProjectFileInfo(pathToProjectFile, NuGetUtilities.GetNearestConfigPath(targetDirectory));
         }
 
         public ProjectFile CreateProjectFileFromScriptFiles(string defaultTargetFramework, string[] csxFiles)
@@ -128,17 +126,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
             return projectFile;
-        }
-
-        private void EvaluateAndGenerateNuGetConfigFile(string targetDirectory, string pathToProjectFileFolder)
-        {
-            var pathToDestinationNuGetConfigFile = Path.Combine(pathToProjectFileFolder, Settings.DefaultSettingsFileName);
-
-            if (File.Exists(pathToDestinationNuGetConfigFile))
-                File.Delete(pathToDestinationNuGetConfigFile);
-
-            _logger.Debug($"Generating NuGet config evaluated at {targetDirectory} to {pathToDestinationNuGetConfigFile}");
-            NuGetUtilities.CreateNuGetConfigFromLocation(targetDirectory, pathToProjectFileFolder);
         }
 
         public static string GetPathToProjectFile(string targetDirectory)

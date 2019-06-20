@@ -28,17 +28,17 @@ namespace Dotnet.Script.DependencyModel.Context
         public bool CanRestore => _restorer.CanRestore;
 
         /// <inheritdoc/>
-        public void Restore(string pathToProjectFile, string[] packageSources)
+        public void Restore(ProjectFileInfo projectFileInfo, string[] packageSources)
         {
-            var projectFile = new ProjectFile(File.ReadAllText(pathToProjectFile));
-            var pathToCachedProjectFile = $"{pathToProjectFile}.cache";
+            var projectFile = new ProjectFile(File.ReadAllText(projectFileInfo.Path));
+            var pathToCachedProjectFile = $"{projectFileInfo.Path}.cache";
             if (File.Exists(pathToCachedProjectFile))
             {
                 _logger.Debug($"Found cached csproj file at: {pathToCachedProjectFile}");
                 var cachedProjectFile = new ProjectFile(File.ReadAllText(pathToCachedProjectFile));
                 if (projectFile.Equals(cachedProjectFile))
                 {
-                    _logger.Debug($"Skipping restore. {pathToProjectFile} and {pathToCachedProjectFile} are identical.");
+                    _logger.Debug($"Skipping restore. {projectFileInfo.Path} and {pathToCachedProjectFile} are identical.");
                     return;
                 }
                 else
@@ -55,7 +55,7 @@ namespace Dotnet.Script.DependencyModel.Context
 
             void RestoreAndCacheProjectFile()
             {
-                _restorer.Restore(pathToProjectFile, packageSources);
+                _restorer.Restore(projectFileInfo, packageSources);
                 if (projectFile.IsCacheable)
                 {
                     _logger.Debug($"Caching project file : {pathToCachedProjectFile}");
@@ -63,7 +63,7 @@ namespace Dotnet.Script.DependencyModel.Context
                 }
                 else
                 {
-                    _logger.Warning($"Unable to cache {pathToProjectFile}. For caching and optimal performance, ensure that the script(s) references Nuget packages with a pinned version.");
+                    _logger.Warning($"Unable to cache {projectFileInfo.Path}. For caching and optimal performance, ensure that the script(s) references Nuget packages with a pinned version.");
                 }
             }
         }

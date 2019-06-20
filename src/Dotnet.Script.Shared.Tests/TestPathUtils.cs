@@ -42,8 +42,11 @@ namespace Dotnet.Script.Shared.Tests
         public static void RemovePackageFromGlobalNugetCache(string packageName)
         {
             var pathToGlobalPackagesFolder = TestPathUtils.GetPathToGlobalPackagesFolder();
-            var pathToAutoMapperPackage = Directory.GetDirectories(pathToGlobalPackagesFolder).Single(d => d.Contains(packageName, StringComparison.OrdinalIgnoreCase));
-            FileUtils.RemoveDirectory(pathToAutoMapperPackage);
+            var pathToPackage = Directory.GetDirectories(pathToGlobalPackagesFolder).SingleOrDefault(d => d.Contains(packageName, StringComparison.OrdinalIgnoreCase));
+            if (pathToPackage != null)
+            {
+                FileUtils.RemoveDirectory(pathToPackage);
+            }
         }
     }
 }
