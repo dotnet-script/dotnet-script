@@ -26,7 +26,7 @@ namespace Dotnet.Script.DependencyModel.Context
             var configFileArgument = CreateConfigFileArgument();
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
 
-            _logger.Debug($"Restoring {projectFileInfo.Path} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier}");
+            _logger.Debug($"Restoring {projectFileInfo.Path} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier} NugetConfigFile: {projectFileInfo.NuGetConfigFile}");
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" -r {runtimeIdentifier} {packageSourcesArgument} {configFileArgument}");
             if (exitcode != 0)
             {
