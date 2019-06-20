@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -172,7 +171,7 @@ namespace Dotnet.Script.Tests
                 var pathToLaunchConfiguration = Path.Combine(scriptFolder.Path, ".vscode/launch.json");
                 var config = JObject.Parse(File.ReadAllText(pathToLaunchConfiguration));
 
-                config.SelectToken("configurations[0].args[1]").Replace("InvalidPath/dotnet-script.dll,");
+                config.SelectToken("configurations[0].args[1]").Replace("InvalidPath/dotnet-script.dll");
 
                 File.WriteAllText(pathToLaunchConfiguration, config.ToString());
 

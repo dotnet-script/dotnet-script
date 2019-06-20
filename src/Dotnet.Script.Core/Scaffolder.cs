@@ -174,7 +174,7 @@ namespace Dotnet.Script.Core
                 }
                 else
                 {
-                    string pattern = @"^(\s*"")(.*dotnet-script.dll)("").*$";
+                    string pattern = @"^(\s*"")(.*dotnet-script.dll)(""\s*,).*$";
                     if (Regex.IsMatch(launchFileContent, pattern, RegexOptions.Multiline))
                     {
                         var newLaunchFileContent = Regex.Replace(launchFileContent, pattern, $"$1{dotnetScriptPath}$3", RegexOptions.Multiline);
