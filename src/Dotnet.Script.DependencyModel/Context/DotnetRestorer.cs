@@ -46,7 +46,7 @@ namespace Dotnet.Script.DependencyModel.Context
             {
                 return string.IsNullOrWhiteSpace(projectFileInfo.NuGetConfigFile)
                     ? string.Empty
-                    : $"--configfile {projectFileInfo.NuGetConfigFile}";
+                    : $"--configfile \"{projectFileInfo.NuGetConfigFile}\"";
 
             }
         }

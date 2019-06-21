@@ -391,7 +391,7 @@ namespace Dotnet.Script.Tests
 
             using (var packageLibraryFolder = new DisposableFolder())
             {
-                CreateTestPackage(packageLibraryFolder);
+                CreateTestPackage(packageLibraryFolder.Path);
 
                 string pathToScriptFile = CreateTestScript(packageLibraryFolder.Path);
 
@@ -407,7 +407,7 @@ namespace Dotnet.Script.Tests
 
             using (var packageLibraryFolder = new DisposableFolder())
             {
-                CreateTestPackage(packageLibraryFolder);
+                CreateTestPackage(packageLibraryFolder.Path);
 
                 var scriptFolder = Path.Combine(packageLibraryFolder.Path, "ScriptFolder");
                 Directory.CreateDirectory(scriptFolder);
@@ -417,6 +417,26 @@ namespace Dotnet.Script.Tests
                 Assert.Contains("Success", result.output);
             }
         }
+
+        [Fact]
+        public void ShouldHandleLocalNuGetFileWhenPathContainsSpace()
+        {
+            TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
+
+            using (var packageLibraryFolder = new DisposableFolder())
+            {
+                var packageLibraryFolderPath = Path.Combine(packageLibraryFolder.Path, "library folder");
+                Directory.CreateDirectory(packageLibraryFolderPath);
+
+                CreateTestPackage(packageLibraryFolderPath);
+
+                string pathToScriptFile = CreateTestScript(packageLibraryFolderPath);
+
+                var result = ScriptTestRunner.Default.Execute($"\"{pathToScriptFile}\"");
+                Assert.Contains("Success", result.output);
+            }
+        }
+
 
         private static string CreateTestScript(string scriptFolder)
         {
@@ -429,11 +449,16 @@ WriteLine(""Success"");
             return pathToScriptFile;
         }
 
-        private static void CreateTestPackage(DisposableFolder packageLibraryFolder)
+        private static void CreateTestPackage(string packageLibraryFolder)
         {
-            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary", packageLibraryFolder.Path);
-            var projectFolder = Path.Combine(packageLibraryFolder.Path, "NuGetConfigTestLibrary");
-            ProcessHelper.RunAndCaptureOutput("dotnet", $"pack -o {Path.Combine(packageLibraryFolder.Path, "packagePath")}", projectFolder);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary", packageLibraryFolder);
+            var projectFolder = Path.Combine(packageLibraryFolder, "NuGetConfigTestLibrary");
+            ProcessHelper.RunAndCaptureOutput("dotnet", $"pack -o \"{Path.Combine(packageLibraryFolder, "packagePath")}\"", projectFolder);
+            CreateNuGetConfig(packageLibraryFolder);
+        }
+
+        private static void CreateNuGetConfig(string packageLibraryFolder)
+        {
             string nugetConfig = @"
 <configuration>
     <packageSources>
@@ -442,7 +467,7 @@ WriteLine(""Success"");
     </packageSources>
 ></configuration>
                 ";
-            File.WriteAllText(Path.Combine(packageLibraryFolder.Path, "NuGet.Config"), nugetConfig);
+            File.WriteAllText(Path.Combine(packageLibraryFolder, "NuGet.Config"), nugetConfig);
         }
     }
 }
