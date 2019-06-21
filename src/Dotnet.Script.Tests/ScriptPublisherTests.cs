@@ -160,18 +160,20 @@ namespace Dotnet.Script.Tests
         public void SimplePublishDllToOtherFolderTest()
         {
             using (var workspaceFolder = new DisposableFolder())
-            using (var publishFolder = new DisposableFolder())
             {
-                var code = @"WriteLine(""hello world"");";
-                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
-                File.WriteAllText(mainPath, code);
-                var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} --dll -o {publishFolder.Path}", workspaceFolder.Path);
-                Assert.Equal(0, publishResult.exitCode);
+                using (var publishFolder = new DisposableFolder())
+                {
+                    var code = @"WriteLine(""hello world"");";
+                    var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                    File.WriteAllText(mainPath, code);
+                    var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} --dll -o {publishFolder.Path}", workspaceFolder.Path);
+                    Assert.Equal(0, publishResult.exitCode);
 
-                var dllPath = Path.Combine(publishFolder.Path, "main.dll");
-                var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", publishFolder.Path);
+                    var dllPath = Path.Combine(publishFolder.Path, "main.dll");
+                    var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", publishFolder.Path);
 
-                Assert.Equal(0, dllRunResult.exitCode);
+                    Assert.Equal(0, dllRunResult.exitCode);
+                }
             }
         }
 
@@ -219,7 +221,7 @@ namespace Dotnet.Script.Tests
         {
             using (var workspaceFolder = new DisposableFolder())
             {
-                ProcessHelper.RunAndCaptureOutput($"dotnet",$" new classlib -n MyCustomLibrary -o {workspaceFolder.Path}");
+                ProcessHelper.RunAndCaptureOutput($"dotnet", $" new classlib -n MyCustomLibrary -o {workspaceFolder.Path}");
                 ProcessHelper.RunAndCaptureOutput($"dotnet", $" build -o {workspaceFolder.Path}", workspaceFolder.Path);
                 var code = $@"#r ""MyCustomLibrary.dll"" {Environment.NewLine} WriteLine(""hello world"");";
                 var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
@@ -230,6 +232,27 @@ namespace Dotnet.Script.Tests
                 Assert.Equal(0, publishResult.exitCode);
             }
         }
+
+        [Fact]
+        public void ShouldHandleSpaceInPublishFolder()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+
+                var publishResult = ScriptTestRunner.Default.Execute(@"publish main.csx -o ""publish folder""", workspaceFolder.Path);
+
+                Assert.Equal(0, publishResult.exitCode);
+
+                var exePath = Path.Combine(workspaceFolder.Path, "publish folder", "script");
+                var executableRunResult = _commandRunner.Execute(exePath);
+
+                Assert.Equal(0, executableRunResult);
+            }
+        }
+
 
         private LogFactory GetLogFactory()
         {
