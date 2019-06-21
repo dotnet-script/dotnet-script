@@ -85,7 +85,7 @@ namespace Dotnet.Script.Core
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors
-            var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o {context.WorkingDirectory}");
+            var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\"");
             if (exitcode != 0)
             {
                 throw new Exception($"dotnet publish failed with result '{exitcode}'");
