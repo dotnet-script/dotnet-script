@@ -156,8 +156,8 @@ foo.csx arg1 arg2 arg3
 ```
 > OSX/Linux
 >
-> Just like all scripts, on OSX/Linux you need to have a !# and mark the file as executable via **chmod +x foo.csx**.
-> If you use **dotnet script init**  to create your csx it will automatically have the !# directive and be marked as
+> Just like all scripts, on OSX/Linux you need to have a `#!` and mark the file as executable via **chmod +x foo.csx**.
+> If you use **dotnet script init**  to create your csx it will automatically have the `#!` directive and be marked as
 > executable.
 
 The OSX/Linux shebang directive should be **#!/usr/bin/env dotnet-script**
