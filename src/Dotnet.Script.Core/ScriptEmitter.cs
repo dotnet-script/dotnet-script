@@ -18,7 +18,7 @@ namespace Dotnet.Script.Core
             _scriptCompiler = scriptCompiler;
         }
 
-        public virtual ScriptEmitResult Emit<TReturn, THost>(ScriptContext context)
+        public virtual ScriptEmitResult Emit<TReturn, THost>(ScriptContext context, string assemblyName)
         {
             var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
             foreach (var warning in compilationContext.Warnings)
@@ -43,7 +43,9 @@ namespace Dotnet.Script.Core
             if (context.OptimizationLevel == Microsoft.CodeAnalysis.OptimizationLevel.Debug)
             {
                 emitOptions = new EmitOptions()
-                    .WithDebugInformationFormat(DebugInformationFormat.Embedded);
+                    .WithDebugInformationFormat(DebugInformationFormat.Embedded)
+                    .WithPdbFilePath($"{assemblyName}.pdb");
+
             }
 
             var result = compilation.Emit(peStream, options: emitOptions);

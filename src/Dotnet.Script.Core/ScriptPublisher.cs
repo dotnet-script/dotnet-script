@@ -96,7 +96,8 @@ namespace Dotnet.Script.Core
 
         private string CreateScriptAssembly<TReturn, THost>(ScriptContext context, string outputDirectory, string assemblyFileName)
         {
-            var emitResult = _scriptEmitter.Emit<TReturn, THost>(context);
+            var assemblyName = Path.GetFileNameWithoutExtension(assemblyFileName);
+            var emitResult = _scriptEmitter.Emit<TReturn, THost>(context, assemblyName);
             var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
             using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
             using (emitResult.PeStream)
