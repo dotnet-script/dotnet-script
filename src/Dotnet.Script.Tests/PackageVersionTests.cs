@@ -11,6 +11,7 @@ namespace Dotnet.Script.Tests
     {
         [Theory]
         [InlineData("1.2.3")]
+        [InlineData("1.2.3.4")]
         [InlineData("[1.2]")]
         [InlineData("[1.2.3]")]
         [InlineData("[1.2.3-beta1]")]
