@@ -57,6 +57,10 @@ namespace Dotnet.Script.DependencyModel.Context
                 }
             }
 
+            var netcoreAppRuntimeAssemblyLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll");
+            var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", "3.0", netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+            scriptDependencies.Add(netCoreAppDependency);
             return new ScriptDependencyContext(scriptDependencies.ToArray());
         }
 

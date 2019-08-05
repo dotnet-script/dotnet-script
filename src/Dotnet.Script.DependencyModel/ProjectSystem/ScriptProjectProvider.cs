@@ -132,10 +132,10 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 projectFile.PackageReferences.Add(packageReference);
             }
 
-            if (defaultTargetFramework == "netcoreapp3.0")
-            {
-                AddNetCoreAppReference(projectFile);
-            }
+            // if (defaultTargetFramework == "netcoreapp3.0")
+            // {
+            //     AddNetCoreAppReference(projectFile);
+            // }
 
             projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
             return projectFile;
@@ -160,7 +160,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 dotnetRuntimeVersion = _scriptEnvironment.NetCoreVersion.Version;
             }
 
-            projectFile.PackageReferences.Add(new PackageReference("Microsoft.NetCore.App", $"[{dotnetRuntimeVersion}]"));
+            //projectFile.PackageReferences.Add(new PackageReference("Microsoft.NETCore.DotNetAppHost", $"[{dotnetRuntimeVersion}]"));
+            //projectFile.PackageReferences.Add(new PackageReference("Microsoft.NETCore.App.Ref", $"[3.0.0-preview9-19423-09]"));
         }
 
         public static string GetPathToProjectFile(string targetDirectory)

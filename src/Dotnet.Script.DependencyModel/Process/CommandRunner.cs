@@ -80,7 +80,7 @@ namespace Dotnet.Script.DependencyModel.Process
             {
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    _logger.Debug(e.Data);
+                    _logger.Error(e.Data);
                 }
             };
             return process;
