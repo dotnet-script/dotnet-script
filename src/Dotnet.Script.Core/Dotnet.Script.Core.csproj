@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>A cross platform library allowing you to run C# (CSX) scripts with support for debugging and inline NuGet packages. Based on Roslyn.</Description>
-    <VersionPrefix>0.29.1</VersionPrefix>
+    <VersionPrefix>0.30.0</VersionPrefix>
     <Authors>filipw</Authors>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>Dotnet.Script.Core</AssemblyName>
@@ -19,17 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Templates\helloworld.csx.template" />
-    <None Remove="Templates\launch.json.template" />
-    <None Remove="Templates\omnisharp.json.template" />
-    <None Remove="Templates\program.publish.template" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Templates\helloworld.csx.template" />
-    <EmbeddedResource Include="Templates\launch.json.template" />
-    <EmbeddedResource Include="Templates\omnisharp.json.template" />
-    <EmbeddedResource Include="Templates\program.publish.template" />
+    <EmbeddedResource Include="**/*.template" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,7 +10,7 @@ namespace Dotnet.Script.Tests
 {
     [Collection("IntegrationTests")]
     public class ScriptProjectProviderTests
-    {       
+    {
         private readonly ScriptEnvironment _scriptEnvironment;
 
         public ScriptProjectProviderTests(ITestOutputHelper testOutputHelper)
@@ -20,29 +20,20 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
-        public void ShouldCopyLocalNuGetConfig()
-        {
-            var provider = CreateProvider();
-            var pathToProjectFile = provider.CreateProject(TestPathUtils.GetPathToTestFixtureFolder("LocalNuGetConfig"), _scriptEnvironment.TargetFramework, true);
-            var pathToProjectFileFolder = Path.GetDirectoryName(pathToProjectFile);
-            Assert.True(File.Exists(Path.Combine(pathToProjectFileFolder,"NuGet.Config")));
-        }
-
-        [Fact]
         public void ShouldLogProjectFileContent()
         {
-            StringBuilder log = new StringBuilder();            
+            StringBuilder log = new StringBuilder();
             var provider = new ScriptProjectProvider(type => ((level, message, exception) => log.AppendLine(message)));
 
             provider.CreateProject(TestPathUtils.GetPathToTestFixtureFolder("HelloWorld"), _scriptEnvironment.TargetFramework, true);
             var output = log.ToString();
 
-            Assert.Contains("<Project Sdk=\"Microsoft.NET.Sdk\">",output);
+            Assert.Contains("<Project Sdk=\"Microsoft.NET.Sdk\">", output);
         }
 
         private ScriptProjectProvider CreateProvider()
         {
-            ScriptProjectProvider provider = new ScriptProjectProvider(TestOutputHelper.CreateTestLogFactory());          
+            ScriptProjectProvider provider = new ScriptProjectProvider(TestOutputHelper.CreateTestLogFactory());
             return provider;
         }
     }

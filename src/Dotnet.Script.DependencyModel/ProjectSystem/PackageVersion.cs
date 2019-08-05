@@ -8,7 +8,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     /// </summary>
     public class PackageVersion : IEquatable<PackageVersion>
     {
-        private static Regex IsPinnedRegex = new Regex(@"^(?>\[\d+[^,\]]+(?<!\.)\]|\d+\.\d+\.\d+)$", RegexOptions.Compiled);
+        private static Regex IsPinnedRegex = new Regex(@"^(?>\[\d+[^,\]]+(?<!\.)\]|\d+(\.\d+){2,})$", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageVersion"/> class.
@@ -29,7 +29,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <summary>
         /// Gets a <see cref="bool"/> value that indicates whether the <see cref="PackageVersion"/> is "pinned".
         /// </summary>
-        public bool IsPinned {get;}
+        public bool IsPinned { get; }
 
         /// <inheritdoc/>
         public bool Equals(PackageVersion other)
