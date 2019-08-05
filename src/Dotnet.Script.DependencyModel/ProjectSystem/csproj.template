@@ -1,9 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
   </ItemGroup>
+  <Target Name="RecordReferencePaths" AfterTargets="AfterResolveReferences">
+    <WriteLinesToFile File="$(OutputPath)/ReferencePaths.txt" Lines="@(ReferencePath)" />
+  </Target>
 </Project>
