@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.ScriptPackage;
@@ -58,25 +59,24 @@ namespace Dotnet.Script.DependencyModel.Context
             }
 
             var netcoreAppRuntimeAssemblyLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
-            var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsNetCoreAppAssembly).ToArray();
+            var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
             var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", "3.0", netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
             scriptDependencies.Add(netCoreAppDependency);
             return new ScriptDependencyContext(scriptDependencies.ToArray());
         }
 
-        private static bool IsNetCoreAppAssembly(string path)
+        private static bool IsAssembly(string file)
         {
-            var fileName = Path.GetFileName(path);
-            if (fileName.IndexOf("diasymreader", StringComparison.OrdinalIgnoreCase) >= 0)
+            // https://docs.microsoft.com/en-us/dotnet/standard/assembly/identify
+            try
+            {
+                AssemblyName.GetAssemblyName(file);
+                return true;
+            }
+            catch (System.Exception)
             {
                 return false;
             }
-
-            if (fileName.IndexOf("EnterpriseServices", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return false;
-            }
-            return fileName.StartsWith("system", StringComparison.InvariantCultureIgnoreCase) || fileName.StartsWith("microsoft", StringComparison.InvariantCultureIgnoreCase) || fileName.StartsWith("mscorlib", StringComparison.InvariantCultureIgnoreCase);
         }
 
         private static LockFileTarget GetLockFileTarget(LockFile lockFile)
