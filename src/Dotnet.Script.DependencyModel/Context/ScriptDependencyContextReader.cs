@@ -71,6 +71,11 @@ namespace Dotnet.Script.DependencyModel.Context
             {
                 return false;
             }
+
+            if (fileName.IndexOf("EnterpriseServices", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return false;
+            }
             return fileName.StartsWith("system", StringComparison.InvariantCultureIgnoreCase) || fileName.StartsWith("microsoft", StringComparison.InvariantCultureIgnoreCase) || fileName.StartsWith("mscorlib", StringComparison.InvariantCultureIgnoreCase);
         }
 
