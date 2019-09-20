@@ -125,22 +125,5 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
             var match = RootPathMatcher.Match(pathToScriptFile);
             return match.Groups[1].Value;
         }
-
-        private static string GetPackageFullPath(string packagePath, string[] nugetPackageFolders)
-        {
-            foreach (var nugetPackageFolder in nugetPackageFolders)
-            {
-                var packageFullPath = Path.Combine(nugetPackageFolder, packagePath);
-                if (Directory.Exists(packageFullPath))
-                {
-                    return packageFullPath;
-                }
-            }
-
-            string message = $@"The requested script package path ({packagePath}) was not found in the global Nuget cache(s).
-. Try executing/publishing the script again with the '--no-cache' option";
-
-            throw new InvalidOperationException(message);
-        }
     }
 }

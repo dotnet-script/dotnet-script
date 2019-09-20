@@ -11,7 +11,7 @@ namespace Dotnet.Script.Tests
     [Collection("IntegrationTests")]
     public class ScriptExecutionTests
     {
-        private ScriptEnvironment _scriptEnvironment;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
         public ScriptExecutionTests(ITestOutputHelper testOutputHelper)
         {

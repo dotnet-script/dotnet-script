@@ -13,23 +13,19 @@ namespace Dotnet.Script.DependencyModel.Runtime
     public class RuntimeDependencyResolver
     {
         private readonly ScriptProjectProvider _scriptProjectProvider;
-        private readonly ScriptEnvironment _scriptEnvironment;
-
         private readonly ScriptDependencyContextReader _dependencyContextReader;
 
         private readonly IRestorer _restorer;
 
-        public RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, LogFactory logFactory, ScriptEnvironment scriptEnvironment, bool useRestoreCache)
+        public RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, LogFactory logFactory, bool useRestoreCache)
         {
             _scriptProjectProvider = scriptProjectProvider;
-            _scriptEnvironment = scriptEnvironment;
             _dependencyContextReader = new ScriptDependencyContextReader(logFactory);
             _restorer = CreateRestorer(logFactory, useRestoreCache);
         }
 
-        public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache) : this(new ScriptProjectProvider(logFactory), logFactory, ScriptEnvironment.Default, useRestoreCache)
+        public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache) : this(new ScriptProjectProvider(logFactory), logFactory, useRestoreCache)
         {
-
         }
 
         private static IRestorer CreateRestorer(LogFactory logFactory, bool useRestoreCache)

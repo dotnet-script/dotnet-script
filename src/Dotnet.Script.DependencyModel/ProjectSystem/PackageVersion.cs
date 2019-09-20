@@ -8,7 +8,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     /// </summary>
     public class PackageVersion : IEquatable<PackageVersion>
     {
-        private static Regex IsPinnedRegex = new Regex(@"^(?>\[\d+[^,\]]+(?<!\.)\]|\d+(\.\d+){2,})$", RegexOptions.Compiled);
+        private static readonly Regex IsPinnedRegex = new Regex(@"^(?>\[\d+[^,\]]+(?<!\.)\]|\d+(\.\d+){2,})$", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageVersion"/> class.
