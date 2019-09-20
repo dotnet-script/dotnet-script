@@ -7,14 +7,4 @@ namespace Dotnet.Script.DependencyModel.Compilation
     {
         IEnumerable<CompilationReference> Read(ProjectFileInfo projectFile);
     }
-
-    public class CompilationReference
-    {
-        public CompilationReference(string path)
-        {
-            Path = path;
-        }
-
-        public string Path { get; }
-    }
 }

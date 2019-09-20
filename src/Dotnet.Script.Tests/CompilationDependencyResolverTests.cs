@@ -71,9 +71,9 @@ namespace Dotnet.Script.Tests
             Assert.Contains(dependencies, d => d.Path.Contains("Auth0.ManagementApi", StringComparison.InvariantCultureIgnoreCase));
         }
 
-        private CompilationDependencyResolver2 CreateResolver()
+        private CompilationDependencyResolver CreateResolver()
         {
-            var resolver = new CompilationDependencyResolver2(TestOutputHelper.CreateTestLogFactory());
+            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
             return resolver;
         }
     }

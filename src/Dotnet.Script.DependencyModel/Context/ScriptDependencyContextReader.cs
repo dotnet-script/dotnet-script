@@ -49,7 +49,7 @@ namespace Dotnet.Script.DependencyModel.Context
             foreach (var targetLibrary in targetLibraries)
             {
                 var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packageFolders, packagePathResolver, targetLibrary);
-                if (scriptDependency.CompileTimeDependencyPaths.Any() ||
+                if (
                     scriptDependency.NativeAssetPaths.Any() ||
                     scriptDependency.RuntimeDependencyPaths.Any() ||
                     scriptDependency.ScriptPaths.Any())
@@ -57,6 +57,7 @@ namespace Dotnet.Script.DependencyModel.Context
                     scriptDependencies.Add(scriptDependency);
                 }
             }
+
 
             var netcoreAppRuntimeAssemblyLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
             var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();

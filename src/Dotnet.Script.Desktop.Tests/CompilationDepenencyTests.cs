@@ -26,9 +26,9 @@ namespace Dotnet.Script.Desktop.Tests
             Assert.True(dependencies.Count() > 0);
         }
 
-        private CompilationDependencyResolver2 CreateResolver()
+        private CompilationDependencyResolver CreateResolver()
         {
-            var resolver = new CompilationDependencyResolver2(TestOutputHelper.CreateTestLogFactory());
+            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
             return resolver;
         }
     }
