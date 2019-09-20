@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.ScriptPackage;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -58,11 +59,13 @@ namespace Dotnet.Script.DependencyModel.Context
                 }
             }
 
-
-            var netcoreAppRuntimeAssemblyLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
-            var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
-            var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", "3.0", netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
-            scriptDependencies.Add(netCoreAppDependency);
+            if (ScriptEnvironment.Default.NetCoreVersion.Version.StartsWith("3"))
+            {
+                var netcoreAppRuntimeAssemblyLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
+                var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
+                var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", ScriptEnvironment.Default.NetCoreVersion.Version, netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+                scriptDependencies.Add(netCoreAppDependency);
+            }
             return new ScriptDependencyContext(scriptDependencies.ToArray());
         }
 
