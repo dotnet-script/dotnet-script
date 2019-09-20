@@ -57,7 +57,7 @@ namespace Dotnet.Script.Tests
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("InlineNugetPackageWithRefFolder");
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
             var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
-            Assert.Contains(dependencies, d => d.Path.Contains("system.data.sqlclient/4.6.1/ref/".Replace("\\", "/"), StringComparison.InvariantCultureIgnoreCase));
+            Assert.Contains(dependencies, d => d.Path.Replace("\\", "/").Contains("system.data.sqlclient/4.6.1/ref/"));
         }
 
 
