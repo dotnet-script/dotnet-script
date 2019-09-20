@@ -76,7 +76,10 @@ private void CreateNuGetPackages()
 private void RunTests()
 {
     DotNet.Test(testProjectFolder);
-    DotNet.Test(testDesktopProjectFolder);
+    if (BuildEnvironment.IsWindows)
+    {
+        DotNet.Test(testDesktopProjectFolder);
+    }
 }
 
 private async Task PublishRelease()
