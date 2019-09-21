@@ -60,11 +60,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             projectFile.TargetFramework = parseResultFromCode.TargetFramework ?? defaultTargetFramework;
 
-            if (defaultTargetFramework == "netcoreapp3.0")
-            {
-                AddNetCoreAppReference(projectFile);
-            }
-
             projectFile.Save(pathToProjectFile);
 
             LogProjectFileInfo(pathToProjectFile);
@@ -132,37 +127,10 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 projectFile.PackageReferences.Add(packageReference);
             }
 
-            // if (defaultTargetFramework == "netcoreapp3.0")
-            // {
-            //     AddNetCoreAppReference(projectFile);
-            // }
-
             projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
             return projectFile;
         }
 
-        private void AddNetCoreAppReference(ProjectFile projectFile)
-        {
-            string dotnetRuntimeVersion;
-            if (!_scriptEnvironment.IsNetCore)
-            {
-                // We only go here if the host is desktop (OmniSharp)
-
-                _logger.Debug("Trying to determine .Net Core runtime version using dotnet --info");
-                var workingDirectory = Path.GetDirectoryName(new Uri(typeof(ScriptProjectProvider).Assembly.CodeBase).LocalPath);
-                var dotnetInfo = _commandRunner.Capture("dotnet", "--info", workingDirectory)
-                    .EnsureSuccessfulExitCode().StandardOut;
-                dotnetRuntimeVersion = Regex.Match(dotnetInfo, @"^Host.*\n\s*Version:\s*(.*)$", RegexOptions.Multiline).Groups[1].Value;
-                _logger.Debug($"dotnet --info reported runtime version : {dotnetRuntimeVersion}");
-            }
-            else
-            {
-                dotnetRuntimeVersion = _scriptEnvironment.NetCoreVersion.Version;
-            }
-
-            //projectFile.PackageReferences.Add(new PackageReference("Microsoft.NETCore.DotNetAppHost", $"[{dotnetRuntimeVersion}]"));
-            //projectFile.PackageReferences.Add(new PackageReference("Microsoft.NETCore.App.Ref", $"[3.0.0-preview9-19423-09]"));
-        }
 
         public static string GetPathToProjectFile(string targetDirectory)
         {
