@@ -49,7 +49,7 @@ namespace Dotnet.Script.DependencyModel.Context
             List<ScriptDependency> scriptDependencies = new List<ScriptDependency>();
             foreach (var targetLibrary in targetLibraries)
             {
-                var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packageFolders, packagePathResolver, targetLibrary);
+                var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packagePathResolver, targetLibrary);
                 if (
                     scriptDependency.NativeAssetPaths.Any() ||
                     scriptDependency.RuntimeDependencyPaths.Any() ||
@@ -108,7 +108,7 @@ Make sure that the file exists and that it is a valid 'project.assets.json' file
             return lockFile;
         }
 
-        private ScriptDependency CreateScriptDependency(string name, string version, string[] packageFolders, FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
+        private ScriptDependency CreateScriptDependency(string name, string version, FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
             var runtimeDependencyPaths = GetRuntimeDependencyPaths(packagePathResolver, targetLibrary);
             var compileTimeDependencyPaths = GetCompileTimeDependencyPaths(packagePathResolver, targetLibrary);
