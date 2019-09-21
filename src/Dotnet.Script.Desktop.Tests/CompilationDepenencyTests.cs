@@ -17,7 +17,7 @@ namespace Dotnet.Script.Desktop.Tests
         [Theory]
         [InlineData("netcoreapp2.1")]
         [InlineData("netcoreapp3.0")]
-        public void ShouldGetCompilationDependenciesForNetCoreApp2_1(string targetFramework)
+        public void ShouldGetCompilationDependenciesForNetCoreApp(string targetFramework)
         {
             var resolver = CreateResolver();
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("HelloWorld");
