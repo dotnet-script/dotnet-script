@@ -11,7 +11,7 @@ namespace Dotnet.Script.Core.Versioning
     public class LoggedVersionProvider : IVersionProvider
     {
         private readonly IVersionProvider _versionProvider;
-        private Logger _logger;
+        private readonly Logger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoggedVersionProvider"/> class.

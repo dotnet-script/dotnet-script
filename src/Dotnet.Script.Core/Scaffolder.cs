@@ -143,7 +143,7 @@ namespace Dotnet.Script.Core
             string installLocation = _scriptEnvironment.InstallLocation;
             bool isInstalledAsGlobalTool = installLocation.Contains(".dotnet/tools", StringComparison.OrdinalIgnoreCase);
             string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
-            string launchFileContent = null;
+            string launchFileContent;
             if (!File.Exists(pathToLaunchFile))
             {
                 if (isInstalledAsGlobalTool)
@@ -187,11 +187,6 @@ namespace Dotnet.Script.Core
                 }
 
             }
-        }
-
-        private bool IsInstalledAsGlobalTool()
-        {
-            return _scriptEnvironment.InstallLocation.Contains(".dotnet/tools", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
