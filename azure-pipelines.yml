@@ -20,8 +20,8 @@ jobs:
   pool:
     name: Hosted Ubuntu 1604
   steps:
-  - bash: 'curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.0.100-rc1-014190'
-    displayName: 'Install 3.0.100-rc1-014190'
+  - bash: 'curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.0.100'
+    displayName: 'Install 3.0.100'
 
   - bash: 'curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 2.1.402'
     displayName: 'Install 2.1.402'
@@ -45,9 +45,9 @@ jobs:
     name: Hosted macOS
   steps:
   - bash: |
-       curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.0.100-rc1-014190
+       curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.0.100
 
-    displayName: 'Install 3.0.100-rc1-014190'
+    displayName: 'Install 3.0.100'
 
   - bash: |
        curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
@@ -66,9 +66,9 @@ jobs:
   steps:
   - powershell: |
        iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1
-       .\dotnet-install.ps1 -Version  3.0.100-rc1-014190
+       .\dotnet-install.ps1 -Version  3.0.100
 
-    displayName: 'Install 3.0.100-rc1-014190'
+    displayName: 'Install 3.0.100'
 
   - powershell: |
        iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1
