@@ -30,11 +30,5 @@ namespace Dotnet.Script.Tests
 
             Assert.Contains("<Project Sdk=\"Microsoft.NET.Sdk\">", output);
         }
-
-        private ScriptProjectProvider CreateProvider()
-        {
-            ScriptProjectProvider provider = new ScriptProjectProvider(TestOutputHelper.CreateTestLogFactory());
-            return provider;
-        }
     }
 }

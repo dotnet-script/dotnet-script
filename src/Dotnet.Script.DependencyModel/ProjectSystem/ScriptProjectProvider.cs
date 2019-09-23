@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
-using NuGet.Configuration;
+using Dotnet.Script.DependencyModel.Process;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
@@ -13,17 +14,19 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         private readonly ScriptParser _scriptParser;
         private readonly ScriptFilesResolver _scriptFilesResolver;
         private readonly ScriptEnvironment _scriptEnvironment;
+        private readonly CommandRunner _commandRunner;
         private readonly Logger _logger;
 
-        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
+        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment, CommandRunner commandRunner)
         {
             _logger = logFactory.CreateLogger<ScriptProjectProvider>();
             _scriptParser = scriptParser;
             _scriptFilesResolver = scriptFilesResolver;
             _scriptEnvironment = scriptEnvironment;
+            _commandRunner = commandRunner;
         }
 
-        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, ScriptEnvironment.Default)
+        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, ScriptEnvironment.Default, new CommandRunner(logFactory))
         {
         }
 
@@ -127,6 +130,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
             return projectFile;
         }
+
 
         public static string GetPathToProjectFile(string targetDirectory)
         {

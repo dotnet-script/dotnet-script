@@ -1,6 +1,7 @@
 ﻿using Dotnet.Script.DependencyModel.Compilation;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
+using System;
 using System.IO;
 using Xunit;
 using Xunit.Abstractions;
@@ -25,7 +26,7 @@ namespace Dotnet.Script.Tests
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("InlineNugetPackage");
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
             var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
-            Assert.Contains(dependencies, d => d.Name == "AutoMapper");
+            Assert.Contains(dependencies, d => d.Path.Contains("AutoMapper", StringComparison.InvariantCultureIgnoreCase));
         }
 
         [Fact]
@@ -35,8 +36,8 @@ namespace Dotnet.Script.Tests
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("InlineNugetPackageWithFileFiltering");
             var csxFiles = Directory.GetFiles(targetDirectory, "InlineNugetPackage.csx");
             var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
-            Assert.DoesNotContain(dependencies, d => d.Name == "AutoMapper");
-            Assert.Contains(dependencies, d => d.Name == "Newtonsoft.Json");
+            Assert.DoesNotContain(dependencies, d => d.Path.Contains("AutoMapper", StringComparison.InvariantCultureIgnoreCase));
+            Assert.Contains(dependencies, d => d.Path.Contains("Newtonsoft.Json", StringComparison.InvariantCultureIgnoreCase));
         }
 
         [Fact]
@@ -46,8 +47,19 @@ namespace Dotnet.Script.Tests
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("NativeLibrary");
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
             var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
-            Assert.Contains(dependencies, d => d.Name == "Microsoft.Data.Sqlite.Core");
+            Assert.Contains(dependencies, d => d.Path.Contains("Microsoft.Data.Sqlite.Core", StringComparison.InvariantCultureIgnoreCase));
         }
+
+        [Fact]
+        public void ShouldGetCompilationDependenciesForNuGetPackageWithRefFolder()
+        {
+            var resolver = CreateResolver();
+            var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("InlineNugetPackageWithRefFolder");
+            var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
+            var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
+            Assert.Contains(dependencies, d => d.Path.Replace("\\", "/").Contains("system.data.sqlclient/4.6.1/ref/"));
+        }
+
 
         [Fact]
         public void ShouldGetCompilationDependenciesForIssue129()
@@ -56,7 +68,7 @@ namespace Dotnet.Script.Tests
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("Issue129");
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
             var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
-            Assert.Contains(dependencies, d => d.Name == "Auth0.ManagementApi");
+            Assert.Contains(dependencies, d => d.Path.Contains("Auth0.ManagementApi", StringComparison.InvariantCultureIgnoreCase));
         }
 
         private CompilationDependencyResolver CreateResolver()

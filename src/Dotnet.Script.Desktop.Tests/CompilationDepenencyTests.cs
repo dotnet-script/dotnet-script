@@ -14,13 +14,15 @@ namespace Dotnet.Script.Desktop.Tests
             testOutputHelper.Capture();
         }
 
-        [Fact]
-        public void ShouldGetCompilationDependenciesForNetCoreApp2_1()
+        [Theory]
+        [InlineData("netcoreapp2.1")]
+        [InlineData("netcoreapp3.0")]
+        public void ShouldGetCompilationDependenciesForNetCoreApp(string targetFramework)
         {
             var resolver = CreateResolver();
             var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("HelloWorld");
             var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
-            var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, "netcoreapp2.1");
+            var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, targetFramework);
             Assert.True(dependencies.Count() > 0);
         }
 

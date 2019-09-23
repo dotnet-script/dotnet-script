@@ -23,9 +23,9 @@ namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
-        private ScriptEnvironment _scriptEnvironment;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
-        private Logger _logger;
+        private readonly Logger _logger;
 
         static ScriptCompiler()
         {

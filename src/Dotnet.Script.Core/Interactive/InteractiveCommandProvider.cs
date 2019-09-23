@@ -4,7 +4,7 @@ namespace Dotnet.Script.Core
 {
     public class InteractiveCommandProvider
     {
-        private IInteractiveCommand[] _commands = new IInteractiveCommand[] 
+        private readonly IInteractiveCommand[] _commands = new IInteractiveCommand[] 
         {
             new ResetInteractiveCommand(),
             new ClsCommand(),

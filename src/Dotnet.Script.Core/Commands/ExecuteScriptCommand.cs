@@ -103,6 +103,10 @@ namespace Dotnet.Script.Core.Commands
             var configuration = options.OptimizationLevel.ToString();
             incrementalHash.AppendData(Encoding.UTF8.GetBytes(configuration));
 
+            // Ensure that we don't run with the deps of an old target framework or SDK version.
+            incrementalHash.AppendData(Encoding.UTF8.GetBytes(ScriptEnvironment.Default.NetCoreVersion.Tfm));
+            incrementalHash.AppendData(Encoding.UTF8.GetBytes(ScriptEnvironment.Default.NetCoreVersion.Version));
+
             hash = Convert.ToBase64String(incrementalHash.GetHashAndReset());
             return true;
         }

@@ -6,4 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
   </ItemGroup>
+  <Target Name="RecordReferencePaths" AfterTargets="AfterResolveReferences">
+    <WriteLinesToFile File="$(OutputPath)/ReferencePaths.txt" Lines="@(ReferencePath)" />
+  </Target>
 </Project>

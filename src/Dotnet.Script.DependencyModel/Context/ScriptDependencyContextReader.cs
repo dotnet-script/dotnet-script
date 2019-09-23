@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.ScriptPackage;
 using Microsoft.DotNet.PlatformAbstractions;
@@ -10,6 +12,7 @@ using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.ProjectModel;
 using NuGet.RuntimeModel;
+using NuGet.Versioning;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
@@ -34,7 +37,6 @@ namespace Dotnet.Script.DependencyModel.Context
         public ScriptDependencyContext ReadDependencyContext(string pathToAssetsFile)
         {
             var lockFile = GetLockFile(pathToAssetsFile);
-
             // Since we execute "dotnet restore -r [rid]" we get two targets in the lock file.
             // The second target is the one containing the runtime deps for the given RID.
             var target = GetLockFileTarget(lockFile);
@@ -47,8 +49,8 @@ namespace Dotnet.Script.DependencyModel.Context
             List<ScriptDependency> scriptDependencies = new List<ScriptDependency>();
             foreach (var targetLibrary in targetLibraries)
             {
-                var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packageFolders, packagePathResolver, targetLibrary);
-                if (scriptDependency.CompileTimeDependencyPaths.Any() ||
+                var scriptDependency = CreateScriptDependency(targetLibrary.Name, targetLibrary.Version.ToString(), packagePathResolver, targetLibrary);
+                if (
                     scriptDependency.NativeAssetPaths.Any() ||
                     scriptDependency.RuntimeDependencyPaths.Any() ||
                     scriptDependency.ScriptPaths.Any())
@@ -57,7 +59,28 @@ namespace Dotnet.Script.DependencyModel.Context
                 }
             }
 
+            if (ScriptEnvironment.Default.NetCoreVersion.Version.StartsWith("3"))
+            {
+                var netcoreAppRuntimeAssemblyLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
+                var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
+                var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", ScriptEnvironment.Default.NetCoreVersion.Version, netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+                scriptDependencies.Add(netCoreAppDependency);
+            }
             return new ScriptDependencyContext(scriptDependencies.ToArray());
+        }
+
+        private static bool IsAssembly(string file)
+        {
+            // https://docs.microsoft.com/en-us/dotnet/standard/assembly/identify
+            try
+            {
+                AssemblyName.GetAssemblyName(file);
+                return true;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
         }
 
         private static LockFileTarget GetLockFileTarget(LockFile lockFile)
@@ -85,7 +108,7 @@ Make sure that the file exists and that it is a valid 'project.assets.json' file
             return lockFile;
         }
 
-        private ScriptDependency CreateScriptDependency(string name, string version, string[] packageFolders, FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
+        private ScriptDependency CreateScriptDependency(string name, string version, FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
             var runtimeDependencyPaths = GetRuntimeDependencyPaths(packagePathResolver, targetLibrary);
             var compileTimeDependencyPaths = GetCompileTimeDependencyPaths(packagePathResolver, targetLibrary);
@@ -115,7 +138,7 @@ Make sure that the file exists and that it is a valid 'project.assets.json' file
         private string[] GetNativeAssetPaths(FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
             List<string> nativeAssetPaths = new List<string>();
-            foreach (var runtimeTarget in targetLibrary.NativeLibraries)
+            foreach (var runtimeTarget in targetLibrary.NativeLibraries.Where(lfi => !lfi.Path.EndsWith("_._")))
             {
                 var fullPath = ResolveFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
                 nativeAssetPaths.Add(fullPath);

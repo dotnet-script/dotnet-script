@@ -21,9 +21,9 @@ namespace Dotnet.Script.Tests
 
         private ScriptTestRunner()
         {
-            _scriptEnvironment = ScriptEnvironment.Default;            
+            _scriptEnvironment = ScriptEnvironment.Default;
         }
-        
+
         public (string output, int exitCode) Execute(string arguments, string workingDirectory = null)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(arguments), workingDirectory);
@@ -31,7 +31,7 @@ namespace Dotnet.Script.Tests
         }
 
         public int ExecuteInProcess(string arguments = null)
-        {                        
+        {
             return Program.Main(arguments?.Split(" ") ?? Array.Empty<string>());
         }
 
@@ -44,7 +44,7 @@ namespace Dotnet.Script.Tests
 
         public int ExecuteFixtureInProcess(string fixture, string arguments = null)
         {
-            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);            
+            var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
             return Program.Main(new[] { pathToFixture }.Concat(arguments?.Split(" ") ?? Array.Empty<string>()).ToArray());
         }
 
@@ -67,7 +67,7 @@ namespace Dotnet.Script.Tests
         }
 
         public (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
-        {            
+        {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"-c release eval \"{code}\""));
             return result;
         }

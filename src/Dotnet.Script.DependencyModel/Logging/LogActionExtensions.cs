@@ -35,19 +35,21 @@ namespace Dotnet.Script.DependencyModel.Logging
 
         private static Dictionary<string, LogLevel> CreateMap()
         {
-            var map = new Dictionary<string, LogLevel>(StringComparer.InvariantCultureIgnoreCase);
-            map.Add("t", LogLevel.Trace);
-            map.Add("trace", LogLevel.Trace);
-            map.Add("d", LogLevel.Debug);
-            map.Add("debug", LogLevel.Debug);
-            map.Add("i", LogLevel.Info);
-            map.Add("info", LogLevel.Info);
-            map.Add("w", LogLevel.Warning);
-            map.Add("warning", LogLevel.Warning);
-            map.Add("e", LogLevel.Error);
-            map.Add("error", LogLevel.Error);
-            map.Add("c", LogLevel.Critical);
-            map.Add("critical", LogLevel.Critical);
+            var map = new Dictionary<string, LogLevel>(StringComparer.InvariantCultureIgnoreCase)
+            {
+                { "t", LogLevel.Trace },
+                { "trace", LogLevel.Trace },
+                { "d", LogLevel.Debug },
+                { "debug", LogLevel.Debug },
+                { "i", LogLevel.Info },
+                { "info", LogLevel.Info },
+                { "w", LogLevel.Warning },
+                { "warning", LogLevel.Warning },
+                { "e", LogLevel.Error },
+                { "error", LogLevel.Error },
+                { "c", LogLevel.Critical },
+                { "critical", LogLevel.Critical }
+            };
             return map;
         }
 
