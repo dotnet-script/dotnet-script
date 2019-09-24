@@ -50,7 +50,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             }
 
             targetDirectory = Path.Combine(targetDirectory, "interactive");
-            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
+            var pathToProjectFile = GetPathToProjectFile(targetDirectory, defaultTargetFramework);
             var projectFile = new ProjectFile();
 
             foreach (var packageReference in allPackageReferences)
@@ -108,7 +108,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
             ProjectFile projectFile = CreateProjectFileFromScriptFiles(defaultTargetFramework, csxFiles);
 
-            var pathToProjectFile = GetPathToProjectFile(targetDirectory);
+            var pathToProjectFile = GetPathToProjectFile(targetDirectory, defaultTargetFramework);
             projectFile.Save(pathToProjectFile);
 
             LogProjectFileInfo(pathToProjectFile);
@@ -132,9 +132,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         }
 
 
-        public static string GetPathToProjectFile(string targetDirectory)
+        public static string GetPathToProjectFile(string targetDirectory, string targetFramework)
         {
-            var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory);
+            var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory, targetFramework);
             var pathToProjectFile = Path.Combine(pathToProjectDirectory, "script.csproj");
             return pathToProjectFile;
         }
