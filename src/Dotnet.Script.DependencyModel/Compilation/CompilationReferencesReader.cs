@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
@@ -39,6 +40,9 @@ namespace Dotnet.Script.DependencyModel.Compilation
             string pathToCompilationProjectFile = Path.Combine(workingDirectory, outputDirectory, Path.GetFileName(projectFile.Path));
             File.Copy(projectFile.Path, pathToCompilationProjectFile, true);
 
+            // We remove any third party package references since we are only after the framework assemblies here.
+            RemovePackageReferences(pathToCompilationProjectFile);
+
             var referencePathsFile = Path.Combine(workingDirectory, outputDirectory, "ReferencePaths.txt");
             if (File.Exists(referencePathsFile))
             {
@@ -52,6 +56,13 @@ namespace Dotnet.Script.DependencyModel.Compilation
             var referenceAssemblies = File.ReadAllLines(referencePathsFile);
             var compilationReferences = referenceAssemblies.Select(ra => new CompilationReference(ra)).ToArray();
             return compilationReferences;
+        }
+
+        private static void RemovePackageReferences(string projectFile)
+        {
+            var document = XDocument.Load(projectFile);
+            document.Descendants("PackageReference").Remove();
+            document.Save(projectFile);
         }
     }
 }

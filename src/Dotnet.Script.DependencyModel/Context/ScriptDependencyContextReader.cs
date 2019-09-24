@@ -53,6 +53,7 @@ namespace Dotnet.Script.DependencyModel.Context
                 if (
                     scriptDependency.NativeAssetPaths.Any() ||
                     scriptDependency.RuntimeDependencyPaths.Any() ||
+                    scriptDependency.CompileTimeDependencyPaths.Any() ||
                     scriptDependency.ScriptPaths.Any())
                 {
                     scriptDependencies.Add(scriptDependency);
