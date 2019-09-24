@@ -31,7 +31,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             var packageReferenceElements = projectFileDocument.Descendants("PackageReference");
             foreach (var packageReferenceElement in packageReferenceElements)
             {
-                PackageReferences.Add(new PackageReference(packageReferenceElement.Attribute("Include").Value,packageReferenceElement.Attribute("Version").Value));
+                PackageReferences.Add(new PackageReference(packageReferenceElement.Attribute("Include").Value, packageReferenceElement.Attribute("Version").Value));
             }
 
             var assemblyReferenceElements = projectFileDocument.Descendants("Reference");
@@ -49,7 +49,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <summary>
         /// Gets a list of <see cref="PackageReference"/> elements for this <see cref="ProjectFile"/>.
         /// </summary>
-        public HashSet<PackageReference> PackageReferences { get ;} = new HashSet<PackageReference>();
+        public HashSet<PackageReference> PackageReferences { get; } = new HashSet<PackageReference>();
 
         /// <summary>
         /// Gets a list of <see cref="AssemblyReference"/> elements for this <see cref="ProjectFile"/>.
@@ -59,7 +59,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <summary>
         /// Gets or sets the target framework for this <see cref="ProjectFile"/>.
         /// </summary>
-        public string TargetFramework { get; set;} = ScriptEnvironment.Default.TargetFramework;
+        public string TargetFramework { get; set; } = ScriptEnvironment.Default.TargetFramework;
 
         public void Save(string pathToProjectFile)
         {

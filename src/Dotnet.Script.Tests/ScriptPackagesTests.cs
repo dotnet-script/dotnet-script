@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Dotnet.Script.DependencyModel.Compilation;
 using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Runtime;
 using Dotnet.Script.Shared.Tests;
 using Xunit;
 using Xunit.Abstractions;
@@ -31,7 +32,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowMeaningfulExceptionWhenScriptPackageIsMissing()
         {
-            using(var scriptFolder = new DisposableFolder())
+            using (var scriptFolder = new DisposableFolder())
             {
                 var code = new StringBuilder();
                 code.AppendLine("#load \"nuget:ScriptPackageWithMainCsx, 1.0.0\"");
@@ -95,10 +96,10 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldGetScriptFilesFromScriptPackage()
         {
-            var resolver = CreateCompilationDependencyResolver();
+            var resolver = CreateRuntimeDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
             var csxFiles = Directory.GetFiles(fixture, "*.csx");
-            var dependencies = resolver.GetDependencies(fixture, csxFiles,  true, _scriptEnvironment.TargetFramework);
+            var dependencies = resolver.GetDependencies(csxFiles.First(), Array.Empty<string>());
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
             Assert.NotEmpty(scriptFiles);
         }
@@ -110,9 +111,9 @@ namespace Dotnet.Script.Tests
         }
 
 
-        private CompilationDependencyResolver CreateCompilationDependencyResolver()
+        private RuntimeDependencyResolver CreateRuntimeDependencyResolver()
         {
-            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
+            var resolver = new RuntimeDependencyResolver(TestOutputHelper.CreateTestLogFactory(), useRestoreCache: false);
             return resolver;
         }
 
@@ -128,7 +129,7 @@ namespace Dotnet.Script.Tests
                 Console.SetError(stringWriter);
                 var baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 var fullPathToScriptFile = Path.Combine(baseDir, "..", "..", "..", "TestFixtures", "ScriptPackage", scriptFileName);
-                Program.Main(new[] { fullPathToScriptFile , "--no-cache"});
+                Program.Main(new[] { fullPathToScriptFile, "--no-cache" });
                 return output.ToString();
 
             }

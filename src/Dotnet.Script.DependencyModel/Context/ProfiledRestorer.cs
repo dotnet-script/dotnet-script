@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
@@ -16,11 +17,11 @@ namespace Dotnet.Script.DependencyModel.Context
 
         public bool CanRestore => _restorer.CanRestore;
 
-        public void Restore(string pathToProjectFile, string[] packageSources)
+        public void Restore(ProjectFileInfo projectFileInfo, string[] packageSources)
         {
             var stopwatch = Stopwatch.StartNew();
-            _restorer.Restore(pathToProjectFile, packageSources);
-            _logger.Debug($"Restoring {pathToProjectFile} took {stopwatch.ElapsedMilliseconds}ms");
+            _restorer.Restore(projectFileInfo, packageSources);
+            _logger.Debug($"Restoring {projectFileInfo.Path} took {stopwatch.ElapsedMilliseconds}ms");
         }
     }
 }
