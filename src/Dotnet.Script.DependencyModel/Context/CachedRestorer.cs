@@ -1,4 +1,5 @@
 using System.IO;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 
@@ -31,6 +32,7 @@ namespace Dotnet.Script.DependencyModel.Context
         public void Restore(ProjectFileInfo projectFileInfo, string[] packageSources)
         {
             var projectFile = new ProjectFile(File.ReadAllText(projectFileInfo.Path));
+
             var pathToCachedProjectFile = $"{projectFileInfo.Path}.cache";
             if (File.Exists(pathToCachedProjectFile))
             {
