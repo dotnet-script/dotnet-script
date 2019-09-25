@@ -38,9 +38,9 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleNullableContextAsError()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixtureInProcess("Nullable");
-            // Assert.Equal(1, result.exitCode);
-            // Assert.Contains("error CS8625", result.output);
+            var result = ScriptTestRunner.Default.ExecuteFixture("Nullable");
+            Assert.Equal(1, result.exitCode);
+            Assert.Contains("error CS8625", result.output);
         }
 
         [Fact]
