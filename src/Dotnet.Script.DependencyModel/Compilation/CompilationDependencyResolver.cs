@@ -47,7 +47,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             if (defaultTargetFramework.StartsWith("netcoreapp3", StringComparison.InvariantCultureIgnoreCase))
             {
                 var compilationreferences = _compilationReferenceReader.Read(projectFileInfo);
-                result.Add(new CompilationDependency("Microsoft.NETCore.App", ScriptEnvironment.Default.NetCoreVersion.Version, compilationreferences.Select(cr => cr.Path).ToArray(), Array.Empty<string>()));
+                result.Add(new CompilationDependency("Microsoft.NETCore.App", "3.0", compilationreferences.Select(cr => cr.Path).ToArray(), Array.Empty<string>()));
             }
 
             return result;
