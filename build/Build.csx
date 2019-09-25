@@ -1,4 +1,4 @@
-#load "nuget:Dotnet.Build, 0.3.9"
+#load "nuget:Dotnet.Build, 0.7.1"
 #load "nuget:dotnet-steps, 0.0.1"
 #load "nuget:github-changelog, 0.1.5"
 #load "Choco.csx"
@@ -100,7 +100,7 @@ private async Task PublishRelease()
 
     if (Git.Default.IsTagCommit())
     {
-        Git.Default.RequreCleanWorkingTree();
+        Git.Default.RequireCleanWorkingTree();
         await ReleaseManagerFor(owner, projectName, BuildEnvironment.GitHubAccessToken)
         .CreateRelease(Git.Default.GetLatestTag(), pathToReleaseNotes, new[] { new ZipReleaseAsset(pathToGitHubReleaseAsset) });
         NuGet.TryPush(nuGetArtifactsFolder);
