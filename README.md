@@ -535,6 +535,33 @@ We can specify this when executing the script.
 dotnet script foo.csx -c release
 ```
 
+## 	
+
+## Nullable reference types
+
+Starting from version 0.50.0, `dotnet-script` supports .Net Core 3.0 and all the C# 8 features.
+The way we deal with [nullable references types](https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references) in `dotnet-script` is that we turn every warning related to nullable reference types into compiler errors. This means every warning between `CS8600` and `CS8655` are treated as an error when compiling the script. 
+
+Nullable references types are turned off by default and the way we enable it is using the `#nullable enable` compiler directive. This means that existing scripts will continue to work, but we can now opt-in on this new feature.
+
+```csharp
+#!/usr/bin/env dotnet-script
+
+#nullable enable
+
+string name = null;
+```
+
+Trying to execute the script will result in the following error
+
+```shell
+main.csx(5,15): error CS8625: Cannot convert null literal to non-nullable reference type.
+```
+
+We will also see this when working with scripts in VS Code under the problems panel.
+
+![image](https://user-images.githubusercontent.com/1034073/65727087-0e982600-e0b7-11e9-8fa0-d16331ab948a.png)
+
 ## Team
 
 * [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
