@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:2.1
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0
 
 # https://www.nuget.org/packages/dotnet-script/
 RUN dotnet tool install dotnet-script --tool-path /usr/bin
