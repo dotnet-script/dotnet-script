@@ -7,12 +7,12 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 [![Build Status](https://bernhardrichter.visualstudio.com/dotnet-script/_apis/build/status/filipw.dotnet-script?branchName=master)](https://bernhardrichter.visualstudio.com/dotnet-script/_build/latest?definitionId=4&branchName=master)
 
 
-## Nuget Packages
+## NuGet Packages
 
-| Name                                  | Version                                                                                                                                                             | Framework        |
+| Name                                  | Version                                                                                                                                                             | Framework(s)        |
 |---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
-| `dotnet-script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `netcoreapp2.1`  |
-| `Dotnet.Script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `netcoreapp2.1`  |
+| `dotnet-script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `netcoreapp2.1`, `netcoreapp3.0`  |
+| `Dotnet.Script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `netcoreapp2.1`, `netcoreapp3.0`  |
 | `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `netstandard2.0` |
 | `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0` |
 | `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0` |
@@ -21,11 +21,11 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ### Prerequisites
 
-The only thing we need to install is [.Net Core 2.1+ SDK](https://www.microsoft.com/net/download/core).
+The only thing we need to install is [.NET Core 2.1+ SDK](https://www.microsoft.com/net/download/core). In order to use C# 8.0 features, [.NET Core 3.0+ SDK](https://www.microsoft.com/net/download/core) must be installed.
 
-### .Net Core 2.1 Global Tool
+### .NET Core Global Tool
 
-.Net Core 2.1 introduces the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
+.NET Core 2.1 introduces the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
 
 ```shell
 dotnet tool install -g dotnet-script
@@ -36,7 +36,7 @@ Tool 'dotnet-script' (version '0.22.0') was successfully installed.
 
 The advantage of this approach is that you can use the same command for installation across all platforms.
 
-> ⚠️ In order to use the global tool you need [.Net Core SDK 2.1.300](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300) or higher. The earlier previews and release candidates of .NET Core 2.1 are not supported.
+> ⚠️ In order to use the global tool you need [.NET Core SDK 2.1.300](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300) or higher. The earlier previews and release candidates of .NET Core 2.1 are not supported.
 
 .NET Core SDK also supports viewing a list of installed tools and their uninstallation.
 
@@ -95,7 +95,7 @@ docker run -it dotnet-script --version
 
 ### Github
 
-You can manually download all the releases in `zip` format from the [Github releases page](https://github.com/filipw/dotnet-script/releases).
+You can manually download all the releases in `zip` format from the [GitHub releases page](https://github.com/filipw/dotnet-script/releases).
 
 
 ## Usage
