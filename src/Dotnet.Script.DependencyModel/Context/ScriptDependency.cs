@@ -8,6 +8,7 @@ namespace Dotnet.Script.DependencyModel.Context
             Version = version;
             RuntimeDependencyPaths = runtimeDependencyPaths;
             NativeAssetPaths = nativeAssetPaths;
+            CompileTimeDependencyPaths = compileTimeDependencyPaths;
             ScriptPaths = scriptPaths;
         }
 
@@ -15,6 +16,7 @@ namespace Dotnet.Script.DependencyModel.Context
         public string Version { get; }
         public string[] RuntimeDependencyPaths { get; }
         public string[] NativeAssetPaths { get; }
+        public string[] CompileTimeDependencyPaths { get; }
         public string[] ScriptPaths { get; }
 
         public override string ToString()

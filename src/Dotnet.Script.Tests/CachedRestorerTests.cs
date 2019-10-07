@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Context;
+using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.Shared.Tests;
 using Moq;
@@ -26,7 +27,7 @@ namespace Dotnet.Script.Tests
             {
 
                 var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
-                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, "script.csproj.cache");
+                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, $"script.csproj.cache");
 
                 var projectFile = new ProjectFile();
                 projectFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
@@ -56,7 +57,7 @@ namespace Dotnet.Script.Tests
             {
                 var projectFile = new ProjectFile();
                 var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
-                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, "script.csproj.cache");
+                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, $"script.csproj.cache");
 
                 projectFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
                 projectFile.PackageReferences.Add(new PackageReference("AnotherPackage", "3.2"));
@@ -86,7 +87,7 @@ namespace Dotnet.Script.Tests
             {
                 var projectFile = new ProjectFile();
                 var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
-                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, "script.csproj.cache");
+                var pathToCachedProjectFile = Path.Combine(projectFolder.Path, $"script.csproj.cache");
 
                 projectFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
                 projectFile.PackageReferences.Add(new PackageReference("AnotherPackage", "1.2.3"));

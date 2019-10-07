@@ -8,9 +8,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     public static class FileUtils
     {
-        public static string CreateTempFolder(string targetDirectory)
+        public static string CreateTempFolder(string targetDirectory, string targetFramework)
         {
-            string pathToProjectDirectory = GetPathToTempFolder(targetDirectory);
+            string pathToProjectDirectory = Path.Combine(GetPathToTempFolder(targetDirectory), targetFramework);
 
             if (!Directory.Exists(pathToProjectDirectory))
             {

@@ -1,4 +1,4 @@
-#load "nuget:Dotnet.Build, 0.3.1"
+#load "nuget:Dotnet.Build, 0.7.1"
 
 using System.Xml.Linq;
 
@@ -11,7 +11,6 @@ public static class Choco
     /// <param name="outputFolder">The path to the output folder (*.nupkg)</param>
     public static void Pack(string pathToProjectFolder, string pathToBinaries, string outputFolder)
     {
-        File.Copy(Path.Combine(pathToProjectFolder, "../../LICENSE"), Path.Combine("Chocolatey","tools","LICENSE.TXT"), true);
         string pathToProjectFile = Directory.GetFiles(pathToProjectFolder, "*.csproj").Single();
         CreateSpecificationFromProject(pathToProjectFile, pathToBinaries);
         Command.Execute("choco.exe", $@"pack Chocolatey\chocolatey.nuspec  --outputdirectory {outputFolder}");
@@ -20,7 +19,7 @@ public static class Choco
     public static void Push(string packagesFolder, string apiKey, string source = "https://push.chocolatey.org/")
     {
         var packageFiles = Directory.GetFiles(packagesFolder, "*.nupkg");
-        foreach(var packageFile in packageFiles)
+        foreach (var packageFile in packageFiles)
         {
             Command.Execute("choco.exe", $"push {packageFile} --source {source} --key {apiKey}");
         }
@@ -29,7 +28,7 @@ public static class Choco
     public static void TryPush(string packagesFolder, string apiKey, string source = "https://push.chocolatey.org/")
     {
         var packageFiles = Directory.GetFiles(packagesFolder, "*.nupkg");
-        foreach(var packageFile in packageFiles)
+        foreach (var packageFile in packageFiles)
         {
             Command.Execute("choco.exe", $"push {packageFile} --source {source} --key {apiKey}");
         }
@@ -77,11 +76,11 @@ public static class Choco
         packageElement.Add(filesElement);
 
         // Add the tools folder that contains "ChocolateyInstall.ps1"
-        filesElement.Add(CreateFileElement(@"tools\*.*",$@"{packageId}\tools"));
+        filesElement.Add(CreateFileElement(@"tools\*.*", $@"{packageId}\tools"));
         var srcGlobPattern = $@"{pathToBinaries}\**\*";
-        filesElement.Add(CreateFileElement(srcGlobPattern,packageId));
+        filesElement.Add(CreateFileElement(srcGlobPattern, packageId));
 
-        using (var fileStream = new FileStream("Chocolatey/chocolatey.nuspec",FileMode.Create))
+        using (var fileStream = new FileStream("Chocolatey/chocolatey.nuspec", FileMode.Create))
         {
             new XDocument(packageElement).Save(fileStream);
         }
