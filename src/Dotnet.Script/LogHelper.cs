@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using Dotnet.Script.DependencyModel.Logging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
