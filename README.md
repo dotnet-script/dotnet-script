@@ -263,7 +263,7 @@ This is an out-of-process operation and represents a significant overhead to the
 
 In order to execute a script it needs to be compiled first and since that is a CPU and time consuming operation, we make sure that we only compile when the source code has changed. This works by creating a SHA256 hash from all the script files involved in the execution. This hash is written to a temporary location along with the DLL that represents the result of the script compilation. When a script is executed the hash is computed and compared with the hash from the previous compilation. If they match there is no need to recompile and we run from the already compiled DLL. If the hashes don't match, the cache is invalidated and we recompile.
 
-> You can override this automatic caching by passing **--nocache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script.
+> You can override this automatic caching by passing **--no-cache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script.
 
 ###
 
