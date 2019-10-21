@@ -85,7 +85,8 @@ namespace Dotnet.Script.Core
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors
-            var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\"");
+            var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\" {(ScriptEnvironment.Default.TargetFramework == "netcoreapp3.0" ? "/p:PublishSingleFile=true" : "")} /p:DebugType=Embedded");
+
             if (exitcode != 0)
             {
                 throw new Exception($"dotnet publish failed with result '{exitcode}'");
@@ -151,7 +152,7 @@ namespace Dotnet.Script.Core
             return assemblyPath;
         }
 
-        private void CopyProgramTemplate(string tempProjectDirecory)
+        private static void CopyProgramTemplate(string tempProjectDirecory)
         {
             const string resourceName = "Dotnet.Script.Core.Templates.program.publish.template";
 
