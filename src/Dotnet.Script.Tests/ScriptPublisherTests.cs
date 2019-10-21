@@ -5,6 +5,7 @@ using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.Shared.Tests;
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -38,6 +39,12 @@ namespace Dotnet.Script.Tests
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
+
+                var publishedFiles = Directory.EnumerateFiles(Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier));
+
+#if NETCOREAPP3_0
+                Assert.True(1 == publishedFiles.Count(), "There should be only a single published file on .NET Core 3.0");
+#endif
             }
         }
 
