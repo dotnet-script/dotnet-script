@@ -272,6 +272,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldLoadMicrosoftExtensionsDependencyInjection()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("MicrosoftExtensionsDependencyInjection");
+            Assert.Contains("Microsoft.Extensions.DependencyInjection.IServiceCollection", result.output);
+        }
+
+        [Fact]
         public void ShouldThrowExceptionOnInvalidMediaType()
         {
             var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
