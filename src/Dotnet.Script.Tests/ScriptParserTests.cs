@@ -14,7 +14,7 @@ namespace Dotnet.Script.Tests
 
         public ScriptParserTests(ITestOutputHelper testOutputHelper)
         {
-            testOutputHelper.Capture(minimumLogLevel:0);
+            testOutputHelper.Capture(minimumLogLevel: 0);
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
@@ -70,7 +70,7 @@ namespace Dotnet.Script.Tests
             var result = parser.ParseFromCode(code.ToString());
 
             Assert.Equal(1, result.PackageReferences.Count);
-            Assert.Equal("Package", result.PackageReferences.Single().Id.Value  );
+            Assert.Equal("Package", result.PackageReferences.Single().Id.Value);
             Assert.Equal("1.2.3-beta-1", result.PackageReferences.Single().Version.Value);
         }
 
@@ -121,30 +121,6 @@ namespace Dotnet.Script.Tests
             var result = parser.ParseFromCode(code);
 
             Assert.Equal(0, result.PackageReferences.Count);
-        }
-
-        [Fact]
-        public void ShouldParseTargetFramework()
-        {
-            var parser = CreateParser();
-
-            var result = parser.ParseFromCode($"#! \"{_scriptEnvironment.TargetFramework}\"");
-
-            Assert.Equal(_scriptEnvironment.TargetFramework, result.TargetFramework);
-        }
-
-        [Theory]
-        [InlineData("\n#! \"TARGET_FRAMEWORK\"")]
-        [InlineData("\r#! \"TARGET_FRAMEWORK\"")]
-        [InlineData("#!\n\"TARGET_FRAMEWORK\"")]
-        [InlineData("#!\r\"TARGET_FRAMEWORK\"")]
-        public void ShouldNotParseBadTargetFramework(string code)
-        {
-            var parser = CreateParser();
-
-            var result = parser.ParseFromCode(code.Replace("TARGET_FRAMEWORK", _scriptEnvironment.TargetFramework));
-
-            Assert.Null(result.TargetFramework);
         }
 
         private ScriptParser CreateParser()
