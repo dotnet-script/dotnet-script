@@ -17,51 +17,24 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         public ParseResult ParseFromCode(string code)
         {
-            string currentTargetFramework = null;
             var allPackageReferences = new HashSet<PackageReference>();
             allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(code));
             allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(code));
-            string targetFramework = ReadTargetFramework(code);
-            if (targetFramework != null)
-            {
-                if (currentTargetFramework != null && targetFramework != currentTargetFramework)
-                {
-                    _logger.Debug($"Found multiple target frameworks. Using {currentTargetFramework}.");
-                }
-                else
-                {
-                    currentTargetFramework = targetFramework;
-                }
-            }
-
-            return new ParseResult(allPackageReferences, currentTargetFramework);
+            return new ParseResult(allPackageReferences);
         }
 
         public ParseResult ParseFromFiles(IEnumerable<string> csxFiles)
         {
             var allPackageReferences = new HashSet<PackageReference>();
-            string currentTargetFramework = null;
             foreach (var csxFile in csxFiles)
             {
                 _logger.Debug($"Parsing {csxFile}");
                 var fileContent = File.ReadAllText(csxFile);
                 allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(fileContent));
                 allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(fileContent));
-                string targetFramework = ReadTargetFramework(fileContent);
-                if (targetFramework != null)
-                {
-                    if (currentTargetFramework != null && targetFramework != currentTargetFramework)
-                    {
-                        _logger.Debug($"Found multiple target frameworks. Using {currentTargetFramework}.");
-                    }
-                    else
-                    {
-                        currentTargetFramework = targetFramework;
-                    }
-                }
             }
 
-            return new ParseResult(allPackageReferences, currentTargetFramework);
+            return new ParseResult(allPackageReferences);
         }
 
         const string Hws = @"[\x20\t]*"; // hws = horizontal whitespace
@@ -97,17 +70,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 var packageReference = new PackageReference(id, version);
                 yield return packageReference;
             }
-        }
-
-        private static string ReadTargetFramework(string fileContent)
-        {
-            const string pattern = @"^" + Hws + @"#!" + Hws + @"""(.*)""";
-            var match = Regex.Match(fileContent, pattern);
-            if (match.Success)
-            {
-                return match.Groups[1].Value;
-            }
-            return null;
         }
     }
 }

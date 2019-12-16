@@ -446,6 +446,13 @@ namespace Dotnet.Script.Tests
             }
         }
 
+        [Fact]
+        public void ShouldHandleScriptWithTargetFrameworkInShebang()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("TargetFrameworkInShebang");
+            Assert.Contains("Hello world!", result.output);
+        }
+
 
         private static string CreateTestScript(string scriptFolder)
         {

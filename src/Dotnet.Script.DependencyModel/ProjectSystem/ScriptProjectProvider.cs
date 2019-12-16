@@ -58,7 +58,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 projectFile.PackageReferences.Add(packageReference);
             }
 
-            projectFile.TargetFramework = parseResultFromCode.TargetFramework ?? defaultTargetFramework;
+            projectFile.TargetFramework = defaultTargetFramework;
 
             projectFile.Save(pathToProjectFile);
 
@@ -127,7 +127,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 projectFile.PackageReferences.Add(packageReference);
             }
 
-            projectFile.TargetFramework = parseresult.TargetFramework ?? defaultTargetFramework;
+            projectFile.TargetFramework = defaultTargetFramework;
             return projectFile;
         }
 
