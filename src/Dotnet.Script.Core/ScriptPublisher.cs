@@ -70,23 +70,25 @@ namespace Dotnet.Script.Core
                 throw new ArgumentNullException(nameof(runtimeIdentifier));
             }
 
-            const string AssemblyName = "scriptAssembly";
             executeFileName = executeFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
+            const string AssemblyName = "scriptAssembly";
 
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework, executeFileName);
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework);
+            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework, executeFileName);
             var tempProjectDirectory = Path.GetDirectoryName(tempProjectPath);
-
+            
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirectory, AssemblyName);
-            var projectFile = new ProjectFile();
+           
+            var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.PackageReferences.Add(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion));
             projectFile.AssemblyReferences.Add(new AssemblyReference(scriptAssemblyPath));
-            projectFile.Save(tempProjectPath);
+            projectFile.Save(renamedProjectPath);
 
             CopyProgramTemplate(tempProjectDirectory);
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors
-            var exitcode = commandRunner.Execute("dotnet", $"publish \"{tempProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\" {(ScriptEnvironment.Default.TargetFramework == "netcoreapp3.0" ? "/p:PublishSingleFile=true" : "")} /p:DebugType=Embedded");
+            var exitcode = commandRunner.Execute("dotnet", $"publish \"{renamedProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\" {(ScriptEnvironment.Default.TargetFramework == "netcoreapp3.0" ? "/p:PublishSingleFile=true" : "")} /p:DebugType=Embedded");
 
             if (exitcode != 0)
             {
