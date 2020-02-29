@@ -40,7 +40,7 @@ namespace Dotnet.Script.Core.Commands
             }
             else
             {
-                publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier);
+                publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier, options.LibraryName);
             }
         }
 

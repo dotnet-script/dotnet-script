@@ -63,7 +63,7 @@ namespace Dotnet.Script.Core
             }
         }
 
-        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier)
+        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier, string executeFileName = null)
         {
             if (runtimeIdentifier == null)
             {
@@ -71,12 +71,13 @@ namespace Dotnet.Script.Core
             }
 
             const string AssemblyName = "scriptAssembly";
+            executeFileName = executeFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
 
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework);
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework, executeFileName);
             var tempProjectDirectory = Path.GetDirectoryName(tempProjectPath);
 
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirectory, AssemblyName);
-            var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
+            var projectFile = new ProjectFile();
             projectFile.PackageReferences.Add(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion));
             projectFile.AssemblyReferences.Add(new AssemblyReference(scriptAssemblyPath));
             projectFile.Save(tempProjectPath);
