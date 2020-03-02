@@ -63,22 +63,22 @@ namespace Dotnet.Script.Core
             }
         }
 
-        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier, string executeFileName = null)
+        public void CreateExecutable<TReturn, THost>(ScriptContext context, LogFactory logFactory, string runtimeIdentifier, string executableFileName = null)
         {
             if (runtimeIdentifier == null)
             {
                 throw new ArgumentNullException(nameof(runtimeIdentifier));
             }
 
-            executeFileName = executeFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
+            executableFileName = executableFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
             const string AssemblyName = "scriptAssembly";
 
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework);
-            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework, executeFileName);
+            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework, executableFileName);
             var tempProjectDirectory = Path.GetDirectoryName(tempProjectPath);
-            
+
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirectory, AssemblyName);
-           
+
             var projectFile = new ProjectFile(File.ReadAllText(tempProjectPath));
             projectFile.PackageReferences.Add(new PackageReference("Microsoft.CodeAnalysis.Scripting", ScriptingVersion));
             projectFile.AssemblyReferences.Add(new AssemblyReference(scriptAssemblyPath));
