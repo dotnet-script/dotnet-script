@@ -24,10 +24,10 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
             _logger = logFactory.CreateLogger<ScriptFilesDependencyResolver>();
         }
 
-        public string[] GetScriptFileDependencies(string path, string[] nugetPackageFolders)
+
+
+        public string[] GetScriptFileDependencies(string packagePath)
         {
-            var result = new List<string>();
-            var packagePath = GetPackageFullPath(path, nugetPackageFolders);
             var allScriptFiles = Directory.GetFiles(packagePath, "*.csx", SearchOption.AllDirectories);
 
             if (allScriptFiles.Length == 0)
@@ -35,8 +35,13 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
                 return Array.Empty<string>();
             }
 
-            _logger.Debug($"Processing script file dependencies from '{path}'");
+            _logger.Debug($"Processing script file dependencies from '{packagePath}'");
+            return ProcessScriptFiles(allScriptFiles);
+        }
 
+        private string[] ProcessScriptFiles(string[] allScriptFiles)
+        {
+            var result = new List<string>();
             var scriptFilesPerTargetFramework = GetScriptFilesPerTargetFramework(allScriptFiles);
             var scriptFiles = GetScriptFilesMatchingCurrentRuntime(scriptFilesPerTargetFramework);
             if (scriptFiles.Length == 0)
@@ -119,23 +124,6 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
         {
             var match = RootPathMatcher.Match(pathToScriptFile);
             return match.Groups[1].Value;
-        }
-
-        private static string GetPackageFullPath(string packagePath, string[] nugetPackageFolders)
-        {
-            foreach (var nugetPackageFolder in nugetPackageFolders)
-            {
-                var packageFullPath = Path.Combine(nugetPackageFolder, packagePath);
-                if (Directory.Exists(packageFullPath))
-                {
-                    return packageFullPath;
-                }
-            }
-
-            string message = $@"The requested script package path ({packagePath}) was not found in the global Nuget cache(s).
-. Try executing/publishing the script again with the '--no-cache' option";
-
-            throw new InvalidOperationException(message);
         }
     }
 }

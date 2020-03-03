@@ -23,9 +23,9 @@ namespace Dotnet.Script.Core
 {
     public class ScriptCompiler
     {
-        private ScriptEnvironment _scriptEnvironment;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
-        private Logger _logger;
+        private readonly Logger _logger;
 
         static ScriptCompiler()
         {
@@ -51,23 +51,31 @@ namespace Dotnet.Script.Core
         };
 
         // see: https://github.com/dotnet/roslyn/issues/5501
-        protected virtual IEnumerable<string> SuppressedDiagnosticIds => new[] { "CS1701", "CS1702", "CS1705" };
+        protected virtual IEnumerable<string> SuppressedDiagnosticIds { get; } = new[] { "CS1701", "CS1702", "CS1705" };
 
-        public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+        protected virtual Dictionary<string, ReportDiagnostic> SpecificDiagnosticOptions { get; } = new Dictionary<string, ReportDiagnostic>();
+
+        public CSharpParseOptions ParseOptions { get; } = new CSharpParseOptions(LanguageVersion.Preview, kind: SourceCodeKind.Script);
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
         public ScriptCompiler(LogFactory logFactory, bool useRestoreCache)
-            :this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
+            : this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
         {
 
         }
 
-        public ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
+        private ScriptCompiler(LogFactory logFactory, RuntimeDependencyResolver runtimeDependencyResolver)
         {
             _logger = logFactory(typeof(ScriptCompiler));
             _scriptEnvironment = ScriptEnvironment.Default;
             RuntimeDependencyResolver = runtimeDependencyResolver;
+
+            // nullable diagnostic options should be set to errors
+            for (var i = 8600; i <= 8655; i++)
+            {
+                SpecificDiagnosticOptions.Add($"CS{i}", ReportDiagnostic.Error);
+            }
         }
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
@@ -77,7 +85,8 @@ namespace Dotnet.Script.Core
                 .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
-                .WithFileEncoding(context.Code.Encoding);
+                .WithLanguageVersion(LanguageVersion.Preview)
+                .WithFileEncoding(context.Code.Encoding ?? Encoding.UTF8);
 
             // if the framework is not Core CLR, add GAC references
             if (!ScriptEnvironment.Default.IsNetCore)
@@ -92,6 +101,16 @@ namespace Dotnet.Script.Core
                     "System.Xml.Linq",
                     "System.Net.Http",
                     "Microsoft.CSharp");
+
+                // on *nix load netstandard
+                if (!ScriptEnvironment.Default.IsWindows)
+                {
+                    var netstandard = Assembly.Load("netstandard");
+                    if (netstandard != null)
+                    {
+                        opts = opts.AddReferences(MetadataReference.CreateFromFile(netstandard.Location));
+                    }
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(context.FilePath))
@@ -110,8 +129,7 @@ namespace Dotnet.Script.Core
             RuntimeDependency[] runtimeDependencies = GetRuntimeDependencies(context);
 
             var encoding = context.Code.Encoding ?? Encoding.UTF8; // encoding is required when emitting debug information
-            var scriptOptions = CreateScriptOptions(context, runtimeDependencies.ToList())
-                .WithFileEncoding(encoding);
+            var scriptOptions = CreateScriptOptions(context, runtimeDependencies.ToList());
 
             var loadedAssembliesMap = CreateLoadedAssembliesMap();
 
@@ -128,11 +146,18 @@ namespace Dotnet.Script.Core
 
             var script = CSharpScript.Create<TReturn>(code, scriptOptions, typeof(THost), loader);
 
-            SetOptimizationLevel(context, script);
+            SetCompilationOptions(context, script);
 
-            EvaluateDiagnostics(script);
+            var orderedDiagnostics = script.GetDiagnostics();
+            var suppressedDiagnostics = orderedDiagnostics.Where(d => SuppressedDiagnosticIds.Contains(d.Id));
+            foreach (var suppressedDiagnostic in suppressedDiagnostics)
+            {
+                _logger.Debug($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
+            }
 
-            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions, runtimeDependencies);
+            var nonSuppressedDiagnostics = orderedDiagnostics.Except(suppressedDiagnostics).ToArray();
+
+            return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions, runtimeDependencies, nonSuppressedDiagnostics);
         }
 
         private RuntimeDependency[] GetRuntimeDependencies(ScriptContext context)
@@ -143,7 +168,7 @@ namespace Dotnet.Script.Core
             }
             else
             {
-                return RuntimeDependencyResolver.GetDependencies(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
+                return RuntimeDependencyResolver.GetDependenciesForCode(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
             }
         }
 
@@ -168,29 +193,18 @@ namespace Dotnet.Script.Core
             return scriptOptions;
         }
 
-        private void EvaluateDiagnostics<TReturn>(Script<TReturn> script)
+        private void SetCompilationOptions<TReturn>(ScriptContext context, Script<TReturn> script)
         {
-            var orderedDiagnostics = script.GetDiagnostics();
+            var compilationOptionsField = typeof(CSharpCompilation).GetTypeInfo().GetDeclaredField("_options");
+            var compilation = script.GetCompilation();
+            var compilationOptions = (CSharpCompilationOptions)compilationOptionsField.GetValue(compilation);
+            compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(SpecificDiagnosticOptions.ToImmutableDictionary());
+            compilationOptionsField.SetValue(compilation, compilationOptions);
 
-            var suppressedDiagnostics = orderedDiagnostics.Where(d => SuppressedDiagnosticIds.Contains(d.Id));
-            foreach (var suppressedDiagnostic in suppressedDiagnostics)
-            {
-                _logger.Debug($"Suppressed diagnostic {suppressedDiagnostic.Id}: {suppressedDiagnostic.ToString()}");
-            }
-
-            if (orderedDiagnostics.Except(suppressedDiagnostics).Any(d => d.Severity == DiagnosticSeverity.Error))
-            {
-                throw new CompilationErrorException("Script compilation failed due to one or more errors.",
-                    orderedDiagnostics.ToImmutableArray());
-            }
-        }
-
-        private void SetOptimizationLevel<TReturn>(ScriptContext context, Script<TReturn> script)
-        {
             if (context.OptimizationLevel == OptimizationLevel.Release)
             {
                 _logger.Debug("Configuration/Optimization mode: Release");
-                SetReleaseOptimizationLevel(script.GetCompilation());
+                SetReleaseOptimizationLevel(compilation);
             }
             else
             {

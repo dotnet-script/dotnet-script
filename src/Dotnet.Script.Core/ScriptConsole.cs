@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using Microsoft.CodeAnalysis;
 using RL = System.ReadLine;
 
 namespace Dotnet.Script.Core
 {
     public class ScriptConsole
     {
-        public static readonly ScriptConsole Default = new ScriptConsole(Console.Out, null, Console.Error);
+        public static readonly ScriptConsole Default = new ScriptConsole(Console.Out, Console.In, Console.Error);
 
         public virtual TextWriter Error { get; }
         public virtual TextWriter Out { get; }
@@ -38,6 +39,25 @@ namespace Dotnet.Script.Core
         public virtual void WriteNormal(string value)
         {
             Out.WriteLine(value.TrimEnd(Environment.NewLine.ToCharArray()));
+        }
+
+        public virtual void WriteDiagnostics(Diagnostic[] warningDiagnostics, Diagnostic[] errorDiagnostics) 
+        {
+            if (warningDiagnostics != null) 
+            {
+                foreach (var warning in warningDiagnostics)
+                {
+                    WriteHighlighted(warning.ToString());
+                }
+            }
+
+            if (warningDiagnostics != null) 
+            {
+                foreach (var error in errorDiagnostics)
+                {
+                    WriteError(error.ToString());
+                }
+            }
         }
 
         public virtual string ReadLine()

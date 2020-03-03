@@ -29,7 +29,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         private ScriptEnvironment()
         {
             _netCoreVersion = new Lazy<DotnetVersion>(GetNetCoreAppVersion);
-            _targetFramework = new Lazy<string>(() => _netCoreVersion.Value == DotnetVersion.Unknown ? throw new PlatformNotSupportedException("Cannot determine .NET Core Version") : _netCoreVersion.Value.Tfm);
+            _targetFramework = new Lazy<string>(() => _netCoreVersion.Value == DotnetVersion.Unknown ? "net472" : _netCoreVersion.Value.Tfm);
             _installLocation = new Lazy<string>(GetInstallLocation);
             _platformIdentifier = new Lazy<string>(GetPlatformIdentifier);
             _runtimeIdentifier = new Lazy<string>(GetRuntimeIdentifier);
@@ -74,7 +74,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private static DotnetVersion GetNetCoreAppVersion()
         {
-            // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156 
+            // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156
             var codeBase = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.CodeBase;
             var pattern = @"^.*Microsoft\.NETCore\.App\/(\d\.\d)(.*?)\/";
             var match = Regex.Match(codeBase, pattern, RegexOptions.IgnoreCase);

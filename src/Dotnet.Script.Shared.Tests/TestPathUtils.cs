@@ -3,14 +3,15 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Dotnet.Script.Tests
+namespace Dotnet.Script.Shared.Tests
 {
     public class TestPathUtils
     {
         public static string GetPathToTestFixtureFolder(string fixture)
         {
-            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            return Path.Combine(baseDirectory, "..", "..", "..", "TestFixtures", fixture);
+
+            var baseDirectory = Path.GetDirectoryName(new Uri(typeof(TestPathUtils).Assembly.CodeBase).LocalPath);
+            return Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", "..", "Dotnet.Script.Tests", "TestFixtures", fixture));
         }
 
         public static string GetPathToTempFolder(string path)
@@ -41,8 +42,11 @@ namespace Dotnet.Script.Tests
         public static void RemovePackageFromGlobalNugetCache(string packageName)
         {
             var pathToGlobalPackagesFolder = TestPathUtils.GetPathToGlobalPackagesFolder();
-            var pathToAutoMapperPackage = Directory.GetDirectories(pathToGlobalPackagesFolder).Single(d => d.Contains(packageName, StringComparison.OrdinalIgnoreCase));
-            FileUtils.RemoveDirectory(pathToAutoMapperPackage);
+            var pathToPackage = Directory.GetDirectories(pathToGlobalPackagesFolder).SingleOrDefault(d => d.Contains(packageName, StringComparison.OrdinalIgnoreCase));
+            if (pathToPackage != null)
+            {
+                FileUtils.RemoveDirectory(pathToPackage);
+            }
         }
     }
 }

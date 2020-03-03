@@ -10,13 +10,11 @@ namespace Dotnet.Script.Core.Commands
     {
         private readonly ScriptConsole _scriptConsole;
         private readonly LogFactory _logFactory;
-        private readonly Logger _logger;
 
         public PublishCommand(ScriptConsole scriptConsole, LogFactory logFactory)
         {
             _scriptConsole = scriptConsole;
             _logFactory = logFactory;
-            _logger = logFactory.CreateLogger<PublishCommand>();
         }
 
         public void Execute(PublishCommandOptions options)
@@ -42,14 +40,14 @@ namespace Dotnet.Script.Core.Commands
             }
             else
             {
-                publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier);
+                publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier, options.LibraryName);
             }
         }
 
         private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
         {
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory, useRestoreCache);
-            var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
+
+            var compiler = new ScriptCompiler(logFactory, useRestoreCache);
             return compiler;
         }
     }

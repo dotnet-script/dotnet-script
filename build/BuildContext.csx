@@ -1,4 +1,4 @@
-#load "nuget:Dotnet.Build, 0.3.1"
+#load "nuget:Dotnet.Build, 0.7.1"
 using static FileUtils;
 using System.Xml.Linq;
 
@@ -11,7 +11,7 @@ var solutionFolder = Path.Combine(root,"..","src");
 var dotnetScriptProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script");
 var dotnetScriptCoreProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Core");
 var dotnetScriptDependencyModelProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel");
-var dotnetScriptDependencyModelNuGetProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel.NuGet");
+var dotnetScriptDependencyModelNuGetProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel.Nuget");
 var testProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Tests");
 var testDesktopProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Desktop.Tests");
 

@@ -11,7 +11,7 @@ namespace Dotnet.Script.Tests
     [Collection("IntegrationTests")]
     public class ScriptExecutionTests
     {
-        private ScriptEnvironment _scriptEnvironment;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
         public ScriptExecutionTests(ITestOutputHelper testOutputHelper)
         {
@@ -24,7 +24,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("HelloWorld");
+            var result = ScriptTestRunner.Default.ExecuteFixture("HelloWorld", "--no-cache");
             Assert.Contains("Hello World", result.output);
         }
 
@@ -33,6 +33,21 @@ namespace Dotnet.Script.Tests
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("InlineNugetPackage");
             Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+        }
+
+        [Fact]
+        public void ShouldHandleNullableContextAsError()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("Nullable");
+            Assert.Equal(1, result.exitCode);
+            Assert.Contains("error CS8625", result.output);
+        }
+
+        [Fact]
+        public void ShouldNotHandleDisabledNullableContextAsError()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("NullableDisabled");
+            Assert.Equal(0, result.exitCode);
         }
 
         [Fact]
@@ -45,7 +60,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
+            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary", "--no-cache");
             Assert.Contains("Connection successful", result.output);
         }
 
@@ -131,8 +146,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleIssue198()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue198");
-            Assert.Contains("NuGet.Client", result.output);
+            var result = ScriptTestRunner.Default.ExecuteFixtureInProcess("Issue198");
+            // Assert.Contains("NuGet.Client", result.output);
         }
 
         [Fact]
@@ -157,8 +172,8 @@ namespace Dotnet.Script.Tests
         }
 
         [Theory]
-        [InlineData("release","false")]
-        [InlineData("debug","true")]
+        [InlineData("release", "false")]
+        [InlineData("debug", "true")]
         public void ShouldCompileScriptWithReleaseConfiguration(string configuration, string expected)
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", $"-c {configuration}");
@@ -184,6 +199,14 @@ namespace Dotnet.Script.Tests
         {
             var result = ScriptTestRunner.Default.ExecuteFixture("CSharp72");
             Assert.Contains("hi", result.output);
+        }
+
+        [Fact]
+        public void ShouldHandleCSharp80()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("CSharp80");
+            Assert.Equal(0, result.exitCode);
+
         }
 
         [Fact]
@@ -242,6 +265,20 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleIssue435()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("Issue435");
+            Assert.Contains("value:Microsoft.Extensions.Configuration.ConfigurationBuilder", result.output);
+        }
+
+        [Fact]
+        public void ShouldLoadMicrosoftExtensionsDependencyInjection()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("MicrosoftExtensionsDependencyInjection");
+            Assert.Contains("Microsoft.Extensions.DependencyInjection.IServiceCollection", result.output);
+        }
+
+        [Fact]
         public void ShouldThrowExceptionOnInvalidMediaType()
         {
             var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
@@ -277,14 +314,14 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowMeaningfulErrorMessageWhenDependencyIsNotFound()
         {
-            using(var libraryFolder = new DisposableFolder())
+            using (var libraryFolder = new DisposableFolder())
             {
                 // Create a package that we can reference
 
                 ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n SampleLibrary", libraryFolder.Path);
                 ProcessHelper.RunAndCaptureOutput("dotnet", "pack", libraryFolder.Path);
 
-                using(var scriptFolder = new DisposableFolder())
+                using (var scriptFolder = new DisposableFolder())
                 {
                     var code = new StringBuilder();
                     code.AppendLine("#r \"nuget:SampleLibrary, 1.0.0\"");
@@ -298,6 +335,8 @@ namespace Dotnet.Script.Tests
 
                     // Remove the package from the global NuGet cache
                     TestPathUtils.RemovePackageFromGlobalNugetCache("SampleLibrary");
+
+                    //ScriptTestRunner.Default.ExecuteInProcess(pathToScript);
 
                     result = ScriptTestRunner.Default.Execute(pathToScript);
                     Assert.Contains("Try executing/publishing the script", result.output);
@@ -314,19 +353,24 @@ namespace Dotnet.Script.Tests
         {
             string code =
             @"using AgileObjects.AgileMapper;
-    public class TestClass
+    namespace TestLibrary
     {
-        public TestClass()
+        public class TestClass
         {
-            IMapper mapper = Mapper.CreateNew();
+            public TestClass()
+            {
+                IMapper mapper = Mapper.CreateNew();
+            }
         }
-    }";
+    }
+    ";
 
             string script =
     @"#r ""nuget: AgileObjects.AgileMapper, 0.25.0""
-#r ""TestLibrary.dll""
+#r ""testlib/TestLibrary.dll""
 
     using AgileObjects.AgileMapper;
+    using TestLibrary;
 
     IMapper mapper = Mapper.CreateNew();
     var testClass = new TestClass();
@@ -340,12 +384,106 @@ namespace Dotnet.Script.Tests
                 ProcessHelper.RunAndCaptureOutput("dotnet", "add TestLibrary.csproj package AgileObjects.AgileMapper -v 0.25.0", projectFolder);
                 File.WriteAllText(Path.Combine(projectFolder, "Class1.cs"), code);
                 File.WriteAllText(Path.Combine(projectFolder, "script.csx"), script);
-                ProcessHelper.RunAndCaptureOutput("dotnet", "build -c release -o ./", projectFolder);
+                ProcessHelper.RunAndCaptureOutput("dotnet", "build -c release -o testlib", projectFolder);
 
                 var result = ScriptTestRunner.Default.Execute(Path.Combine(projectFolder, "script.csx"));
 
                 Assert.Contains("Hello World!", result.output);
             }
+        }
+
+
+        [Fact]
+        public void ShouldHandleLocalNuGetConfigWithRelativePath()
+        {
+            TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
+
+            using (var packageLibraryFolder = new DisposableFolder())
+            {
+                CreateTestPackage(packageLibraryFolder.Path);
+
+                string pathToScriptFile = CreateTestScript(packageLibraryFolder.Path);
+
+                var result = ScriptTestRunner.Default.Execute(pathToScriptFile);
+                Assert.Contains("Success", result.output);
+            }
+        }
+
+        [Fact]
+        public void ShouldHandleLocalNuGetConfigWithRelativePathInParentFolder()
+        {
+            TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
+
+            using (var packageLibraryFolder = new DisposableFolder())
+            {
+                CreateTestPackage(packageLibraryFolder.Path);
+
+                var scriptFolder = Path.Combine(packageLibraryFolder.Path, "ScriptFolder");
+                Directory.CreateDirectory(scriptFolder);
+                string pathToScriptFile = CreateTestScript(scriptFolder);
+
+                var result = ScriptTestRunner.Default.Execute(pathToScriptFile);
+                Assert.Contains("Success", result.output);
+            }
+        }
+
+        [Fact]
+        public void ShouldHandleLocalNuGetFileWhenPathContainsSpace()
+        {
+            TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
+
+            using (var packageLibraryFolder = new DisposableFolder())
+            {
+                var packageLibraryFolderPath = Path.Combine(packageLibraryFolder.Path, "library folder");
+                Directory.CreateDirectory(packageLibraryFolderPath);
+
+                CreateTestPackage(packageLibraryFolderPath);
+
+                string pathToScriptFile = CreateTestScript(packageLibraryFolderPath);
+
+                var result = ScriptTestRunner.Default.Execute($"\"{pathToScriptFile}\"");
+                Assert.Contains("Success", result.output);
+            }
+        }
+
+        [Fact]
+        public void ShouldHandleScriptWithTargetFrameworkInShebang()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("TargetFrameworkInShebang");
+            Assert.Contains("Hello world!", result.output);
+        }
+
+
+        private static string CreateTestScript(string scriptFolder)
+        {
+            string script = @"
+#r ""nuget:NuGetConfigTestLibrary, 1.0.0""
+WriteLine(""Success"");
+                ";
+            string pathToScriptFile = Path.Combine(scriptFolder, "testscript.csx");
+            File.WriteAllText(pathToScriptFile, script);
+            return pathToScriptFile;
+        }
+
+        private static void CreateTestPackage(string packageLibraryFolder)
+        {
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary", packageLibraryFolder);
+            var projectFolder = Path.Combine(packageLibraryFolder, "NuGetConfigTestLibrary");
+            ProcessHelper.RunAndCaptureOutput("dotnet", $"pack -o \"{Path.Combine(packageLibraryFolder, "packagePath")}\"", projectFolder);
+            CreateNuGetConfig(packageLibraryFolder);
+        }
+
+        private static void CreateNuGetConfig(string packageLibraryFolder)
+        {
+            string nugetConfig = @"
+<configuration>
+    <packageSources>
+        <clear/>
+        <add key=""localSource"" value=""packagePath""/>
+    </packageSources>
+></configuration>
+                ";
+            File.WriteAllText(Path.Combine(packageLibraryFolder, "NuGet.Config"), nugetConfig);
         }
     }
 }

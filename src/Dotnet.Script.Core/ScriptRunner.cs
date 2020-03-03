@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
@@ -28,7 +30,7 @@ namespace Dotnet.Script.Core
 
         public async Task<TReturn> Execute<TReturn>(string dllPath, IEnumerable<string> commandLineArgs)
         {
-            var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(dllPath);
+            var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesForLibrary(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
             var assembly = Assembly.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
 
@@ -78,20 +80,15 @@ namespace Dotnet.Script.Core
 
         public virtual Task<TReturn> Execute<TReturn, THost>(ScriptContext context, THost host)
         {
-            try
-            {
-                var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
-                return Execute(compilationContext, host);
-            }
-            catch (CompilationErrorException e)
-            {
-                foreach (var diagnostic in e.Diagnostics)
-                {
-                    ScriptConsole.WriteError(diagnostic.ToString());
-                }
+            var compilationContext = ScriptCompiler.CreateCompilationContext<TReturn, THost>(context);
+            ScriptConsole.WriteDiagnostics(compilationContext.Warnings, compilationContext.Errors);
 
-                throw;
+            if (compilationContext.Errors.Any())
+            {
+                throw new CompilationErrorException("Script compilation failed due to one or more errors.", compilationContext.Errors.ToImmutableArray());
             }
+
+            return Execute(compilationContext, host);
         }
 
         public virtual async Task<TReturn> Execute<TReturn, THost>(ScriptCompilationContext<TReturn> compilationContext, THost host)

@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Scripting.Hosting;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Dotnet.Script
@@ -126,6 +127,23 @@ namespace Dotnet.Script
                     return 0;
                 });
             });
+
+            // windows only 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // on windows we have command to register .csx files to be executed by dotnet-script
+                app.Command("register", c =>
+                {
+                    c.Description = "Register .csx file handler to enable running scripts directly";
+                    c.HelpOption(helpOptionTemplate);
+                    c.OnExecute(() =>
+                    {
+                        var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
+                        var scaffolder = new Scaffolder(logFactory);
+                        scaffolder.RegisterFileHandler();
+                    });
+                });
+            }
 
             app.Command("publish", c =>
             {

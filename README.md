@@ -4,31 +4,27 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ## Build status
 
-| Build server | Platform     | Build status                                                                                                                                  |
-|--------------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| AppVeyor     | Windows      | [![](https://img.shields.io/appveyor/ci/filipw/dotnet-script/master.svg)](https://ci.appveyor.com/project/filipw/dotnet-script/branch/master) |
-| Travis       | Linux / OS X | [![](https://travis-ci.org/filipw/dotnet-script.svg?branch=master)](https://travis-ci.org/filipw/dotnet-script)                               |
+[![Build Status](https://bernhardrichter.visualstudio.com/dotnet-script/_apis/build/status/filipw.dotnet-script?branchName=master)](https://bernhardrichter.visualstudio.com/dotnet-script/_build/latest?definitionId=4&branchName=master)
 
+## NuGet Packages
 
-## Nuget Packages
-
-| Name                                  | Version                                                                                                                                                             | Framework        |
-|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|
-| `dotnet-script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `netcoreapp2.1`  |
-| `Dotnet.Script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `netcoreapp2.1`  |
-| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `netstandard2.0` |
-| `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0` |
-| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0` |
+| Name                                  | Version                                                                                                                                                             | Framework(s)                     |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `dotnet-script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `netcoreapp2.1`, `netcoreapp3.0` |
+| `Dotnet.Script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `netcoreapp2.1`, `netcoreapp3.0` |
+| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `netstandard2.0`                 |
+| `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0`                 |
+| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0`                 |
 
 ## Installing
 
 ### Prerequisites
 
-The only thing we need to install is [.Net Core 2.1+ SDK](https://www.microsoft.com/net/download/core). 
+The only thing we need to install is [.NET Core 2.1+ SDK](https://www.microsoft.com/net/download/core). In order to use C# 8.0 features, [.NET Core 3.0+ SDK](https://www.microsoft.com/net/download/core) must be installed.
 
-### .Net Core 2.1 Global Tool
+### .NET Core Global Tool
 
-.Net Core 2.1 introduces the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
+.NET Core 2.1 introduces the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
 
 ```shell
 dotnet tool install -g dotnet-script
@@ -39,7 +35,7 @@ Tool 'dotnet-script' (version '0.22.0') was successfully installed.
 
 The advantage of this approach is that you can use the same command for installation across all platforms.
 
-> ⚠️ In order to use the global tool you need [.Net Core SDK 2.1.300](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300) or higher. The earlier previews and release candidates of .NET Core 2.1 are not supported.
+> ⚠️ In order to use the global tool you need [.NET Core SDK 2.1.300](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300) or higher. The earlier previews and release candidates of .NET Core 2.1 are not supported.
 
 .NET Core SDK also supports viewing a list of installed tools and their uninstallation.
 
@@ -98,8 +94,7 @@ docker run -it dotnet-script --version
 
 ### Github
 
-You can manually download all the releases in `zip` format from the [Github releases page](https://github.com/filipw/dotnet-script/releases).
-
+You can manually download all the releases in `zip` format from the [GitHub releases page](https://github.com/filipw/dotnet-script/releases).
 
 ## Usage
 
@@ -152,15 +147,17 @@ Instead of `main.csx` which is the default, we now have a file named `custom.csx
 > Note: Executing `dotnet script init` inside a folder that already contains one or more script files will not create the `main.csx` file.
 
 ### Running scripts
+
 Scripts can be executed directly from the shell as if they were executables.
 
 ```bash
 foo.csx arg1 arg2 arg3
 ```
+
 > OSX/Linux
 >
-> Just like all scripts, on OSX/Linux you need to have a !# and mark the file as executable via **chmod +x foo.csx**.  
-> If you use **dotnet script init**  to create your csx it will automatically have the !# directive and be marked as 
+> Just like all scripts, on OSX/Linux you need to have a `#!` and mark the file as executable via **chmod +x foo.csx**.
+> If you use **dotnet script init** to create your csx it will automatically have the `#!` directive and be marked as
 > executable.
 
 The OSX/Linux shebang directive should be **#!/usr/bin/env dotnet-script**
@@ -177,8 +174,6 @@ foo.csx arg1 arg2 arg3
 dotnet script foo.csx -- arg1 arg2 arg3
 dotnet-script foo.csx -- arg1 arg2 arg3
 ```
-
-
 
 #### Passing arguments to scripts
 
@@ -236,16 +231,17 @@ dotnet script foo.csx -s https://SomePackageSource -s https://AnotherPackageSour
 ```
 
 ### Creating DLLs or Exes from a CSX file
-Dotnet-Script can create a standalone executable or DLL for your script. 
 
-| Switch | Long switch                     | description                                                                                                          |
-|--------|---------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| -o     | --output                        | Directory where the published executable should be placed.  Defaults to a 'publish' folder in the current directory. |
-| -n     | --name                          | The name for the generated DLL (executable not supported at this time).  Defaults to the name of the script.         |
-|        | --dll                           | Publish to a .dll instead of an executable.                                                                          |
-| -c     | --configuration <configuration> | Configuration to use for publishing the script [Release/Debug]. Default is "Debug"                                   |
-| -d     | --debug                         | Enables debug output.                                                                                                |
-| -r     | --runtime                       | The runtime used when publishing the self contained executable. Defaults to your current runtime.                    |
+Dotnet-Script can create a standalone executable or DLL for your script.
+
+| Switch | Long switch                     | description                                                                                                         |
+| ------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| -o     | --output                        | Directory where the published executable should be placed. Defaults to a 'publish' folder in the current directory. |
+| -n     | --name                          | The name for the generated DLL (executable not supported at this time). Defaults to the name of the script.         |
+|        | --dll                           | Publish to a .dll instead of an executable.                                                                         |
+| -c     | --configuration <configuration> | Configuration to use for publishing the script [Release/Debug]. Default is "Debug"                                  |
+| -d     | --debug                         | Enables debug output.                                                                                               |
+| -r     | --runtime                       | The runtime used when publishing the self contained executable. Defaults to your current runtime.                   |
 
 The executable you can run directly independent of dotnet install, while the DLL is can be run using the dotnet CLI like this:
 
@@ -255,7 +251,7 @@ dotnet script exec {path_to_dll} -- arg1 arg2
 
 ### Caching
 
-We provide two types of caching, the `dependency cache` and the `execution cache` which is explained in detail below. In order for any of these caches to be enabled, it is required that all NuGet package references are specified using an exact version number. The reason for this constraint is that we need to make sure that we don't execute a script with a stale dependency graph. 
+We provide two types of caching, the `dependency cache` and the `execution cache` which is explained in detail below. In order for any of these caches to be enabled, it is required that all NuGet package references are specified using an exact version number. The reason for this constraint is that we need to make sure that we don't execute a script with a stale dependency graph.
 
 #### Dependency Cache
 
@@ -264,20 +260,21 @@ This is an out-of-process operation and represents a significant overhead to the
 
 #### Execution cache
 
-In order to execute a script it needs to be compiled first and since that is a CPU and time consuming operation, we make sure that we only compile when the source code has changed. This works by creating a SHA256 hash from all the script files involved in the execution. This hash is written to a temporary location along with the DLL that represents the result of the script compilation. When a script is executed the hash is computed and compared with the hash from the previous compilation. If they match there is no need to recompile and we run from the already compiled DLL. If the hashes don't match, the cache is invalidated and we recompile. 
+In order to execute a script it needs to be compiled first and since that is a CPU and time consuming operation, we make sure that we only compile when the source code has changed. This works by creating a SHA256 hash from all the script files involved in the execution. This hash is written to a temporary location along with the DLL that represents the result of the script compilation. When a script is executed the hash is computed and compared with the hash from the previous compilation. If they match there is no need to recompile and we run from the already compiled DLL. If the hashes don't match, the cache is invalidated and we recompile.
 
-> You can override this automatic caching by passing **--nocache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script. 
+> You can override this automatic caching by passing **--no-cache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script.
 
-### 
+###
 
 ### Debugging
 
 The days of debugging scripts using `Console.WriteLine` are over. One major feature of `dotnet script` is the ability to debug scripts directly in VS Code. Just set a breakpoint anywhere in your script file(s) and hit F5(start debugging)
 
 ![debug](https://user-images.githubusercontent.com/1034073/30173509-2f31596c-93f8-11e7-9124-ca884cf6564e.gif)
+
 ### Script Packages
 
-Script packages are a way of organizing reusable scripts into NuGet packages that can be consumed by other scripts. This means that we now can leverage scripting infrastructure without the need for any kind of bootstrapping. 
+Script packages are a way of organizing reusable scripts into NuGet packages that can be consumed by other scripts. This means that we now can leverage scripting infrastructure without the need for any kind of bootstrapping.
 
 #### Creating a script package
 
@@ -292,20 +289,20 @@ The following example shows how the scripts are laid out inside the NuGet packag
             └── main.csx
 ```
 
-This example contains just the `main.csx` file in the root folder, but packages may have multiple script files either in the root folder or in subfolders below the root folder. 
+This example contains just the `main.csx` file in the root folder, but packages may have multiple script files either in the root folder or in subfolders below the root folder.
 
 When loading a script package we will look for an entry point script to be loaded. This entry point script is identified by one of the following.
 
-- A script called `main.csx` in the root folder  
+- A script called `main.csx` in the root folder
 - A single script file in the root folder
 
 If the entry point script cannot be determined, we will simply load all the scripts files in the package.
 
-> The advantage with using an entry point script is that we can control loading other scripts from the package. 
+> The advantage with using an entry point script is that we can control loading other scripts from the package.
 
 #### Consuming a script package
 
-To consume a script package all we need to do specify the NuGet package in the `#load `directive.
+To consume a script package all we need to do specify the NuGet package in the `#load`directive.
 
 The following example loads the [simple-targets](https://www.nuget.org/packages/simple-targets-csx) package that contains script files to be included in our script.
 
@@ -321,19 +318,17 @@ targets.Add("default", () => Console.WriteLine("Hello, world!"));
 Run(Args, targets);
 ```
 
-> Note: Debugging also works for script packages so that we can easily step into the scripts that are brought in using the `#load` directive. 
-
-
+> Note: Debugging also works for script packages so that we can easily step into the scripts that are brought in using the `#load` directive.
 
 ### Remote Scripts
 
-Scripts don't actually have to exist locally on the machine. We can also execute scripts that are made available on an `http(s)` endpoint.  
+Scripts don't actually have to exist locally on the machine. We can also execute scripts that are made available on an `http(s)` endpoint.
 
 This means that we can create a Gist on Github and execute it just by providing the URL to the Gist.
 
 This [Gist](https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx) contains a script that prints out "Hello World"
 
-We can execute the script like this 
+We can execute the script like this
 
 ```shell
 dotnet script https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx
@@ -354,9 +349,7 @@ public static string GetScriptPath([CallerFilePath] string path = null) => path;
 public static string GetScriptFolder([CallerFilePath] string path = null) => Path.GetDirectoryName(path);
 ```
 
-> Tip: Put these methods as top level methods in a separate script file and `#load` that file wherever access to the script path and/or folder is needed. 
-
-
+> Tip: Put these methods as top level methods in a separate script file and `#load` that file wherever access to the script path and/or folder is needed.
 
 ## REPL
 
@@ -391,7 +384,7 @@ List<string>(2) { "foo", "bar" }
 
 ### Inline Nuget packages
 
-REPL also supports inline Nuget packages - meaning the Nuget packages can be installed into the REPL from *within the REPL*. This is done via our `#r` and `#load` from Nuget support and uses identical syntax.
+REPL also supports inline Nuget packages - meaning the Nuget packages can be installed into the REPL from _within the REPL_. This is done via our `#r` and `#load` from Nuget support and uses identical syntax.
 
 ```
 ~$ dotnet script
@@ -422,7 +415,7 @@ Using Roslyn syntax parsing, we also support multiline REPL mode. This means tha
 Aside from the regular C# script code, you can invoke the following commands (directives) from within the REPL:
 
 | Command  | Description                                                  |
-|----------|--------------------------------------------------------------|
+| -------- | ------------------------------------------------------------ |
 | `#load`  | Load a script into the REPL (same as `#load` usage in CSX)   |
 | `#r`     | Load an assembly into the REPL (same as `#r` usage in CSX)   |
 | `#reset` | Reset the REPL back to initial state (without restarting it) |
@@ -445,7 +438,7 @@ When you run this with the `-i` flag, `Hello World` is printed, REPL starts and 
 ```
 ~$ dotnet script foo.csx -i
 Hello World
-> 
+>
 ```
 
 You can also seed the REPL from inside the REPL - at any point - by invoking a `#load` directive pointed at a specific file. For example:
@@ -457,7 +450,7 @@ Hello World
 >
 ```
 
-## Piping 
+## Piping
 
 The following example shows how we can pipe data in and out of a script.
 
@@ -466,15 +459,15 @@ The `UpperCase.csx` script simply converts the standard input to upper case and 
 ```csharp
 #! "netcoreapp2.1"
 using (var streamReader = new StreamReader(Console.OpenStandardInput()))
-{    
-    Write(streamReader.ReadToEnd().ToUpper()); 
+{
+    Write(streamReader.ReadToEnd().ToUpper());
 }
 ```
 
 We can now simply pipe the output from one command into our script like this.
 
 ```shell
-echo "This is some text" | dotnet script UpperCase.csx 
+echo "This is some text" | dotnet script UpperCase.csx
 THIS IS SOME TEXT
 ```
 
@@ -503,26 +496,24 @@ public static void WaitForDebugger()
 }
 ```
 
-To debug the script when executing it from the command line we can do something like 
+To debug the script when executing it from the command line we can do something like
 
-````c#
-#! "netcoreapp2.0"
-#r "nuget: NetStandard.Library, 2.0.0"
+```c#
 WaitForDebugger();
 using (var streamReader = new StreamReader(Console.OpenStandardInput()))
-{    
+{
     Write(streamReader.ReadToEnd().ToUpper()); // <- SET BREAKPOINT HERE
 }
-````
+```
 
-Now when we run the script from the command line we will get 
+Now when we run the script from the command line we will get
 
 ```shell
 $ echo "This is some text" | dotnet script UpperCase.csx
 Attach Debugger (VS Code)
 ```
 
-This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the  `.NET Core Attach` debugger and pick the process that represents the executing script. 
+This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the `.NET Core Attach` debugger and pick the process that represents the executing script.
 
 Once that is done we should see out breakpoint being hit.
 
@@ -538,11 +529,38 @@ We can specify this when executing the script.
 dotnet script foo.csx -c release
 ```
 
+##
+
+## Nullable reference types
+
+Starting from version 0.50.0, `dotnet-script` supports .Net Core 3.0 and all the C# 8 features.
+The way we deal with [nullable references types](https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references) in `dotnet-script` is that we turn every warning related to nullable reference types into compiler errors. This means every warning between `CS8600` and `CS8655` are treated as an error when compiling the script.
+
+Nullable references types are turned off by default and the way we enable it is using the `#nullable enable` compiler directive. This means that existing scripts will continue to work, but we can now opt-in on this new feature.
+
+```csharp
+#!/usr/bin/env dotnet-script
+
+#nullable enable
+
+string name = null;
+```
+
+Trying to execute the script will result in the following error
+
+```shell
+main.csx(5,15): error CS8625: Cannot convert null literal to non-nullable reference type.
+```
+
+We will also see this when working with scripts in VS Code under the problems panel.
+
+![image](https://user-images.githubusercontent.com/1034073/65727087-0e982600-e0b7-11e9-8fa0-d16331ab948a.png)
+
 ## Team
 
-* [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
-* [Filip W](https://github.com/filipw) ([@filip_woj](https://twitter.com/filip_woj))
+- [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
+- [Filip W](https://github.com/filipw) ([@filip_woj](https://twitter.com/filip_woj))
 
-## License 
+## License
 
 [MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE)

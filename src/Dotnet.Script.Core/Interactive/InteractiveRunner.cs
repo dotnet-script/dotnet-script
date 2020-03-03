@@ -21,8 +21,7 @@ namespace Dotnet.Script.Core
         private bool _shouldExit = false;
         private ScriptState<object> _scriptState;
         private ScriptOptions _scriptOptions;
-        private InteractiveScriptGlobals _globals;
-
+        private readonly InteractiveScriptGlobals _globals;
         protected Logger Logger;
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole Console;
@@ -63,9 +62,9 @@ namespace Dotnet.Script.Core
             await RunLoop();
         }
 
-        protected virtual async Task Execute(string input)
+        public virtual async Task<object> Execute(string input)
         {
-            await HandleScriptErrors(async () =>
+            return await HandleScriptErrors(async () =>
             {
                 if (_scriptState == null)
                 {
@@ -77,7 +76,7 @@ namespace Dotnet.Script.Core
                 {
                     if (input.StartsWith("#r ") || input.StartsWith("#load "))
                     {
-                        var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependencies(CurrentDirectory, ScriptMode.REPL,_packageSources, input).ToArray();
+                        var lineRuntimeDependencies = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesForCode(CurrentDirectory, ScriptMode.REPL,_packageSources, input).ToArray();
                         var lineDependencies = lineRuntimeDependencies.SelectMany(rtd => rtd.Assemblies).Distinct();
 
                         var scriptMap = lineRuntimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
@@ -113,9 +112,18 @@ namespace Dotnet.Script.Core
         private async Task RunFirstScript(ScriptContext scriptContext)
         {
             foreach (var arg in scriptContext.Args)
+            {
                 _globals.Args.Add(arg);
+            }
 
             var compilationContext = ScriptCompiler.CreateCompilationContext<object, InteractiveScriptGlobals>(scriptContext);
+            Console.WriteDiagnostics(compilationContext.Warnings, compilationContext.Errors);
+
+            if (compilationContext.Errors.Any())
+            {
+                throw new CompilationErrorException("Script compilation failed due to one or more errors.", compilationContext.Errors.ToImmutableArray());
+            }
+
             _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
             _scriptOptions = compilationContext.ScriptOptions;
         }
@@ -143,20 +151,22 @@ namespace Dotnet.Script.Core
             return input.ToString();
         }
 
-        private async Task HandleScriptErrors(Func<Task> doWork)
+        private async Task<object> HandleScriptErrors(Func<Task> doWork)
         {
             try
             {
                 await doWork();
                 if (_scriptState?.Exception != null)
                 {
-                    Console.WriteError(CSharpObjectFormatter.Instance.FormatException(_scriptState.Exception));
+                    Console.WriteError(CSharpObjectFormatter.Instance.ToDisplayString(_scriptState.Exception));
                 }
 
                 if (_scriptState?.ReturnValue != null)
                 {
                     _globals.Print(_scriptState.ReturnValue);
                 }
+
+                return _scriptState.ReturnValue;
             }
             catch (CompilationErrorException e)
             {
@@ -167,8 +177,10 @@ namespace Dotnet.Script.Core
             }
             catch (Exception e)
             {
-                Console.WriteError(CSharpObjectFormatter.Instance.FormatException(e));
+                Console.WriteError(CSharpObjectFormatter.Instance.ToDisplayString(e));
             }
+
+            return null;
         }
     }
 }

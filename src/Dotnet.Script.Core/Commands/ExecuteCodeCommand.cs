@@ -29,8 +29,7 @@ namespace Dotnet.Script.Core.Commands
 
         private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
         {
-            var runtimeDependencyResolver = new RuntimeDependencyResolver(logFactory, useRestoreCache);
-            var compiler = new ScriptCompiler(logFactory, runtimeDependencyResolver);
+            var compiler = new ScriptCompiler(logFactory, useRestoreCache);
             return compiler;
         }
     }
