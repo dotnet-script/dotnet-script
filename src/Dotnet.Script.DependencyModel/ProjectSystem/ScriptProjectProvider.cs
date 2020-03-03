@@ -132,10 +132,12 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         }
 
 
-        public static string GetPathToProjectFile(string targetDirectory, string targetFramework)
+        public static string GetPathToProjectFile(string targetDirectory, string targetFramework, string projectName = null)
         {
+            projectName ??= "script";
+            var projectFileName = projectName + ".csproj";
             var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory, targetFramework);
-            var pathToProjectFile = Path.Combine(pathToProjectDirectory, "script.csproj");
+            var pathToProjectFile = Path.Combine(pathToProjectDirectory, projectFileName);
             return pathToProjectFile;
         }
     }

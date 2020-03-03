@@ -35,7 +35,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath}", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "main");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
@@ -82,7 +82,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = ScriptTestRunner.Default.Execute($"publish {mainPath} -o {publishRootFolder.Path}");
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(publishRootFolder.Path, "script");
+                var exePath = Path.Combine(publishRootFolder.Path, "main");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
@@ -100,7 +100,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = ScriptTestRunner.Default.Execute("publish main.csx", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier, "main");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
@@ -118,7 +118,7 @@ namespace Dotnet.Script.Tests
                 var publishResult = ScriptTestRunner.Default.Execute("publish main.csx -o publish", workspaceFolder.Path);
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish", "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", "main");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
@@ -204,6 +204,25 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void CustomExeNameTest()
+        {
+            using (var workspaceFolder = new DisposableFolder())
+            {
+                var exeName = "testName";
+                var code = @"WriteLine(""hello world"");";
+                var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
+                File.WriteAllText(mainPath, code);
+                var publishResult = ScriptTestRunner.Default.Execute($"publish main.csx -o publish -n {exeName}", workspaceFolder.Path);
+                Assert.Equal(0, publishResult.exitCode);
+
+                var exePath = Path.Combine(workspaceFolder.Path, "publish", exeName);
+                var executableRunResult = _commandRunner.Execute(exePath);
+
+                Assert.Equal(0, executableRunResult);
+            }
+        }
+
+        [Fact]
         public void DllWithArgsTests()
         {
             using (var workspaceFolder = new DisposableFolder())
@@ -252,13 +271,12 @@ namespace Dotnet.Script.Tests
 
                 Assert.Equal(0, publishResult.exitCode);
 
-                var exePath = Path.Combine(workspaceFolder.Path, "publish folder", "script");
+                var exePath = Path.Combine(workspaceFolder.Path, "publish folder", "main");
                 var executableRunResult = _commandRunner.Execute(exePath);
 
                 Assert.Equal(0, executableRunResult);
             }
         }
-
 
         private LogFactory GetLogFactory()
         {
