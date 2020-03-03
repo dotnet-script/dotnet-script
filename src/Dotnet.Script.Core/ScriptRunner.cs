@@ -36,7 +36,7 @@ namespace Dotnet.Script.Core
             {
                 var assemblyName = new AssemblyName(args.Name);
                 var result = runtimeDepsMap.TryGetValue(assemblyName.Name, out RuntimeAssembly runtimeAssembly);
-                if (!result) throw new Exception($"Unable to locate assembly '{assemblyName.Name}: {assemblyName.Version}'");
+                if (!result) return null;
                 var loadedAssembly = Assembly.LoadFrom(runtimeAssembly.Path);
                 return loadedAssembly;
             };
