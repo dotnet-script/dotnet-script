@@ -18,7 +18,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldNotUpdateHashWhenSourceIsNotChanged()
         {
-             using (var scriptFolder = new DisposableFolder())
+            using (var scriptFolder = new DisposableFolder())
             {
                 var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
@@ -61,7 +61,7 @@ namespace Dotnet.Script.Tests
             {
                 var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
-                WriteScript(pathToScript, "#r \"nuget:AutoMapper, *\"" ,"WriteLine(42);");
+                WriteScript(pathToScript, "#r \"nuget:AutoMapper, *\"", "WriteLine(42);");
 
                 var result = Execute(pathToScript);
                 Assert.Contains("42", result.output);
@@ -77,7 +77,7 @@ namespace Dotnet.Script.Tests
             {
                 var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
-                WriteScript(pathToScript, "#r \"nuget:LightInject, 5.2.1\"" ,"WriteLine(42);");
+                WriteScript(pathToScript, "#r \"nuget:LightInject, 5.2.1\"", "WriteLine(42);");
                 ScriptTestRunner.Default.Execute($"{pathToScript} --nocache");
                 var pathToExecutionCache = GetPathToExecutionCache(pathToScript);
                 Assert.True(File.Exists(Path.Combine(pathToExecutionCache, "LightInject.dll")));
@@ -103,7 +103,7 @@ namespace Dotnet.Script.Tests
 
         private static string GetPathToExecutionCache(string pathToScript)
         {
-            var pathToTempFolder = Path.GetDirectoryName(Dotnet.Script.DependencyModel.ProjectSystem.FileUtils.GetPathToTempFolder(pathToScript));
+            var pathToTempFolder = Path.GetDirectoryName(Dotnet.Script.DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript));
             var pathToExecutionCache = Path.Combine(pathToTempFolder, "execution-cache");
             return pathToExecutionCache;
         }
