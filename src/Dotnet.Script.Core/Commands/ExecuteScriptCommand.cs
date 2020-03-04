@@ -45,7 +45,7 @@ namespace Dotnet.Script.Core.Commands
 
         private string GetLibrary(ExecuteScriptCommandOptions executeOptions)
         {
-            var projectFolder = FileUtils.GetPathToTempFolder(Path.GetDirectoryName(executeOptions.File.Path));
+            var projectFolder = FileUtils.GetPathToScriptTempFolder(Path.GetDirectoryName(executeOptions.File.Path));
             var executionCacheFolder = Path.Combine(projectFolder, "execution-cache");
             var pathToLibrary = Path.Combine(executionCacheFolder, "script.dll");
 
@@ -54,7 +54,7 @@ namespace Dotnet.Script.Core.Commands
                 return CreateLibrary();
             }
 
-            if (!string.Equals(hash,cachedHash))
+            if (!string.Equals(hash, cachedHash))
             {
                 return CreateLibrary();
             }
@@ -63,7 +63,7 @@ namespace Dotnet.Script.Core.Commands
 
             string CreateLibrary()
             {
-                var options = new PublishCommandOptions(executeOptions.File,executionCacheFolder, "script", PublishType.Library,executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
+                var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
                 new PublishCommand(_scriptConsole, _logFactory).Execute(options);
                 if (hash != null)
                 {

@@ -12,7 +12,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     {
         public static string CreateTempFolder(string targetDirectory, string targetFramework)
         {
-            string pathToProjectDirectory = Path.Combine(GetPathToTempFolder(targetDirectory), targetFramework);
+            string pathToProjectDirectory = Path.Combine(GetPathToScriptTempFolder(targetDirectory), targetFramework);
 
             if (!Directory.Exists(pathToProjectDirectory))
             {
@@ -22,7 +22,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return pathToProjectDirectory;
         }
 
-        public static string GetPathToTempFolder(string targetDirectory)
+        public static string GetPathToScriptTempFolder(string targetDirectory)
         {
             if (!Path.IsPathRooted(targetDirectory))
             {
@@ -47,7 +47,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return pathToProjectDirectory;
         }
 
-        private static string GetTempPath()
+        public static string GetTempPath()
         {
             var userFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
 
