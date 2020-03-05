@@ -24,7 +24,7 @@
         "-c",
         "release",
         "-f",
-        "netcoreapp3.0",
+        "netcoreapp3.1",
         "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
       ],
       "problemMatcher": "$msCompile",
@@ -42,7 +42,7 @@
         "-c",
         "release",
         "-f",
-        "netcoreapp3.0",
+        "netcoreapp3.1",
         "/p:CollectCoverage=true",
         "/p:Exclude=\"[xunit*]*\"",
         "/p:CoverletOutputFormat=lcov",
