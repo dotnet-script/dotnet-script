@@ -57,7 +57,7 @@ namespace Dotnet.Script.Core
             File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
 
             // only display published if we aren't auto publishing to temp folder
-            if (!scriptAssemblyPath.StartsWith(Path.GetTempPath()))
+            if (!scriptAssemblyPath.StartsWith(FileUtils.GetTempPath()))
             {
                 _scriptConsole.WriteSuccess($"Published {context.FilePath} to { scriptAssemblyPath}");
             }
