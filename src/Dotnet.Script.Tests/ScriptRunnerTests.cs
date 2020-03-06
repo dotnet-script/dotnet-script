@@ -15,7 +15,7 @@ namespace Dotnet.Script.Tests
         {
             var scriptRunner = CreateScriptRunner();
 
-            var result = scriptRunner.ResolveAssembly(new ResolveEventArgs(It.IsAny<string>()), new Dictionary<string, RuntimeAssembly>());
+            var result = scriptRunner.ResolveAssembly(new ResolveEventArgs("AnyAssemblyName"), new Dictionary<string, RuntimeAssembly>());
 
             Assert.Null(result);
         }
