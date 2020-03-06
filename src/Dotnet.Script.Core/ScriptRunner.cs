@@ -34,14 +34,7 @@ namespace Dotnet.Script.Core
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
             var assembly = Assembly.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
 
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-            {
-                var assemblyName = new AssemblyName(args.Name);
-                var result = runtimeDepsMap.TryGetValue(assemblyName.Name, out RuntimeAssembly runtimeAssembly);
-                if (!result) throw new Exception($"Unable to locate assembly '{assemblyName.Name}: {assemblyName.Version}'");
-                var loadedAssembly = Assembly.LoadFrom(runtimeAssembly.Path);
-                return loadedAssembly;
-            };
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) => ResolveAssembly(args, runtimeDepsMap);
 
             var type = assembly.GetType("Submission#0");
             var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
@@ -95,6 +88,15 @@ namespace Dotnet.Script.Core
         {
             var scriptResult = await compilationContext.Script.RunAsync(host, ex => true).ConfigureAwait(false);
             return ProcessScriptState(scriptResult);
+        }
+
+        internal Assembly ResolveAssembly(ResolveEventArgs args, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
+        {
+            var assemblyName = new AssemblyName(args.Name);
+            var result = runtimeDepsMap.TryGetValue(assemblyName.Name, out RuntimeAssembly runtimeAssembly);
+            if (!result) return null;
+            var loadedAssembly = Assembly.LoadFrom(runtimeAssembly.Path);
+            return loadedAssembly;
         }
 
         protected TReturn ProcessScriptState<TReturn>(ScriptState<TReturn> scriptState)
