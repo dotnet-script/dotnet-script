@@ -139,9 +139,17 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             Version = version;
             Tfm = tfm;
+
+            var versionMatch = Regex.Match(input: Version, pattern: @"^(\d+)(?:\.(\d+))?");
+            if (versionMatch.Success && versionMatch.Groups[1].Success)
+                Major = int.Parse(versionMatch.Groups[1].Value);
+            if (versionMatch.Success && versionMatch.Groups[2].Success)
+                Minor = int.Parse(versionMatch.Groups[2].Value);
         }
 
         public string Version { get; }
         public string Tfm { get; }
+        public int Major { get; }
+        public int Minor { get; }
     }
 }
