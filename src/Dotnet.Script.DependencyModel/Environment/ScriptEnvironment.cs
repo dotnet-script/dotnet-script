@@ -76,7 +76,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156
             var codeBase = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.CodeBase;
-            var pattern = @"^.*Microsoft\.NETCore\.App\/(\d\.\d)(.*?)\/";
+            var pattern = @"^.*Microsoft\.NETCore\.App\/(\d+\.\d+)(.*?)\/";
             var match = Regex.Match(codeBase, pattern, RegexOptions.IgnoreCase);
             if (!match.Success)
             {
