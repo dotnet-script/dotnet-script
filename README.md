@@ -243,7 +243,7 @@ Dotnet-Script can create a standalone executable or DLL for your script.
 | -d     | --debug                         | Enables debug output.                                                                                               |
 | -r     | --runtime                       | The runtime used when publishing the self contained executable. Defaults to your current runtime.                   |
 
-The executable you can run directly independent of dotnet install, while the DLL is can be run using the dotnet CLI like this:
+The executable you can run directly independent of dotnet install, while the DLL can be run using the dotnet CLI like this:
 
 ```shell
 dotnet script exec {path_to_dll} -- arg1 arg2
