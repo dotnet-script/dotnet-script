@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.8.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <!-- The following references are just quick fixes for issue #166 and issue #268
