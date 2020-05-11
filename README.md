@@ -484,7 +484,7 @@ The first thing we need to do add the following to the `launch.config` file that
 }
 ```
 
-To debug this script we need a way to attach the debugger in VS Code and to the simplest thing we can do here is to wait for the debugger to attach by adding this method somewhere.
+To debug this script we need a way to attach the debugger in VS Code and the simplest thing we can do here is to wait for the debugger to attach by adding this method somewhere.
 
 ```c#
 public static void WaitForDebugger()
@@ -515,7 +515,7 @@ Attach Debugger (VS Code)
 
 This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the `.NET Core Attach` debugger and pick the process that represents the executing script.
 
-Once that is done we should see out breakpoint being hit.
+Once that is done we should see our breakpoint being hit.
 
 ## Configuration(Debug/Release)
 
