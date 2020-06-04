@@ -47,10 +47,9 @@ namespace Dotnet.Script.Core
             submissionStates[0] = globals;
 
             var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
-            TReturn returnValue;
             try
             {
-                returnValue = await resultTask;
+                _ = await resultTask;
             }
             catch (System.Exception ex)
             {
