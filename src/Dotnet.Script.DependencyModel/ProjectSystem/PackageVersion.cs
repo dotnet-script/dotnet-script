@@ -8,7 +8,38 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
     /// </summary>
     public class PackageVersion : IEquatable<PackageVersion>
     {
-        private static readonly Regex IsPinnedRegex = new Regex(@"^(?>\[\d+[^,\]]+(?<!\.)\]|\d+(\.\d+){2,})$", RegexOptions.Compiled);
+        // Following patterns are "inspired" from SemVer 2.0 grammar:
+        //
+        // Source: https://semver.org/spec/v2.0.0.html#backusnaur-form-grammar-for-valid-semver-versions
+
+        //   <numeric identifier> ::= "0"
+        //                          | <positive digit>
+        //                          | <positive digit> <digits>
+        //
+        //   <digits> ::= <digit>
+        //              | <digit> <digits>
+        //
+        //   <digit> ::= "0"
+        //             | <positive digit>
+        //
+        //   <positive digit> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+        const string NumericPattern = @"(?:0|[1-9][0-9]*)";
+
+        //   <valid semver> ::= <version core>
+        //          | <version core> "-" <pre-release>
+        //          | <version core> "+" <build>
+        //          | <version core> "-" <pre-release> "+" <build>
+        //
+        //   <version core> ::= <major> "." <minor> "." <patch>
+
+        const string MajorPlusVersionPattern = NumericPattern + @"(?:\." + NumericPattern + @")";
+        const string VersionSuffixPattern = @"(?:[+-][\w][\w+.-]*)?";
+
+        private static readonly Regex IsPinnedRegex =
+            new Regex(@"^(?>\[" + MajorPlusVersionPattern + @"{1,4}" + VersionSuffixPattern + @"\]"
+                         + @"|" + MajorPlusVersionPattern + @"{2,3}" + VersionSuffixPattern + @")$",
+                      RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PackageVersion"/> class.

@@ -20,6 +20,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="ProjectSystem\ScriptParserInternal.cs">
+      <DependentUpon>ScriptParser.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="ProjectSystem\csproj.template" />
   </ItemGroup>
 
