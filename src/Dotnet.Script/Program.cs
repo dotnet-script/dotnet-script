@@ -83,13 +83,9 @@ namespace Dotnet.Script
                 c.HelpOption(helpOptionTemplate);
                 c.OnExecute(async () =>
                 {
-                    if (string.IsNullOrWhiteSpace(code.Value))
-                    {
-                        c.ShowHelp();
-                        return 0;
-                    }
+                    var source = string.IsNullOrWhiteSpace(code.Value) ? await Console.In.ReadToEndAsync() : code.Value;
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    var options = new ExecuteCodeCommandOptions(code.Value,cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
+                    var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
                     return await new ExecuteCodeCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
