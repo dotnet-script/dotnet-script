@@ -12,7 +12,12 @@
     <Description>A MetadataReferenceResolver that allows inline nuget references to be specified in script(csx) files.</Description>
     <Authors>dotnet-script</Authors>
     <Company>dotnet-script</Company>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Dotnet.Script.DependencyModel\ProjectSystem\ScriptParserInternal.cs" Link="ScriptParserInternal.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.6.0" />
   </ItemGroup>
