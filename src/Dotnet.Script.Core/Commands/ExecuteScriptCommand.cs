@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.ProjectSystem;
+using CSharpMinifier;
 
 namespace Dotnet.Script.Core.Commands
 {
@@ -32,14 +35,14 @@ namespace Dotnet.Script.Core.Commands
             }
 
             var pathToLibrary = GetLibrary(options);
-            return await ExecuteLibrary<TReturn>(pathToLibrary, options.Arguments, options.NoCache);
+            return await ExecuteLibrary<TReturn>(pathToLibrary, options.Arguments, options.CacheLevel);
         }
 
         private async Task<TReturn> DownloadAndRunCode<TReturn>(ExecuteScriptCommandOptions executeOptions)
         {
             var downloader = new ScriptDownloader();
             var code = await downloader.Download(executeOptions.File.Path);
-            var options = new ExecuteCodeCommandOptions(code, Directory.GetCurrentDirectory(), executeOptions.Arguments, executeOptions.OptimizationLevel, executeOptions.NoCache, executeOptions.PackageSources);
+            var options = new ExecuteCodeCommandOptions(code, Directory.GetCurrentDirectory(), executeOptions.Arguments, executeOptions.OptimizationLevel, executeOptions.CacheLevel, executeOptions.PackageSources);
             return await new ExecuteCodeCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
 
@@ -56,7 +59,7 @@ namespace Dotnet.Script.Core.Commands
                 return pathToLibrary;
             }
 
-            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
+            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.CacheLevel);
             new PublishCommand(_scriptConsole, _logFactory).Execute(options);
             if (hash != null)
             {
@@ -87,9 +90,16 @@ namespace Dotnet.Script.Core.Commands
 
 
             IncrementalHash incrementalHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-            foreach (var scriptFile in allScriptFiles)
+            if (options.NormalCacheLevel == CommandScriptCompilationCacheLevel.Aggressive)
             {
-                incrementalHash.AppendData(File.ReadAllBytes(scriptFile));
+                AccumulateAggressiveHash(allScriptFiles, incrementalHash);
+            }
+            else
+            {
+                foreach (var scriptFile in allScriptFiles)
+                {
+                    incrementalHash.AppendData(File.ReadAllBytes(scriptFile));
+                }
             }
 
             var configuration = options.OptimizationLevel.ToString();
@@ -103,6 +113,24 @@ namespace Dotnet.Script.Core.Commands
             return true;
         }
 
+        /// <remarks>
+        /// This method is marked to be never in-lined so that if the hashing
+        /// requires no minification of code then
+        /// <see cref="Minifier.Minify(string)"/> is never subjected to JIT
+        /// compilation.
+        /// </remarks>
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void AccumulateAggressiveHash(IEnumerable<string> scriptFiles,
+                                                     IncrementalHash hashAccumulator)
+        {
+            foreach (var scriptFile in scriptFiles)
+            {
+                var source = File.ReadAllText(scriptFile);
+                var minified = string.Join(string.Empty, Minifier.Minify(source));
+                hashAccumulator.AppendData(Encoding.UTF8.GetBytes(minified));
+            }
+        }
 
         public bool TryGetHash(string cacheFolder, out string hash)
         {
@@ -124,9 +152,9 @@ namespace Dotnet.Script.Core.Commands
             return true;
         }
 
-        private async Task<TReturn> ExecuteLibrary<TReturn>(string pathToLibrary, string[] arguments, bool noCache)
+        private async Task<TReturn> ExecuteLibrary<TReturn>(string pathToLibrary, string[] arguments, CommandScriptCompilationCacheLevel cacheLevel)
         {
-            var options = new ExecuteLibraryCommandOptions(pathToLibrary, arguments, noCache);
+            var options = new ExecuteLibraryCommandOptions(pathToLibrary, arguments, cacheLevel);
             return await new ExecuteLibraryCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
     }

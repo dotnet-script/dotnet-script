@@ -1,3 +1,4 @@
+using System;
 using Dotnet.Script.DependencyModel.Environment;
 using Microsoft.CodeAnalysis;
 
@@ -5,7 +6,11 @@ namespace Dotnet.Script.Core.Commands
 {
     public class PublishCommandOptions
     {
-        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, bool noCache)
+        [Obsolete("Use the constructor overload that accepts a " + nameof(CommandScriptCompilationCacheLevel) + " argument instead.")]
+        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, bool noCache) :
+            this(file, outputDirectory, libraryName, publishType, optimizationLevel, packageSources, runtimeIdentifier, noCache.ToCommandScriptCompilationCacheLevel()) {}
+
+        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, CommandScriptCompilationCacheLevel cacheLevel)
         {
             File = file;
             OutputDirectory = outputDirectory;
@@ -14,7 +19,7 @@ namespace Dotnet.Script.Core.Commands
             OptimizationLevel = optimizationLevel;
             PackageSources = packageSources;
             RuntimeIdentifier = runtimeIdentifier ?? ScriptEnvironment.Default.RuntimeIdentifier;
-            NoCache = noCache;
+            CacheLevel = cacheLevel;
         }
 
         public ScriptFile File { get; }
@@ -24,7 +29,9 @@ namespace Dotnet.Script.Core.Commands
         public OptimizationLevel OptimizationLevel { get; }
         public string[] PackageSources { get; }
         public string RuntimeIdentifier { get; }
-        public bool NoCache { get; }
+        public bool NoCache => CacheLevel == CommandScriptCompilationCacheLevel.None;
+        public CommandScriptCompilationCacheLevel CacheLevel { get; }
+        public CommandScriptCompilationCacheLevel NormalCacheLevel => CacheLevel.Normalize();
     }
 
     public enum PublishType

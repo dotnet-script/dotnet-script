@@ -68,6 +68,10 @@ namespace Dotnet.Script
             var nocache = app.Option("--no-cache", "Disable caching (Restore and Dll cache)", CommandOptionType.NoValue);
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
+            CommandScriptCompilationCacheLevel GetCacheLevel() =>
+                nocache.HasValue() ? CommandScriptCompilationCacheLevel.None
+                                   : CommandScriptCompilationCacheLevel.Default;
+
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
             var argsAfterDoubleHyphen  = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
@@ -89,7 +93,7 @@ namespace Dotnet.Script
                         return 0;
                     }
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    var options = new ExecuteCodeCommandOptions(code.Value,cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
+                    var options = new ExecuteCodeCommandOptions(code.Value,cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, GetCacheLevel(), packageSources.Values?.ToArray());
                     return await new ExecuteCodeCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
@@ -172,7 +176,7 @@ namespace Dotnet.Script
                         commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug,
                         packageSources.Values?.ToArray(),
                         runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier,
-                        nocache.HasValue()
+                        GetCacheLevel()
                     );
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
@@ -199,7 +203,7 @@ namespace Dotnet.Script
                     (
                         dllPath.Value,
                         app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
-                        nocache.HasValue()
+                        GetCacheLevel()
                     );
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     return await new ExecuteLibraryCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
@@ -235,7 +239,7 @@ namespace Dotnet.Script
                         optimizationLevel,
                         packageSources.Values?.ToArray(),
                         interactive.HasValue(),
-                        nocache.HasValue()
+                        GetCacheLevel()
                     );
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
