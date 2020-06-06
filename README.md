@@ -264,6 +264,15 @@ In order to execute a script it needs to be compiled first and since that is a C
 
 > You can override this automatic caching by passing **--no-cache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script.
 
+#### Cache Location
+
+The temporary location used for caches is a sub-directory named `dotnet-script` under (in order of priority):
+
+1. The path specified for the value of the environment variable named `DOTNET_SCRIPT_CACHE_LOCATION`, if defined and value is not empty.
+2. Linux distributions only: `$XDG_CACHE_HOME` if defined otherwise `$HOME/.cache`
+3. macOS only: `~/Library/Caches`
+4. The value returned by [`Path.GetTempPath`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.gettemppath) for the platform.
+
 ###
 
 ### Debugging
