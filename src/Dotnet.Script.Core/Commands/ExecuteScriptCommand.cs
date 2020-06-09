@@ -53,6 +53,7 @@ namespace Dotnet.Script.Core.Commands
                 && TryGetHash(executionCacheFolder, out var cachedHash)
                 && string.Equals(hash, cachedHash))
             {
+                _logger.Debug($"Using cached compilation: " + pathToLibrary);
                 return pathToLibrary;
             }
 

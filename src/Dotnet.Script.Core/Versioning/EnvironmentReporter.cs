@@ -1,12 +1,10 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
-using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.Core.Versioning
 {
-
     /// <summary>
     /// A class that reports environmental information to the <see cref="ScriptConsole"/>.
     /// </summary>
@@ -49,16 +47,14 @@ namespace Dotnet.Script.Core.Versioning
             var currentVersion = _versionProvider.GetCurrentVersion();
             var latestVersion = await _versionProvider.GetLatestVersion();
 
-            ReportEnvironmentalInfo(currentVersion,
-                                    $"Scripts temp path   : {FileUtils.GetScriptsTempPath()}");
+            ReportEnvironmentalInfo(currentVersion);
             if (!latestVersion.Equals(currentVersion) && latestVersion.IsResolved)
             {
                 ReportThatNewVersionIsAvailable(latestVersion);
             }
         }
 
-        private void ReportEnvironmentalInfo(VersionInfo installedVersion,
-                                             params string[] footers)
+        private void ReportEnvironmentalInfo(VersionInfo installedVersion)
         {
             var netCoreVersion = _scriptEnvironment.NetCoreVersion;
 
@@ -69,9 +65,6 @@ namespace Dotnet.Script.Core.Versioning
             sb.AppendLine($".NET Core version   : {netCoreVersion.Version}");
             sb.AppendLine($"Platform identifier : {ScriptEnvironment.Default.PlatformIdentifier}");
             sb.AppendLine($"Runtime identifier  : {ScriptEnvironment.Default.RuntimeIdentifier}");
-
-            foreach (var footer in footers)
-                sb.AppendLine(footer);
 
             _scriptConsole.WriteNormal(sb.ToString());
         }

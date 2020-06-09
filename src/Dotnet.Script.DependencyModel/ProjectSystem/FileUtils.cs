@@ -22,9 +22,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return pathToProjectDirectory;
         }
 
-        public static string GetScriptsTempPath() =>
-            Path.Combine(GetTempPath(), "dotnet-script");
-
         public static string GetPathToScriptTempFolder(string targetDirectory)
         {
             if (!Path.IsPathRooted(targetDirectory))
@@ -32,6 +29,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 throw new ArgumentOutOfRangeException(nameof(targetDirectory), "Must be a root path");
             }
 
+            var tempDirectory = GetTempPath();
             var pathRoot = Path.GetPathRoot(targetDirectory);
             var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
             if (pathRoot.Length > 0 && ScriptEnvironment.Default.IsWindows)
@@ -45,7 +43,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
                 targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
             }
-            var pathToProjectDirectory = Path.Combine(GetScriptsTempPath(), targetDirectoryWithoutRoot);
+            var pathToProjectDirectory = Path.Combine(tempDirectory, "dotnet-script", targetDirectoryWithoutRoot);
             return pathToProjectDirectory;
         }
 
