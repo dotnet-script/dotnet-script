@@ -96,11 +96,6 @@ namespace Dotnet.Script
                             return 0;
                         }
                     }
-                    else if (Console.IsInputRedirected)
-                    {
-                        Console.Error.WriteLine("Code to evaluate must be supplied as an argument or over the standard input stream, but not both.");
-                        return 1;
-                    }
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
