@@ -13,7 +13,15 @@
     <Authors>dotnet-script</Authors>
     <Company>dotnet-script</Company>
     <LangVersion>latest</LangVersion>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <Compile Include="..\Dotnet.Script.DependencyModel\ProjectSystem\ScriptParserInternal.cs" Link="ScriptParserInternal.cs" />
