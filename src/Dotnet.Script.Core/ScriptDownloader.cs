@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -11,7 +12,12 @@ namespace Dotnet.Script.Core
         public async Task<string> Download(string uri)
         {
             const string plainTextMediaType = "text/plain";
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new HttpClient(new HttpClientHandler
+            {
+                // Avoid Deflate due to bugs. For more info, see:
+                // https://github.com/weblinq/WebLinq/issues/132
+                AutomaticDecompression = DecompressionMethods.GZip
+            }))
             {
                 using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
