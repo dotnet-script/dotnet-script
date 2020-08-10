@@ -12,7 +12,7 @@ namespace Dotnet.Script.Core
         {
             using (HttpClient client = new HttpClient())
             {
-                using (HttpResponseMessage response = await client.GetAsync(uri))
+                using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead))
                 {
                     response.EnsureSuccessStatusCode();
 
