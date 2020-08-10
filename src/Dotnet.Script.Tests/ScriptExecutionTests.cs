@@ -470,7 +470,7 @@ WriteLine(""Success"");
 
         private static void CreateTestPackage(string packageLibraryFolder)
         {
-            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary", packageLibraryFolder);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary -f netstandard2.0", packageLibraryFolder);
             var projectFolder = Path.Combine(packageLibraryFolder, "NuGetConfigTestLibrary");
             ProcessHelper.RunAndCaptureOutput("dotnet", $"pack -o \"{Path.Combine(packageLibraryFolder, "packagePath")}\"", projectFolder);
             CreateNuGetConfig(packageLibraryFolder);
