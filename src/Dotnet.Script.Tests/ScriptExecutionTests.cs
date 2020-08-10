@@ -456,6 +456,15 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello world!", result.output);
         }
 
+        [Fact]
+        public void ShouldIgnoreGlobalJsonInScriptFolder()
+        {
+            var fixture = "InvalidGlobalJson";
+            var workingDirectory = Path.GetDirectoryName(TestPathUtils.GetPathToTestFixture(fixture));
+            var result = ScriptTestRunner.Default.ExecuteFixture("InvalidGlobalJson", $"--no-cache", workingDirectory);
+            Assert.Contains("Hello world!", result.output);
+        }
+
 
         private static string CreateTestScript(string scriptFolder)
         {

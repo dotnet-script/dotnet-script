@@ -35,10 +35,10 @@ namespace Dotnet.Script.Tests
             return Program.Main(arguments?.Split(" ") ?? Array.Empty<string>());
         }
 
-        public (string output, int exitCode) ExecuteFixture(string fixture, string arguments = null)
+        public (string output, int exitCode) ExecuteFixture(string fixture, string arguments = null, string workingDirectory = null)
         {
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"{pathToFixture} {arguments}"));
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"{pathToFixture} {arguments}"), workingDirectory);
             return result;
         }
 
