@@ -18,7 +18,7 @@ namespace Dotnet.Script.Core
                 AutomaticDecompression = DecompressionMethods.GZip
             }))
             {
-                using (HttpResponseMessage response = await client.GetAsync(uri))
+                using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead))
                 {
                     response.EnsureSuccessStatusCode();
 
