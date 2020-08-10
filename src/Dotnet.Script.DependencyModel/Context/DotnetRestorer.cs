@@ -26,12 +26,12 @@ namespace Dotnet.Script.DependencyModel.Context
             var packageSourcesArgument = CreatePackageSourcesArguments();
             var configFileArgument = CreateConfigFileArgument();
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
-            var workingDirectory = Path.GetDirectoryName(projectFileInfo.Path);
+            var workingDirectory = Path.GetFullPath(Path.GetDirectoryName(projectFileInfo.Path));
 
 
             _logger.Debug($"Restoring {projectFileInfo.Path} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier} NugetConfigFile: {projectFileInfo.NuGetConfigFile}");
+
             var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" -r {runtimeIdentifier} {packageSourcesArgument} {configFileArgument}", workingDirectory);
-            //var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" -r {runtimeIdentifier} {packageSourcesArgument} {configFileArgument}");
             if (exitcode != 0)
             {
                 // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'
