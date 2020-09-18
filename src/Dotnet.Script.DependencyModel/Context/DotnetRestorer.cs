@@ -11,12 +11,14 @@ namespace Dotnet.Script.DependencyModel.Context
     public class DotnetRestorer : IRestorer
     {
         private readonly CommandRunner _commandRunner;
+        private readonly bool _useNugetCache;
         private readonly Logger _logger;
         private readonly ScriptEnvironment _scriptEnvironment;
 
-        public DotnetRestorer(CommandRunner commandRunner, LogFactory logFactory)
+        public DotnetRestorer(CommandRunner commandRunner, LogFactory logFactory, bool useNugetCache)
         {
             _commandRunner = commandRunner;
+            _useNugetCache = useNugetCache;
             _logger = logFactory.CreateLogger<DotnetRestorer>();
             _scriptEnvironment = ScriptEnvironment.Default;
         }
@@ -28,10 +30,10 @@ namespace Dotnet.Script.DependencyModel.Context
             var runtimeIdentifier = _scriptEnvironment.RuntimeIdentifier;
             var workingDirectory = Path.GetFullPath(Path.GetDirectoryName(projectFileInfo.Path));
 
-
+            string noCacheFlag = _useNugetCache ? string.Empty : "--no-cache";
             _logger.Debug($"Restoring {projectFileInfo.Path} using the dotnet cli. RuntimeIdentifier : {runtimeIdentifier} NugetConfigFile: {projectFileInfo.NuGetConfigFile}");
 
-            var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" -r {runtimeIdentifier} {packageSourcesArgument} {configFileArgument}", workingDirectory);
+            var exitcode = _commandRunner.Execute("dotnet", $"restore \"{projectFileInfo.Path}\" {noCacheFlag} -r {runtimeIdentifier} {packageSourcesArgument} {configFileArgument}", workingDirectory);
             if (exitcode != 0)
             {
                 // We must throw here, otherwise we may incorrectly run with the old 'project.assets.json'

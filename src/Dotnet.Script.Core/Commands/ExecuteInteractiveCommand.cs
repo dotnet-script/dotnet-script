@@ -18,7 +18,7 @@ namespace Dotnet.Script.Core.Commands
 
         public async Task<int> Execute(ExecuteInteractiveCommandOptions options)
         {
-            var compiler = new ScriptCompiler(_logFactory, useRestoreCache: false);
+            var compiler = new ScriptCompiler(_logFactory, useRestoreCache: false, useNugetCache: true);
             var runner = new InteractiveRunner(compiler, _logFactory, _scriptConsole, options.PackageSources);
 
             if (options.ScriptFile == null)

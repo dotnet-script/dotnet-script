@@ -59,8 +59,8 @@ namespace Dotnet.Script.Core
 
         public RuntimeDependencyResolver RuntimeDependencyResolver { get; }
 
-        public ScriptCompiler(LogFactory logFactory, bool useRestoreCache)
-            : this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache))
+        public ScriptCompiler(LogFactory logFactory, bool useRestoreCache, bool useNugetCache)
+            : this(logFactory, new RuntimeDependencyResolver(logFactory, useRestoreCache, useNugetCache))
         {
 
         }
@@ -82,7 +82,7 @@ namespace Dotnet.Script.Core
         {
             var scriptMap = runtimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
-                .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
+                .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory), scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
                 .WithLanguageVersion(LanguageVersion.Preview)
@@ -266,7 +266,7 @@ namespace Dotnet.Script.Core
                 if (assemblyName.Version == null || runtimeAssembly.Name.Version > assemblyName.Version)
                 {
                     loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);
-                    if(loadedAssembly != null)
+                    if (loadedAssembly != null)
                     {
                         _logger.Trace($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
                         return loadedAssembly;

@@ -23,7 +23,7 @@ namespace Dotnet.Script.Tests
         private ScriptRunner CreateScriptRunner()
         {
             var logFactory = TestOutputHelper.CreateTestLogFactory();
-            var scriptCompiler = new ScriptCompiler(logFactory, false);
+            var scriptCompiler = new ScriptCompiler(logFactory, useRestoreCache:false, useNugetCache:true);
 
             return new ScriptRunner(scriptCompiler, logFactory, ScriptConsole.Default);
         }

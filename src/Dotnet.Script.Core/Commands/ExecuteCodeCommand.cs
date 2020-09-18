@@ -22,14 +22,14 @@ namespace Dotnet.Script.Core.Commands
         {
             var sourceText = SourceText.From(options.Code);
             var context = new ScriptContext(sourceText, options.WorkingDirectory ?? Directory.GetCurrentDirectory(), options.Arguments, null, options.OptimizationLevel, ScriptMode.Eval, options.PackageSources);
-            var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
+            var compiler = GetScriptCompiler(!options.NoCache, !options.NoNugetCache, _logFactory);
             var runner = new ScriptRunner(compiler, _logFactory, _scriptConsole);
             return await runner.Execute<TReturn>(context);
         }
 
-        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
+        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, bool useNugetCache, LogFactory logFactory)
         {
-            var compiler = new ScriptCompiler(logFactory, useRestoreCache);
+            var compiler = new ScriptCompiler(logFactory, useRestoreCache, useNugetCache);
             return compiler;
         }
     }

@@ -13,31 +13,33 @@ namespace Dotnet.Script.DependencyModel.Runtime
     public class RuntimeDependencyResolver
     {
         private readonly ScriptProjectProvider _scriptProjectProvider;
+        private readonly bool _useNugetCache;
         private readonly ScriptDependencyContextReader _dependencyContextReader;
 
         private readonly IRestorer _restorer;
 
-        public RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, LogFactory logFactory, bool useRestoreCache)
+        public RuntimeDependencyResolver(ScriptProjectProvider scriptProjectProvider, LogFactory logFactory, bool useRestoreCache, bool useNugetCache)
         {
             _scriptProjectProvider = scriptProjectProvider;
+            _useNugetCache = useNugetCache;
             _dependencyContextReader = new ScriptDependencyContextReader(logFactory);
-            _restorer = CreateRestorer(logFactory, useRestoreCache);
+            _restorer = CreateRestorer(logFactory, useRestoreCache, useNugetCache);
         }
 
-        public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache) : this(new ScriptProjectProvider(logFactory), logFactory, useRestoreCache)
+        public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache, bool useNugetCache) : this(new ScriptProjectProvider(logFactory), logFactory, useRestoreCache, useNugetCache)
         {
         }
 
-        private static IRestorer CreateRestorer(LogFactory logFactory, bool useRestoreCache)
+        private static IRestorer CreateRestorer(LogFactory logFactory, bool useRestoreCache, bool useNugetCache)
         {
             var commandRunner = new CommandRunner(logFactory);
             if (useRestoreCache)
             {
-                return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory), logFactory), logFactory);
+                return new ProfiledRestorer(new CachedRestorer(new DotnetRestorer(commandRunner, logFactory, useNugetCache), logFactory), logFactory);
             }
             else
             {
-                return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory), logFactory);
+                return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory, useNugetCache), logFactory);
             }
         }
 

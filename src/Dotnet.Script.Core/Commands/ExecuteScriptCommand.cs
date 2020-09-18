@@ -32,14 +32,14 @@ namespace Dotnet.Script.Core.Commands
             }
 
             var pathToLibrary = GetLibrary(options);
-            return await ExecuteLibrary<TReturn>(pathToLibrary, options.Arguments, options.NoCache);
+            return await ExecuteLibrary<TReturn>(pathToLibrary, options.Arguments, options.NoCache, options.NoNugetCache);
         }
 
         private async Task<TReturn> DownloadAndRunCode<TReturn>(ExecuteScriptCommandOptions executeOptions)
         {
             var downloader = new ScriptDownloader();
             var code = await downloader.Download(executeOptions.File.Path);
-            var options = new ExecuteCodeCommandOptions(code, Directory.GetCurrentDirectory(), executeOptions.Arguments, executeOptions.OptimizationLevel, executeOptions.NoCache, executeOptions.PackageSources);
+            var options = new ExecuteCodeCommandOptions(code, Directory.GetCurrentDirectory(), executeOptions.Arguments, executeOptions.OptimizationLevel, executeOptions.NoCache, executeOptions.NoNugetCache, executeOptions.PackageSources);
             return await new ExecuteCodeCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
 
@@ -57,7 +57,7 @@ namespace Dotnet.Script.Core.Commands
                 return pathToLibrary;
             }
 
-            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
+            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache, executeOptions.NoNugetCache);
             new PublishCommand(_scriptConsole, _logFactory).Execute(options);
             if (hash != null)
             {
@@ -125,9 +125,9 @@ namespace Dotnet.Script.Core.Commands
             return true;
         }
 
-        private async Task<TReturn> ExecuteLibrary<TReturn>(string pathToLibrary, string[] arguments, bool noCache)
+        private async Task<TReturn> ExecuteLibrary<TReturn>(string pathToLibrary, string[] arguments, bool noCache, bool noNugetCache)
         {
-            var options = new ExecuteLibraryCommandOptions(pathToLibrary, arguments, noCache);
+            var options = new ExecuteLibraryCommandOptions(pathToLibrary, arguments, noCache, noNugetCache);
             return await new ExecuteLibraryCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
     }

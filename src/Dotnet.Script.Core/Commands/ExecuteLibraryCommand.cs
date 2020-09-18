@@ -25,15 +25,15 @@ namespace Dotnet.Script.Core.Commands
             }
 
             var absoluteFilePath = options.LibraryPath.GetRootedPath();
-            var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
+            var compiler = GetScriptCompiler(!options.NoCache, !options.NoNugetCache, _logFactory);
             var runner = new ScriptRunner(compiler, _logFactory, _scriptConsole);
             var result = await runner.Execute<TReturn>(absoluteFilePath, options.Arguments);
             return result;
         }
 
-        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
+        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, bool useNugetCache, LogFactory logFactory)
         {
-            var compiler = new ScriptCompiler(logFactory, useRestoreCache);
+            var compiler = new ScriptCompiler(logFactory, useRestoreCache, useNugetCache);
             return compiler;
         }
     }

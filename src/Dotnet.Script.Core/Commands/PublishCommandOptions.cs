@@ -5,7 +5,7 @@ namespace Dotnet.Script.Core.Commands
 {
     public class PublishCommandOptions
     {
-        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, bool noCache)
+        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, bool noCache, bool noNugetCache)
         {
             File = file;
             OutputDirectory = outputDirectory;
@@ -15,6 +15,7 @@ namespace Dotnet.Script.Core.Commands
             PackageSources = packageSources;
             RuntimeIdentifier = runtimeIdentifier ?? ScriptEnvironment.Default.RuntimeIdentifier;
             NoCache = noCache;
+            NoNugetCache = noNugetCache;
         }
 
         public ScriptFile File { get; }
@@ -25,6 +26,7 @@ namespace Dotnet.Script.Core.Commands
         public string[] PackageSources { get; }
         public string RuntimeIdentifier { get; }
         public bool NoCache { get; }
+        public bool NoNugetCache { get; }
     }
 
     public enum PublishType

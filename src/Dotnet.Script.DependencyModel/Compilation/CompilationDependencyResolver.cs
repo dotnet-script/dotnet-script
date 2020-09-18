@@ -56,7 +56,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
         private static IRestorer CreateRestorer(LogFactory logFactory)
         {
             var commandRunner = new CommandRunner(logFactory);
-            return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory), logFactory);
+            return new ProfiledRestorer(new DotnetRestorer(commandRunner, logFactory, useNugetCache: true), logFactory);
         }
     }
 }

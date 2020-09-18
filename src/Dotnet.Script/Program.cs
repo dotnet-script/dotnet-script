@@ -66,10 +66,11 @@ namespace Dotnet.Script
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
             var nocache = app.Option("--no-cache", "Disable caching (Restore and Dll cache)", CommandOptionType.NoValue);
+            var noNugetCache = app.Option("--no-nuget-cache", "Disable the NuGet restore cache", CommandOptionType.NoValue);
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
-            var argsAfterDoubleHyphen  = args.SkipWhile(a => a != "--").Skip(1).ToArray();
+            var argsAfterDoubleHyphen = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
             const string helpOptionTemplate = "-? | -h | --help";
             app.HelpOption(helpOptionTemplate);
@@ -98,7 +99,7 @@ namespace Dotnet.Script
                     }
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
+                    var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(), noNugetCache.HasValue(), packageSources.Values?.ToArray());
                     return await new ExecuteCodeCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
@@ -137,7 +138,7 @@ namespace Dotnet.Script
                 });
             });
 
-            // windows only 
+            // windows only
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // on windows we have command to register .csx files to be executed by dotnet-script
@@ -181,7 +182,8 @@ namespace Dotnet.Script
                         commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug,
                         packageSources.Values?.ToArray(),
                         runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier,
-                        nocache.HasValue()
+                        nocache.HasValue(),
+                        noNugetCache.HasValue()
                     );
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
@@ -208,7 +210,8 @@ namespace Dotnet.Script
                     (
                         dllPath.Value,
                         app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
-                        nocache.HasValue()
+                        nocache.HasValue(),
+                        noNugetCache.HasValue()
                     );
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
                     return await new ExecuteLibraryCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
@@ -244,12 +247,13 @@ namespace Dotnet.Script
                         optimizationLevel,
                         packageSources.Values?.ToArray(),
                         interactive.HasValue(),
-                        nocache.HasValue()
+                        nocache.HasValue(),
+                        noNugetCache.HasValue()
                     );
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
                     return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
-            }
+                }
                 else
                 {
                     await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray());
