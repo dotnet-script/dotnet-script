@@ -6,7 +6,7 @@ using Dotnet.Script.DependencyModel.Logging;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
-    public class ScriptParser
+    public partial class ScriptParser
     {
         private readonly Logger _logger;
 
@@ -36,15 +36,6 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             return new ParseResult(allPackageReferences);
         }
-
-        const string Hws = @"[\x20\t]*"; // hws = horizontal whitespace
-
-        const string DirectivePatternPrefix = @"^"
-                                            + Hws + @"#";
-        const string DirectivePatternSuffix = Hws + @"""nuget:"
-                                            // https://github.com/NuGet/docs.microsoft.com-nuget/issues/543#issue-270039223
-                                            + Hws + @"(\w+(?:[_.-]\w+)*)"
-                                            + @"(?:" + Hws + "," + Hws + @"(.+?))?""";
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromReferenceDirective(string fileContent)
         {

@@ -241,12 +241,15 @@ namespace Dotnet.Script.Tests
             Assert.Contains("AutoMapper.MapperConfiguration", result.output);
         }
 
-        [Fact]
-        public void ShouldExecuteRemoteScript()
+        [Theory]
+        [InlineData("https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx",
+                    "Hello World")]
+        [InlineData("https://github.com/filipw/dotnet-script/files/5035247/hello.csx.gz",
+                    "Hello, world!")]
+        public void ShouldExecuteRemoteScript(string url, string output)
         {
-            var url = "https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx";
             var result = ScriptTestRunner.Default.Execute(url);
-            Assert.Contains("Hello World", result.output);
+            Assert.Contains(output, result.output);
         }
 
         [Fact]
@@ -453,6 +456,15 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello world!", result.output);
         }
 
+        [Fact]
+        public void ShouldIgnoreGlobalJsonInScriptFolder()
+        {
+            var fixture = "InvalidGlobalJson";
+            var workingDirectory = Path.GetDirectoryName(TestPathUtils.GetPathToTestFixture(fixture));
+            var result = ScriptTestRunner.Default.ExecuteFixture("InvalidGlobalJson", $"--no-cache", workingDirectory);
+            Assert.Contains("Hello world!", result.output);
+        }
+
 
         private static string CreateTestScript(string scriptFolder)
         {
@@ -467,7 +479,7 @@ WriteLine(""Success"");
 
         private static void CreateTestPackage(string packageLibraryFolder)
         {
-            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary", packageLibraryFolder);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary -f netstandard2.0", packageLibraryFolder);
             var projectFolder = Path.Combine(packageLibraryFolder, "NuGetConfigTestLibrary");
             ProcessHelper.RunAndCaptureOutput("dotnet", $"pack -o \"{Path.Combine(packageLibraryFolder, "packagePath")}\"", projectFolder);
             CreateNuGetConfig(packageLibraryFolder);

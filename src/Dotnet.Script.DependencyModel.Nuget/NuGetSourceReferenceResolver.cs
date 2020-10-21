@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.DependencyModel.NuGet
 {
@@ -15,7 +14,6 @@ namespace Dotnet.Script.DependencyModel.NuGet
     {
         private readonly SourceReferenceResolver _sourceReferenceResolver;
         private readonly IDictionary<string, IReadOnlyList<string>> _scriptMap;
-        private static readonly Regex PackageNameMatcher = new Regex(@"\s*nuget\s*:\s*(.*)\s*,", RegexOptions.Compiled | RegexOptions.IgnoreCase); 
 
         public NuGetSourceReferenceResolver(SourceReferenceResolver sourceReferenceResolver, IDictionary<string, IReadOnlyList<string>> scriptMap)
         {
@@ -48,9 +46,8 @@ namespace Dotnet.Script.DependencyModel.NuGet
 
         public override string ResolveReference(string path, string baseFilePath)
         {
-            if (path.StartsWith("nuget:", StringComparison.OrdinalIgnoreCase))
+            if (ScriptParser.TryParseNuGetPackageReference(path, out var packageName, out _))
             {
-                var packageName = PackageNameMatcher.Match(path).Groups[1].Value;
                 if (_scriptMap.TryGetValue(packageName, out var scripts))
                 {
                     if (scripts.Count == 1)
@@ -66,9 +63,8 @@ namespace Dotnet.Script.DependencyModel.NuGet
 
         public override Stream OpenRead(string resolvedPath)
         {
-            if (resolvedPath.StartsWith("nuget:", StringComparison.OrdinalIgnoreCase))
+            if (ScriptParser.TryParseNuGetPackageReference(resolvedPath, out var packageName, out _))
             {
-                var packageName = PackageNameMatcher.Match(resolvedPath).Groups[1].Value;
                 var scripts = _scriptMap[packageName];
                 if (scripts.Count == 1)
                 {

@@ -49,28 +49,21 @@ namespace Dotnet.Script.Core.Commands
             var executionCacheFolder = Path.Combine(projectFolder, "execution-cache");
             var pathToLibrary = Path.Combine(executionCacheFolder, "script.dll");
 
-            if (!TryCreateHash(executeOptions, out var hash) || !TryGetHash(executionCacheFolder, out var cachedHash))
+            if (TryCreateHash(executeOptions, out var hash)
+                && TryGetHash(executionCacheFolder, out var cachedHash)
+                && string.Equals(hash, cachedHash))
             {
-                return CreateLibrary();
+                _logger.Debug($"Using cached compilation: " + pathToLibrary);
+                return pathToLibrary;
             }
 
-            if (!string.Equals(hash, cachedHash))
+            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
+            new PublishCommand(_scriptConsole, _logFactory).Execute(options);
+            if (hash != null)
             {
-                return CreateLibrary();
+                File.WriteAllText(Path.Combine(executionCacheFolder, "script.sha256"), hash);
             }
-
-            return pathToLibrary;
-
-            string CreateLibrary()
-            {
-                var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
-                new PublishCommand(_scriptConsole, _logFactory).Execute(options);
-                if (hash != null)
-                {
-                    File.WriteAllText(Path.Combine(executionCacheFolder, "script.sha256"), hash);
-                }
-                return Path.Combine(executionCacheFolder, "script.dll");
-            }
+            return Path.Combine(executionCacheFolder, "script.dll");
         }
 
         public bool TryCreateHash(ExecuteScriptCommandOptions options, out string hash)

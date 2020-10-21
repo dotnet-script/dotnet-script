@@ -60,7 +60,7 @@ namespace Dotnet.Script.DependencyModel.Context
                 }
             }
 
-            if (ScriptEnvironment.Default.NetCoreVersion.Version.StartsWith("3") || ScriptEnvironment.Default.NetCoreVersion.Version.StartsWith("5"))
+            if (ScriptEnvironment.Default.NetCoreVersion.Major >= 3)
             {
                 var netcoreAppRuntimeAssemblyLocation = Path.GetDirectoryName(typeof(object).Assembly.Location);
                 var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();

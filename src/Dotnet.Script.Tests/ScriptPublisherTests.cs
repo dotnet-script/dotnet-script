@@ -40,10 +40,11 @@ namespace Dotnet.Script.Tests
 
                 Assert.Equal(0, executableRunResult);
 
-#if NETCOREAPP3_0
                 var publishedFiles = Directory.EnumerateFiles(Path.Combine(workspaceFolder.Path, "publish", _scriptEnvironment.RuntimeIdentifier));
-                Assert.True(1 == publishedFiles.Count(), "There should be only a single published file on .NET Core 3.0");
-#endif
+                if (_scriptEnvironment.NetCoreVersion.Major >= 3)
+                    Assert.True(publishedFiles.Count() == 1, "There should be only a single published file");
+                else
+                    Assert.True(publishedFiles.Count() > 1, "There should be multiple published files");
             }
         }
 

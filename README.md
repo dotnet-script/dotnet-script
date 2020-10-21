@@ -243,7 +243,7 @@ Dotnet-Script can create a standalone executable or DLL for your script.
 | -d     | --debug                         | Enables debug output.                                                                                               |
 | -r     | --runtime                       | The runtime used when publishing the self contained executable. Defaults to your current runtime.                   |
 
-The executable you can run directly independent of dotnet install, while the DLL is can be run using the dotnet CLI like this:
+The executable you can run directly independent of dotnet install, while the DLL can be run using the dotnet CLI like this:
 
 ```shell
 dotnet script exec {path_to_dll} -- arg1 arg2
@@ -263,6 +263,15 @@ This is an out-of-process operation and represents a significant overhead to the
 In order to execute a script it needs to be compiled first and since that is a CPU and time consuming operation, we make sure that we only compile when the source code has changed. This works by creating a SHA256 hash from all the script files involved in the execution. This hash is written to a temporary location along with the DLL that represents the result of the script compilation. When a script is executed the hash is computed and compared with the hash from the previous compilation. If they match there is no need to recompile and we run from the already compiled DLL. If the hashes don't match, the cache is invalidated and we recompile.
 
 > You can override this automatic caching by passing **--no-cache** flag, which will bypass both caches and cause dependency resolution and script compilation to happen every time we execute the script.
+
+#### Cache Location
+
+The temporary location used for caches is a sub-directory named `dotnet-script` under (in order of priority):
+
+1. The path specified for the value of the environment variable named `DOTNET_SCRIPT_CACHE_LOCATION`, if defined and value is not empty.
+2. Linux distributions only: `$XDG_CACHE_HOME` if defined otherwise `$HOME/.cache`
+3. macOS only: `~/Library/Caches`
+4. The value returned by [`Path.GetTempPath`](https://docs.microsoft.com/en-us/dotnet/api/system.io.path.gettemppath) for the platform.
 
 ###
 
@@ -484,7 +493,7 @@ The first thing we need to do add the following to the `launch.config` file that
 }
 ```
 
-To debug this script we need a way to attach the debugger in VS Code and to the simplest thing we can do here is to wait for the debugger to attach by adding this method somewhere.
+To debug this script we need a way to attach the debugger in VS Code and the simplest thing we can do here is to wait for the debugger to attach by adding this method somewhere.
 
 ```c#
 public static void WaitForDebugger()
@@ -515,7 +524,7 @@ Attach Debugger (VS Code)
 
 This now gives us a chance to attach the debugger before stepping into the script and from VS Code, select the `.NET Core Attach` debugger and pick the process that represents the executing script.
 
-Once that is done we should see out breakpoint being hit.
+Once that is done we should see our breakpoint being hit.
 
 ## Configuration(Debug/Release)
 

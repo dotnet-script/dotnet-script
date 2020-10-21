@@ -76,7 +76,7 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156
             var codeBase = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.CodeBase;
-            var pattern = @"^.*Microsoft\.NETCore\.App\/(\d\.\d)(.*?)\/";
+            var pattern = @"^.*Microsoft\.NETCore\.App\/(\d+\.\d+)(.*?)\/";
             var match = Regex.Match(codeBase, pattern, RegexOptions.IgnoreCase);
             if (!match.Success)
             {
@@ -139,9 +139,17 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             Version = version;
             Tfm = tfm;
+
+            var versionMatch = Regex.Match(input: Version, pattern: @"^(\d+)(?:\.(\d+))?");
+            if (versionMatch.Success && versionMatch.Groups[1].Success)
+                Major = int.Parse(versionMatch.Groups[1].Value);
+            if (versionMatch.Success && versionMatch.Groups[2].Success)
+                Minor = int.Parse(versionMatch.Groups[2].Value);
         }
 
         public string Version { get; }
         public string Tfm { get; }
+        public int Major { get; }
+        public int Minor { get; }
     }
 }

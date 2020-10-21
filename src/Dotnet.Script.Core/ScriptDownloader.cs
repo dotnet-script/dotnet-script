@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
-using System.Net.Mime;
 using System.Threading.Tasks;
 
 namespace Dotnet.Script.Core
@@ -10,23 +10,30 @@ namespace Dotnet.Script.Core
     {
         public async Task<string> Download(string uri)
         {
-            const string plainTextMediaType = "text/plain";
             using (HttpClient client = new HttpClient())
             {
-                using (HttpResponseMessage response = await client.GetAsync(uri))
+                using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead))
                 {
                     response.EnsureSuccessStatusCode();
 
                     using (HttpContent content = response.Content)
                     {
-                        string mediaType = content.Headers.ContentType.MediaType;
-
-                        if (string.IsNullOrWhiteSpace(mediaType) || mediaType.Equals(plainTextMediaType, StringComparison.InvariantCultureIgnoreCase))
+                        var mediaType = content.Headers.ContentType.MediaType?.ToLowerInvariant().Trim();
+                        switch (mediaType)
                         {
-                            return await content.ReadAsStringAsync();
+                            case null:
+                            case "":
+                            case "text/plain":
+                                return await content.ReadAsStringAsync();
+                            case "application/gzip":
+                            case "application/x-gzip":
+                                using (var stream = await content.ReadAsStreamAsync())
+                                using (var gzip = new GZipStream(stream, CompressionMode.Decompress))
+                                using (var reader = new StreamReader(gzip))
+                                    return await reader.ReadToEndAsync();
+                            default:
+                                throw new NotSupportedException($"The media type '{mediaType}' is not supported when executing a script over http/https");
                         }
-
-                        throw new NotSupportedException($"The media type '{mediaType}' is not supported when executing a script over http/https");
                     }
                 }
             }
