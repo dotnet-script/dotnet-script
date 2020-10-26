@@ -70,11 +70,18 @@ namespace Dotnet.Script.Core
                 throw new ArgumentNullException(nameof(runtimeIdentifier));
             }
 
+            string targetFrameworkFolder = _scriptEnvironment.TargetFramework;
+            if (string.Equals(targetFrameworkFolder, "netcoreapp5.0", StringComparison.InvariantCultureIgnoreCase))
+            {
+                targetFrameworkFolder = "net5.0";
+            }
+
+
             executableFileName = executableFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
             const string AssemblyName = "scriptAssembly";
 
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework);
-            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework, executableFileName);
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), targetFrameworkFolder);
+            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), targetFrameworkFolder, executableFileName);
             var tempProjectDirectory = Path.GetDirectoryName(tempProjectPath);
 
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirectory, AssemblyName);

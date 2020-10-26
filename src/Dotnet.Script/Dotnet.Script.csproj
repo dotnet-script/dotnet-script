@@ -4,7 +4,7 @@
         <VersionPrefix>0.53.0</VersionPrefix>
         <Authors>filipw</Authors>
         <PackageId>Dotnet.Script</PackageId>
-        <TargetFrameworks>netcoreapp2.1;netcoreapp3.1;netcoreapp5.0</TargetFrameworks>
+        <TargetFrameworks>net5.0;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
         <DebugType>portable</DebugType>
         <AssemblyName>dotnet-script</AssemblyName>
         <OutputType>Exe</OutputType>
