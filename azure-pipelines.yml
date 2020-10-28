@@ -49,7 +49,7 @@ jobs:
           curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.1.102
         displayName: "Install 3.0.100"
 
-        - bash: |
+      - bash: |
           curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 5.0.100-rc.2.20479.15
         displayName: "Install 5.0.100-rc.2.20479.15"
 
