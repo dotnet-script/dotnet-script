@@ -156,6 +156,10 @@ namespace Dotnet.Script.DependencyModel.Environment
                 Major = int.Parse(versionMatch.Groups[1].Value);
             if (versionMatch.Success && versionMatch.Groups[2].Success)
                 Minor = int.Parse(versionMatch.Groups[2].Value);
+            if (Major >= 5)
+            {
+                Tfm = $"net{Major}.{Minor}";
+            }
         }
 
         public string Version { get; }

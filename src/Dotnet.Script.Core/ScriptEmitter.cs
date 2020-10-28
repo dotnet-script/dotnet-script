@@ -18,7 +18,7 @@ namespace Dotnet.Script.Core
             _scriptCompiler = scriptCompiler;
         }
 
-        public virtual ScriptEmitResult Emit<TReturn, THost>(ScriptContext context)
+        public virtual ScriptEmitResult Emit<TReturn, THost>(ScriptContext context, string assemblyName)
         {
             var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
             foreach (var warning in compilationContext.Warnings)
@@ -37,13 +37,17 @@ namespace Dotnet.Script.Core
             }
 
             var compilation = compilationContext.Script.GetCompilation();
+            compilation = compilation.WithAssemblyName(assemblyName);
 
             var peStream = new MemoryStream();
             EmitOptions emitOptions = null;
+
             if (context.OptimizationLevel == Microsoft.CodeAnalysis.OptimizationLevel.Debug)
             {
                 emitOptions = new EmitOptions()
                     .WithDebugInformationFormat(DebugInformationFormat.Embedded);
+
+
             }
 
             var result = compilation.Emit(peStream, options: emitOptions);

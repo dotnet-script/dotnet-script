@@ -13,7 +13,7 @@ namespace Dotnet.Script.Core
 {
     public class ScriptPublisher
     {
-        private const string ScriptingVersion = "2.8.2";
+        private const string ScriptingVersion = "3.7.0";
 
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptEmitter _scriptEmitter;
@@ -70,18 +70,11 @@ namespace Dotnet.Script.Core
                 throw new ArgumentNullException(nameof(runtimeIdentifier));
             }
 
-            string targetFrameworkFolder = _scriptEnvironment.TargetFramework;
-            if (string.Equals(targetFrameworkFolder, "netcoreapp5.0", StringComparison.InvariantCultureIgnoreCase))
-            {
-                targetFrameworkFolder = "net5.0";
-            }
-
-
             executableFileName = executableFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
             const string AssemblyName = "scriptAssembly";
 
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), targetFrameworkFolder);
-            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), targetFrameworkFolder, executableFileName);
+            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), _scriptEnvironment.TargetFramework);
+            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), _scriptEnvironment.TargetFramework, executableFileName);
             var tempProjectDirectory = Path.GetDirectoryName(tempProjectPath);
 
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirectory, AssemblyName);
@@ -95,7 +88,10 @@ namespace Dotnet.Script.Core
 
             var commandRunner = new CommandRunner(logFactory);
             // todo: may want to add ability to return dotnet.exe errors
-            var exitcode = commandRunner.Execute("dotnet", $"publish \"{renamedProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\" {(ScriptEnvironment.Default.NetCoreVersion.Major >= 3 ? "/p:PublishSingleFile=true" : string.Empty)} /p:DebugType=Embedded");
+            var publishSingleFileArgument = ScriptEnvironment.Default.NetCoreVersion.Major >= 3 ? "/p:PublishSingleFile=true" : string.Empty;
+            var includeNativeLibrariesForSelfExtract = ScriptEnvironment.Default.NetCoreVersion.Major >= 5 ? "/p:IncludeNativeLibrariesForSelfExtract=true" : string.Empty;
+
+            var exitcode = commandRunner.Execute("dotnet", $"publish \"{renamedProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\" {publishSingleFileArgument} {includeNativeLibrariesForSelfExtract} /p:DebugType=Embedded");
 
             if (exitcode != 0)
             {
@@ -107,7 +103,7 @@ namespace Dotnet.Script.Core
 
         private string CreateScriptAssembly<TReturn, THost>(ScriptContext context, string outputDirectory, string assemblyFileName)
         {
-            var emitResult = _scriptEmitter.Emit<TReturn, THost>(context);
+            var emitResult = _scriptEmitter.Emit<TReturn, THost>(context, assemblyFileName);
             var assemblyPath = Path.Combine(outputDirectory, $"{assemblyFileName}.dll");
             using (var peFileStream = new FileStream(assemblyPath, FileMode.Create))
             using (emitResult.PeStream)

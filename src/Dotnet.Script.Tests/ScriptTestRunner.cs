@@ -80,13 +80,8 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
-            string targetFrameworkFolder = _scriptEnvironment.TargetFramework;
-            if (string.Equals(targetFrameworkFolder, "netcoreapp5.0", StringComparison.InvariantCultureIgnoreCase))
-            {
-                targetFrameworkFolder = "net5.0";
-            }
 
-            var allArgs = $"exec {Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, targetFrameworkFolder, "dotnet-script.dll")} {arguments}";
+            var allArgs = $"exec {Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")} {arguments}";
 
             return allArgs;
         }
