@@ -456,6 +456,15 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello world!", result.output);
         }
 
+        [Fact]
+        public void ShouldIgnoreGlobalJsonInScriptFolder()
+        {
+            var fixture = "InvalidGlobalJson";
+            var workingDirectory = Path.GetDirectoryName(TestPathUtils.GetPathToTestFixture(fixture));
+            var result = ScriptTestRunner.Default.ExecuteFixture("InvalidGlobalJson", $"--no-cache", workingDirectory);
+            Assert.Contains("Hello world!", result.output);
+        }
+
 
         private static string CreateTestScript(string scriptFolder)
         {
@@ -470,7 +479,7 @@ WriteLine(""Success"");
 
         private static void CreateTestPackage(string packageLibraryFolder)
         {
-            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary", packageLibraryFolder);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n NuGetConfigTestLibrary -f netstandard2.0", packageLibraryFolder);
             var projectFolder = Path.Combine(packageLibraryFolder, "NuGetConfigTestLibrary");
             ProcessHelper.RunAndCaptureOutput("dotnet", $"pack -o \"{Path.Combine(packageLibraryFolder, "packagePath")}\"", projectFolder);
             CreateNuGetConfig(packageLibraryFolder);
