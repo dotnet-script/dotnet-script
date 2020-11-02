@@ -18,7 +18,7 @@ namespace Dotnet.Script.Core
 
                     using (HttpContent content = response.Content)
                     {
-                        var mediaType = content.Headers.ContentType.MediaType?.ToLowerInvariant().Trim();
+                        var mediaType = content.Headers.ContentType?.MediaType?.ToLowerInvariant().Trim();
                         switch (mediaType)
                         {
                             case null:
