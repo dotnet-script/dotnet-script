@@ -25,8 +25,8 @@ jobs:
       - bash: "curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 2.1.402"
         displayName: "Install 2.1.402"
 
-      - bash: "curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 5.0.100-rc.2.20479.15"
-        displayName: " 5.0.100-rc.2.20479.15"
+      - bash: "curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 5.0.100"
+        displayName: " 5.0.100"
 
       - bash: |
           export PATH=/home/vsts/.dotnet:$PATH
@@ -50,8 +50,8 @@ jobs:
         displayName: "Install 3.0.100"
 
       - bash: |
-          curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 5.0.100-rc.2.20479.15
-        displayName: "Install 5.0.100-rc.2.20479.15"
+          curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 5.0.100
+        displayName: "Install 5.0.100"
 
       - bash: |
           curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
@@ -81,9 +81,9 @@ jobs:
 
       - powershell: |
           iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1
-          .\dotnet-install.ps1 -Version  5.0.100-rc.2.20479.15
+          .\dotnet-install.ps1 -Version  5.0.100
 
-        displayName: "Install 5.0.100-rc.2.20479.15 SDK"
+        displayName: "Install 5.0.100"
 
       # NuGet Tool Installer
       # Acquires a specific version of NuGet from the internet or the tools cache and adds it to the PATH. Use this task to change the version of NuGet used in the NuGet tasks.
