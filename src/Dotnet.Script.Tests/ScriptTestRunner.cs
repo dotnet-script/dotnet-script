@@ -42,6 +42,13 @@ namespace Dotnet.Script.Tests
             return result;
         }
 
+        public (string output, int exitcode) ExecuteWithScriptPackage(string fixture, string arguments = null, string workingDirectory = null)
+        {
+            var pathToScriptPackageFixtures = TestPathUtils.GetPathToTestFixtureFolder("ScriptPackage");
+            var pathToFixture = Path.Combine(pathToScriptPackageFixtures, fixture, $"{fixture}.csx");
+            return ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"{pathToFixture} {arguments}"), workingDirectory);
+        }
+
         public int ExecuteFixtureInProcess(string fixture, string arguments = null)
         {
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
@@ -80,6 +87,7 @@ namespace Dotnet.Script.Tests
 #else
             configuration = "Release";
 #endif
+
             var allArgs = $"exec {Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")} {arguments}";
 
             return allArgs;

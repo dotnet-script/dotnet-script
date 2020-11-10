@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
+using System.Runtime.Loader;
 using System.Threading.Tasks;
 using static System.Console;
 using System.Reflection;
@@ -18,15 +19,14 @@ namespace dotnetPublishCode
                 foreach (var arg in args)
                     globals.Args.Add(arg);
 
-                var path = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                var assembly = Assembly.LoadFrom(Path.Combine(path, "scriptAssembly.dll"));
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName("scriptAssembly"));
                 var type = assembly.GetType("Submission#0");
                 var factoryMethod = type.GetMethod("<Factory>");
                 if (factoryMethod == null) throw new Exception("couldn't find factory method to initiate script");
 
                 var invokeTask = factoryMethod.Invoke(null, new object[] { new object[] { globals, null } }) as Task<int>;
                 var invokeResult = await invokeTask;
-                if (invokeResult != 0) 
+                if (invokeResult != 0)
                 {
                     WritePrettyError($"Error result: '{invokeResult}'");
                     return 0x1;

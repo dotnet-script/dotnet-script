@@ -74,6 +74,7 @@ namespace Dotnet.Script.DependencyModel.Environment
 
         private static DotnetVersion GetNetCoreAppVersion()
         {
+            GetNetCoreVersion();
             // https://github.com/dotnet/BenchmarkDotNet/blob/94863ab4d024eca04d061423e5aad498feff386b/src/BenchmarkDotNet/Portability/RuntimeInformation.cs#L156
             var codeBase = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.CodeBase;
             var pattern = @"^.*Microsoft\.NETCore\.App\/(\d+\.\d+)(.*?)\/";
@@ -86,6 +87,16 @@ namespace Dotnet.Script.DependencyModel.Environment
             var version = match.Groups[1].Value + match.Groups[2].Value;
 
             return new DotnetVersion(version, $"netcoreapp{tfm}");
+        }
+
+        public static string GetNetCoreVersion()
+        {
+            var assembly = typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly;
+            var assemblyPath = assembly.CodeBase.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            int netCoreAppIndex = Array.IndexOf(assemblyPath, "Microsoft.NETCore.App");
+            if (netCoreAppIndex > 0 && netCoreAppIndex < assemblyPath.Length - 2)
+                return assemblyPath[netCoreAppIndex + 1];
+            return null;
         }
 
         private static string GetInstallLocation()
@@ -145,6 +156,10 @@ namespace Dotnet.Script.DependencyModel.Environment
                 Major = int.Parse(versionMatch.Groups[1].Value);
             if (versionMatch.Success && versionMatch.Groups[2].Success)
                 Minor = int.Parse(versionMatch.Groups[2].Value);
+            if (Major >= 5)
+            {
+                Tfm = $"net{Major}.{Minor}";
+            }
         }
 
         public string Version { get; }

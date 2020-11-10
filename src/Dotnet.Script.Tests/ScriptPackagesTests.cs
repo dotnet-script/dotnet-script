@@ -25,11 +25,12 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleScriptPackageWithMainCsx()
         {
-            var result = Execute("WithMainCsx/WithMainCsx.csx");
-            Assert.StartsWith("Hello from netstandard2.0", result);
+            var (output, exitcode) = ScriptTestRunner.Default.ExecuteWithScriptPackage("WithMainCsx", "--no-cache");
+            Assert.Equal(0, exitcode);
+            Assert.StartsWith("Hello from netstandard2.0", output);
         }
 
-        [Fact]
+        //[Fact]
         public void ShouldThrowMeaningfulExceptionWhenScriptPackageIsMissing()
         {
             using (var scriptFolder = new DisposableFolder())
@@ -60,37 +61,42 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleScriptWithAnyTargetFramework()
         {
-            var result = Execute("WithAnyTargetFramework/WithAnyTargetFramework.csx");
-            Assert.StartsWith("Hello from any target framework", result);
+            var (output, exitcode) = ScriptTestRunner.Default.ExecuteWithScriptPackage("WithAnyTargetFramework", "--no-cache");
+            Assert.Equal(0, exitcode);
+            Assert.StartsWith("Hello from any target framework", output);
         }
 
         [Fact]
         public void ShouldHandleScriptPackageWithNoEntryPointFile()
         {
-            var result = Execute("WithNoEntryPointFile/WithNoEntryPointFile.csx");
-            Assert.Contains("Hello from Foo.csx", result);
-            Assert.Contains("Hello from Bar.csx", result);
+            var (output, exitcode) = ScriptTestRunner.Default.ExecuteWithScriptPackage("WithNoEntryPointFile", "--no-cache");
+            Assert.Equal(0, exitcode);
+            Assert.Contains("Hello from Foo.csx", output);
+            Assert.Contains("Hello from Bar.csx", output);
         }
 
         [Fact]
         public void ShouldHandleScriptPackageWithScriptPackageDependency()
         {
-            var result = Execute("WithScriptPackageDependency/WithScriptPackageDependency.csx");
-            Assert.StartsWith("Hello from netstandard2.0", result);
+            var (output, exitcode) = ScriptTestRunner.Default.ExecuteWithScriptPackage("WithScriptPackageDependency", "--no-cache");
+            Assert.Equal(0, exitcode);
+            Assert.StartsWith("Hello from netstandard2.0", output);
         }
 
         [Fact]
         public void ShouldThrowExceptionWhenReferencingUnknownPackage()
         {
-            var result = Execute("WithInvalidPackageReference/WithInvalidPackageReference.csx");
-            Assert.StartsWith("Unable to restore packages from", result);
+            var (output, exitcode) = ScriptTestRunner.Default.ExecuteWithScriptPackage("WithInvalidPackageReference", "--no-cache");
+            Assert.NotEqual(0, exitcode);
+            Assert.StartsWith("Unable to restore packages from", output);
         }
 
         [Fact]
         public void ShouldHandleScriptPackageWithSubFolder()
         {
-            var result = Execute("WithSubFolder/WithSubFolder.csx");
-            Assert.StartsWith("Hello from Bar.csx", result);
+            var (output, exitcode) = ScriptTestRunner.Default.ExecuteWithScriptPackage("WithSubFolder", "--no-cache");
+            Assert.Equal(0, exitcode);
+            Assert.StartsWith("Hello from Bar.csx", output);
         }
 
         [Fact]
