@@ -48,7 +48,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             {
                 File.Delete(referencePathsFile);
             }
-            var exitCode = _commandRunner.Execute("dotnet", $"build \"{pathToCompilationProjectFile}\" /p:OutputType=Library -o {outputDirectory}", workingDirectory);
+            var exitCode = _commandRunner.Execute("dotnet", $"build \"{pathToCompilationProjectFile}\" /p:OutputType=Library -o {outputDirectory} --nologo", workingDirectory);
             if (exitCode != 0)
             {
                 throw new Exception($"Unable to read compilation dependencies for '{projectFile.Path}'. Make sure that all script files contains valid NuGet references");
