@@ -44,10 +44,11 @@ namespace Dotnet.Script.DependencyModel.Compilation
             }
 
             // On .Net Core, we need to fetch the compilation references for framework assemblies separately.
-            if (defaultTargetFramework.StartsWith("netcoreapp3", StringComparison.InvariantCultureIgnoreCase))
+            if (defaultTargetFramework.StartsWith("netcoreapp3", StringComparison.InvariantCultureIgnoreCase) ||
+                defaultTargetFramework.StartsWith("net5", StringComparison.InvariantCultureIgnoreCase))
             {
                 var compilationreferences = _compilationReferenceReader.Read(projectFileInfo);
-                result.Add(new CompilationDependency("Microsoft.NETCore.App", "3.0", compilationreferences.Select(cr => cr.Path).ToArray(), Array.Empty<string>()));
+                result.Add(new CompilationDependency("Dotnet.Script.Default.Dependencies", "99.0", compilationreferences.Select(cr => cr.Path).ToArray(), Array.Empty<string>()));
             }
 
             return result;
