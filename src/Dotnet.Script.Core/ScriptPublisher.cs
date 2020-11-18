@@ -1,10 +1,8 @@
-using Dotnet.Script.Core.Internal;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.IO;
 using System.Reflection;
@@ -13,7 +11,7 @@ namespace Dotnet.Script.Core
 {
     public class ScriptPublisher
     {
-        private const string ScriptingVersion = "3.8.0-5.final";
+        private const string ScriptingVersion = "3.8.0";
 
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptEmitter _scriptEmitter;
