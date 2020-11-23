@@ -25,10 +25,12 @@ namespace Dotnet.Script.Tests
                 WriteScript(pathToScript, "WriteLine(42);");
                 var firstResult = Execute(pathToScript);
                 Assert.Contains("42", firstResult.output);
+                Assert.NotNull(firstResult.hash);
 
                 WriteScript(pathToScript, "WriteLine(42);");
                 var secondResult = Execute(pathToScript);
                 Assert.Contains("42", secondResult.output);
+                Assert.NotNull(secondResult.hash);
 
                 Assert.Equal(firstResult.hash, secondResult.hash);
             }
@@ -45,10 +47,12 @@ namespace Dotnet.Script.Tests
                 WriteScript(pathToScript, "WriteLine(42);");
                 var firstResult = Execute(pathToScript);
                 Assert.Contains("42", firstResult.output);
+                Assert.NotNull(firstResult.hash);
 
                 WriteScript(pathToScript, "WriteLine(84);");
                 var secondResult = Execute(pathToScript);
                 Assert.Contains("84", secondResult.output);
+                Assert.NotNull(secondResult.hash);
 
                 Assert.NotEqual(firstResult.hash, secondResult.hash);
             }
@@ -103,7 +107,7 @@ namespace Dotnet.Script.Tests
 
         private static string GetPathToExecutionCache(string pathToScript)
         {
-            var pathToTempFolder = Path.GetDirectoryName(Dotnet.Script.DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript));
+            var pathToTempFolder = Dotnet.Script.DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript);
             var pathToExecutionCache = Path.Combine(pathToTempFolder, "execution-cache");
             return pathToExecutionCache;
         }
