@@ -1,0 +1,22 @@
+{
+  "fileOptions": {
+    "systemExcludeSearchPatterns": [
+      "**/TestFixtures/**/*.csx",
+      "**/ScriptPackages/**/*.csx"
+    ],
+    "userExcludeSearchPatterns": []
+  },
+  "script": {
+    "enableScriptNuGetReferences": true,
+    "defaultTargetFramework": "net5.0"
+  },
+  "FormattingOptions": {
+      "organizeImports": true,
+      "enableEditorConfigSupport": true
+  },
+  "RoslynExtensionsOptions": {
+      "enableImportCompletion": true,
+      "enableAnalyzersSupport": true,
+      "enableDecompilationSupport": true
+  }
+}

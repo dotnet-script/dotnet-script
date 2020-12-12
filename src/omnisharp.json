@@ -1,9 +1,0 @@
-{
-  "fileOptions": {
-    "systemExcludeSearchPatterns": [
-      "**/TestFixtures/**/*.csx",
-      "**/ScriptPackages/**/*.csx"
-    ],
-    "userExcludeSearchPatterns": []
-  }
-}
