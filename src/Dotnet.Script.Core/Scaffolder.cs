@@ -63,7 +63,7 @@ namespace Dotnet.Script.Core
                     RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     // mark .csx file as executable, this activates the shebang to run dotnet-script as interpreter
-                    _commandRunner.Execute($"/bin/chmod", $"+x {pathToScriptFile}");
+                    _commandRunner.Execute($"/bin/chmod", $"+x \"{pathToScriptFile}\"");
                 }
                 _scriptConsole.WriteSuccess($"...'{pathToScriptFile}' [Created]");
             }

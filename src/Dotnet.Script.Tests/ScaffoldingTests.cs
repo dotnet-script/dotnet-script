@@ -25,12 +25,32 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
+                ScriptTestRunner.Default.ExecuteInProcess($"init {scriptFolder.Path}");
+
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
 
                 Assert.Equal(0, exitCode);
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "main.csx")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, "omnisharp.json")));
                 Assert.True(File.Exists(Path.Combine(scriptFolder.Path, ".vscode", "launch.json")));
+            }
+        }
+
+        [Fact]
+        public void ShouldInitializeScriptFolderContainingWhitespace()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var path = Path.Combine(scriptFolder.Path, "Folder with whitespace");
+                Directory.CreateDirectory(path);
+
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", path);
+
+                Assert.Equal(0, exitCode);
+                Assert.DoesNotContain("No such file or directory", output, StringComparison.OrdinalIgnoreCase);
+                Assert.True(File.Exists(Path.Combine(path, "main.csx")));
+                Assert.True(File.Exists(Path.Combine(path, "omnisharp.json")));
+                Assert.True(File.Exists(Path.Combine(path, ".vscode", "launch.json")));
             }
         }
 
