@@ -25,8 +25,6 @@ namespace Dotnet.Script.Tests
         {
             using (var scriptFolder = new DisposableFolder())
             {
-                ScriptTestRunner.Default.ExecuteInProcess($"init {scriptFolder.Path}");
-
                 var (output, exitCode) = ScriptTestRunner.Default.Execute("init", scriptFolder.Path);
 
                 Assert.Equal(0, exitCode);
