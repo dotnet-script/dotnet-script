@@ -34,6 +34,24 @@ namespace Dotnet.Script.Tests
             }
         }
 
+        [Fact]
+        public void ShouldInitializeScriptFolderContainingWhitespace()
+        {
+            using (var scriptFolder = new DisposableFolder())
+            {
+                var path = Path.Combine(scriptFolder.Path, "Folder with whitespace");
+                Directory.CreateDirectory(path);
+
+                var (output, exitCode) = ScriptTestRunner.Default.Execute("init", path);
+
+                Assert.Equal(0, exitCode);
+                Assert.DoesNotContain("No such file or directory", output, StringComparison.OrdinalIgnoreCase);
+                Assert.True(File.Exists(Path.Combine(path, "main.csx")));
+                Assert.True(File.Exists(Path.Combine(path, "omnisharp.json")));
+                Assert.True(File.Exists(Path.Combine(path, ".vscode", "launch.json")));
+            }
+        }
+
         [OnlyOnUnixFact]
         public void ShouldRegisterToRunCsxScriptDirectly()
         {
