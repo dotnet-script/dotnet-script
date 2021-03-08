@@ -45,7 +45,7 @@ namespace Dotnet.Script.Core.Commands
 
         private string GetLibrary(ExecuteScriptCommandOptions executeOptions)
         {
-            var projectFolder = FileUtils.GetPathToScriptTempFolder(Path.GetDirectoryName(executeOptions.File.Path));
+            var projectFolder = FileUtils.GetPathToScriptTempFolder(executeOptions.File.Path);
             var executionCacheFolder = Path.Combine(projectFolder, "execution-cache");
             var pathToLibrary = Path.Combine(executionCacheFolder, "script.dll");
 
