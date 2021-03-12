@@ -21,7 +21,7 @@
     <EmbeddedResource Include="**/*.template" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.8.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
