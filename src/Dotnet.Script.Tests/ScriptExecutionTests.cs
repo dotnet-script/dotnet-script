@@ -352,6 +352,13 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleIssue613()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("Issue613");
+            Assert.Equal(0, result.exitCode);
+        }
+
+        [Fact]
         public void ShouldHandleIssue235()
         {
             string code =
