@@ -30,8 +30,8 @@
     <!-- The following references are just quick fixes for issue #166 and issue #268
     We need to figure out why we can't load these via the dependency context.
      -->
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.DependencyModel.Nuget\Dotnet.Script.DependencyModel.NuGet.csproj" />
