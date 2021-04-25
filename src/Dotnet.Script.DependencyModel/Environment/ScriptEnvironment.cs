@@ -86,7 +86,12 @@ namespace Dotnet.Script.DependencyModel.Environment
             var tfm = match.Groups[1].Value;
             var version = match.Groups[1].Value + match.Groups[2].Value;
 
-            return new DotnetVersion(version, $"netcoreapp{tfm}");
+            var result = Convert.ToDouble(tfm);
+
+            if(result < 5.0)
+                return new DotnetVersion(version, $"netcoreapp{tfm}");
+
+            return new DotnetVersion(version, $"net{tfm}");
         }
 
         public static string GetNetCoreVersion()
