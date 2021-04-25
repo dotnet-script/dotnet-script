@@ -88,8 +88,9 @@ namespace Dotnet.Script.Core
             // todo: may want to add ability to return dotnet.exe errors
             var publishSingleFileArgument = ScriptEnvironment.Default.NetCoreVersion.Major >= 3 ? "/p:PublishSingleFile=true" : string.Empty;
             var includeNativeLibrariesForSelfExtract = ScriptEnvironment.Default.NetCoreVersion.Major >= 5 ? "/p:IncludeNativeLibrariesForSelfExtract=true" : string.Empty;
+            var publishSelfContainedArgument = ScriptEnvironment.Default.NetCoreVersion.Major >= 5 ? "--self-contained true" : string.Empty;
 
-            var exitcode = commandRunner.Execute("dotnet", $"publish \"{renamedProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\" {publishSingleFileArgument} {includeNativeLibrariesForSelfExtract} /p:DebugType=Embedded");
+            var exitcode = commandRunner.Execute("dotnet", $"publish \"{renamedProjectPath}\" -c Release -r {runtimeIdentifier} -o \"{context.WorkingDirectory}\" {publishSelfContainedArgument} {publishSingleFileArgument} {includeNativeLibrariesForSelfExtract} /p:DebugType=Embedded");
 
             if (exitcode != 0)
             {
