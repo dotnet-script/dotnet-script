@@ -17,7 +17,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../build/dotnet-script.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="**/*.template" />

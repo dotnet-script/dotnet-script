@@ -21,7 +21,7 @@
         <IsPackable>true</IsPackable>
         <LangVersion>latest</LangVersion>
         <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>../../build/dotnet-script.snk</AssemblyOriginatorKeyFile>
+        <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
