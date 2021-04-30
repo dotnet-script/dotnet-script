@@ -14,7 +14,7 @@
     <Version>1.1.0</Version>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\build\dotnet-script.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../build/dotnet-script.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
