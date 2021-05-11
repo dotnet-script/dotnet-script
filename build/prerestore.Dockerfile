@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1
+FROM mcr.microsoft.com/dotnet/sdk:5.0
 
 # https://www.nuget.org/packages/dotnet-script/
 RUN dotnet tool install dotnet-script --tool-path /usr/bin
@@ -8,8 +8,6 @@ RUN dotnet tool install dotnet-script --tool-path /usr/bin
 # 'dotnet restore' to be run.
 # This is necessary if you want to run this in a networkless
 # docker container.
-RUN echo "return;" > tmpscript.cs
-RUN dotnet script tmpscript.cs
-RUN rm tmpscript.cs
+RUN dotnet script eval "Console.WriteLine(\"☑️ Prepared env for offline usage\")"
 
 ENTRYPOINT [ "dotnet", "script" ]
