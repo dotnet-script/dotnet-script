@@ -12,7 +12,7 @@
                 "${file}"
             ],
             "cwd": "${workspaceRoot}",
-            "stopAtEntry": true
+            "stopAtEntry": false
         }
     ]
 }
