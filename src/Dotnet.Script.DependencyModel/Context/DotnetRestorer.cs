@@ -2,6 +2,7 @@
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
+using Gapotchenko.FX.Diagnostics;
 using System;
 using System.IO;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Dotnet.Script.DependencyModel.Context
             {
                 return packageSources.Length == 0
                     ? string.Empty
-                    : packageSources.Select(s => $"-s {s}")
+                    : packageSources.Select(s => $"-s {CommandLine.EscapeArgument(s)}")
                         .Aggregate((current, next) => $"{current} {next}");
             }
 
