@@ -34,30 +34,38 @@ namespace Dotnet.Script.Core
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
             var assembly = Assembly.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
 
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) => ResolveAssembly(args, runtimeDepsMap);
+            Assembly OnResolve(object sender, ResolveEventArgs args) => ResolveAssembly(args, runtimeDepsMap);
 
-            var type = assembly.GetType("Submission#0");
-            var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
-
-            var globals = new CommandLineScriptGlobals(ScriptConsole.Out, CSharpObjectFormatter.Instance);
-            foreach (var arg in commandLineArgs)
-                globals.Args.Add(arg);
-
-            var submissionStates = new object[2];
-            submissionStates[0] = globals;
-
-            var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
+            AppDomain.CurrentDomain.AssemblyResolve += OnResolve;
             try
             {
-                _ = await resultTask;
-            }
-            catch (System.Exception ex)
-            {
-                ScriptConsole.WriteError(ex.ToString());
-                throw new ScriptRuntimeException("Script execution resulted in an exception.", ex);
-            }
+                var type = assembly.GetType("Submission#0");
+                var method = type.GetMethod("<Factory>", BindingFlags.Static | BindingFlags.Public);
 
-            return await resultTask;
+                var globals = new CommandLineScriptGlobals(ScriptConsole.Out, CSharpObjectFormatter.Instance);
+                foreach (var arg in commandLineArgs)
+                    globals.Args.Add(arg);
+
+                var submissionStates = new object[2];
+                submissionStates[0] = globals;
+
+                var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
+                try
+                {
+                    _ = await resultTask;
+                }
+                catch (System.Exception ex)
+                {
+                    ScriptConsole.WriteError(ex.ToString());
+                    throw new ScriptRuntimeException("Script execution resulted in an exception.", ex);
+                }
+
+                return await resultTask;
+            }
+            finally
+            {
+                AppDomain.CurrentDomain.AssemblyResolve -= OnResolve;
+            }
         }
 
         public Task<TReturn> Execute<TReturn>(ScriptContext context)
