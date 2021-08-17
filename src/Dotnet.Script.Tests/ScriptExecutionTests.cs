@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
-using Gapotchenko.FX.Diagnostics;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -140,7 +139,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleIssue189()
         {
-            var result = ScriptTestRunner.Default.Execute(CommandLine.Build(Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx")));
+            var result = ScriptTestRunner.Default.Execute($"\"{Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx")}\"");
             Assert.Contains("Newtonsoft.Json.JsonConvert", result.output);
         }
 

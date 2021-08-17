@@ -1,8 +1,8 @@
 ﻿using Dotnet.Script.DependencyModel.Environment;
+using Dotnet.Script.DependencyModel.Internal;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
 using Dotnet.Script.DependencyModel.ProjectSystem;
-using Gapotchenko.FX.Diagnostics;
 using System;
 using System.IO;
 using System.Linq;
