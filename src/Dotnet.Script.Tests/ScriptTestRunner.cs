@@ -88,7 +88,7 @@ namespace Dotnet.Script.Tests
             configuration = "Release";
 #endif
 
-            var allArgs = $"exec {Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")} {arguments}";
+            var allArgs = $"exec \"{Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "Dotnet.Script", "bin", configuration, _scriptEnvironment.TargetFramework, "dotnet-script.dll")}\" {arguments}";
 
             return allArgs;
         }
