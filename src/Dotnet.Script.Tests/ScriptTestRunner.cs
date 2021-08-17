@@ -38,7 +38,7 @@ namespace Dotnet.Script.Tests
         public (string output, int exitCode) ExecuteFixture(string fixture, string arguments = null, string workingDirectory = null)
         {
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
-            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"{pathToFixture} {arguments}"), workingDirectory);
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"\"{pathToFixture}\" {arguments}"), workingDirectory);
             return result;
         }
 
@@ -46,7 +46,7 @@ namespace Dotnet.Script.Tests
         {
             var pathToScriptPackageFixtures = TestPathUtils.GetPathToTestFixtureFolder("ScriptPackage");
             var pathToFixture = Path.Combine(pathToScriptPackageFixtures, fixture, $"{fixture}.csx");
-            return ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"{pathToFixture} {arguments}"), workingDirectory);
+            return ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"\"{pathToFixture}\" {arguments}"), workingDirectory);
         }
 
         public int ExecuteFixtureInProcess(string fixture, string arguments = null)
