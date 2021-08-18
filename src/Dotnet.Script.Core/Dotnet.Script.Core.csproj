@@ -23,6 +23,7 @@
     <EmbeddedResource Include="**/*.template" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2021.2.6-beta" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="ReadLine" Version="2.0.1" />

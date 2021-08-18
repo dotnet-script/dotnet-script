@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
+using Gapotchenko.FX.Reflection;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
@@ -30,13 +31,15 @@ namespace Dotnet.Script.Core
 
         public async Task<TReturn> Execute<TReturn>(string dllPath, IEnumerable<string> commandLineArgs)
         {
+            var assemblyLoaderPal = AssemblyLoadPal.ForCurrentAppDomain;
+
             var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesForLibrary(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
-            var assembly = Assembly.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
+            var assembly = assemblyLoaderPal.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
 
-            Assembly OnResolve(object sender, ResolveEventArgs args) => ResolveAssembly(args, runtimeDepsMap);
+            Assembly OnResolve(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args) => ResolveAssembly(sender, args, runtimeDepsMap);
 
-            AppDomain.CurrentDomain.AssemblyResolve += OnResolve;
+            assemblyLoaderPal.Resolving += OnResolve;
             try
             {
                 var type = assembly.GetType("Submission#0");
@@ -64,7 +67,7 @@ namespace Dotnet.Script.Core
             }
             finally
             {
-                AppDomain.CurrentDomain.AssemblyResolve -= OnResolve;
+                assemblyLoaderPal.Resolving -= OnResolve;
             }
         }
 
@@ -97,12 +100,11 @@ namespace Dotnet.Script.Core
             return ProcessScriptState(scriptResult);
         }
 
-        internal Assembly ResolveAssembly(ResolveEventArgs args, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
+        internal Assembly ResolveAssembly(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
         {
-            var assemblyName = new AssemblyName(args.Name);
-            var result = runtimeDepsMap.TryGetValue(assemblyName.Name, out RuntimeAssembly runtimeAssembly);
+            var result = runtimeDepsMap.TryGetValue(args.Name.Name, out RuntimeAssembly runtimeAssembly);
             if (!result) return null;
-            var loadedAssembly = Assembly.LoadFrom(runtimeAssembly.Path);
+            var loadedAssembly = sender.LoadFrom(runtimeAssembly.Path);
             return loadedAssembly;
         }
 
