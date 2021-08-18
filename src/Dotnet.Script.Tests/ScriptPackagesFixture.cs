@@ -43,12 +43,12 @@ namespace Dotnet.Script.Tests
                 if (_scriptEnvironment.IsWindows)
                 {
                     command = pathtoNuget430;
-                    var result = ProcessHelper.RunAndCaptureOutput(command, $"pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}");
+                    var result = ProcessHelper.RunAndCaptureOutput(command, $"pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
                 }
                 else
                 {
                     command = "mono";
-                    var result = ProcessHelper.RunAndCaptureOutput(command, $"{pathtoNuget430} pack {specFile} -OutputDirectory {pathToPackagesOutputFolder}");
+                    var result = ProcessHelper.RunAndCaptureOutput(command, $"\"{pathtoNuget430}\" pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
                 }
 
             }
