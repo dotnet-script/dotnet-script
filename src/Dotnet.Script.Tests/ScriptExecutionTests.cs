@@ -139,7 +139,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleIssue189()
         {
-            var result = ScriptTestRunner.Default.Execute(Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx"));
+            var result = ScriptTestRunner.Default.Execute($"\"{Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx")}\"");
             Assert.Contains("Newtonsoft.Json.JsonConvert", result.output);
         }
 
