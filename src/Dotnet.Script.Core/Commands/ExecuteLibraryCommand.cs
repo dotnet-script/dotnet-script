@@ -26,7 +26,12 @@ namespace Dotnet.Script.Core.Commands
 
             var absoluteFilePath = options.LibraryPath.GetRootedPath();
             var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
-            var runner = new ScriptRunner(compiler, _logFactory, _scriptConsole);
+            var runner = new ScriptRunner(compiler, _logFactory, _scriptConsole)
+            {
+#if NETCOREAPP
+                AssemblyLoadContext = options.AssemblyLoadContext
+#endif
+            };
             var result = await runner.Execute<TReturn>(absoluteFilePath, options.Arguments);
             return result;
         }

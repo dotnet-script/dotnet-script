@@ -32,7 +32,14 @@ namespace Dotnet.Script.Core.Commands
             }
 
             var pathToLibrary = GetLibrary(options);
-            return await ExecuteLibrary<TReturn>(pathToLibrary, options.Arguments, options.NoCache);
+
+            var libraryOptions = new ExecuteLibraryCommandOptions(pathToLibrary, options.Arguments, options.NoCache)
+            {
+#if NETCOREAPP
+                AssemblyLoadContext = options.AssemblyLoadContext
+#endif
+            };
+            return await new ExecuteLibraryCommand(_scriptConsole, _logFactory).Execute<TReturn>(libraryOptions);
         }
 
         private async Task<TReturn> DownloadAndRunCode<TReturn>(ExecuteScriptCommandOptions executeOptions)
@@ -123,12 +130,6 @@ namespace Dotnet.Script.Core.Commands
 
             hash = File.ReadAllText(pathToHashFile);
             return true;
-        }
-
-        private async Task<TReturn> ExecuteLibrary<TReturn>(string pathToLibrary, string[] arguments, bool noCache)
-        {
-            var options = new ExecuteLibraryCommandOptions(pathToLibrary, arguments, noCache);
-            return await new ExecuteLibraryCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
     }
 }
