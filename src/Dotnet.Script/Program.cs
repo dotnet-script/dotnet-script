@@ -245,7 +245,10 @@ namespace Dotnet.Script
                         packageSources.Values?.ToArray(),
                         interactive.HasValue(),
                         nocache.HasValue()
-                    );
+                    )
+                    {
+                        AssemblyLoadContext = new IsolatedAssemblyLoadContext()
+                    };
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
                     return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
