@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+#if NETCOREAPP
+using System.Runtime.Loader;
+#endif
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
@@ -29,9 +32,23 @@ namespace Dotnet.Script.Core
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
+#if NETCOREAPP
+#nullable enable
+        /// <summary>
+        /// Gets or sets a custom assembly load context to use for script execution.
+        /// </summary>
+        public AssemblyLoadContext? AssemblyLoadContext { get; init; }
+#nullable restore
+#endif
+
         public async Task<TReturn> Execute<TReturn>(string dllPath, IEnumerable<string> commandLineArgs)
         {
-            var assemblyLoaderPal = AssemblyLoadPal.ForCurrentAppDomain;
+#if NETCOREAPP
+            var assemblyLoadContext = AssemblyLoadContext;
+            var assemblyLoaderPal = assemblyLoadContext != null ? new AssemblyLoadPal(assemblyLoadContext) : AssemblyLoadPal.ForCurrentAppDomain;
+#else
+            var assemblyLoaderPal = AssemblyLoadPal.ForCurrentAppDomain;            
+#endif
 
             var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesForLibrary(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
