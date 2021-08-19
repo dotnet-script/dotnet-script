@@ -45,18 +45,18 @@ namespace Dotnet.Script.Core
         {
 #if NETCOREAPP
             var assemblyLoadContext = AssemblyLoadContext;
-            var assemblyLoaderPal = assemblyLoadContext != null ? new AssemblyLoadPal(assemblyLoadContext) : AssemblyLoadPal.ForCurrentAppDomain;
+            var assemblyLoadPal = assemblyLoadContext != null ? new AssemblyLoadPal(assemblyLoadContext) : AssemblyLoadPal.ForCurrentAppDomain;
 #else
-            var assemblyLoaderPal = AssemblyLoadPal.ForCurrentAppDomain;            
+            var assemblyLoadPal = AssemblyLoadPal.ForCurrentAppDomain;            
 #endif
 
             var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesForLibrary(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
-            var assembly = assemblyLoaderPal.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
+            var assembly = assemblyLoadPal.LoadFrom(dllPath); // this needs to be called prior to 'AssemblyLoadPal.Resolving' event handler added
 
             Assembly OnResolve(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args) => ResolveAssembly(sender, args, runtimeDepsMap);
 
-            assemblyLoaderPal.Resolving += OnResolve;
+            assemblyLoadPal.Resolving += OnResolve;
             try
             {
                 var type = assembly.GetType("Submission#0");
@@ -84,7 +84,7 @@ namespace Dotnet.Script.Core
             }
             finally
             {
-                assemblyLoaderPal.Resolving -= OnResolve;
+                assemblyLoadPal.Resolving -= OnResolve;
             }
         }
 
@@ -117,11 +117,11 @@ namespace Dotnet.Script.Core
             return ProcessScriptState(scriptResult);
         }
 
-        internal Assembly ResolveAssembly(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
+        internal Assembly ResolveAssembly(AssemblyLoadPal pal, AssemblyLoadPal.ResolvingEventArgs args, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
         {
             var result = runtimeDepsMap.TryGetValue(args.Name.Name, out RuntimeAssembly runtimeAssembly);
             if (!result) return null;
-            var loadedAssembly = sender.LoadFrom(runtimeAssembly.Path);
+            var loadedAssembly = pal.LoadFrom(runtimeAssembly.Path);
             return loadedAssembly;
         }
 
