@@ -55,12 +55,12 @@ namespace Dotnet.Script.Core
             var assembly = assemblyLoadPal.LoadFrom(dllPath); // this needs to be called prior to 'AssemblyLoadPal.Resolving' event handler added
 
 #if NETCOREAPP
-            using var assemblyAutoLoader = new AssemblyAutoLoader(assemblyLoadContext);
-            assemblyAutoLoader.AddAssembly(assembly);
+            using var assemblyAutoLoader = assemblyLoadContext != null ? new AssemblyAutoLoader(assemblyLoadContext) : null;
+            assemblyAutoLoader?.AddAssembly(assembly);
 #endif
 
 #if NETCOREAPP3_0_OR_GREATER
-            using var contextualReflectionScope = assemblyLoadContext.EnterContextualReflection();
+            using var contextualReflectionScope = assemblyLoadContext != null ? assemblyLoadContext.EnterContextualReflection() : default;
 #endif
 
             Assembly OnResolve(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args) => ResolveAssembly(sender, args, runtimeDepsMap);
