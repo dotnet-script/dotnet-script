@@ -14,6 +14,36 @@ namespace Dotnet.Script.Core
     public class ScriptAssemblyLoadContext : AssemblyLoadContext
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptAssemblyLoadContext"/> class.
+        /// </summary>
+        public ScriptAssemblyLoadContext()
+        {
+        }
+
+#if NETCOREAPP3_0_OR_GREATER
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptAssemblyLoadContext"/> class
+        /// with a name and a value that indicates whether unloading is enabled.
+        /// </summary>
+        /// <param name="name"><inheritdoc/></param>
+        /// <param name="isCollectible"><inheritdoc/></param>
+        public ScriptAssemblyLoadContext(string? name, bool isCollectible = false) :
+            base(name, isCollectible)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptAssemblyLoadContext"/> class
+        /// with a value that indicates whether unloading is enabled.
+        /// </summary>
+        /// <param name="isCollectible"><inheritdoc/></param>
+        protected ScriptAssemblyLoadContext(bool isCollectible) :
+            base(isCollectible)
+        {
+        }
+#endif
+
+        /// <summary>
         /// <para>
         /// Gets the value indicating whether a specified assembly is homogeneous.
         /// </para>
