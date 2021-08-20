@@ -472,6 +472,12 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello world!", result.output);
         }
 
+        [Fact]
+        public void ShouldIsolateScriptAssemblies()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("Isolation");
+            Assert.Contains("10.0.0.0", result.output);
+        }
 
         private static string CreateTestScript(string scriptFolder)
         {
