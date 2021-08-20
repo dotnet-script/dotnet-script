@@ -11,6 +11,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using System.Threading.Tasks;
 
 namespace Dotnet.Script
@@ -247,7 +248,7 @@ namespace Dotnet.Script
                         nocache.HasValue()
                     )
                     {
-                        AssemblyLoadContext = new ScriptAssemblyLoadContext()
+                        AssemblyLoadContext = CreateAssemblyLoadContext()
                     };
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
@@ -265,16 +266,24 @@ namespace Dotnet.Script
 
         private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources)
         {
-            var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources);
+            var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources)
+            {
+                AssemblyLoadContext = CreateAssemblyLoadContext()
+            };
             await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
             return 0;
         }
 
         private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources)
         {
-            var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources);
+            var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources)
+            {
+                AssemblyLoadContext = CreateAssemblyLoadContext()
+            };
             await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
             return 0;
         }
+
+        static AssemblyLoadContext CreateAssemblyLoadContext() => new ScriptAssemblyLoadContext();
     }
 }
