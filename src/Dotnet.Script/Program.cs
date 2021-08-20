@@ -247,7 +247,7 @@ namespace Dotnet.Script
                         nocache.HasValue()
                     )
                     {
-                        AssemblyLoadContext = new IsolatedAssemblyLoadContext()
+                        AssemblyLoadContext = new ScriptAssemblyLoadContext()
                     };
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
