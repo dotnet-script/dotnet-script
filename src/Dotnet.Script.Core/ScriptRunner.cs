@@ -57,15 +57,43 @@ namespace Dotnet.Script.Core
 #if NETCOREAPP
             using var assemblyAutoLoader = assemblyLoadContext != null ? new AssemblyAutoLoader(assemblyLoadContext) : null;
             assemblyAutoLoader?.AddAssembly(assembly);
+
+            Assembly OnLoading(ScriptAssemblyLoadContext sender, ScriptAssemblyLoadContext.LoadingEventArgs args)
+            {
+                var assemblyName = args.Name;
+
+                if (sender.IsHomogeneousAssembly(assemblyName))
+                {
+                    // The default assembly loader will take care of it.
+                    return null;
+                }
+
+                return ResolveAssembly(assemblyLoadPal, assemblyName, runtimeDepsMap);
+            }
+
+            IntPtr OnLoadingUnmanagedDll(ScriptAssemblyLoadContext sender, ScriptAssemblyLoadContext.LoadingUnmanagedDllEventArgs args)
+            {
+                string dllPath = assemblyAutoLoader.ResolveUnmanagedDllPath(args.UnmanagedDllName);
+                if (dllPath == null)
+                    return IntPtr.Zero;
+                return args.LoadUnmanagedDllFromPath(dllPath);
+            }
+
+            var scriptAssemblyLoadContext = assemblyLoadContext as ScriptAssemblyLoadContext;
+            if (scriptAssemblyLoadContext != null)
+            {
+                scriptAssemblyLoadContext.Loading += OnLoading;
+                scriptAssemblyLoadContext.LoadingUnmanagedDll += OnLoadingUnmanagedDll;
+            }
 #endif
 
 #if NETCOREAPP3_0_OR_GREATER
             using var contextualReflectionScope = assemblyLoadContext != null ? assemblyLoadContext.EnterContextualReflection() : default;
 #endif
 
-            Assembly OnResolve(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args) => ResolveAssembly(sender, args, runtimeDepsMap);
+            Assembly OnResolving(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args) => ResolveAssembly(sender, args.Name, runtimeDepsMap);
 
-            assemblyLoadPal.Resolving += OnResolve;
+            assemblyLoadPal.Resolving += OnResolving;
             try
             {
                 var type = assembly.GetType("Submission#0");
@@ -78,22 +106,27 @@ namespace Dotnet.Script.Core
                 var submissionStates = new object[2];
                 submissionStates[0] = globals;
 
-                var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
                 try
                 {
-                    _ = await resultTask;
+                    var resultTask = (Task<TReturn>)method.Invoke(null, new[] { submissionStates });
+                    return await resultTask;
                 }
                 catch (System.Exception ex)
                 {
                     ScriptConsole.WriteError(ex.ToString());
                     throw new ScriptRuntimeException("Script execution resulted in an exception.", ex);
                 }
-
-                return await resultTask;
             }
             finally
             {
-                assemblyLoadPal.Resolving -= OnResolve;
+                assemblyLoadPal.Resolving -= OnResolving;
+#if NETCOREAPP
+                if (scriptAssemblyLoadContext != null)
+                {
+                    scriptAssemblyLoadContext.LoadingUnmanagedDll -= OnLoadingUnmanagedDll;
+                    scriptAssemblyLoadContext.Loading -= OnLoading;
+                }
+#endif
             }
         }
 
@@ -126,9 +159,9 @@ namespace Dotnet.Script.Core
             return ProcessScriptState(scriptResult);
         }
 
-        internal Assembly ResolveAssembly(AssemblyLoadPal pal, AssemblyLoadPal.ResolvingEventArgs args, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
+        internal Assembly ResolveAssembly(AssemblyLoadPal pal, AssemblyName assemblyName, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
         {
-            var result = runtimeDepsMap.TryGetValue(args.Name.Name, out RuntimeAssembly runtimeAssembly);
+            var result = runtimeDepsMap.TryGetValue(assemblyName.Name, out RuntimeAssembly runtimeAssembly);
             if (!result) return null;
             var loadedAssembly = pal.LoadFrom(runtimeAssembly.Path);
             return loadedAssembly;

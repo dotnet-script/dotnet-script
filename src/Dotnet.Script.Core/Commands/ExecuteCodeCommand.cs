@@ -22,7 +22,12 @@ namespace Dotnet.Script.Core.Commands
         {
             var sourceText = SourceText.From(options.Code);
             var context = new ScriptContext(sourceText, options.WorkingDirectory ?? Directory.GetCurrentDirectory(), options.Arguments, null, options.OptimizationLevel, ScriptMode.Eval, options.PackageSources);
-            var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
+            var compiler = new ScriptCompiler(_logFactory, !options.NoCache)
+            {
+#if NETCOREAPP
+                AssemblyLoadContext = options.AssemblyLoadContext
+#endif
+            };
             var runner = new ScriptRunner(compiler, _logFactory, _scriptConsole)
             {
 #if NETCOREAPP
@@ -30,12 +35,6 @@ namespace Dotnet.Script.Core.Commands
 #endif
             };
             return await runner.Execute<TReturn>(context);
-        }
-
-        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
-        {
-            var compiler = new ScriptCompiler(logFactory, useRestoreCache);
-            return compiler;
         }
     }
 }

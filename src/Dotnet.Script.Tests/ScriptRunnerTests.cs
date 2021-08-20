@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Runtime;
 using Dotnet.Script.Shared.Tests;
@@ -16,7 +17,7 @@ namespace Dotnet.Script.Tests
         {
             var scriptRunner = CreateScriptRunner();
 
-            var result = scriptRunner.ResolveAssembly(AssemblyLoadPal.ForCurrentAppDomain, new AssemblyLoadPal.ResolvingEventArgs(null, "AnyAssemblyName"), new Dictionary<string, RuntimeAssembly>());
+            var result = scriptRunner.ResolveAssembly(AssemblyLoadPal.ForCurrentAppDomain, new AssemblyName("AnyAssemblyName"), new Dictionary<string, RuntimeAssembly>());
 
             Assert.Null(result);
         }

@@ -25,7 +25,12 @@ namespace Dotnet.Script.Core.Commands
             }
 
             var absoluteFilePath = options.LibraryPath.GetRootedPath();
-            var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
+            var compiler = new ScriptCompiler(_logFactory, !options.NoCache)
+            {
+#if NETCOREAPP
+                AssemblyLoadContext = options.AssemblyLoadContext
+#endif
+            };
             var runner = new ScriptRunner(compiler, _logFactory, _scriptConsole)
             {
 #if NETCOREAPP
@@ -34,12 +39,6 @@ namespace Dotnet.Script.Core.Commands
             };
             var result = await runner.Execute<TReturn>(absoluteFilePath, options.Arguments);
             return result;
-        }
-
-        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
-        {
-            var compiler = new ScriptCompiler(logFactory, useRestoreCache);
-            return compiler;
         }
     }
 }

@@ -64,7 +64,12 @@ namespace Dotnet.Script.Core.Commands
                 return pathToLibrary;
             }
 
-            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
+            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache)
+            {
+#if NETCOREAPP
+                AssemblyLoadContext = executeOptions.AssemblyLoadContext
+#endif
+            };
             new PublishCommand(_scriptConsole, _logFactory).Execute(options);
             if (hash != null)
             {
