@@ -25,17 +25,16 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Gapotchenko.FX" Version="2021.1.5" />
-    <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2021.2.8-beta" />
+    <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2021.2.10-beta" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <!-- The following references are just quick fixes for issue #166 and issue #268
+    <!-- The following references are just quick fixes for issue #166
     We need to figure out why we can't load these via the dependency context.
      -->
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
     <PackageReference Include="StrongNamer" Version="0.2.5" PrivateAssets="all" />
   </ItemGroup>
