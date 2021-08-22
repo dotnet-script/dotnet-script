@@ -53,13 +53,13 @@ namespace Dotnet.Script.Core
         /// </summary>
         /// <param name="assemblyName">The assembly name.</param>
         /// <returns><c>true</c> if the specified assembly is homogeneous; otherwise, <c>false</c>.</returns>
-        protected internal virtual bool IsHomogeneousAssembly(AssemblyName assemblyName) =>
-            assemblyName.Name switch
-            {
-                "mscorlib" or
-                "Microsoft.CodeAnalysis.Scripting" => true,
-                _ => false
-            };
+        protected internal virtual bool IsHomogeneousAssembly(AssemblyName assemblyName)
+        {
+            var name = assemblyName.Name;
+            return
+                string.Equals(name, "mscorlib", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(name, "Microsoft.CodeAnalysis.Scripting", StringComparison.OrdinalIgnoreCase);
+        }
 
         /// <inheritdoc/>
         protected override Assembly? Load(AssemblyName assemblyName) => InvokeLoading(assemblyName);
@@ -70,7 +70,7 @@ namespace Dotnet.Script.Core
         /// <summary>
         /// Provides data for the <see cref="Loading"/> event.
         /// </summary>
-        public sealed class LoadingEventArgs : EventArgs
+        internal sealed class LoadingEventArgs : EventArgs
         {
             public LoadingEventArgs(AssemblyName assemblyName)
             {
