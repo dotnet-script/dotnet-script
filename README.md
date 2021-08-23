@@ -20,11 +20,11 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ### Prerequisites
 
-The only thing we need to install is [.NET Core 2.1+ SDK](https://www.microsoft.com/net/download/core). In order to use C# 8.0 features, [.NET Core 3.1+ SDK](https://www.microsoft.com/net/download/core) must be installed.
+The only thing we need to install is [.NET Core 3.1 or .NET 5.0 SDK](https://www.microsoft.com/net/download/core).
 
 ### .NET Core Global Tool
 
-.NET Core 2.1 introduces the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
+.NET Core 2.1 introduced the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
 
 ```shell
 dotnet tool install -g dotnet-script
@@ -34,9 +34,6 @@ Tool 'dotnet-script' (version '0.22.0') was successfully installed.
 ```
 
 The advantage of this approach is that you can use the same command for installation across all platforms.
-
-> ⚠️ In order to use the global tool you need [.NET Core SDK 2.1.300](https://www.microsoft.com/net/download/dotnet-core/sdk-2.1.300) or higher. The earlier previews and release candidates of .NET Core 2.1 are not supported.
-
 .NET Core SDK also supports viewing a list of installed tools and their uninstallation.
 
 ```shell
