@@ -35,7 +35,7 @@ await StepRunner.Execute(Args);
 
 private void CreateGitHubReleaseAsset()
 {
-    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "netcoreapp2.1");
+    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "netcoreapp3.1");
     Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
 }
 
