@@ -10,8 +10,8 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 | Name                                  | Version                                                      | Framework(s)                     |
 | ------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
-| `dotnet-script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/) | `netcoreapp2.1`, `netcoreapp3.1` |
-| `Dotnet.Script`                       | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/) | `netcoreapp2.1`, `netcoreapp3.1` |
+| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/) | `net5.0`, `netcoreapp3.1` |
+| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/) | `net5.0`, `netcoreapp3.1` |
 | `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/) | `netstandard2.0`                 |
 | `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/) | `netstandard2.0`                 |
 | `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0`                 |
@@ -316,7 +316,7 @@ To consume a script package all we need to do specify the NuGet package in the `
 The following example loads the [simple-targets](https://www.nuget.org/packages/simple-targets-csx) package that contains script files to be included in our script.
 
 ```C#
-#! "netcoreapp2.1"
+#! "netcoreapp3.1"
 #load "nuget:simple-targets-csx, 6.0.0"
 
 using static SimpleTargets;
@@ -466,7 +466,7 @@ The following example shows how we can pipe data in and out of a script.
 The `UpperCase.csx` script simply converts the standard input to upper case and writes it back out to standard output.
 
 ```csharp
-#! "netcoreapp2.1"
+#! "netcoreapp3.1"
 using (var streamReader = new StreamReader(Console.OpenStandardInput()))
 {
     Write(streamReader.ReadToEnd().ToUpper());
