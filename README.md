@@ -313,7 +313,6 @@ To consume a script package all we need to do specify the NuGet package in the `
 The following example loads the [simple-targets](https://www.nuget.org/packages/simple-targets-csx) package that contains script files to be included in our script.
 
 ```C#
-#! "netcoreapp3.1"
 #load "nuget:simple-targets-csx, 6.0.0"
 
 using static SimpleTargets;
@@ -463,7 +462,6 @@ The following example shows how we can pipe data in and out of a script.
 The `UpperCase.csx` script simply converts the standard input to upper case and writes it back out to standard output.
 
 ```csharp
-#! "netcoreapp3.1"
 using (var streamReader = new StreamReader(Console.OpenStandardInput()))
 {
     Write(streamReader.ReadToEnd().ToUpper());
