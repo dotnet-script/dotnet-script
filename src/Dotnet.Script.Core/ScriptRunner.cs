@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+#if NETCOREAPP
+using System.Runtime.Loader;
+#endif
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Runtime;
+using Gapotchenko.FX.Reflection;
 using Microsoft.CodeAnalysis.CSharp.Scripting.Hosting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.Hosting;
@@ -28,15 +32,68 @@ namespace Dotnet.Script.Core
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
+#if NETCOREAPP
+#nullable enable
+        /// <summary>
+        /// Gets or sets a custom assembly load context to use for script execution.
+        /// </summary>
+        public AssemblyLoadContext? AssemblyLoadContext { get; init; }
+#nullable restore
+#endif
+
         public async Task<TReturn> Execute<TReturn>(string dllPath, IEnumerable<string> commandLineArgs)
         {
+#if NETCOREAPP
+            var assemblyLoadContext = AssemblyLoadContext;
+            var assemblyLoadPal = assemblyLoadContext != null ? new AssemblyLoadPal(assemblyLoadContext) : AssemblyLoadPal.ForCurrentAppDomain;
+#else
+            var assemblyLoadPal = AssemblyLoadPal.ForCurrentAppDomain;            
+#endif
+
             var runtimeDeps = ScriptCompiler.RuntimeDependencyResolver.GetDependenciesForLibrary(dllPath);
             var runtimeDepsMap = ScriptCompiler.CreateScriptDependenciesMap(runtimeDeps);
-            var assembly = Assembly.LoadFrom(dllPath); // this needs to be called prior to 'AppDomain.CurrentDomain.AssemblyResolve' event handler added
+            var assembly = assemblyLoadPal.LoadFrom(dllPath); // this needs to be called prior to 'AssemblyLoadPal.Resolving' event handler added
 
-            Assembly OnResolve(object sender, ResolveEventArgs args) => ResolveAssembly(args, runtimeDepsMap);
+#if NETCOREAPP
+            using var assemblyAutoLoader = assemblyLoadContext != null ? new AssemblyAutoLoader(assemblyLoadContext) : null;
+            assemblyAutoLoader?.AddAssembly(assembly);
 
-            AppDomain.CurrentDomain.AssemblyResolve += OnResolve;
+            Assembly OnLoading(ScriptAssemblyLoadContext sender, ScriptAssemblyLoadContext.LoadingEventArgs args)
+            {
+                var assemblyName = args.Name;
+
+                if (sender.IsHomogeneousAssembly(assemblyName))
+                {
+                    // The default assembly loader will take care of it.
+                    return null;
+                }
+
+                return ResolveAssembly(assemblyLoadPal, assemblyName, runtimeDepsMap);
+            }
+
+            IntPtr OnLoadingUnmanagedDll(ScriptAssemblyLoadContext sender, ScriptAssemblyLoadContext.LoadingUnmanagedDllEventArgs args)
+            {
+                string dllPath = assemblyAutoLoader.ResolveUnmanagedDllPath(args.UnmanagedDllName);
+                if (dllPath == null)
+                    return IntPtr.Zero;
+                return args.LoadUnmanagedDllFromPath(dllPath);
+            }
+
+            var scriptAssemblyLoadContext = assemblyLoadContext as ScriptAssemblyLoadContext;
+            if (scriptAssemblyLoadContext != null)
+            {
+                scriptAssemblyLoadContext.Loading += OnLoading;
+                scriptAssemblyLoadContext.LoadingUnmanagedDll += OnLoadingUnmanagedDll;
+            }
+#endif
+
+#if NETCOREAPP3_0_OR_GREATER
+            using var contextualReflectionScope = assemblyLoadContext != null ? assemblyLoadContext.EnterContextualReflection() : default;
+#endif
+
+            Assembly OnResolving(AssemblyLoadPal sender, AssemblyLoadPal.ResolvingEventArgs args) => ResolveAssembly(sender, args.Name, runtimeDepsMap);
+
+            assemblyLoadPal.Resolving += OnResolving;
             try
             {
                 var type = assembly.GetType("Submission#0");
@@ -49,22 +106,27 @@ namespace Dotnet.Script.Core
                 var submissionStates = new object[2];
                 submissionStates[0] = globals;
 
-                var resultTask = method.Invoke(null, new[] { submissionStates }) as Task<TReturn>;
                 try
                 {
-                    _ = await resultTask;
+                    var resultTask = (Task<TReturn>)method.Invoke(null, new[] { submissionStates });
+                    return await resultTask;
                 }
                 catch (System.Exception ex)
                 {
                     ScriptConsole.WriteError(ex.ToString());
                     throw new ScriptRuntimeException("Script execution resulted in an exception.", ex);
                 }
-
-                return await resultTask;
             }
             finally
             {
-                AppDomain.CurrentDomain.AssemblyResolve -= OnResolve;
+                assemblyLoadPal.Resolving -= OnResolving;
+#if NETCOREAPP
+                if (scriptAssemblyLoadContext != null)
+                {
+                    scriptAssemblyLoadContext.LoadingUnmanagedDll -= OnLoadingUnmanagedDll;
+                    scriptAssemblyLoadContext.Loading -= OnLoading;
+                }
+#endif
             }
         }
 
@@ -97,12 +159,11 @@ namespace Dotnet.Script.Core
             return ProcessScriptState(scriptResult);
         }
 
-        internal Assembly ResolveAssembly(ResolveEventArgs args, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
+        internal Assembly ResolveAssembly(AssemblyLoadPal pal, AssemblyName assemblyName, Dictionary<string, RuntimeAssembly> runtimeDepsMap)
         {
-            var assemblyName = new AssemblyName(args.Name);
             var result = runtimeDepsMap.TryGetValue(assemblyName.Name, out RuntimeAssembly runtimeAssembly);
             if (!result) return null;
-            var loadedAssembly = Assembly.LoadFrom(runtimeAssembly.Path);
+            var loadedAssembly = pal.LoadFrom(runtimeAssembly.Path);
             return loadedAssembly;
         }
 

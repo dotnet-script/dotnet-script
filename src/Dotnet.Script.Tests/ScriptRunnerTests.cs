@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Dotnet.Script.Core;
 using Dotnet.Script.DependencyModel.Runtime;
 using Dotnet.Script.Shared.Tests;
+using Gapotchenko.FX.Reflection;
 using Moq;
 using Xunit;
 
@@ -15,7 +17,7 @@ namespace Dotnet.Script.Tests
         {
             var scriptRunner = CreateScriptRunner();
 
-            var result = scriptRunner.ResolveAssembly(new ResolveEventArgs("AnyAssemblyName"), new Dictionary<string, RuntimeAssembly>());
+            var result = scriptRunner.ResolveAssembly(AssemblyLoadPal.ForCurrentAppDomain, new AssemblyName("AnyAssemblyName"), new Dictionary<string, RuntimeAssembly>());
 
             Assert.Null(result);
         }
