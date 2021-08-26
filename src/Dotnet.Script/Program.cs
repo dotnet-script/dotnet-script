@@ -67,10 +67,11 @@ namespace Dotnet.Script
             var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
             var nocache = app.Option("--no-cache", "Disable caching (Restore and Dll cache)", CommandOptionType.NoValue);
+            var isolatedLoadContext = app.Option("--isolated-load-context", "Use isolated assembly load context", CommandOptionType.NoValue);
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
-            var argsAfterDoubleHyphen  = args.SkipWhile(a => a != "--").Skip(1).ToArray();
+            var argsAfterDoubleHyphen = args.SkipWhile(a => a != "--").Skip(1).ToArray();
 
             const string helpOptionTemplate = "-? | -h | --help";
             app.HelpOption(helpOptionTemplate);
@@ -99,7 +100,7 @@ namespace Dotnet.Script
                     }
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(),packageSources.Values?.ToArray());
+                    var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(), packageSources.Values?.ToArray());
                     return await new ExecuteCodeCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
@@ -231,11 +232,15 @@ namespace Dotnet.Script
                     return 0;
                 }
 
+                AssemblyLoadContext assemblyLoadContext = null;
+                if (isolatedLoadContext.HasValue())
+                    assemblyLoadContext = new ScriptAssemblyLoadContext();
+
                 if (scriptFile.HasValue)
                 {
                     if (interactive.HasValue())
                     {
-                        return await RunInteractiveWithSeed(file.Value, logFactory, scriptArguments, packageSources.Values?.ToArray());
+                        return await RunInteractiveWithSeed(file.Value, logFactory, scriptArguments, packageSources.Values?.ToArray(), assemblyLoadContext);
                     }
 
                     var fileCommandOptions = new ExecuteScriptCommandOptions
@@ -248,15 +253,15 @@ namespace Dotnet.Script
                         nocache.HasValue()
                     )
                     {
-                        AssemblyLoadContext = CreateAssemblyLoadContext()
+                        AssemblyLoadContext = assemblyLoadContext
                     };
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
                     return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
-            }
+                }
                 else
                 {
-                    await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray());
+                    await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray(), assemblyLoadContext);
                 }
                 return exitCode;
             });
@@ -264,26 +269,24 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);
         }
 
-        private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources)
+        private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources, AssemblyLoadContext assemblyLoadContext)
         {
             var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources)
             {
-                AssemblyLoadContext = CreateAssemblyLoadContext()
+                AssemblyLoadContext = assemblyLoadContext
             };
             await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
             return 0;
         }
 
-        private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources)
+        private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources, AssemblyLoadContext assemblyLoadContext)
         {
             var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources)
             {
-                AssemblyLoadContext = CreateAssemblyLoadContext()
+                AssemblyLoadContext = assemblyLoadContext
             };
             await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
             return 0;
         }
-
-        static AssemblyLoadContext CreateAssemblyLoadContext() => new ScriptAssemblyLoadContext();
     }
 }
