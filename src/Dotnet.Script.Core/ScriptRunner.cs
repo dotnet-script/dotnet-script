@@ -85,9 +85,7 @@ namespace Dotnet.Script.Core
                 scriptAssemblyLoadContext.Loading += OnLoading;
                 scriptAssemblyLoadContext.LoadingUnmanagedDll += OnLoadingUnmanagedDll;
             }
-#endif
 
-#if NETCOREAPP3_0_OR_GREATER
             using var contextualReflectionScope = assemblyLoadContext != null ? assemblyLoadContext.EnterContextualReflection() : default;
 #endif
 
