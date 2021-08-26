@@ -1,0 +1,9 @@
+{
+    "fileOptions": {
+        "systemExcludeSearchPatterns": [
+            "**/TestFixtures/**/*",
+            "**/ScriptPackages/**/*"
+        ],
+        "excludeSearchPatterns": []
+    }
+}

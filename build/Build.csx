@@ -24,7 +24,7 @@ Step pack = () =>
 [DefaultStep]
 AsyncStep release = async () =>
 {
-    test();
+    //test();
     pack();
     await PublishRelease();
 };
