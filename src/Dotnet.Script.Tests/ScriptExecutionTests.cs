@@ -479,6 +479,13 @@ namespace Dotnet.Script.Tests
             Assert.Contains("10.0.0.0", result.output);
         }
 
+        [Fact]
+        public void ShouldSetCurrentContextualReflectionContext()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("CurrentContextualReflectionContext", "--isolated-load-context");
+            Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", result.output);
+        }
+
         private static string CreateTestScript(string scriptFolder)
         {
             string script = @"
