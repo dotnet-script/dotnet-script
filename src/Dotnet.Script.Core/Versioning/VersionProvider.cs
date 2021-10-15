@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Logging;
-using Newtonsoft.Json.Linq;
 
 namespace Dotnet.Script.Core.Versioning
 {
@@ -34,8 +34,8 @@ namespace Dotnet.Script.Core.Versioning
 
             VersionInfo ParseTagName(string json)
             {
-                JObject jsonResult = JObject.Parse(json);
-                return new VersionInfo(jsonResult.SelectToken("tag_name").Value<string>(), isResolved:true);
+                JsonDocument jsonResult = JsonDocument.Parse(json);
+                return new VersionInfo(jsonResult.RootElement.GetProperty("tag_name").GetString(), isResolved:true);
             }
         }
 

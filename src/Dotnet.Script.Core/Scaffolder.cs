@@ -2,12 +2,12 @@
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.Core
@@ -119,9 +119,39 @@ namespace Dotnet.Script.Core
             if (!File.Exists(pathToOmniSharpJson))
             {
                 var omniSharpFileTemplate = TemplateLoader.ReadTemplate("omnisharp.json.template");
-                JObject settings = JObject.Parse(omniSharpFileTemplate);
-                settings["script"]["defaultTargetFramework"] = _scriptEnvironment.TargetFramework;
-                File.WriteAllText(pathToOmniSharpJson, settings.ToString());
+                using var jsonStream = new MemoryStream();
+                using var jsonWriter = new Utf8JsonWriter(jsonStream, new JsonWriterOptions { Indented = true });
+                using var jsonDocument = JsonDocument.Parse(omniSharpFileTemplate);
+                jsonWriter.WriteStartObject();
+                foreach (var element in jsonDocument.RootElement.EnumerateObject())
+                {
+                   if (element.Name == "script")
+                   {
+                      jsonWriter.WritePropertyName(element.Name);
+                      jsonWriter.WriteStartObject();
+                      foreach (var childElement in element.Value.EnumerateObject())
+                      {
+                         if (childElement.Name == "defaultTargetFramework")
+						       {
+                            jsonWriter.WritePropertyName(childElement.Name);
+                            jsonWriter.WriteStringValue(_scriptEnvironment.TargetFramework);
+                         }
+                         else
+						       {
+                            childElement.WriteTo(jsonWriter);
+                         }
+                      }
+                      jsonWriter.WriteEndObject();
+                   }
+                   else
+                   {
+                      element.WriteTo(jsonWriter);
+                   }
+                }
+                jsonWriter.WriteEndObject();
+                jsonWriter.Flush();
+                var resultJson = Encoding.UTF8.GetString(jsonStream.ToArray());
+                File.WriteAllText(pathToOmniSharpJson, resultJson);
                 _scriptConsole.WriteSuccess($"...'{pathToOmniSharpJson}' [Created]");
             }
             else
