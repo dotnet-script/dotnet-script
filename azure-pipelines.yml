@@ -30,7 +30,7 @@ jobs:
 
       - bash: |
           export PATH=/home/vsts/.dotnet:$PATH
-          curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
+          curl -L https://github.com/filipw/dotnet-script/releases/download/1.2.1/dotnet-script.1.2.1.zip > dotnet-script.zip
           unzip -o dotnet-script.zip -d ./
         displayName: "Install dotnet-script"
 
@@ -58,7 +58,7 @@ jobs:
         displayName: "Install 6.0.100"
 
       - bash: |
-          curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
+          curl -L https://github.com/filipw/dotnet-script/releases/download/1.2.1/dotnet-script.1.2.1.zip > dotnet-script.zip
           unzip -o dotnet-script.zip -d ./
         displayName: "Install dotnet-script"
 
@@ -105,7 +105,7 @@ jobs:
       - bash: |
           export PATH=/c/Users/VssAdministrator/AppData/Local/Microsoft/dotnet:$PATH
           cd build
-          curl -L https://github.com/filipw/dotnet-script/releases/download/0.28.0/dotnet-script.0.28.0.zip > dotnet-script.zip
+          curl -L https://github.com/filipw/dotnet-script/releases/download/1.2.1/dotnet-script.1.2.1.zip > dotnet-script.zip
           unzip -o dotnet-script.zip -d ./
         displayName: "Install dotnet-script"
 
