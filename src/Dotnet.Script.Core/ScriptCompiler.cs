@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+#if NETCOREAPP
+using System.Runtime.Loader;
+#endif
 using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Script.Core.Internal;
@@ -77,6 +80,15 @@ namespace Dotnet.Script.Core
                 SpecificDiagnosticOptions.Add($"CS{i}", ReportDiagnostic.Error);
             }
         }
+
+#if NETCOREAPP
+#nullable enable
+        /// <summary>
+        /// Gets or sets a custom assembly load context to use for script execution.
+        /// </summary>
+        public AssemblyLoadContext? AssemblyLoadContext { get; init; }
+#nullable restore
+#endif
 
         public virtual ScriptOptions CreateScriptOptions(ScriptContext context, IList<RuntimeDependency> runtimeDependencies)
         {
@@ -176,7 +188,19 @@ namespace Dotnet.Script.Core
         {
             foreach (var runtimeAssembly in scriptDependenciesMap.Values)
             {
-                loadedAssembliesMap.TryGetValue(runtimeAssembly.Name.Name, out var loadedAssembly);
+                bool homogenization;
+#if NETCOREAPP
+                homogenization =
+                    AssemblyLoadContext is not ScriptAssemblyLoadContext salc ||
+                    salc.IsHomogeneousAssembly(runtimeAssembly.Name);
+#else
+                homogenization = true;
+#endif
+
+                Assembly loadedAssembly = null;
+                if (homogenization)
+                    loadedAssembliesMap.TryGetValue(runtimeAssembly.Name.Name, out loadedAssembly);
+                
                 if (loadedAssembly == null)
                 {
                     _logger.Trace("Adding reference to a runtime dependency => " + runtimeAssembly);

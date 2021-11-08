@@ -139,7 +139,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandleIssue189()
         {
-            var result = ScriptTestRunner.Default.Execute(Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx"));
+            var result = ScriptTestRunner.Default.Execute($"\"{Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx")}\"");
             Assert.Contains("Newtonsoft.Json.JsonConvert", result.output);
         }
 
@@ -472,6 +472,19 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Hello world!", result.output);
         }
 
+        [Fact]
+        public void ShouldIsolateScriptAssemblies()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("Isolation", "--isolated-load-context");
+            Assert.Contains("10.0.0.0", result.output);
+        }
+
+        [Fact]
+        public void ShouldSetCurrentContextualReflectionContext()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture("CurrentContextualReflectionContext", "--isolated-load-context");
+            Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", result.output);
+        }
 
         private static string CreateTestScript(string scriptFolder)
         {

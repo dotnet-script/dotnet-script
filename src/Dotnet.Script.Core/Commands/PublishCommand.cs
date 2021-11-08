@@ -28,7 +28,12 @@ namespace Dotnet.Script.Core.Commands
                 (options.PublishType == PublishType.Library ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", options.RuntimeIdentifier));
 
             var absolutePublishDirectory = publishDirectory.GetRootedPath();
-            var compiler = GetScriptCompiler(!options.NoCache, _logFactory);
+            var compiler = new ScriptCompiler(_logFactory, !options.NoCache)
+            {
+#if NETCOREAPP
+                AssemblyLoadContext = options.AssemblyLoadContext
+#endif
+            };
             var scriptEmitter = new ScriptEmitter(_scriptConsole, compiler);
             var publisher = new ScriptPublisher(_logFactory, scriptEmitter);
             var code = absoluteFilePath.ToSourceText();
@@ -42,13 +47,6 @@ namespace Dotnet.Script.Core.Commands
             {
                 publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier, options.LibraryName);
             }
-        }
-
-        private static ScriptCompiler GetScriptCompiler(bool useRestoreCache, LogFactory logFactory)
-        {
-
-            var compiler = new ScriptCompiler(logFactory, useRestoreCache);
-            return compiler;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Dotnet.Script.Tests
         {
             var fixture = "ScriptPackage/WithNoNuGetConfig";
             var pathToScriptPackages = ScriptPackagesFixture.GetPathToPackagesFolder();
-            var result = ScriptTestRunner.Default.ExecuteFixture(fixture, $"--no-cache -s {pathToScriptPackages}");
+            var result = ScriptTestRunner.Default.ExecuteFixture(fixture, $"--no-cache -s \"{pathToScriptPackages}\"");
             Assert.Contains("Hello", result.output);
             Assert.Equal(0, result.exitCode);
         }
@@ -27,7 +27,7 @@ namespace Dotnet.Script.Tests
         {
             var pathToScriptPackages = ScriptPackagesFixture.GetPathToPackagesFolder();
             var code = @"#load \""nuget:ScriptPackageWithMainCsx,1.0.0\"" SayHello();";
-            var result = ScriptTestRunner.Default.Execute($"--no-cache -s {pathToScriptPackages} eval \"{code}\"");
+            var result = ScriptTestRunner.Default.Execute($"--no-cache -s \"{pathToScriptPackages}\" eval \"{code}\"");
             Assert.Contains("Hello", result.output);
             Assert.Equal(0, result.exitCode);
         }

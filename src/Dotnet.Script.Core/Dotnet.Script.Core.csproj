@@ -2,9 +2,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>A cross platform library allowing you to run C# (CSX) scripts with support for debugging and inline NuGet packages. Based on Roslyn.</Description>
-    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionPrefix>1.2.1</VersionPrefix>
     <Authors>filipw</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>Dotnet.Script.Core</AssemblyName>
     <PackageId>Dotnet.Script.Core</PackageId>
     <PackageTags>script;csx;csharp;roslyn</PackageTags>
@@ -16,6 +16,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <LangVersion>9.0</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -23,17 +24,18 @@
     <EmbeddedResource Include="**/*.template" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Gapotchenko.FX" Version="2021.1.5" />
+    <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2021.2.11" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <!-- The following references are just quick fixes for issue #166 and issue #268
-    We need to figure out why we can't load these via the dependency context.
-     -->
+    <!-- The following references are just quick fixes for issue #166 and issue #268 -->
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
+    <!-- End of quick fixes -->
     <PackageReference Include="StrongNamer" Version="0.2.5" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
