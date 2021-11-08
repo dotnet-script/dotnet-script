@@ -17,7 +17,7 @@ jobs:
     displayName: Ubuntu Agent
     condition: succeeded()
     pool:
-      name: Hosted Ubuntu 1604
+      name: Hosted Ubuntu 1804
     steps:
       - bash: "curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.1.102"
         displayName: "Install 3.0.100"
