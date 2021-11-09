@@ -160,17 +160,10 @@ namespace Dotnet.Script.Core
             return new ScriptCompilationContext<TReturn>(script, context.Code, loader, scriptOptions, runtimeDependencies, nonSuppressedDiagnostics);
         }
 
-        private RuntimeDependency[] GetRuntimeDependencies(ScriptContext context)
-        {
-            if (context.ScriptMode == ScriptMode.Script)
-            {
-                return RuntimeDependencyResolver.GetDependencies(context.FilePath, context.PackageSources).ToArray();
-            }
-            else
-            {
-                return RuntimeDependencyResolver.GetDependenciesForCode(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
-            }
-        }
+        private RuntimeDependency[] GetRuntimeDependencies(ScriptContext context) 
+            => context.ScriptMode == ScriptMode.Script
+                ? RuntimeDependencyResolver.GetDependencies(context.FilePath, context.PackageSources, context.SDK).ToArray()
+                : RuntimeDependencyResolver.GetDependenciesForCode(context.WorkingDirectory, context.ScriptMode, context.PackageSources, context.Code.ToString()).ToArray();
 
         private ScriptOptions AddScriptReferences(ScriptOptions scriptOptions, Dictionary<string, Assembly> loadedAssembliesMap, Dictionary<string, RuntimeAssembly> scriptDependenciesMap)
         {

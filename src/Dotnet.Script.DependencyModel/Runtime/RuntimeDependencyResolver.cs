@@ -41,9 +41,9 @@ namespace Dotnet.Script.DependencyModel.Runtime
             }
         }
 
-        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packageSources)
+        public IEnumerable<RuntimeDependency> GetDependencies(string scriptFile, string[] packageSources, string sdk)
         {
-            var projectFileInfo = _scriptProjectProvider.CreateProjectForScriptFile(scriptFile);
+            var projectFileInfo = _scriptProjectProvider.CreateProjectForScriptFile(scriptFile, sdk);
             _restorer.Restore(projectFileInfo, packageSources);
             var pathToAssetsFile = Path.Combine(Path.GetDirectoryName(projectFileInfo.Path), "obj", "project.assets.json");
             return GetDependenciesInternal(pathToAssetsFile);

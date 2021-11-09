@@ -10,7 +10,7 @@ namespace Dotnet.Script.Core
 {
     public class ScriptContext
     {
-        public ScriptContext(SourceText code, string workingDirectory, IEnumerable<string> args, string filePath = null, OptimizationLevel optimizationLevel = OptimizationLevel.Debug, ScriptMode scriptMode = ScriptMode.Script, string[] packageSources = null)
+        public ScriptContext(SourceText code, string workingDirectory, IEnumerable<string> args, string filePath = null, OptimizationLevel optimizationLevel = OptimizationLevel.Debug, ScriptMode scriptMode = ScriptMode.Script, string[] packageSources = null, string sdk = null)
         {
             Code = code;
             WorkingDirectory = workingDirectory;
@@ -19,6 +19,7 @@ namespace Dotnet.Script.Core
             OptimizationLevel = optimizationLevel;
             ScriptMode = filePath != null ? ScriptMode.Script : scriptMode;
             PackageSources = packageSources ?? Array.Empty<string>();
+            SDK = sdk;
         }
 
         public SourceText Code { get; }
@@ -34,5 +35,6 @@ namespace Dotnet.Script.Core
         public ScriptMode ScriptMode { get; }
 
         public string[] PackageSources { get; }
+        public string SDK { get; }
     }
 }

@@ -61,9 +61,15 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// </summary>
         public string TargetFramework { get; set; } = ScriptEnvironment.Default.TargetFramework;
 
+        /// <summary>
+        /// Gets or sets the SDK for this <see cref="ProjectFile"/>.
+        /// </summary>
+        public string SDK { get; set; } = "Microsoft.NET.Sdk";
+
         public void Save(string pathToProjectFile)
         {
             var projectFileDocument = XDocument.Parse(ReadTemplate("csproj.template"));
+            projectFileDocument.Root.Add(new XAttribute("Sdk", SDK));
             var itemGroupElement = projectFileDocument.Descendants("ItemGroup").Single();
             foreach (var packageReference in PackageReferences)
             {
@@ -83,19 +89,15 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             var targetFrameworkElement = projectFileDocument.Descendants("TargetFramework").Single();
             targetFrameworkElement.Value = TargetFramework;
 
-            using (var fileStream = new FileStream(pathToProjectFile, FileMode.Create, FileAccess.Write))
-            {
-                projectFileDocument.Save(fileStream);
-            }
+            using var fileStream = new FileStream(pathToProjectFile, FileMode.Create, FileAccess.Write);
+            projectFileDocument.Save(fileStream);
         }
 
         private static string ReadTemplate(string name)
         {
             var resourceStream = typeof(ProjectFile).GetTypeInfo().Assembly.GetManifestResourceStream($"Dotnet.Script.DependencyModel.ProjectSystem.{name}");
-            using (var streamReader = new StreamReader(resourceStream))
-            {
-                return streamReader.ReadToEnd();
-            }
+            using var streamReader = new StreamReader(resourceStream);
+            return streamReader.ReadToEnd();
         }
 
         /// <inheritdoc/>
@@ -105,7 +107,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             if (ReferenceEquals(this, other)) return true;
             return PackageReferences.SequenceEqual(other.PackageReferences)
                 && AssemblyReferences.SequenceEqual(other.AssemblyReferences)
-                && TargetFramework.Equals(other.TargetFramework);
+                && TargetFramework.Equals(other.TargetFramework)
+                && SDK.Equals(other.SDK);
         }
 
         /// <inheritdoc/>

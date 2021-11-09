@@ -105,7 +105,7 @@ namespace Dotnet.Script.Tests
             var resolver = CreateRuntimeDependencyResolver();
             var fixture = GetFullPathToTestFixture("ScriptPackage/WithMainCsx");
             var csxFiles = Directory.GetFiles(fixture, "*.csx");
-            var dependencies = resolver.GetDependencies(csxFiles.First(), Array.Empty<string>());
+            var dependencies = resolver.GetDependencies(csxFiles.First(), Array.Empty<string>(), null);
             var scriptFiles = dependencies.Single(d => d.Name == "ScriptPackageWithMainCsx").Scripts;
             Assert.NotEmpty(scriptFiles);
         }
@@ -117,7 +117,7 @@ namespace Dotnet.Script.Tests
         }
 
 
-        private RuntimeDependencyResolver CreateRuntimeDependencyResolver()
+        private static RuntimeDependencyResolver CreateRuntimeDependencyResolver()
         {
             var resolver = new RuntimeDependencyResolver(TestOutputHelper.CreateTestLogFactory(), useRestoreCache: false);
             return resolver;

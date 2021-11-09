@@ -67,6 +67,7 @@ namespace Dotnet.Script
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
             var nocache = app.Option("--no-cache", "Disable caching (Restore and Dll cache)", CommandOptionType.NoValue);
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
+            var sdk = app.Option("--sdk <sdk>", "Project SDK to use. Default is \"Microsoft.NET.Sdk\"", CommandOptionType.SingleValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
             var argsAfterDoubleHyphen  = args.SkipWhile(a => a != "--").Skip(1).ToArray();
@@ -181,7 +182,8 @@ namespace Dotnet.Script
                         commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug,
                         packageSources.Values?.ToArray(),
                         runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier,
-                        nocache.HasValue()
+                        nocache.HasValue(),
+                        sdk.Value()
                     );
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
@@ -244,7 +246,8 @@ namespace Dotnet.Script
                         optimizationLevel,
                         packageSources.Values?.ToArray(),
                         interactive.HasValue(),
-                        nocache.HasValue()
+                        nocache.HasValue(),
+                        sdk.Value()
                     );
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);

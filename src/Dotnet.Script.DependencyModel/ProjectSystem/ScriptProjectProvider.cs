@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
+using Newtonsoft.Json;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
@@ -79,7 +80,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return CreateProject(targetDirectory, Directory.GetFiles(targetDirectory, "*.csx", SearchOption.AllDirectories), defaultTargetFramework, enableNuGetScriptReferences);
         }
 
-        public ProjectFileInfo CreateProject(string targetDirectory, IEnumerable<string> scriptFiles, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false)
+        public ProjectFileInfo CreateProject(string targetDirectory, IEnumerable<string> scriptFiles, string defaultTargetFramework = "net46", bool enableNuGetScriptReferences = false, string sdk = null)
         {
             if (scriptFiles == null || !scriptFiles.Any())
             {
@@ -94,19 +95,19 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             _logger.Debug($"Creating project file for *.csx files found in {targetDirectory} using {defaultTargetFramework} as the default framework.");
 
-            return SaveProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, scriptFiles.ToArray());
+            return SaveProjectFileFromScriptFiles(targetDirectory, defaultTargetFramework, scriptFiles.ToArray(), sdk);
         }
 
-        public ProjectFileInfo CreateProjectForScriptFile(string scriptFile)
+        public ProjectFileInfo CreateProjectForScriptFile(string scriptFile, string sdk)
         {
             _logger.Debug($"Creating project file for {scriptFile}");
             var scriptFiles = _scriptFilesResolver.GetScriptFiles(scriptFile);
-            return SaveProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray());
+            return SaveProjectFileFromScriptFiles(Path.GetDirectoryName(scriptFile), _scriptEnvironment.TargetFramework, scriptFiles.ToArray(), sdk);
         }
 
-        private ProjectFileInfo SaveProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles)
+        private ProjectFileInfo SaveProjectFileFromScriptFiles(string targetDirectory, string defaultTargetFramework, string[] csxFiles, string sdk)
         {
-            ProjectFile projectFile = CreateProjectFileFromScriptFiles(defaultTargetFramework, csxFiles);
+            ProjectFile projectFile = CreateProjectFileFromScriptFiles(defaultTargetFramework, csxFiles, sdk);
 
             var pathToProjectFile = GetPathToProjectFile(targetDirectory, defaultTargetFramework);
             projectFile.Save(pathToProjectFile);
@@ -116,7 +117,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return new ProjectFileInfo(pathToProjectFile, NuGetUtilities.GetNearestConfigPath(targetDirectory));
         }
 
-        public ProjectFile CreateProjectFileFromScriptFiles(string defaultTargetFramework, string[] csxFiles)
+        public ProjectFile CreateProjectFileFromScriptFiles(string defaultTargetFramework, string[] csxFiles, string sdk)
         {
             var parseresult = _scriptParser.ParseFromFiles(csxFiles);
 
@@ -128,6 +129,11 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             }
 
             projectFile.TargetFramework = defaultTargetFramework;
+            if (!string.IsNullOrWhiteSpace(sdk)) 
+            {
+                projectFile.SDK = sdk;
+            }
+
             return projectFile;
         }
 

@@ -57,7 +57,7 @@ namespace Dotnet.Script.Core.Commands
                 return pathToLibrary;
             }
 
-            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache);
+            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache, executeOptions.SDK);
             new PublishCommand(_scriptConsole, _logFactory).Execute(options);
             if (hash != null)
             {
@@ -77,7 +77,7 @@ namespace Dotnet.Script.Core.Commands
 
             var scriptFilesProvider = new ScriptFilesResolver();
             var allScriptFiles = scriptFilesProvider.GetScriptFiles(options.File.Path);
-            var projectFile = new ScriptProjectProvider(_logFactory).CreateProjectFileFromScriptFiles(ScriptEnvironment.Default.TargetFramework, allScriptFiles.ToArray());
+            var projectFile = new ScriptProjectProvider(_logFactory).CreateProjectFileFromScriptFiles(ScriptEnvironment.Default.TargetFramework, allScriptFiles.ToArray(), options.SDK);
 
             if (!projectFile.IsCacheable)
             {
@@ -91,6 +91,11 @@ namespace Dotnet.Script.Core.Commands
             foreach (var scriptFile in allScriptFiles)
             {
                 incrementalHash.AppendData(File.ReadAllBytes(scriptFile));
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.SDK))
+            {
+                incrementalHash.AppendData(Encoding.UTF8.GetBytes(options.SDK));
             }
 
             var configuration = options.OptimizationLevel.ToString();
