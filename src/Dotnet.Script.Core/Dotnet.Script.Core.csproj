@@ -26,7 +26,7 @@
   <ItemGroup>
     <PackageReference Include="Gapotchenko.FX" Version="2021.1.5" />
     <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2021.2.11" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.0-6.final" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
