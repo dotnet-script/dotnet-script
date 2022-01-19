@@ -24,7 +24,7 @@
         "-c",
         "release",
         "-f",
-        "netcoreapp3.1",
+        "net6.0",
         "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
       ],
       "problemMatcher": "$msCompile",
