@@ -43,7 +43,7 @@ jobs:
     displayName: Mac Agent
     condition: succeeded()
     pool:
-      name: Hosted macOS
+      vmImage: 'macOS-latest'
     steps:
       - bash: |
           curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.1.102
