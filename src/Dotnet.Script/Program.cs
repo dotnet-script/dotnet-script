@@ -55,8 +55,9 @@ namespace Dotnet.Script
 
         private static int Wain(string[] args)
         {
-            var app = new CommandLineApplication(throwOnUnexpectedArg: false)
+            var app = new CommandLineApplication()
             {
+                UnrecognizedArgumentHandling = UnrecognizedArgumentHandling.CollectAndContinue,
                 ExtendedHelpText = "Starting without a path to a CSX file or a command, starts the REPL (interactive) mode."
             };
 
@@ -83,7 +84,7 @@ namespace Dotnet.Script
                 var code = c.Argument("code", "Code to execute.");
                 var cwd = c.Option("-cwd |--workingdirectory <currentworkingdirectory>", "Working directory for the code compiler. Defaults to current directory.", CommandOptionType.SingleValue);
                 c.HelpOption(helpOptionTemplate);
-                c.OnExecute(async () =>
+                c.OnExecuteAsync(async (cancellationToken) =>
                 {
                     var source = code.Value;
                     if (string.IsNullOrWhiteSpace(source))
@@ -198,7 +199,7 @@ namespace Dotnet.Script
                 var dllPath = c.Argument("dll", "Path to DLL based script");
                 var commandDebugMode = c.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
                 c.HelpOption(helpOptionTemplate);
-                c.OnExecute(async () =>
+                c.OnExecuteAsync(async (cancellationToken) =>
                 {
                     if (string.IsNullOrWhiteSpace(dllPath.Value))
                     {
@@ -217,7 +218,7 @@ namespace Dotnet.Script
                 });
             });
 
-            app.OnExecute(async () =>
+            app.OnExecuteAsync(async (cancellationToken) =>
             {
                 int exitCode = 0;
 
