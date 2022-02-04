@@ -51,7 +51,7 @@ namespace Dotnet.Script.Core
                 }
             }
 
-            if (warningDiagnostics != null) 
+            if (errorDiagnostics != null) 
             {
                 foreach (var error in errorDiagnostics)
                 {
