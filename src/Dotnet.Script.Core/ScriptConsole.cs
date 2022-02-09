@@ -62,7 +62,15 @@ namespace Dotnet.Script.Core
 
         public virtual string ReadLine()
         {
-            return In == null ? RL.Read() : In.ReadLine();
+            bool isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
+            string result = (In == null || !isWindows) ? RL.Read() : In.ReadLine();
+
+            if (!isWindows)
+            {
+              RL.AddHistory (result);
+            }
+
+            return result;
         }
 
         public ScriptConsole(TextWriter output, TextReader input, TextWriter error)
