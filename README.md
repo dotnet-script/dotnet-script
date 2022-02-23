@@ -145,7 +145,14 @@ Instead of `main.csx` which is the default, we now have a file named `custom.csx
 
 ### Running scripts
 
-Scripts can be executed directly from the shell as if they were executables.
+You can execute your script using **dotnet script** or **dotnet-script**. 
+
+```bash
+dotnet script foo.csx
+dotnet-script foo.csx
+```
+
+On OSX/Linux, scripts can be executed directly from a shell as if they were executables.
 
 ```bash
 foo.csx arg1 arg2 arg3
@@ -164,7 +171,9 @@ The OSX/Linux shebang directive should be **#!/usr/bin/env dotnet-script**
 Console.WriteLine("Hello world");
 ```
 
-You can execute your script using **dotnet script** or **dotnet-script**, which allows you to pass arguments to control your script execution more.
+On Windows, you can run **dotnet register script** to achieve a similar behaviour. This register dotnet-script in the Windows registry as the tool to process .csx files.
+
+You can pass arguments to control your script execution more.
 
 ```bash
 foo.csx arg1 arg2 arg3
