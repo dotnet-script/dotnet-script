@@ -11,164 +11,161 @@ namespace Dotnet.Script.Tests
     [Collection("IntegrationTests")]
     public class ScriptExecutionTests
     {
-        private readonly ScriptEnvironment _scriptEnvironment;
-
         public ScriptExecutionTests(ITestOutputHelper testOutputHelper)
         {
             var dllCache = Path.Combine(Path.GetTempPath(), "dotnet-scripts");
             FileUtils.RemoveDirectory(dllCache);
             testOutputHelper.Capture();
-            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("HelloWorld", "--no-cache");
-            Assert.Contains("Hello World", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("HelloWorld", "--no-cache");
+            Assert.Contains("Hello World", output);
         }
 
         [Fact]
         public void ShouldExecuteScriptWithInlineNugetPackage()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("InlineNugetPackage");
-            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("InlineNugetPackage");
+            Assert.Contains("AutoMapper.MapperConfiguration", output);
         }
 
         [Fact]
         public void ShouldHandleNullableContextAsError()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Nullable");
-            Assert.Equal(1, result.exitCode);
-            Assert.Contains("error CS8625", result.output);
+            var (output, exitCode) = ScriptTestRunner.Default.ExecuteFixture("Nullable");
+            Assert.Equal(1, exitCode);
+            Assert.Contains("error CS8625", output);
         }
 
         [Fact]
         public void ShouldNotHandleDisabledNullableContextAsError()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("NullableDisabled");
-            Assert.Equal(0, result.exitCode);
+            var (_, exitCode) = ScriptTestRunner.Default.ExecuteFixture("NullableDisabled");
+            Assert.Equal(0, exitCode);
         }
 
         [Fact]
         public void ShouldIncludeExceptionLineNumberAndFile()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--no-cache");
-            Assert.Contains("Exception.csx:line 1", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Exception", "--no-cache");
+            Assert.Contains("Exception.csx:line 1", output);
         }
 
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary", "--no-cache");
-            Assert.Contains("Connection successful", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary", "--no-cache");
+            Assert.Contains("Connection successful", output);
         }
 
         [Fact]
         public void ShouldReturnExitCodeOneWhenScriptFails()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception");
-            Assert.Equal(1, result.exitCode);
+            var (_, exitCode) = ScriptTestRunner.Default.ExecuteFixture("Exception");
+            Assert.Equal(1, exitCode);
         }
 
         [Fact]
         public void ShouldReturnStackTraceInformationWhenScriptFails()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Exception", "--no-cache");
-            Assert.Contains("die!", result.output);
-            Assert.Contains("Exception.csx:line 1", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Exception", "--no-cache");
+            Assert.Contains("die!", output);
+            Assert.Contains("Exception.csx:line 1", output);
         }
 
         [Fact]
         public void ShouldReturnExitCodeOneWhenScriptFailsToCompile()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("CompilationError");
-            Assert.Equal(1, result.exitCode);
+            var (_, exitCode) = ScriptTestRunner.Default.ExecuteFixture("CompilationError");
+            Assert.Equal(1, exitCode);
         }
 
         [Fact]
         public void ShouldHandleIssue129()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue129");
-            Assert.Contains("Bad HTTP authentication header", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue129");
+            Assert.Contains("Bad HTTP authentication header", output);
         }
 
         [Fact]
         public void ShouldHandleIssue166()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue166", "--no-cache");
-            Assert.Contains("Connection successful", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue166", "--no-cache");
+            Assert.Contains("Connection successful", output);
 
         }
 
         [Fact]
         public void ShouldPassUnknownArgumentToScript()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Arguments", "arg1");
-            Assert.Contains("arg1", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Arguments", "arg1");
+            Assert.Contains("arg1", output);
         }
 
         [Fact]
         public void ShouldPassKnownArgumentToScriptWhenEscapedByDoubleHyphen()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Arguments", "-- -v");
-            Assert.Contains("-v", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Arguments", "-- -v");
+            Assert.Contains("-v", output);
         }
 
         [Fact]
         public void ShouldNotPassUnEscapedKnownArgumentToScript()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Arguments", "-v");
-            Assert.DoesNotContain("-v", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Arguments", "-v");
+            Assert.DoesNotContain("-v", output);
         }
 
         [Fact]
         public void ShouldPropagateReturnValue()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("ReturnValue");
-            Assert.Equal(42, result.exitCode);
+            var (_, exitCode) = ScriptTestRunner.Default.ExecuteFixture("ReturnValue");
+            Assert.Equal(42, exitCode);
         }
 
         [Fact]
         public void ShouldHandleIssue181()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue181");
-            Assert.Contains("42", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue181");
+            Assert.Contains("42", output);
         }
 
         [Fact]
         public void ShouldHandleIssue189()
         {
-            var result = ScriptTestRunner.Default.Execute($"\"{Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx")}\"");
-            Assert.Contains("Newtonsoft.Json.JsonConvert", result.output);
+            var (output, _) = ScriptTestRunner.Default.Execute($"\"{Path.Combine(TestPathUtils.GetPathToTestFixtureFolder("Issue189"), "SomeFolder", "Script.csx")}\"");
+            Assert.Contains("Newtonsoft.Json.JsonConvert", output);
         }
 
         [Fact]
         public void ShouldHandleIssue198()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixtureInProcess("Issue198");
+            var result = ScriptTestRunner.ExecuteFixtureInProcess("Issue198");
             // Assert.Contains("NuGet.Client", result.output);
         }
 
         [Fact]
         public void ShouldHandleIssue204()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue204");
-            Assert.Contains("System.Net.WebProxy", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue204");
+            Assert.Contains("System.Net.WebProxy", output);
         }
 
         [Fact]
         public void ShouldHandleIssue214()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue214");
-            Assert.Contains("Hello World!", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue214");
+            Assert.Contains("Hello World!", output);
         }
 
         [Fact]
         public void ShouldHandleIssue318()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue318");
-            Assert.Contains("Hello World!", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue318");
+            Assert.Contains("Hello World!", output);
         }
 
         [Theory]
@@ -176,36 +173,36 @@ namespace Dotnet.Script.Tests
         [InlineData("debug", "true")]
         public void ShouldCompileScriptWithReleaseConfiguration(string configuration, string expected)
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", $"-c {configuration}");
-            Assert.Contains(expected, result.output, StringComparison.OrdinalIgnoreCase);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Configuration", $"-c {configuration}");
+            Assert.Contains(expected, output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
         public void ShouldCompileScriptWithDebugConfigurationWhenSpecified()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c debug");
-            Assert.Contains("true", result.output, StringComparison.OrdinalIgnoreCase);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Configuration", "-c debug");
+            Assert.Contains("true", output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
         public void ShouldCompileScriptWithDebugConfigurationWhenNotSpecified()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Configuration");
-            Assert.Contains("true", result.output, StringComparison.OrdinalIgnoreCase);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Configuration");
+            Assert.Contains("true", output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
         public void ShouldHandleCSharp72()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("CSharp72");
-            Assert.Contains("hi", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("CSharp72");
+            Assert.Contains("hi", output);
         }
 
         [Fact]
         public void ShouldHandleCSharp80()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("CSharp80");
-            Assert.Equal(0, result.exitCode);
+            var (_, exitCode) = ScriptTestRunner.Default.ExecuteFixture("CSharp80");
+            Assert.Equal(0, exitCode);
 
         }
 
@@ -213,32 +210,32 @@ namespace Dotnet.Script.Tests
         public void ShouldEvaluateCode()
         {
             var code = "Console.WriteLine(12345);";
-            var result = ScriptTestRunner.Default.ExecuteCode(code);
-            Assert.Contains("12345", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteCode(code);
+            Assert.Contains("12345", output);
         }
 
         [Fact]
         public void ShouldEvaluateCodeInReleaseMode()
         {
             var code = File.ReadAllText(Path.Combine("..", "..", "..", "TestFixtures", "Configuration", "Configuration.csx"));
-            var result = ScriptTestRunner.Default.ExecuteCodeInReleaseMode(code);
-            Assert.Contains("false", result.output, StringComparison.OrdinalIgnoreCase);
+            var (output, _) = ScriptTestRunner.Default.ExecuteCodeInReleaseMode(code);
+            Assert.Contains("false", output, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
         public void ShouldSupportInlineNugetReferencesinEvaluatedCode()
         {
             var code = @"#r \""nuget: AutoMapper, 6.1.1\"" using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
-            var result = ScriptTestRunner.Default.ExecuteCode(code);
-            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteCode(code);
+            Assert.Contains("AutoMapper.MapperConfiguration", output);
         }
 
         [Fact]
         public void ShouldSupportInlineNugetReferencesWithTrailingSemicoloninEvaluatedCode()
         {
             var code = @"#r \""nuget: AutoMapper, 6.1.1\""; using AutoMapper; Console.WriteLine(typeof(MapperConfiguration));";
-            var result = ScriptTestRunner.Default.ExecuteCode(code);
-            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteCode(code);
+            Assert.Contains("AutoMapper.MapperConfiguration", output);
         }
 
         [Theory]
@@ -256,45 +253,45 @@ namespace Dotnet.Script.Tests
         public void ShouldExecuteRemoteScriptUsingTinyUrl()
         {
             var url = "https://tinyurl.com/y8cda9zt";
-            var result = ScriptTestRunner.Default.Execute(url);
-            Assert.Contains("Hello World", result.output);
+            var (output, _) = ScriptTestRunner.Default.Execute(url);
+            Assert.Contains("Hello World", output);
         }
 
         [Fact]
         public void ShouldHandleIssue268()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue268");
-            Assert.Contains("value:", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue268");
+            Assert.Contains("value:", output);
         }
 
         [Fact]
         public void ShouldHandleIssue435()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue435");
-            Assert.Contains("value:Microsoft.Extensions.Configuration.ConfigurationBuilder", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue435");
+            Assert.Contains("value:Microsoft.Extensions.Configuration.ConfigurationBuilder", output);
         }
 
         [Fact]
         public void ShouldLoadMicrosoftExtensionsDependencyInjection()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("MicrosoftExtensionsDependencyInjection");
-            Assert.Contains("Microsoft.Extensions.DependencyInjection.IServiceCollection", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("MicrosoftExtensionsDependencyInjection");
+            Assert.Contains("Microsoft.Extensions.DependencyInjection.IServiceCollection", output);
         }
 
         [Fact]
         public void ShouldThrowExceptionOnInvalidMediaType()
         {
             var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
-            var result = ScriptTestRunner.Default.Execute(url);
-            Assert.Contains("not supported", result.output);
+            var (output, _) = ScriptTestRunner.Default.Execute(url);
+            Assert.Contains("not supported", output);
         }
 
         [Fact]
         public void ShouldHandleNonExistingRemoteScript()
         {
             var url = "https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/DoesNotExists.csx";
-            var result = ScriptTestRunner.Default.Execute(url);
-            Assert.Contains("Not Found", result.output);
+            var (output, _) = ScriptTestRunner.Default.Execute(url);
+            Assert.Contains("Not Found", output);
         }
 
         [Fact]
@@ -303,59 +300,55 @@ namespace Dotnet.Script.Tests
             // This test ensures that we can load the Process class.
             // This used to fail when executing a netcoreapp2.0 script
             // from dotnet-script built for netcoreapp2.1
-            var result = ScriptTestRunner.Default.ExecuteFixture("Process");
-            Assert.Contains("Success", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Process");
+            Assert.Contains("Success", output);
         }
 
         [Fact]
         public void ShouldHandleNuGetVersionRange()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("VersionRange");
-            Assert.Contains("AutoMapper.MapperConfiguration", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("VersionRange");
+            Assert.Contains("AutoMapper.MapperConfiguration", output);
         }
 
         [Fact]
         public void ShouldThrowMeaningfulErrorMessageWhenDependencyIsNotFound()
         {
-            using (var libraryFolder = new DisposableFolder())
-            {
-                // Create a package that we can reference
+            using var libraryFolder = new DisposableFolder();
+            // Create a package that we can reference
 
-                ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n SampleLibrary", libraryFolder.Path);
-                ProcessHelper.RunAndCaptureOutput("dotnet", "pack", libraryFolder.Path);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n SampleLibrary", libraryFolder.Path);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "pack", libraryFolder.Path);
 
-                using (var scriptFolder = new DisposableFolder())
-                {
-                    var code = new StringBuilder();
-                    code.AppendLine("#r \"nuget:SampleLibrary, 1.0.0\"");
-                    code.AppendLine("WriteLine(42)");
-                    var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
-                    File.WriteAllText(pathToScript, code.ToString());
+            using var scriptFolder = new DisposableFolder();
+            var code = new StringBuilder();
+            code.AppendLine("#r \"nuget:SampleLibrary, 1.0.0\"");
+            code.AppendLine("WriteLine(42)");
+            var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
+            File.WriteAllText(pathToScript, code.ToString());
 
-                    // Run once to ensure that it is cached.
-                    var result = ScriptTestRunner.Default.Execute(pathToScript);
-                    Assert.Contains("42", result.output);
+            // Run once to ensure that it is cached.
+            var result = ScriptTestRunner.Default.Execute(pathToScript);
+            Assert.Contains("42", result.output);
 
-                    // Remove the package from the global NuGet cache
-                    TestPathUtils.RemovePackageFromGlobalNugetCache("SampleLibrary");
+            // Remove the package from the global NuGet cache
+            TestPathUtils.RemovePackageFromGlobalNugetCache("SampleLibrary");
 
-                    //ScriptTestRunner.Default.ExecuteInProcess(pathToScript);
+            //ScriptTestRunner.Default.ExecuteInProcess(pathToScript);
 
-                    result = ScriptTestRunner.Default.Execute(pathToScript);
-                    Assert.Contains("Try executing/publishing the script", result.output);
+            result = ScriptTestRunner.Default.Execute(pathToScript);
+            Assert.Contains("Try executing/publishing the script", result.output);
 
-                    // Run again with the '--no-cache' option to assert that the advice actually worked.
-                    result = ScriptTestRunner.Default.Execute($"{pathToScript} --no-cache");
-                    Assert.Contains("42", result.output);
-                }
-            }
+            // Run again with the '--no-cache' option to assert that the advice actually worked.
+            result = ScriptTestRunner.Default.Execute($"{pathToScript} --no-cache");
+            Assert.Contains("42", result.output);
         }
 
         [Fact]
         public void ShouldHandleIssue613()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Issue613");
-            Assert.Equal(0, result.exitCode);
+            var (_, exitCode) = ScriptTestRunner.Default.ExecuteFixture("Issue613");
+            Assert.Equal(0, exitCode);
         }
 
         [Fact]
@@ -387,19 +380,17 @@ namespace Dotnet.Script.Tests
     Console.WriteLine(""Hello World!"");";
 
 
-            using (var disposableFolder = new DisposableFolder())
-            {
-                var projectFolder = Path.Combine(disposableFolder.Path, "TestLibrary");
-                ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n TestLibrary", disposableFolder.Path);
-                ProcessHelper.RunAndCaptureOutput("dotnet", "add TestLibrary.csproj package AgileObjects.AgileMapper -v 0.25.0", projectFolder);
-                File.WriteAllText(Path.Combine(projectFolder, "Class1.cs"), code);
-                File.WriteAllText(Path.Combine(projectFolder, "script.csx"), script);
-                ProcessHelper.RunAndCaptureOutput("dotnet", "build -c release -o testlib", projectFolder);
+            using var disposableFolder = new DisposableFolder();
+            var projectFolder = Path.Combine(disposableFolder.Path, "TestLibrary");
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new classlib -n TestLibrary", disposableFolder.Path);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "add TestLibrary.csproj package AgileObjects.AgileMapper -v 0.25.0", projectFolder);
+            File.WriteAllText(Path.Combine(projectFolder, "Class1.cs"), code);
+            File.WriteAllText(Path.Combine(projectFolder, "script.csx"), script);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "build -c release -o testlib", projectFolder);
 
-                var result = ScriptTestRunner.Default.Execute(Path.Combine(projectFolder, "script.csx"));
+            var (output, exitCode) = ScriptTestRunner.Default.Execute(Path.Combine(projectFolder, "script.csx"));
 
-                Assert.Contains("Hello World!", result.output);
-            }
+            Assert.Contains("Hello World!", output);
         }
 
 
@@ -408,15 +399,13 @@ namespace Dotnet.Script.Tests
         {
             TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
 
-            using (var packageLibraryFolder = new DisposableFolder())
-            {
-                CreateTestPackage(packageLibraryFolder.Path);
+            using var packageLibraryFolder = new DisposableFolder();
+            CreateTestPackage(packageLibraryFolder.Path);
 
-                string pathToScriptFile = CreateTestScript(packageLibraryFolder.Path);
+            string pathToScriptFile = CreateTestScript(packageLibraryFolder.Path);
 
-                var result = ScriptTestRunner.Default.Execute(pathToScriptFile);
-                Assert.Contains("Success", result.output);
-            }
+            var (output, exitCode) = ScriptTestRunner.Default.Execute(pathToScriptFile);
+            Assert.Contains("Success", output);
         }
 
         [Fact]
@@ -424,17 +413,15 @@ namespace Dotnet.Script.Tests
         {
             TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
 
-            using (var packageLibraryFolder = new DisposableFolder())
-            {
-                CreateTestPackage(packageLibraryFolder.Path);
+            using var packageLibraryFolder = new DisposableFolder();
+            CreateTestPackage(packageLibraryFolder.Path);
 
-                var scriptFolder = Path.Combine(packageLibraryFolder.Path, "ScriptFolder");
-                Directory.CreateDirectory(scriptFolder);
-                string pathToScriptFile = CreateTestScript(scriptFolder);
+            var scriptFolder = Path.Combine(packageLibraryFolder.Path, "ScriptFolder");
+            Directory.CreateDirectory(scriptFolder);
+            string pathToScriptFile = CreateTestScript(scriptFolder);
 
-                var result = ScriptTestRunner.Default.Execute(pathToScriptFile);
-                Assert.Contains("Success", result.output);
-            }
+            var (output, exitCode) = ScriptTestRunner.Default.Execute(pathToScriptFile);
+            Assert.Contains("Success", output);
         }
 
         [Fact]
@@ -442,25 +429,23 @@ namespace Dotnet.Script.Tests
         {
             TestPathUtils.RemovePackageFromGlobalNugetCache("NuGetConfigTestLibrary");
 
-            using (var packageLibraryFolder = new DisposableFolder())
-            {
-                var packageLibraryFolderPath = Path.Combine(packageLibraryFolder.Path, "library folder");
-                Directory.CreateDirectory(packageLibraryFolderPath);
+            using var packageLibraryFolder = new DisposableFolder();
+            var packageLibraryFolderPath = Path.Combine(packageLibraryFolder.Path, "library folder");
+            Directory.CreateDirectory(packageLibraryFolderPath);
 
-                CreateTestPackage(packageLibraryFolderPath);
+            CreateTestPackage(packageLibraryFolderPath);
 
-                string pathToScriptFile = CreateTestScript(packageLibraryFolderPath);
+            string pathToScriptFile = CreateTestScript(packageLibraryFolderPath);
 
-                var result = ScriptTestRunner.Default.Execute($"\"{pathToScriptFile}\"");
-                Assert.Contains("Success", result.output);
-            }
+            var (output, exitCode) = ScriptTestRunner.Default.Execute($"\"{pathToScriptFile}\"");
+            Assert.Contains("Success", output);
         }
 
         [Fact]
         public void ShouldHandleScriptWithTargetFrameworkInShebang()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("TargetFrameworkInShebang");
-            Assert.Contains("Hello world!", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("TargetFrameworkInShebang");
+            Assert.Contains("Hello world!", output);
         }
 
         [Fact]
@@ -468,22 +453,22 @@ namespace Dotnet.Script.Tests
         {
             var fixture = "InvalidGlobalJson";
             var workingDirectory = Path.GetDirectoryName(TestPathUtils.GetPathToTestFixture(fixture));
-            var result = ScriptTestRunner.Default.ExecuteFixture("InvalidGlobalJson", $"--no-cache", workingDirectory);
-            Assert.Contains("Hello world!", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("InvalidGlobalJson", $"--no-cache", workingDirectory);
+            Assert.Contains("Hello world!", output);
         }
 
         [Fact]
         public void ShouldIsolateScriptAssemblies()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("Isolation", "--isolated-load-context");
-            Assert.Contains("10.0.0.0", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Isolation", "--isolated-load-context");
+            Assert.Contains("10.0.0.0", output);
         }
 
         [Fact]
         public void ShouldSetCurrentContextualReflectionContext()
         {
-            var result = ScriptTestRunner.Default.ExecuteFixture("CurrentContextualReflectionContext", "--isolated-load-context");
-            Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", result.output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("CurrentContextualReflectionContext", "--isolated-load-context");
+            Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", output);
         }
 
         private static string CreateTestScript(string scriptFolder)

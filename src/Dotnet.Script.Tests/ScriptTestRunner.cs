@@ -11,7 +11,7 @@ namespace Dotnet.Script.Tests
     {
         public static readonly ScriptTestRunner Default = new ScriptTestRunner();
 
-        private ScriptEnvironment _scriptEnvironment;
+        private readonly ScriptEnvironment _scriptEnvironment;
 
         static ScriptTestRunner()
         {
@@ -49,7 +49,7 @@ namespace Dotnet.Script.Tests
             return ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"\"{pathToFixture}\" {arguments}"), workingDirectory);
         }
 
-        public int ExecuteFixtureInProcess(string fixture, string arguments = null)
+        public static int ExecuteFixtureInProcess(string fixture, string arguments = null)
         {
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
             return Program.Main(new[] { pathToFixture }.Concat(arguments?.Split(" ") ?? Array.Empty<string>()).ToArray());

@@ -83,19 +83,15 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             var targetFrameworkElement = projectFileDocument.Descendants("TargetFramework").Single();
             targetFrameworkElement.Value = TargetFramework;
 
-            using (var fileStream = new FileStream(pathToProjectFile, FileMode.Create, FileAccess.Write))
-            {
-                projectFileDocument.Save(fileStream);
-            }
+            using var fileStream = new FileStream(pathToProjectFile, FileMode.Create, FileAccess.Write);
+            projectFileDocument.Save(fileStream);
         }
 
         private static string ReadTemplate(string name)
         {
             var resourceStream = typeof(ProjectFile).GetTypeInfo().Assembly.GetManifestResourceStream($"Dotnet.Script.DependencyModel.ProjectSystem.{name}");
-            using (var streamReader = new StreamReader(resourceStream))
-            {
-                return streamReader.ReadToEnd();
-            }
+            using var streamReader = new StreamReader(resourceStream);
+            return streamReader.ReadToEnd();
         }
 
         /// <inheritdoc/>

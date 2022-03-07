@@ -16,7 +16,7 @@ namespace Dotnet.Script.Tests.Commands
             testOutputHelper.Capture();
         }
 
-        private (ExecuteInteractiveCommand Command, ScriptConsole Console) GetExecuteInteractiveCommand(string[] commands)
+        private static (ExecuteInteractiveCommand Command, ScriptConsole Console) GetExecuteInteractiveCommand(string[] commands)
         {
             var reader = new StringReader(string.Join(Environment.NewLine, commands));
             var writer = new StringWriter();

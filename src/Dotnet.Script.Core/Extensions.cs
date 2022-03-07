@@ -9,10 +9,8 @@ namespace Dotnet.Script.Core
 
         public static SourceText ToSourceText(this string absoluteFilePath)
         {
-            using (var filestream = File.OpenRead(absoluteFilePath))
-            {
-                return SourceText.From(filestream);
-            }
+            using var filestream = File.OpenRead(absoluteFilePath);
+            return SourceText.From(filestream);
         }
     }
 }

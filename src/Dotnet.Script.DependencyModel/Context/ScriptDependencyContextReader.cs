@@ -138,7 +138,7 @@ Make sure that the file exists and that it is a valid 'project.assets.json' file
 
         private string[] GetNativeAssetPaths(FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
-            List<string> nativeAssetPaths = new List<string>();
+            var nativeAssetPaths = new List<string>();
             foreach (var runtimeTarget in targetLibrary.NativeLibraries.Where(lfi => !lfi.Path.EndsWith("_._")))
             {
                 var fullPath = ResolveFullPath(packagePathResolver, targetLibrary.Name, targetLibrary.Version.ToString(), runtimeTarget.Path);
@@ -150,7 +150,7 @@ Make sure that the file exists and that it is a valid 'project.assets.json' file
 
         private static string[] GetRuntimeDependencyPaths(FallbackPackagePathResolver packagePathResolver, LockFileTargetLibrary targetLibrary)
         {
-            List<string> runtimeDependencyPaths = new List<string>();
+            var runtimeDependencyPaths = new List<string>();
 
             foreach (var lockFileItem in targetLibrary.RuntimeAssemblies.Where(lfi => !lfi.Path.EndsWith("_._")))
             {

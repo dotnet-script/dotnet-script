@@ -22,7 +22,7 @@ namespace Dotnet.Script.Tests
             Assert.Null(result);
         }
 
-        private ScriptRunner CreateScriptRunner()
+        private static ScriptRunner CreateScriptRunner()
         {
             var logFactory = TestOutputHelper.CreateTestLogFactory();
             var scriptCompiler = new ScriptCompiler(logFactory, false);

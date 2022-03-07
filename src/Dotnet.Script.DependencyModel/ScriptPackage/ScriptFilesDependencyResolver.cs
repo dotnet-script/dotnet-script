@@ -109,9 +109,9 @@ namespace Dotnet.Script.DependencyModel.ScriptPackage
                 if (match.Success)
                 {
                     var targetFramework = match.Groups[1].Value;
-                    if (!result.TryGetValue(targetFramework, out var files))
+                    if (!result.TryGetValue(targetFramework, out _))
                     {
-                        files = new List<string>();
+                        var files = new List<string>();
                         result.Add(targetFramework, files);
                     }
                     result[targetFramework].Add(match.Groups[0].Value);

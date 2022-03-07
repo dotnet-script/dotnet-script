@@ -2,8 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using Dotnet.Script.DependencyModel.Compilation;
-using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Runtime;
 using Dotnet.Script.Shared.Tests;
 using Xunit;
@@ -14,12 +12,9 @@ namespace Dotnet.Script.Tests
     [Collection("IntegrationTests")]
     public class ScriptPackagesTests : IClassFixture<ScriptPackagesFixture>
     {
-        private readonly ScriptEnvironment _scriptEnvironment;
-
         public ScriptPackagesTests(ITestOutputHelper testOutputHelper)
         {
             testOutputHelper.Capture();
-            _scriptEnvironment = ScriptEnvironment.Default;
         }
 
         [Fact]
@@ -30,32 +25,30 @@ namespace Dotnet.Script.Tests
             Assert.StartsWith("Hello from netstandard2.0", output);
         }
 
-        //[Fact]
+        [Fact(Skip = "Needs review.")]
         public void ShouldThrowMeaningfulExceptionWhenScriptPackageIsMissing()
         {
-            using (var scriptFolder = new DisposableFolder())
-            {
-                var code = new StringBuilder();
-                code.AppendLine("#load \"nuget:ScriptPackageWithMainCsx, 1.0.0\"");
-                code.AppendLine("SayHello();");
-                var pathToScriptFile = Path.Combine(scriptFolder.Path, "main.csx");
-                File.WriteAllText(pathToScriptFile, code.ToString());
-                var pathToScriptPackages = Path.GetFullPath(ScriptPackagesFixture.GetPathToPackagesFolder());
+            using var scriptFolder = new DisposableFolder();
+            var code = new StringBuilder();
+            code.AppendLine("#load \"nuget:ScriptPackageWithMainCsx, 1.0.0\"");
+            code.AppendLine("SayHello();");
+            var pathToScriptFile = Path.Combine(scriptFolder.Path, "main.csx");
+            File.WriteAllText(pathToScriptFile, code.ToString());
+            var pathToScriptPackages = Path.GetFullPath(ScriptPackagesFixture.GetPathToPackagesFolder());
 
-                // Run once to ensure that it is cached.
-                var result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
-                Assert.StartsWith("Hello from netstandard2.0", result.output);
+            // Run once to ensure that it is cached.
+            var result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
+            Assert.StartsWith("Hello from netstandard2.0", result.output);
 
-                // Remove the package from the global NuGet cache
-                TestPathUtils.RemovePackageFromGlobalNugetCache("ScriptPackageWithMainCsx");
+            // Remove the package from the global NuGet cache
+            TestPathUtils.RemovePackageFromGlobalNugetCache("ScriptPackageWithMainCsx");
 
-                //Change the source to force a recompile, now with the missing package.
-                code.Append("return 0;");
-                File.WriteAllText(pathToScriptFile, code.ToString());
+            //Change the source to force a recompile, now with the missing package.
+            code.Append("return 0;");
+            File.WriteAllText(pathToScriptFile, code.ToString());
 
-                result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
-                Assert.Contains("Try executing/publishing the script", result.output);
-            }
+            result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
+            Assert.Contains("Try executing/publishing the script", result.output);
         }
 
         [Fact]
