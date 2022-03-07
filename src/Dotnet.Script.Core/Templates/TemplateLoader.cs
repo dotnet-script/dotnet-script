@@ -8,10 +8,8 @@ namespace Dotnet.Script.Core.Templates
         public static string ReadTemplate(string name)
         {
             var resourceStream = typeof(TemplateLoader).GetTypeInfo().Assembly.GetManifestResourceStream($"Dotnet.Script.Core.Templates.{name}");
-            using (var streamReader = new StreamReader(resourceStream))
-            {
-                return streamReader.ReadToEnd();
-            }
+            using var streamReader = new StreamReader(resourceStream);
+            return streamReader.ReadToEnd();
         }
     }
 }

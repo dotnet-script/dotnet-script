@@ -52,7 +52,6 @@ public static class Choco
         {
             version = versionPrefix;
         }
-        var tags = projectFile.Descendants("PackageTags").SingleOrDefault()?.Value;
         var iconUrl = projectFile.Descendants("PackageIconUrl").SingleOrDefault()?.Value;
         var projectUrl = projectFile.Descendants("PackageProjectUrl").SingleOrDefault()?.Value;
         var repositoryUrl = projectFile.Descendants("RepositoryUrl").SingleOrDefault()?.Value;
@@ -80,10 +79,8 @@ public static class Choco
         var srcGlobPattern = $@"{pathToBinaries}\**\*";
         filesElement.Add(CreateFileElement(srcGlobPattern, packageId));
 
-        using (var fileStream = new FileStream("Chocolatey/chocolatey.nuspec", FileMode.Create))
-        {
-            new XDocument(packageElement).Save(fileStream);
-        }
+        using var fileStream = new FileStream("Chocolatey/chocolatey.nuspec", FileMode.Create);
+        new XDocument(packageElement).Save(fileStream);
     }
 
     private static XElement CreateFileElement(string src, string target)

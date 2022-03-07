@@ -19,130 +19,118 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldNotUpdateHashWhenSourceIsNotChanged()
         {
-            using (var scriptFolder = new DisposableFolder())
-            {
-                var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
+            using var scriptFolder = new DisposableFolder();
+            var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
-                WriteScript(pathToScript, "WriteLine(42);");
-                var firstResult = Execute(pathToScript);
-                Assert.Contains("42", firstResult.output);
-                Assert.NotNull(firstResult.hash);
+            WriteScript(pathToScript, "WriteLine(42);");
+            var (output, hash) = Execute(pathToScript);
+            Assert.Contains("42", output);
+            Assert.NotNull(hash);
 
-                WriteScript(pathToScript, "WriteLine(42);");
-                var secondResult = Execute(pathToScript);
-                Assert.Contains("42", secondResult.output);
-                Assert.NotNull(secondResult.hash);
+            WriteScript(pathToScript, "WriteLine(42);");
+            var secondResult = Execute(pathToScript);
+            Assert.Contains("42", secondResult.output);
+            Assert.NotNull(secondResult.hash);
 
-                Assert.Equal(firstResult.hash, secondResult.hash);
-            }
+            Assert.Equal(hash, secondResult.hash);
         }
 
 
         [Fact]
         public void ShouldUpdateHashWhenSourceChanges()
         {
-            using (var scriptFolder = new DisposableFolder())
-            {
-                var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
+            using var scriptFolder = new DisposableFolder();
+            var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
-                WriteScript(pathToScript, "WriteLine(42);");
-                var firstResult = Execute(pathToScript);
-                Assert.Contains("42", firstResult.output);
-                Assert.NotNull(firstResult.hash);
+            WriteScript(pathToScript, "WriteLine(42);");
+            var (output, hash) = Execute(pathToScript);
+            Assert.Contains("42", output);
+            Assert.NotNull(hash);
 
-                WriteScript(pathToScript, "WriteLine(84);");
-                var secondResult = Execute(pathToScript);
-                Assert.Contains("84", secondResult.output);
-                Assert.NotNull(secondResult.hash);
+            WriteScript(pathToScript, "WriteLine(84);");
+            var secondResult = Execute(pathToScript);
+            Assert.Contains("84", secondResult.output);
+            Assert.NotNull(secondResult.hash);
 
-                Assert.NotEqual(firstResult.hash, secondResult.hash);
-            }
+            Assert.NotEqual(hash, secondResult.hash);
         }
 
         [Fact]
         public void ShouldNotCreateHashWhenScriptIsNotCacheable()
         {
-            using (var scriptFolder = new DisposableFolder())
-            {
-                var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
+            using var scriptFolder = new DisposableFolder();
+            var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
-                WriteScript(pathToScript, "#r \"nuget:AutoMapper, *\"", "WriteLine(42);");
+            WriteScript(pathToScript, "#r \"nuget:AutoMapper, *\"", "WriteLine(42);");
 
-                var result = Execute(pathToScript);
-                Assert.Contains("42", result.output);
+            var (output, hash) = Execute(pathToScript);
+            Assert.Contains("42", output);
 
-                Assert.Null(result.hash);
-            }
+            Assert.Null(hash);
         }
 
         [Fact]
         public void ShouldCopyDllAndPdbToExecutionCacheFolder()
         {
-            using (var scriptFolder = new DisposableFolder())
-            {
-                var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
+            using var scriptFolder = new DisposableFolder();
+            var pathToScript = Path.Combine(scriptFolder.Path, "main.csx");
 
-                WriteScript(pathToScript, "#r \"nuget:LightInject, 5.2.1\"", "WriteLine(42);");
-                ScriptTestRunner.Default.Execute($"{pathToScript} --nocache");
-                var pathToExecutionCache = GetPathToExecutionCache(pathToScript);
-                Assert.True(File.Exists(Path.Combine(pathToExecutionCache, "LightInject.dll")));
-                Assert.True(File.Exists(Path.Combine(pathToExecutionCache, "LightInject.pdb")));
-            }
+            WriteScript(pathToScript, "#r \"nuget:LightInject, 5.2.1\"", "WriteLine(42);");
+            ScriptTestRunner.Default.Execute($"{pathToScript} --nocache");
+            var pathToExecutionCache = GetPathToExecutionCache(pathToScript);
+            Assert.True(File.Exists(Path.Combine(pathToExecutionCache, "LightInject.dll")));
+            Assert.True(File.Exists(Path.Combine(pathToExecutionCache, "LightInject.pdb")));
         }
 
         [Fact]
         public void ShouldCacheScriptsFromSameFolderIndividually()
         {
-            (string Output, bool Cached) Execute(string pathToScript)
+            static (string Output, bool Cached) Execute(string pathToScript)
             {
-                var result = ScriptTestRunner.Default.Execute($"{pathToScript} --debug");
-                return (Output: result.output, Cached: result.output.Contains("Using cached compilation"));
+                var (output, exitCode) = ScriptTestRunner.Default.Execute($"{pathToScript} --debug");
+                return (Output: output, Cached: output.Contains("Using cached compilation"));
             }
 
-            using (var scriptFolder = new DisposableFolder())
-            {
-                var pathToScriptA = Path.Combine(scriptFolder.Path, "script.csx");
-                var pathToScriptB = Path.Combine(scriptFolder.Path, "script");
+            using var scriptFolder = new DisposableFolder();
+            var pathToScriptA = Path.Combine(scriptFolder.Path, "script.csx");
+            var pathToScriptB = Path.Combine(scriptFolder.Path, "script");
 
 
-                var idScriptA = Guid.NewGuid().ToString();
-                File.AppendAllText(pathToScriptA, $@"WriteLine(""{idScriptA}"");");
+            var idScriptA = Guid.NewGuid().ToString();
+            File.AppendAllText(pathToScriptA, $@"WriteLine(""{idScriptA}"");");
 
-                var idScriptB = Guid.NewGuid().ToString();
-                File.AppendAllText(pathToScriptB, $@"WriteLine(""{idScriptB}"");");
-
-
-                var firstResultOfScriptA = Execute(pathToScriptA);
-                Assert.Contains(idScriptA, firstResultOfScriptA.Output);
-                Assert.False(firstResultOfScriptA.Cached);
-
-                var firstResultOfScriptB = Execute(pathToScriptB);
-                Assert.Contains(idScriptB, firstResultOfScriptB.Output);
-                Assert.False(firstResultOfScriptB.Cached);
+            var idScriptB = Guid.NewGuid().ToString();
+            File.AppendAllText(pathToScriptB, $@"WriteLine(""{idScriptB}"");");
 
 
-                var secondResultOfScriptA = Execute(pathToScriptA);
-                Assert.Contains(idScriptA, secondResultOfScriptA.Output);
-                Assert.True(secondResultOfScriptA.Cached);
+            var firstResultOfScriptA = Execute(pathToScriptA);
+            Assert.Contains(idScriptA, firstResultOfScriptA.Output);
+            Assert.False(firstResultOfScriptA.Cached);
 
-                var secondResultOfScriptB = Execute(pathToScriptB);
-                Assert.Contains(idScriptB, secondResultOfScriptB.Output);
-                Assert.True(secondResultOfScriptB.Cached);
-
-
-                var idScriptB2 = Guid.NewGuid().ToString();
-                File.AppendAllText(pathToScriptB, $@"WriteLine(""{idScriptB2}"");");
+            var firstResultOfScriptB = Execute(pathToScriptB);
+            Assert.Contains(idScriptB, firstResultOfScriptB.Output);
+            Assert.False(firstResultOfScriptB.Cached);
 
 
-                var thirdResultOfScriptA = Execute(pathToScriptA);
-                Assert.Contains(idScriptA, thirdResultOfScriptA.Output);
-                Assert.True(thirdResultOfScriptA.Cached);
+            var secondResultOfScriptA = Execute(pathToScriptA);
+            Assert.Contains(idScriptA, secondResultOfScriptA.Output);
+            Assert.True(secondResultOfScriptA.Cached);
 
-                var thirdResultOfScriptB = Execute(pathToScriptB);
-                Assert.Contains(idScriptB, thirdResultOfScriptB.Output);
-                Assert.Contains(idScriptB2, thirdResultOfScriptB.Output);
-                Assert.False(thirdResultOfScriptB.Cached);
-            }
+            var secondResultOfScriptB = Execute(pathToScriptB);
+            Assert.Contains(idScriptB, secondResultOfScriptB.Output);
+            Assert.True(secondResultOfScriptB.Cached);
+
+            var idScriptB2 = Guid.NewGuid().ToString();
+            File.AppendAllText(pathToScriptB, $@"WriteLine(""{idScriptB2}"");");
+
+            var thirdResultOfScriptA = Execute(pathToScriptA);
+            Assert.Contains(idScriptA, thirdResultOfScriptA.Output);
+            Assert.True(thirdResultOfScriptA.Cached);
+
+            var thirdResultOfScriptB = Execute(pathToScriptB);
+            Assert.Contains(idScriptB, thirdResultOfScriptB.Output);
+            Assert.Contains(idScriptB2, thirdResultOfScriptB.Output);
+            Assert.False(thirdResultOfScriptB.Cached);
         }
 
         private (string output, string hash) Execute(string pathToScript)

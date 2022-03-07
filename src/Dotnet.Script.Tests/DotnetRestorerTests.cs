@@ -11,10 +11,10 @@ namespace Dotnet.Script.Tests
 {
     public class DotnetRestorerTests
     {
-        private PackageReference ValidPackageReferenceA => new PackageReference("Newtonsoft.Json", "12.0.3");
-        private PackageReference ValidPackageReferenceB => new PackageReference("Moq", "4.14.5");
+        private static PackageReference ValidPackageReferenceA => new PackageReference("Newtonsoft.Json", "12.0.3");
+        private static PackageReference ValidPackageReferenceB => new PackageReference("Moq", "4.14.5");
 
-        private PackageReference InvalidPackageReferenceA => new PackageReference("7c63e1f5-2248-ed31-9480-e4cb5ac322fe", "1.0.0");
+        private static PackageReference InvalidPackageReferenceA => new PackageReference("7c63e1f5-2248-ed31-9480-e4cb5ac322fe", "1.0.0");
 
         public DotnetRestorerTests(ITestOutputHelper testOutputHelper)
         {
@@ -24,57 +24,53 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldRestoreProjectPackageReferences()
         {
-            using (var projectFolder = new DisposableFolder())
-            {
-                var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
+            using var projectFolder = new DisposableFolder();
+            var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
 
-                var projectFile = new ProjectFile();
-                projectFile.PackageReferences.Add(ValidPackageReferenceA);
-                projectFile.PackageReferences.Add(ValidPackageReferenceB);
-                projectFile.Save(pathToProjectFile);
+            var projectFile = new ProjectFile();
+            projectFile.PackageReferences.Add(ValidPackageReferenceA);
+            projectFile.PackageReferences.Add(ValidPackageReferenceB);
+            projectFile.Save(pathToProjectFile);
 
-                var projectFileInfo = new ProjectFileInfo(pathToProjectFile, string.Empty);
+            var projectFileInfo = new ProjectFileInfo(pathToProjectFile, string.Empty);
 
-                var logFactory = TestOutputHelper.CreateTestLogFactory();
-                var commandRunner = new CommandRunner(logFactory);
-                var restorer = new DotnetRestorer(commandRunner, logFactory);
+            var logFactory = TestOutputHelper.CreateTestLogFactory();
+            var commandRunner = new CommandRunner(logFactory);
+            var restorer = new DotnetRestorer(commandRunner, logFactory);
 
-                var pathToProjectObjDirectory = Path.Combine(projectFolder.Path, "obj");
+            var pathToProjectObjDirectory = Path.Combine(projectFolder.Path, "obj");
 
-                Assert.False(Directory.Exists(pathToProjectObjDirectory));
+            Assert.False(Directory.Exists(pathToProjectObjDirectory));
 
-                restorer.Restore(projectFileInfo, Array.Empty<string>());
+            restorer.Restore(projectFileInfo, Array.Empty<string>());
 
-                Assert.True(Directory.Exists(pathToProjectObjDirectory));
-            }
+            Assert.True(Directory.Exists(pathToProjectObjDirectory));
         }
 
         [Fact]
         public void ShouldThrowExceptionOnRestoreError()
         {
-            using (var projectFolder = new DisposableFolder())
+            using var projectFolder = new DisposableFolder();
+            var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
+
+            var projectFile = new ProjectFile();
+            projectFile.PackageReferences.Add(ValidPackageReferenceA);
+            projectFile.PackageReferences.Add(InvalidPackageReferenceA);
+            projectFile.PackageReferences.Add(ValidPackageReferenceB);
+            projectFile.Save(pathToProjectFile);
+
+            var projectFileInfo = new ProjectFileInfo(pathToProjectFile, string.Empty);
+
+            var logFactory = TestOutputHelper.CreateTestLogFactory();
+            var commandRunner = new CommandRunner(logFactory);
+            var restorer = new DotnetRestorer(commandRunner, logFactory);
+
+            var exception = Assert.Throws<Exception>(() =>
             {
-                var pathToProjectFile = Path.Combine(projectFolder.Path, "script.csproj");
+                restorer.Restore(projectFileInfo, Array.Empty<string>());
+            });
 
-                var projectFile = new ProjectFile();
-                projectFile.PackageReferences.Add(ValidPackageReferenceA);
-                projectFile.PackageReferences.Add(InvalidPackageReferenceA);
-                projectFile.PackageReferences.Add(ValidPackageReferenceB);
-                projectFile.Save(pathToProjectFile);
-
-                var projectFileInfo = new ProjectFileInfo(pathToProjectFile, string.Empty);
-
-                var logFactory = TestOutputHelper.CreateTestLogFactory();
-                var commandRunner = new CommandRunner(logFactory);
-                var restorer = new DotnetRestorer(commandRunner, logFactory);
-
-                var exception = Assert.Throws<Exception>(() =>
-                {
-                    restorer.Restore(projectFileInfo, Array.Empty<string>());
-                });
-
-                Assert.Contains("NU1101", exception.Message); // unable to find package 
-            }
+            Assert.Contains("NU1101", exception.Message); // unable to find package 
         }
     }
 }
