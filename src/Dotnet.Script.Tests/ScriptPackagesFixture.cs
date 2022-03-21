@@ -35,7 +35,7 @@ namespace Dotnet.Script.Tests
             RemoveDirectory(pathToPackagesOutputFolder);
             Directory.CreateDirectory(pathToPackagesOutputFolder);
             var specFiles = GetSpecFiles();
-            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            _ = AppDomain.CurrentDomain.BaseDirectory;
             var pathtoNuget430 = Path.Combine("../../../NuGet/NuGet430.exe");
             foreach (var specFile in specFiles)
             {
@@ -43,12 +43,12 @@ namespace Dotnet.Script.Tests
                 if (_scriptEnvironment.IsWindows)
                 {
                     command = pathtoNuget430;
-                    var result = ProcessHelper.RunAndCaptureOutput(command, $"pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
+                    _ = ProcessHelper.RunAndCaptureOutput(command, $"pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
                 }
                 else
                 {
                     command = "mono";
-                    var result = ProcessHelper.RunAndCaptureOutput(command, $"\"{pathtoNuget430}\" pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
+                    _ = ProcessHelper.RunAndCaptureOutput(command, $"\"{pathtoNuget430}\" pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
                 }
 
             }

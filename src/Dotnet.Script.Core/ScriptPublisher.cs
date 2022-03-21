@@ -68,7 +68,7 @@ namespace Dotnet.Script.Core
                 throw new ArgumentNullException(nameof(runtimeIdentifier));
             }
 
-            executableFileName = executableFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
+            executableFileName ??= Path.GetFileNameWithoutExtension(context.FilePath);
             const string AssemblyName = "scriptAssembly";
 
             var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), _scriptEnvironment.TargetFramework);

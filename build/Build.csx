@@ -54,14 +54,12 @@ private void CreateChocoPackage()
 
 private void CreateGlobalToolPackage()
 {
-    using (var globalToolBuildFolder = new DisposableFolder())
-    {
-        Copy(solutionFolder, globalToolBuildFolder.Path);
-        PatchPackAsTool(globalToolBuildFolder.Path);
-        PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
-        PatchContent(globalToolBuildFolder.Path);
-        Command.Execute("dotnet", $"pack --configuration release --output {nuGetArtifactsFolder}", Path.Combine(globalToolBuildFolder.Path, "Dotnet.Script"));
-    }
+    using var globalToolBuildFolder = new DisposableFolder();
+    Copy(solutionFolder, globalToolBuildFolder.Path);
+    PatchPackAsTool(globalToolBuildFolder.Path);
+    PatchPackageId(globalToolBuildFolder.Path, GlobalToolPackageId);
+    PatchContent(globalToolBuildFolder.Path);
+    Command.Execute("dotnet", $"pack --configuration release --output {nuGetArtifactsFolder}", Path.Combine(globalToolBuildFolder.Path, "Dotnet.Script"));
 }
 
 private void CreateNuGetPackages()

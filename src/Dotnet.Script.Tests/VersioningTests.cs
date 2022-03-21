@@ -50,7 +50,7 @@ namespace Dotnet.Script.Tests
             Assert.DoesNotContain("Version Y is now available", output.ToString());
         }
 
-        private async Task<string> ReportWith(string currentVersion, string latestVersion)
+        private static async Task<string> ReportWith(string currentVersion, string latestVersion)
         {
             var versionProviderMock = new Mock<IVersionProvider>();
             versionProviderMock.Setup(m => m.GetCurrentVersion()).Returns(new VersionInfo(currentVersion, true));
@@ -71,10 +71,10 @@ namespace Dotnet.Script.Tests
         public async Task ShouldLogErrorMessageWhenResolvingLatestVersionFails()
         {
             StringWriter log = new StringWriter();
-            LogFactory logFactory = (type) => (level,message,exception) => 
-            {
-                log.WriteLine(message);
-            };
+            Logger logFactory(Type type) => (level, message, exception) =>
+             {
+                 log.WriteLine(message);
+             };
 
             var versionProviderMock = new Mock<IVersionProvider>();
             versionProviderMock.Setup(m => m.GetCurrentVersion()).Returns(new VersionInfo("X", true));

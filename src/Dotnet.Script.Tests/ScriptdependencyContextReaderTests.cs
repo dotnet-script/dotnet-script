@@ -18,16 +18,14 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowMeaningfulExceptionWhenRuntimeTargetIsMissing()
         {
-            using (var projectFolder = new DisposableFolder())
-            {
-                ProcessHelper.RunAndCaptureOutput("dotnet", "new console -n SampleLibrary", projectFolder.Path);
-                ProcessHelper.RunAndCaptureOutput("dotnet", "restore", projectFolder.Path);
-                var pathToAssetsFile = Path.Combine(projectFolder.Path, "SampleLibrary" ,"obj","project.assets.json");
-                var dependencyResolver = new ScriptDependencyContextReader(TestOutputHelper.CreateTestLogFactory());
+            using var projectFolder = new DisposableFolder();
+            ProcessHelper.RunAndCaptureOutput("dotnet", "new console -n SampleLibrary", projectFolder.Path);
+            ProcessHelper.RunAndCaptureOutput("dotnet", "restore", projectFolder.Path);
+            var pathToAssetsFile = Path.Combine(projectFolder.Path, "SampleLibrary", "obj", "project.assets.json");
+            var dependencyResolver = new ScriptDependencyContextReader(TestOutputHelper.CreateTestLogFactory());
 
-                var exception = Assert.Throws<InvalidOperationException>(() => dependencyResolver.ReadDependencyContext(pathToAssetsFile));
-                Assert.Contains("Make sure that the project file was restored using a RID (runtime identifier).", exception.Message);
-            }
+            var exception = Assert.Throws<InvalidOperationException>(() => dependencyResolver.ReadDependencyContext(pathToAssetsFile));
+            Assert.Contains("Make sure that the project file was restored using a RID (runtime identifier).", exception.Message);
         }
 
         [Fact]

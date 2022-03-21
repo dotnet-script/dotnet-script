@@ -32,7 +32,7 @@ namespace Dotnet.Script
 
     internal class ConsoleOptionsMonitor : IOptionsMonitor<ConsoleLoggerOptions>
     {
-        private ConsoleLoggerOptions _consoleLoggerOptions;
+        private readonly ConsoleLoggerOptions _consoleLoggerOptions;
 
         public ConsoleOptionsMonitor()
         {
