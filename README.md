@@ -171,7 +171,7 @@ The OSX/Linux shebang directive should be **#!/usr/bin/env dotnet-script**
 Console.WriteLine("Hello world");
 ```
 
-On Windows, you can run **dotnet register script** to achieve a similar behaviour. This register dotnet-script in the Windows registry as the tool to process .csx files.
+On Windows, you can run `dotnet script register` to achieve a similar behaviour. This registers dotnet-script in the Windows registry as the tool to process .csx files.
 
 You can pass arguments to control your script execution more.
 
