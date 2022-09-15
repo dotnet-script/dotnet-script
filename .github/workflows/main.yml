@@ -22,6 +22,25 @@ jobs:
       - name: Run build script
         run: dotnet-script build/Build.csx
 
+  build-mac:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install .Net Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: |
+            5.0.x
+            6.0.x
+            7.0.x
+          include-prerelease: true
+      - name: Install dotnet-script
+        run: dotnet tool install dotnet-script --global
+
+      - name: Run build script
+        run: dotnet-script build/Build.csx
+
   build-windows:
     runs-on: windows-latest
 
