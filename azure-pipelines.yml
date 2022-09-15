@@ -17,10 +17,10 @@ jobs:
     displayName: Ubuntu Agent
     condition: succeeded()
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: "ubuntu-18.04"
     steps:
-      - bash: "curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.1.102"
-        displayName: "Install 3.0.100"
+      - bash: "curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 7.0.100-rc.1.22431.12"
+        displayName: "Install 7.0.100"
 
       - bash: "curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 5.0.100"
         displayName: " 5.0.100"
@@ -43,11 +43,11 @@ jobs:
     displayName: Mac Agent
     condition: succeeded()
     pool:
-      vmImage: 'macOS-latest'
+      vmImage: "macOS-latest"
     steps:
       - bash: |
-          curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 3.1.102
-        displayName: "Install 3.0.100"
+          curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 7.0.100-rc.1.22431.12
+        displayName: "Install 7.0.100"
 
       - bash: |
           curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin -version 5.0.100
@@ -73,9 +73,9 @@ jobs:
     steps:
       - powershell: |
           iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1
-          .\dotnet-install.ps1 -Version  3.1.102
+          .\dotnet-install.ps1 -Version  7.0.100-rc.1.22431.12
 
-        displayName: "Install 3.0.100"
+        displayName: "Install 7.0.100"
 
       - powershell: |
           iwr https://raw.githubusercontent.com/dotnet/cli/release/2.1.3xx/scripts/obtain/dotnet-install.ps1 -outfile dotnet-install.ps1

@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP
+﻿#if NET
 
 using System;
 using System.Reflection;
@@ -20,7 +20,7 @@ namespace Dotnet.Script.Core
         {
         }
 
-#if NETCOREAPP3_0_OR_GREATER
+#if NET5_0_OR_GREATER
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptAssemblyLoadContext"/> class
         /// with a name and a value that indicates whether unloading is enabled.

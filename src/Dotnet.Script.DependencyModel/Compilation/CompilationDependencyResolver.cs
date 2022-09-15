@@ -44,7 +44,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
             }
 
             // On .Net Core, we need to fetch the compilation references for framework assemblies separately.
-            if (defaultTargetFramework.StartsWith("netcoreapp3", StringComparison.InvariantCultureIgnoreCase) ||
+            if (defaultTargetFramework.StartsWith("net7", StringComparison.InvariantCultureIgnoreCase) ||
                 defaultTargetFramework.StartsWith("net5", StringComparison.InvariantCultureIgnoreCase) ||
                 defaultTargetFramework.StartsWith("net6", StringComparison.InvariantCultureIgnoreCase))
             {
