@@ -15,8 +15,9 @@ namespace Dotnet.Script.Desktop.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.1")]
         [InlineData("net5.0")]
+        [InlineData("net6.0")]
+        [InlineData("net7.0")]
         public void ShouldGetCompilationDependenciesForNetCoreApp(string targetFramework)
         {
             var resolver = CreateResolver();
