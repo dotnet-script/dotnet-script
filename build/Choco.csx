@@ -78,8 +78,7 @@ public static class Choco
         filesElement.Add(CreateFileElement(@"tools\*.*", $@"{packageId}\tools"));
         var srcGlobPattern = $@"{pathToBinaries}\**\*";
         filesElement.Add(CreateFileElement(srcGlobPattern, packageId));
-
-        using var fileStream = new FileStream("Chocolatey/chocolatey.nuspec", FileMode.Create);
+        using var fileStream = new FileStream(Path.Combine(FileUtils.GetScriptFolder(), "Chocolatey", "chocolatey.nuspec"), FileMode.Create);
         new XDocument(packageElement).Save(fileStream);
     }
 
