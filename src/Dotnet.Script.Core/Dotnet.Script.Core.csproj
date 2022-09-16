@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>A cross platform library allowing you to run C# (CSX) scripts with support for debugging and inline NuGet packages. Based on Roslyn.</Description>
-    <VersionPrefix>1.3.1</VersionPrefix>
+    <VersionPrefix>1.4.0</VersionPrefix>
     <Authors>filipw</Authors>
     <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
     <AssemblyName>Dotnet.Script.Core</AssemblyName>
