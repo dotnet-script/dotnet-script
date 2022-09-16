@@ -43,14 +43,8 @@ namespace Dotnet.Script.DependencyModel.Compilation
                 result.Add(compilationDependency);
             }
 
-            // On .Net Core, we need to fetch the compilation references for framework assemblies separately.
-            if (defaultTargetFramework.StartsWith("net7", StringComparison.InvariantCultureIgnoreCase) ||
-                defaultTargetFramework.StartsWith("net5", StringComparison.InvariantCultureIgnoreCase) ||
-                defaultTargetFramework.StartsWith("net6", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var compilationreferences = _compilationReferenceReader.Read(projectFileInfo);
-                result.Add(new CompilationDependency("Dotnet.Script.Default.Dependencies", "99.0", compilationreferences.Select(cr => cr.Path).ToArray(), Array.Empty<string>()));
-            }
+            var compilationReferences = _compilationReferenceReader.Read(projectFileInfo);
+            result.Add(new CompilationDependency("Dotnet.Script.Default.Dependencies", "99.0", compilationReferences.Select(cr => cr.Path).ToArray(), Array.Empty<string>()));
 
             return result;
         }
