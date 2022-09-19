@@ -13,7 +13,7 @@ public static class Choco
     {
         string pathToProjectFile = Directory.GetFiles(pathToProjectFolder, "*.csproj").Single();
         CreateSpecificationFromProject(pathToProjectFile, pathToBinaries);
-        Command.Execute("choco.exe", $@"pack Chocolatey\chocolatey.nuspec  --outputdirectory {outputFolder}");
+        Command.Execute("choco.exe", $@"pack {Path.Combine(FileUtils.GetScriptFolder(), "Chocolatey", "chocolatey.nuspec")}  --outputdirectory {outputFolder}");
     }
 
     public static void Push(string packagesFolder, string apiKey, string source = "https://push.chocolatey.org/")
@@ -78,8 +78,7 @@ public static class Choco
         filesElement.Add(CreateFileElement(@"tools\*.*", $@"{packageId}\tools"));
         var srcGlobPattern = $@"{pathToBinaries}\**\*";
         filesElement.Add(CreateFileElement(srcGlobPattern, packageId));
-
-        using var fileStream = new FileStream("Chocolatey/chocolatey.nuspec", FileMode.Create);
+        using var fileStream = new FileStream(Path.Combine(FileUtils.GetScriptFolder(), "Chocolatey", "chocolatey.nuspec"), FileMode.Create);
         new XDocument(packageElement).Save(fileStream);
     }
 

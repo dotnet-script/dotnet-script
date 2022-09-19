@@ -4,10 +4,10 @@
 #load "Choco.csx"
 #load "BuildContext.csx"
 
-using static ReleaseManagement;
+using System.Xml.Linq;
 using static ChangeLog;
 using static FileUtils;
-using System.Xml.Linq;
+using static ReleaseManagement;
 
 [StepDescription("Runs all tests.")]
 Step test = () => RunTests();
@@ -35,7 +35,7 @@ await StepRunner.Execute(Args);
 
 private void CreateGitHubReleaseAsset()
 {
-    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "netcoreapp3.1");
+    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net6.0");
     Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
 }
 
