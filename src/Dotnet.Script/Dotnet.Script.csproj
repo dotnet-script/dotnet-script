@@ -9,11 +9,11 @@
         <AssemblyName>dotnet-script</AssemblyName>
         <OutputType>Exe</OutputType>
         <PackageTags>dotnet;cli;script;csx;csharp;roslyn</PackageTags>
-        <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
-        <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
+        <PackageIconUrl>https://avatars.githubusercontent.com/u/113979420</PackageIconUrl>
+        <PackageProjectUrl>https://github.com/dotnet-script/dotnet-script</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
+        <RepositoryUrl>https://github.com/dotnet-script/dotnet-script.git</RepositoryUrl>
         <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
         <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
         <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
