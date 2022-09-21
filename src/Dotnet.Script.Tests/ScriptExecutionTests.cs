@@ -281,7 +281,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowExceptionOnInvalidMediaType()
         {
-            var url = "https://github.com/filipw/dotnet-script/archive/0.20.0.zip";
+            var url = "https://github.com/dotnet-script/dotnet-script/archive/0.20.0.zip";
             var (output, _) = ScriptTestRunner.Default.Execute(url);
             Assert.Contains("not supported", output);
         }

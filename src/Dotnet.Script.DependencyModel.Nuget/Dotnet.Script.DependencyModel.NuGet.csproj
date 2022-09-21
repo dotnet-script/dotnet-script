@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/filipw/dotnet-script</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/dotnet-script/dotnet-script</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/filipw/dotnet-script.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dotnet-script/dotnet-script.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script;csx;csharp;roslyn;nuget</PackageTags>
     <Version>1.4.0</Version>

@@ -59,19 +59,19 @@ choco install dotnet.script
 We also provide a PowerShell script for installation.
 
 ```powershell
-(new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.ps1") | iex
+(new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/dotnet-script/dotnet-script/master/install/install.ps1") | iex
 ```
 
 ### Linux and Mac
 
 ```shell
-curl -s https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.sh | bash
+curl -s https://raw.githubusercontent.com/dotnet-script/dotnet-script/master/install/install.sh | bash
 ```
 
 If permission is denied we can try with `sudo`
 
 ```shell
-curl -s https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.sh | sudo bash
+curl -s https://raw.githubusercontent.com/dotnet-script/dotnet-script/master/install/install.sh | sudo bash
 ```
 
 ### Docker
@@ -91,7 +91,7 @@ docker run -it dotnet-script --version
 
 ### Github
 
-You can manually download all the releases in `zip` format from the [GitHub releases page](https://github.com/filipw/dotnet-script/releases).
+You can manually download all the releases in `zip` format from the [GitHub releases page](https://github.com/dotnet-script/dotnet-script/releases).
 
 ## Usage
 
@@ -576,4 +576,4 @@ We will also see this when working with scripts in VS Code under the problems pa
 
 ## License
 
-[MIT License](https://github.com/filipw/dotnet-script/blob/master/LICENSE)
+[MIT License](https://github.com/dotnet-script/dotnet-script/blob/master/LICENSE)

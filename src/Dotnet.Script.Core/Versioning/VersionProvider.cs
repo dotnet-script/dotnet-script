@@ -14,7 +14,7 @@ namespace Dotnet.Script.Core.Versioning
     public class VersionProvider : IVersionProvider
     {
         private const string UserAgent = "dotnet-script";
-        private static readonly string RequestUri = "/repos/filipw/dotnet-script/releases/latest";
+        private static readonly string RequestUri = "/repos/dotnet-script/dotnet-script/releases/latest";
 
          /// <inheritdoc>
         public async Task<VersionInfo> GetLatestVersion()

@@ -78,11 +78,11 @@ namespace Dotnet.Script.Core.Versioning
             if (ScriptEnvironment.Default.IsWindows)
             {
                 updateInfo.AppendLine("Chocolatey  : choco upgrade Dotnet.Script");
-                updateInfo.AppendLine("Powershell  : (new-object Net.WebClient).DownloadString(\"https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.ps\") | iex");
+                updateInfo.AppendLine("Powershell  : (new-object Net.WebClient).DownloadString(\"https://raw.githubusercontent.com/dotnet-script/dotnet-script/master/install/install.ps\") | iex");
             }
             else
             {
-                updateInfo.AppendLine("Bash        : curl -s https://raw.githubusercontent.com/filipw/dotnet-script/master/install/install.sh | bash");
+                updateInfo.AppendLine("Bash        : curl -s https://raw.githubusercontent.com/dotnet-script/dotnet-script/master/install/install.sh | bash");
             }
 
             _scriptConsole.WriteHighlighted(updateInfo.ToString());

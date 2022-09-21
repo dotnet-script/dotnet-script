@@ -13,8 +13,8 @@ namespace Dotnet.Script.Tests
         [InlineData("1.2.3")]
         [InlineData("1.2.3.4")]
         [InlineData("1.2.3-beta1")]
-        [InlineData("0.1.4-beta")]             // See: https://github.com/filipw/dotnet-script/issues/407#issuecomment-563363947
-        [InlineData("2.0.0-preview3.20122.2")] // See: https://github.com/filipw/dotnet-script/issues/407#issuecomment-631122591
+        [InlineData("0.1.4-beta")]             // See: https://github.com/dotnet-script/dotnet-script/issues/407#issuecomment-563363947
+        [InlineData("2.0.0-preview3.20122.2")] // See: https://github.com/dotnet-script/dotnet-script/issues/407#issuecomment-631122591
         [InlineData("1.0.0-ci-20180920T1656")]
         [InlineData("[1.2]")]
         [InlineData("[1.2.3]")]
