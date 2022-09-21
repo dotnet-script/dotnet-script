@@ -7,7 +7,7 @@
     <Description>Provides runtime and compilation dependency resolution for dotnet-script based scripts.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/dotnet-script/dotnet-script</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/filipw/Strathweb.TypedRouting.AspNetCore/master/strathweb.png</PackageIconUrl>
+    <PackageIconUrl>https://avatars.githubusercontent.com/u/113979420</PackageIconUrl>
     <RepositoryUrl>https://github.com/dotnet-script/dotnet-script.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script;csx;csharp;roslyn;omnisharp</PackageTags>
