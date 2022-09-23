@@ -24,7 +24,7 @@ namespace Dotnet.Script.Tests
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
-        public (string output, int exitCode) Execute(string arguments, string workingDirectory = null)
+        public ProcessResult Execute(string arguments, string workingDirectory = null)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments(arguments), workingDirectory);
             return result;
@@ -35,14 +35,14 @@ namespace Dotnet.Script.Tests
             return Program.Main(arguments?.Split(" ") ?? Array.Empty<string>());
         }
 
-        public (string output, int exitCode) ExecuteFixture(string fixture, string arguments = null, string workingDirectory = null)
+        public ProcessResult ExecuteFixture(string fixture, string arguments = null, string workingDirectory = null)
         {
             var pathToFixture = TestPathUtils.GetPathToTestFixture(fixture);
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"\"{pathToFixture}\" {arguments}"), workingDirectory);
             return result;
         }
 
-        public (string output, int exitcode) ExecuteWithScriptPackage(string fixture, string arguments = null, string workingDirectory = null)
+        public ProcessResult ExecuteWithScriptPackage(string fixture, string arguments = null, string workingDirectory = null)
         {
             var pathToScriptPackageFixtures = TestPathUtils.GetPathToTestFixtureFolder("ScriptPackage");
             var pathToFixture = Path.Combine(pathToScriptPackageFixtures, fixture, $"{fixture}.csx");
@@ -67,13 +67,13 @@ namespace Dotnet.Script.Tests
             return Program.Main(allArguments.ToArray());
         }
 
-        public (string output, int exitCode) ExecuteCode(string code)
+        public ProcessResult ExecuteCode(string code)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"eval \"{code}\""));
             return result;
         }
 
-        public (string output, int exitCode) ExecuteCodeInReleaseMode(string code)
+        public ProcessResult ExecuteCodeInReleaseMode(string code)
         {
             var result = ProcessHelper.RunAndCaptureOutput("dotnet", GetDotnetScriptArguments($"-c release eval \"{code}\""));
             return result;

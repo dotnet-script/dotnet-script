@@ -84,6 +84,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldWriteCompilerWarningsToStandardError()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture(fixture: "CompilationWarning", "--no-cache");
+            Assert.True(string.IsNullOrWhiteSpace(result.standardOut));
+            Assert.Contains("CS1998", result.standardError, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
         public void ShouldHandleIssue129()
         {
             var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue129");
