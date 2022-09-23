@@ -87,8 +87,8 @@ namespace Dotnet.Script.Tests
         public void ShouldWriteCompilerWarningsToStandardError()
         {
             var result = ScriptTestRunner.Default.ExecuteFixture(fixture: "CompilationWarning", "--no-cache");
-            Assert.True(string.IsNullOrWhiteSpace(result.standardOut));
-            Assert.Contains("CS1998", result.standardError, StringComparison.OrdinalIgnoreCase);
+            Assert.True(string.IsNullOrWhiteSpace(result.StandardOut));
+            Assert.Contains("CS1998", result.StandardError, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -254,7 +254,7 @@ namespace Dotnet.Script.Tests
         public void ShouldExecuteRemoteScript(string url, string output)
         {
             var result = ScriptTestRunner.Default.Execute(url);
-            Assert.Contains(output, result.output);
+            Assert.Contains(output, result.Output);
         }
 
         [Fact]
@@ -337,7 +337,7 @@ namespace Dotnet.Script.Tests
 
             // Run once to ensure that it is cached.
             var result = ScriptTestRunner.Default.Execute(pathToScript);
-            Assert.Contains("42", result.output);
+            Assert.Contains("42", result.Output);
 
             // Remove the package from the global NuGet cache
             TestPathUtils.RemovePackageFromGlobalNugetCache("SampleLibrary");
@@ -345,11 +345,11 @@ namespace Dotnet.Script.Tests
             //ScriptTestRunner.Default.ExecuteInProcess(pathToScript);
 
             result = ScriptTestRunner.Default.Execute(pathToScript);
-            Assert.Contains("Try executing/publishing the script", result.output);
+            Assert.Contains("Try executing/publishing the script", result.Output);
 
             // Run again with the '--no-cache' option to assert that the advice actually worked.
             result = ScriptTestRunner.Default.Execute($"{pathToScript} --no-cache");
-            Assert.Contains("42", result.output);
+            Assert.Contains("42", result.Output);
         }
 
         [Fact]

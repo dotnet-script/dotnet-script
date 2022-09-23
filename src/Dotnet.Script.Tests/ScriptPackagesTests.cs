@@ -38,7 +38,7 @@ namespace Dotnet.Script.Tests
 
             // Run once to ensure that it is cached.
             var result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
-            Assert.StartsWith("Hello from netstandard2.0", result.output);
+            Assert.StartsWith("Hello from netstandard2.0", result.Output);
 
             // Remove the package from the global NuGet cache
             TestPathUtils.RemovePackageFromGlobalNugetCache("ScriptPackageWithMainCsx");
@@ -48,7 +48,7 @@ namespace Dotnet.Script.Tests
             File.WriteAllText(pathToScriptFile, code.ToString());
 
             result = ScriptTestRunner.Default.Execute($"{pathToScriptFile} -s {pathToScriptPackages}");
-            Assert.Contains("Try executing/publishing the script", result.output);
+            Assert.Contains("Try executing/publishing the script", result.Output);
         }
 
         [Fact]

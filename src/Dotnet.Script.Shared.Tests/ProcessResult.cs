@@ -4,21 +4,21 @@ namespace Dotnet.Script.Shared.Tests
     {
         public ProcessResult(string output, int exitCode, string standardOut, string standardError)
         {
-            this.output = output;
-            this.exitCode = exitCode;
-            this.standardOut = standardOut;
-            this.standardError = standardError;
+            this.Output = output;
+            this.ExitCode = exitCode;
+            this.StandardOut = standardOut;
+            this.StandardError = standardError;
         }
 
-        public string output { get; }
-        public int exitCode { get; }
-        public string standardOut { get; }
-        public string standardError { get; }
+        public string Output { get; }
+        public int ExitCode { get; }
+        public string StandardOut { get; }
+        public string StandardError { get; }
 
         public void Deconstruct(out string output, out int exitCode)
         {
-            output = this.output;
-            exitCode = this.exitCode;
+            output = this.Output;
+            exitCode = this.ExitCode;
         }
     }
 }
