@@ -2,7 +2,7 @@ namespace Dotnet.Script.Shared.Tests
 {
     public class ProcessResult
     {
-        public ProcessResult(string output, int exitcode, string standardOut, string standardError)
+        public ProcessResult(string output, int exitCode, string standardOut, string standardError)
         {
             this.output = output;
             this.exitCode = exitCode;
