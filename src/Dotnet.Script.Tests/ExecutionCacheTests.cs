@@ -136,8 +136,8 @@ namespace Dotnet.Script.Tests
         private (string output, string hash) Execute(string pathToScript)
         {
             var result = ScriptTestRunner.Default.Execute(pathToScript);
-            testOutputHelper.WriteLine(result.output);
-            Assert.Equal(0, result.exitCode);
+            testOutputHelper.WriteLine(result.Output);
+            Assert.Equal(0, result.ExitCode);
             string pathToExecutionCache = GetPathToExecutionCache(pathToScript);
             var pathToCacheFile = Path.Combine(pathToExecutionCache, "script.sha256");
             string cachedhash = null;
@@ -146,7 +146,7 @@ namespace Dotnet.Script.Tests
                 cachedhash = File.ReadAllText(pathToCacheFile);
             }
 
-            return (result.output, cachedhash);
+            return (result.Output, cachedhash);
         }
 
         private static string GetPathToExecutionCache(string pathToScript)

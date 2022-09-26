@@ -36,22 +36,29 @@ namespace Dotnet.Script.Core
             Console.ResetColor();
         }
 
+        public virtual void WriteWarning(string value)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Error.WriteLine(value.TrimEnd(Environment.NewLine.ToCharArray()));
+            Console.ResetColor();
+        }
+
         public virtual void WriteNormal(string value)
         {
             Out.WriteLine(value.TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
-        public virtual void WriteDiagnostics(Diagnostic[] warningDiagnostics, Diagnostic[] errorDiagnostics) 
+        public virtual void WriteDiagnostics(Diagnostic[] warningDiagnostics, Diagnostic[] errorDiagnostics)
         {
-            if (warningDiagnostics != null) 
+            if (warningDiagnostics != null)
             {
                 foreach (var warning in warningDiagnostics)
                 {
-                    WriteHighlighted(warning.ToString());
+                    WriteWarning(warning.ToString());
                 }
             }
 
-            if (errorDiagnostics != null) 
+            if (errorDiagnostics != null)
             {
                 foreach (var error in errorDiagnostics)
                 {

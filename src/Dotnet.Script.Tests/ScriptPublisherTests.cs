@@ -126,7 +126,7 @@ namespace Dotnet.Script.Tests
             var dllPath = Path.Combine("publish", "main.dll");
             var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", workspaceFolder.Path);
 
-            Assert.Equal(0, dllRunResult.exitCode);
+            Assert.Equal(0, dllRunResult.ExitCode);
         }
 
         [Fact]
@@ -143,7 +143,7 @@ namespace Dotnet.Script.Tests
 
             var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", workspaceFolder.Path);
 
-            Assert.Equal(0, dllRunResult.exitCode);
+            Assert.Equal(0, dllRunResult.ExitCode);
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace Dotnet.Script.Tests
             var dllPath = Path.Combine(publishFolder.Path, "main.dll");
             var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", publishFolder.Path);
 
-            Assert.Equal(0, dllRunResult.exitCode);
+            Assert.Equal(0, dllRunResult.ExitCode);
         }
 
         [Fact]
@@ -178,7 +178,7 @@ namespace Dotnet.Script.Tests
             var dllPath = Path.Combine(workspaceFolder.Path, "publish", assemblyName);
             var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath}", workspaceFolder.Path);
 
-            Assert.Equal(0, dllRunResult.exitCode);
+            Assert.Equal(0, dllRunResult.ExitCode);
         }
 
         [Fact]
@@ -211,8 +211,8 @@ namespace Dotnet.Script.Tests
             var dllPath = Path.Combine(workspaceFolder.Path, "publish", "main.dll");
             var dllRunResult = ScriptTestRunner.Default.Execute($"exec {dllPath} -- w o r l d", workspaceFolder.Path);
 
-            Assert.Equal(0, dllRunResult.exitCode);
-            Assert.Contains("Hello world", dllRunResult.output);
+            Assert.Equal(0, dllRunResult.ExitCode);
+            Assert.Contains("Hello world", dllRunResult.Output);
         }
 
         [Fact]

@@ -23,7 +23,7 @@ namespace Dotnet.Script.Core
             var compilationContext = _scriptCompiler.CreateCompilationContext<TReturn, THost>(context);
             foreach (var warning in compilationContext.Warnings)
             {
-                _scriptConsole.WriteHighlighted(warning.ToString());
+                _scriptConsole.WriteWarning(warning.ToString());
             }
 
             if (compilationContext.Errors.Any())
