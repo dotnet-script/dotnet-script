@@ -2,9 +2,8 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Dotnet.Script.DependencyModel.Logging;
-using Newtonsoft.Json.Linq;
 
 namespace Dotnet.Script.Core.Versioning
 {
@@ -16,10 +15,10 @@ namespace Dotnet.Script.Core.Versioning
         private const string UserAgent = "dotnet-script";
         private static readonly string RequestUri = "/repos/dotnet-script/dotnet-script/releases/latest";
 
-         /// <inheritdoc>
+        /// <inheritdoc>
         public async Task<VersionInfo> GetLatestVersion()
         {
-            using(var httpClient = CreateHttpClient())
+            using (var httpClient = CreateHttpClient())
             {
                 var response = await httpClient.GetStringAsync(RequestUri);
                 return ParseTagName(response);
@@ -34,8 +33,8 @@ namespace Dotnet.Script.Core.Versioning
 
             VersionInfo ParseTagName(string json)
             {
-                JObject jsonResult = JObject.Parse(json);
-                return new VersionInfo(jsonResult.SelectToken("tag_name").Value<string>(), isResolved:true);
+                JsonNode jsonResult = JsonNode.Parse(json);
+                return new VersionInfo(jsonResult["tag_name"].GetValue<string>(), isResolved: true);
             }
         }
 
@@ -43,7 +42,7 @@ namespace Dotnet.Script.Core.Versioning
         public VersionInfo GetCurrentVersion()
         {
             var versionAttribute = typeof(VersionProvider).Assembly.GetCustomAttributes<AssemblyInformationalVersionAttribute>().Single();
-            return new VersionInfo(versionAttribute.InformationalVersion, isResolved:true);
+            return new VersionInfo(versionAttribute.InformationalVersion, isResolved: true);
         }
     }
 }
