@@ -37,6 +37,10 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
     <!-- End of quick fixes -->
     <PackageReference Include="StrongNamer" Version="0.2.5" PrivateAssets="all" />
+
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Text.Json" Version="6.0.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.DependencyModel.Nuget\Dotnet.Script.DependencyModel.NuGet.csproj" />
