@@ -469,7 +469,7 @@ namespace Dotnet.Script.Tests
         public void ShouldIsolateScriptAssemblies()
         {
             var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Isolation", "--isolated-load-context");
-            Assert.Contains("10.0.0.0", output);
+            Assert.Contains("2.0.0.0", output);
         }
 
         [Fact]
