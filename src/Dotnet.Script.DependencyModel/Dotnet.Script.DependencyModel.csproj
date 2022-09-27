@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel" Version="6.3.0" />
+    <PackageReference Include="NuGet.ProjectModel" Version="6.2.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
   </ItemGroup>
 
