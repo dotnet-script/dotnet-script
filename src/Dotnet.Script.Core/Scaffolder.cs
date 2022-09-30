@@ -2,12 +2,12 @@
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.Process;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.Core
@@ -119,7 +119,7 @@ namespace Dotnet.Script.Core
             if (!File.Exists(pathToOmniSharpJson))
             {
                 var omniSharpFileTemplate = TemplateLoader.ReadTemplate("omnisharp.json.template");
-                JObject settings = JObject.Parse(omniSharpFileTemplate);
+                var settings = JsonObject.Parse(omniSharpFileTemplate);
                 settings["script"]["defaultTargetFramework"] = _scriptEnvironment.TargetFramework;
                 File.WriteAllText(pathToOmniSharpJson, settings.ToString());
                 _scriptConsole.WriteSuccess($"...'{pathToOmniSharpJson}' [Created]");
