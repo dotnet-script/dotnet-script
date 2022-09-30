@@ -26,26 +26,39 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         public ParseResult ParseFromFiles(IEnumerable<string> csxFiles)
         {
             var allPackageReferences = new HashSet<PackageReference>();
+            string sdk = string.Empty;
             foreach (var csxFile in csxFiles)
             {
                 _logger.Debug($"Parsing {csxFile}");
                 var fileContent = File.ReadAllText(csxFile);
                 allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(fileContent));
                 allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(fileContent));
+                var sdkReference = ReadSdkFromReferenceDirective(fileContent);
+                if (!string.IsNullOrWhiteSpace(sdkReference))
+                {
+                    sdk = sdkReference;
+                }
             }
 
-            return new ParseResult(allPackageReferences);
+            return new ParseResult(allPackageReferences) { Sdk = sdk };
+        }
+
+        private static string ReadSdkFromReferenceDirective(string fileContent)
+        {
+            const string pattern = DirectivePatternPrefix + "r" + SdkDirectivePatternSuffix;
+            var match = Regex.Match(fileContent, pattern);
+            return match.Success ? match.Groups[1].Value : string.Empty;
         }
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromReferenceDirective(string fileContent)
         {
-            const string pattern = DirectivePatternPrefix + "r" + DirectivePatternSuffix;
+            const string pattern = DirectivePatternPrefix + "r" + NuGetDirectivePatternSuffix;
             return ReadPackageReferencesFromDirective(pattern, fileContent);
         }
 
         private static IEnumerable<PackageReference> ReadPackageReferencesFromLoadDirective(string fileContent)
         {
-            const string pattern = DirectivePatternPrefix + "load" + DirectivePatternSuffix;
+            const string pattern = DirectivePatternPrefix + "load" + NuGetDirectivePatternSuffix;
             return ReadPackageReferencesFromDirective(pattern, fileContent);
         }
 

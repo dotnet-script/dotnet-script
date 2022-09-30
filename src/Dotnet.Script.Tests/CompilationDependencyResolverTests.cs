@@ -72,6 +72,16 @@ namespace Dotnet.Script.Tests
             Assert.Contains(dependencies, d => d.Name == "Auth0.ManagementApi");
         }
 
+        [Fact]
+        public void ShouldGetCompilationDependenciesForWebSdk()
+        {
+            var resolver = CreateResolver();
+            var targetDirectory = TestPathUtils.GetPathToTestFixtureFolder("WebApi");
+            var csxFiles = Directory.GetFiles(targetDirectory, "*.csx");
+            var dependencies = resolver.GetDependencies(targetDirectory, csxFiles, true, _scriptEnvironment.TargetFramework);
+            Assert.Contains(dependencies.SelectMany(d => d.AssemblyPaths), p => p.Contains("Microsoft.AspNetCore.Components"));
+        }
+
         private CompilationDependencyResolver CreateResolver()
         {
             var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());

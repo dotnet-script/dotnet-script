@@ -39,6 +39,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             {
                 AssemblyReferences.Add(new AssemblyReference(assemblyReference.Attribute("Include").Value));
             }
+
+            Sdk = projectFileDocument.Descendants("Project").Single().Attributes("Sdk").Single().Value;
         }
 
         /// <summary>
@@ -61,9 +63,20 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// </summary>
         public string TargetFramework { get; set; } = ScriptEnvironment.Default.TargetFramework;
 
+        /// <summary>
+        /// Gets the project SDK
+        /// </summary>
+        public string Sdk { get; set; }
+
         public void Save(string pathToProjectFile)
         {
             var projectFileDocument = XDocument.Parse(ReadTemplate("csproj.template"));
+            if (!string.IsNullOrEmpty(Sdk))
+            {
+                var projectElement = projectFileDocument.Descendants("Project").Single();
+                projectElement.Attributes("Sdk").Single().Value = Sdk;
+            }
+
             var itemGroupElement = projectFileDocument.Descendants("ItemGroup").Single();
             foreach (var packageReference in PackageReferences)
             {
@@ -101,7 +114,8 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             if (ReferenceEquals(this, other)) return true;
             return PackageReferences.SequenceEqual(other.PackageReferences)
                 && AssemblyReferences.SequenceEqual(other.AssemblyReferences)
-                && TargetFramework.Equals(other.TargetFramework);
+                && TargetFramework.Equals(other.TargetFramework)
+                && Sdk.Equals(other.Sdk);
         }
 
         /// <inheritdoc/>

@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.DependencyModel.ScriptPackage;
 using Microsoft.DotNet.PlatformAbstractions;
 using NuGet.Common;
@@ -36,6 +38,10 @@ namespace Dotnet.Script.DependencyModel.Context
 
         public ScriptDependencyContext ReadDependencyContext(string pathToAssetsFile)
         {
+            var pathToProjectFile = GetPathToProjectFile(pathToAssetsFile);
+            var projectFile = XDocument.Load(pathToProjectFile);
+            var sdk = projectFile.Descendants("Project").Single().Attributes("Sdk").Single().Value;
+
             var lockFile = GetLockFile(pathToAssetsFile);
             // Since we execute "dotnet restore -r [rid]" we get two targets in the lock file.
             // The second target is the one containing the runtime deps for the given RID.
@@ -66,9 +72,65 @@ namespace Dotnet.Script.DependencyModel.Context
                 var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
                 var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", ScriptEnvironment.Default.NetCoreVersion.Version, netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
                 scriptDependencies.Add(netCoreAppDependency);
+                if (sdk == "Microsoft.NET.Sdk.Web")
+                {
+                    var aspNetCoreRuntimeInfo = GetAspNetCoreRuntimeInfo(netcoreAppRuntimeAssemblyLocation);
+                    var aspNetCoreAppRuntimeAssemblies = Directory.GetFiles(aspNetCoreRuntimeInfo.aspNetCoreRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
+                    var aspNetCoreAppDependency = new ScriptDependency("Microsoft.AspNetCore.App", aspNetCoreRuntimeInfo.aspNetCoreVersion, aspNetCoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
+                    scriptDependencies.Add(aspNetCoreAppDependency);
+                }
             }
             return new ScriptDependencyContext(scriptDependencies.ToArray());
         }
+
+        private static string GetPathToProjectFile(string pathToAssetsFile)
+        {
+            var pathToProjectFile = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(pathToAssetsFile), ".."), "*.csproj", SearchOption.TopDirectoryOnly).SingleOrDefault();
+            if (pathToProjectFile is null)
+            {
+                pathToProjectFile = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(pathToAssetsFile), "..", "..", "..", ScriptEnvironment.Default.TargetFramework), "*.csproj", SearchOption.TopDirectoryOnly).SingleOrDefault();
+            }
+
+            if (pathToProjectFile is null)
+            {
+                throw new InvalidOperationException($"Unable to locate project file based on {pathToAssetsFile}");
+            }
+
+            return pathToProjectFile;
+        }
+
+        private static (string aspNetCoreRuntimeAssemblyLocation, string aspNetCoreVersion) GetAspNetCoreRuntimeInfo(string netcoreAppRuntimeAssemblyLocation)
+        {
+            var netCoreAppRuntimeVersion = Path.GetFileName(netcoreAppRuntimeAssemblyLocation);
+            if (!SemanticVersion.TryParse(netCoreAppRuntimeVersion, out var version))
+            {
+                throw new InvalidOperationException("Unable to parse version");
+            }
+            var pathToSharedFolder = Path.GetFullPath(Path.Combine(netcoreAppRuntimeAssemblyLocation, "..", ".."));
+
+            //Microsoft.AspNetCore.App
+            var pathToAspNetCoreRuntimeFolder = Directory.GetDirectories(pathToSharedFolder, "Microsoft.AspNetCore.App", SearchOption.TopDirectoryOnly).Single();
+
+            var aspNetCoreVersionsFolders = Directory.GetDirectories(pathToAspNetCoreRuntimeFolder).Select(folder => Path.GetFileName(folder));
+
+            var aspNetCoreVersions = new List<SemanticVersion>();
+            foreach (var aspNetCoreVersionsFolder in aspNetCoreVersionsFolders)
+            {
+                if (!SemanticVersion.TryParse(aspNetCoreVersionsFolder, out var aspNetCoreVersion))
+                {
+                    throw new InvalidOperationException("Unable to parse version");
+                }
+                else
+                {
+                    aspNetCoreVersions.Add(aspNetCoreVersion);
+                }
+            }
+
+            var latestAspNetCoreVersion = aspNetCoreVersions.Where(v => v.Major == version.Major).OrderBy(v => v).Last();
+
+            return (Path.Combine(pathToAspNetCoreRuntimeFolder, latestAspNetCoreVersion.ToNormalizedString()), latestAspNetCoreVersion.ToNormalizedString());
+        }
+
 
         private static bool IsAssembly(string file)
         {
