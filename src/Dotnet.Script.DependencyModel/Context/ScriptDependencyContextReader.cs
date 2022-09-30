@@ -74,7 +74,7 @@ namespace Dotnet.Script.DependencyModel.Context
                 var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
                 var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", ScriptEnvironment.Default.NetCoreVersion.Version, netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
                 scriptDependencies.Add(netCoreAppDependency);
-                if (File.ReadAllText(pathToAssetsFile).Contains("Microsoft.AspNetCore.App"))
+                if (File.ReadAllText(pathToAssetsFile).Contains("\"Microsoft.AspNetCore.App\""))
                 {
                     var aspNetCoreRuntimeInfo = GetAspNetCoreRuntimeInfo(netcoreAppRuntimeAssemblyLocation);
                     var aspNetCoreAppRuntimeAssemblies = Directory.GetFiles(aspNetCoreRuntimeInfo.aspNetCoreRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
