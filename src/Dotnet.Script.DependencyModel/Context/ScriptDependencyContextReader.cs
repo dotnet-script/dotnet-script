@@ -38,14 +38,16 @@ namespace Dotnet.Script.DependencyModel.Context
 
         public ScriptDependencyContext ReadDependencyContext(string pathToAssetsFile)
         {
-            var pathToProjectFile = GetPathToProjectFile(pathToAssetsFile);
-            var projectFile = XDocument.Load(pathToProjectFile);
-            var sdk = projectFile.Descendants("Project").Single().Attributes("Sdk").Single().Value;
+            // var pathToProjectFile = GetPathToProjectFile(pathToAssetsFile);
+            // var projectFile = XDocument.Load(pathToProjectFile);
+            // var sdk = projectFile.Descendants("Project").Single().Attributes("Sdk").Single().Value;
 
             var lockFile = GetLockFile(pathToAssetsFile);
+
             // Since we execute "dotnet restore -r [rid]" we get two targets in the lock file.
             // The second target is the one containing the runtime deps for the given RID.
             var target = GetLockFileTarget(lockFile);
+
             var targetLibraries = target.Libraries;
             var packageFolders = lockFile.PackageFolders.Select(lfi => lfi.Path).ToArray();
             var userPackageFolder = packageFolders.First();
@@ -72,7 +74,7 @@ namespace Dotnet.Script.DependencyModel.Context
                 var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
                 var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", ScriptEnvironment.Default.NetCoreVersion.Version, netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
                 scriptDependencies.Add(netCoreAppDependency);
-                if (sdk == "Microsoft.NET.Sdk.Web")
+                if (File.ReadAllText(pathToAssetsFile).Contains("Microsoft.AspNetCore.App"))
                 {
                     var aspNetCoreRuntimeInfo = GetAspNetCoreRuntimeInfo(netcoreAppRuntimeAssemblyLocation);
                     var aspNetCoreAppRuntimeAssemblies = Directory.GetFiles(aspNetCoreRuntimeInfo.aspNetCoreRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
