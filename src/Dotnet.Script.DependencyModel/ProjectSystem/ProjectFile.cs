@@ -66,7 +66,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <summary>
         /// Gets the project SDK
         /// </summary>
-        public string Sdk { get; set; }
+        public string Sdk { get; set; } = "Microsoft.NET.Sdk";
 
         public void Save(string pathToProjectFile)
         {
