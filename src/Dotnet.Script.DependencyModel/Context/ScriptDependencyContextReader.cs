@@ -15,6 +15,8 @@ using NuGet.Packaging;
 using NuGet.ProjectModel;
 using NuGet.RuntimeModel;
 using NuGet.Versioning;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Dotnet.Script.DependencyModel.Context
 {
@@ -38,10 +40,6 @@ namespace Dotnet.Script.DependencyModel.Context
 
         public ScriptDependencyContext ReadDependencyContext(string pathToAssetsFile)
         {
-            // var pathToProjectFile = GetPathToProjectFile(pathToAssetsFile);
-            // var projectFile = XDocument.Load(pathToProjectFile);
-            // var sdk = projectFile.Descendants("Project").Single().Attributes("Sdk").Single().Value;
-
             var lockFile = GetLockFile(pathToAssetsFile);
 
             // Since we execute "dotnet restore -r [rid]" we get two targets in the lock file.
@@ -74,7 +72,8 @@ namespace Dotnet.Script.DependencyModel.Context
                 var netcoreAppRuntimeAssemblies = Directory.GetFiles(netcoreAppRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
                 var netCoreAppDependency = new ScriptDependency("Microsoft.NETCore.App", ScriptEnvironment.Default.NetCoreVersion.Version, netcoreAppRuntimeAssemblies, Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>());
                 scriptDependencies.Add(netCoreAppDependency);
-                if (File.ReadAllText(pathToAssetsFile).Contains("\"Microsoft.AspNetCore.App\""))
+                //if (File.ReadAllText(pathToAssetsFile).Contains("\"Microsoft.AspNetCore.App\""))
+                if (HasAspNetCoreFrameworkReference(pathToAssetsFile))
                 {
                     var aspNetCoreRuntimeInfo = GetAspNetCoreRuntimeInfo(netcoreAppRuntimeAssemblyLocation);
                     var aspNetCoreAppRuntimeAssemblies = Directory.GetFiles(aspNetCoreRuntimeInfo.aspNetCoreRuntimeAssemblyLocation, "*.dll").Where(IsAssembly).ToArray();
@@ -84,6 +83,13 @@ namespace Dotnet.Script.DependencyModel.Context
             }
             return new ScriptDependencyContext(scriptDependencies.ToArray());
         }
+
+        private bool HasAspNetCoreFrameworkReference(string pathToAssetsFile)
+        {
+            JObject assetsFile = JObject.Parse(File.ReadAllText(pathToAssetsFile));
+            return assetsFile["project"]?["frameworks"]?["net7.0"]?["frameworkReferences"]?["Microsoft.AspNetCore.App"] != null;
+        }
+
 
         private static string GetPathToProjectFile(string pathToAssetsFile)
         {
