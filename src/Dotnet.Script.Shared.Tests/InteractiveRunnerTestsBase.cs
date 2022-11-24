@@ -307,5 +307,25 @@ namespace Dotnet.Script.Shared.Tests
             var result = ctx.Console.Out.ToString();
             Assert.Contains("[Submission#0+SimpleTargets+TargetDictionary]", result);
         }
+
+        [Fact]
+        public async Task ShouldCompileAndExecuteWithWebSdk()
+        {
+            var commands = new[]
+            {
+                @"#r ""sdk:Microsoft.NET.Sdk.Web""",
+                "using Microsoft.AspNetCore.Builder;",
+                "var a = WebApplication.Create();",
+                @"a.GetType()",
+                "#exit"
+            };
+
+            var ctx = GetRunner(commands);
+            await ctx.Runner.RunLoop();
+
+            var result = ctx.Console.Out.ToString();
+
+            Assert.Contains("[Microsoft.AspNetCore.Builder.WebApplication]", result);
+        }
     }
 }
