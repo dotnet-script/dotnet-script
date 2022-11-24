@@ -1,44 +1,44 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
-        <VersionPrefix>1.4.0</VersionPrefix>
-        <Authors>filipw</Authors>
-        <PackageId>Dotnet.Script</PackageId>
-        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-        <DebugType>portable</DebugType>
-        <AssemblyName>dotnet-script</AssemblyName>
-        <OutputType>Exe</OutputType>
-        <PackageTags>dotnet;cli;script;csx;csharp;roslyn</PackageTags>
-        <PackageIconUrl>https://avatars.githubusercontent.com/u/113979420</PackageIconUrl>
-        <PackageProjectUrl>https://github.com/dotnet-script/dotnet-script</PackageProjectUrl>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/dotnet-script/dotnet-script.git</RepositoryUrl>
-        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-        <PackAsTool>false</PackAsTool>
-        <IsPackable>true</IsPackable>
-        <LangVersion>latest</LangVersion>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0-1.final" />
-        <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="3.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="dotnet-script.cmd">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <Content Include="dotnet-script.sh">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
+    <VersionPrefix>1.4.0</VersionPrefix>
+    <Authors>filipw</Authors>
+    <PackageId>Dotnet.Script</PackageId>
+    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <DebugType>portable</DebugType>
+    <AssemblyName>dotnet-script</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageTags>dotnet;cli;script;csx;csharp;roslyn</PackageTags>
+    <PackageIconUrl>https://avatars.githubusercontent.com/u/113979420</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/dotnet-script/dotnet-script</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dotnet-script/dotnet-script.git</RepositoryUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <PackAsTool>false</PackAsTool>
+    <IsPackable>true</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0-1.final" />
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="dotnet-script.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dotnet-script.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
