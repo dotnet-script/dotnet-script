@@ -22,13 +22,13 @@ namespace Dotnet.Script
             return HandleSkippedTrivia(base.VisitReferenceDirectiveTrivia(node));
         }
 
-        private SyntaxNode HandleSkippedTrivia(SyntaxNode node)
+        private static SyntaxNode HandleSkippedTrivia(SyntaxNode node)
         {
             var skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
-            if (skippedTrivia != null && skippedTrivia.Token.Kind() != SyntaxKind.None) 
+            if (skippedTrivia.Token.Kind() != SyntaxKind.None) 
             {
                 var firstToken = skippedTrivia.GetStructure().ChildTokens().FirstOrDefault();
-                if (firstToken != null && firstToken.Kind() == SyntaxKind.BadToken && firstToken.ToFullString().Trim() == ";")
+                if (firstToken.Kind() == SyntaxKind.BadToken && firstToken.ToFullString().Trim() == ";")
                 {
                     node = node.ReplaceToken(firstToken, SyntaxFactory.Token(SyntaxKind.None));
                     skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
