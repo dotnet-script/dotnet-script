@@ -46,7 +46,7 @@
         "-c",
         "release",
         "-f",
-        "net6.0",
+        "net7.0",
         "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
       ],
       "problemMatcher": "$msCompile",

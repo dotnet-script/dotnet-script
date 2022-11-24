@@ -24,22 +24,15 @@
     <EmbeddedResource Include="**/*.template" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Gapotchenko.FX" Version="2021.1.5" />
-    <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2021.2.11" />
+    <PackageReference Include="Gapotchenko.FX" Version="2022.2.7" />
+    <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2022.2.7" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.4.0-1.final" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <!-- The following references are just quick fixes for issue #166 and issue #268 -->
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
-    <!-- End of quick fixes -->
     <PackageReference Include="StrongNamer" Version="0.2.5" PrivateAssets="all" />
-
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Text.Json" Version="6.0.6" />
+    <PackageReference Include="System.Text.Json" Version="7.0.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.DependencyModel.Nuget\Dotnet.Script.DependencyModel.NuGet.csproj" />
