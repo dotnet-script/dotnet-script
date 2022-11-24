@@ -483,9 +483,11 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldCompileAndExecuteWithWebSdk()
         {
-            // var test = ScriptTestRunner.ExecuteFixtureInProcess("WebApi", "--no-cache --isolated-load-context");
-            var test = ScriptTestRunner.ExecuteFixtureInProcess("WebApi", "--no-cache --debug");
-            Assert.Equal(0, test);
+            var processResult = ScriptTestRunner.Default.ExecuteFixture("WebApi", "--no-cache");
+            Assert.Equal(0, processResult.ExitCode);
+
+            // var test = ScriptTestRunner.ExecuteFixtureInProcess("WebApi", "--no-cache --debug");
+            // Assert.Equal(0, test);
             // var (output, _) = ScriptTestRunner.Default.ExecuteFixture("CurrentContextualReflectionContext", "--isolated-load-context");
             // Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", output);
         }

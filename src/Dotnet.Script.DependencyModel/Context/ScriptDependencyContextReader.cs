@@ -87,9 +87,8 @@ namespace Dotnet.Script.DependencyModel.Context
         private bool HasAspNetCoreFrameworkReference(string pathToAssetsFile)
         {
             JObject assetsFile = JObject.Parse(File.ReadAllText(pathToAssetsFile));
-            return assetsFile["project"]?["frameworks"]?["net7.0"]?["frameworkReferences"]?["Microsoft.AspNetCore.App"] != null;
+            return assetsFile["project"]?["frameworks"]?[ScriptEnvironment.Default.TargetFramework]?["frameworkReferences"]?["Microsoft.AspNetCore.App"] != null;
         }
-
 
         private static string GetPathToProjectFile(string pathToAssetsFile)
         {
