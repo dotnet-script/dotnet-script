@@ -492,6 +492,13 @@ namespace Dotnet.Script.Tests
             // Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", output);
         }
 
+        [Fact]
+        public void ShouldThrowExceptionWhenSdkIsNotSupported()
+        {
+            var processResult = ScriptTestRunner.Default.ExecuteFixture("UnsupportedSdk", "--no-cache");
+            Assert.StartsWith("The sdk 'Unsupported' is not supported", processResult.StandardError);
+        }
+
         private static string CreateTestScript(string scriptFolder)
         {
             string script = @"

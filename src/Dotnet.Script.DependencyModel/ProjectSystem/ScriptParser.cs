@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -20,7 +21,13 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             var allPackageReferences = new HashSet<PackageReference>();
             allPackageReferences.UnionWith(ReadPackageReferencesFromReferenceDirective(code));
             allPackageReferences.UnionWith(ReadPackageReferencesFromLoadDirective(code));
-            return new ParseResult(allPackageReferences);
+            var sdkReference = ReadSdkFromReferenceDirective(code);
+            string sdk = string.Empty;
+            if (!string.IsNullOrWhiteSpace(sdkReference))
+            {
+                sdk = sdkReference;
+            }
+            return new ParseResult(allPackageReferences) { Sdk = sdk };
         }
 
         public ParseResult ParseFromFiles(IEnumerable<string> csxFiles)
@@ -47,6 +54,14 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
             const string pattern = DirectivePatternPrefix + "r" + SdkDirectivePatternSuffix;
             var match = Regex.Match(fileContent, pattern);
+            if (match.Success)
+            {
+                var sdk = match.Groups[1].Value;
+                if (!string.Equals(sdk, "Microsoft.NET.Sdk.Web", System.StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new NotSupportedException($"The sdk '{sdk}' is not supported. Currently 'Microsoft.NET.Sdk.Web' is the only sdk supported.");
+                }
+            }
             return match.Success ? match.Groups[1].Value : string.Empty;
         }
 
