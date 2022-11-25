@@ -18,7 +18,7 @@ namespace Dotnet.Script.Tests
             var commands = new[]
             {
                 @"#r ""sdk:Microsoft.NET.Sdk.Web""",
-                "using Microsoft.AspNetCore.Builderss;",
+                "using Microsoft.AspNetCore.Builder;",
                 "var a = WebApplication.Create();",
                 @"a.GetType()",
                 "#exit"
@@ -28,7 +28,7 @@ namespace Dotnet.Script.Tests
             await ctx.Runner.RunLoop();
 
             var result = ctx.Console.Out.ToString();
-
+            var error = ctx.Console.Error.ToString();
             Assert.Contains("[Microsoft.AspNetCore.Builder.WebApplication]", result);
         }
     }
