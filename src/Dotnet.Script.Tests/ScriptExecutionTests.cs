@@ -21,9 +21,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldExecuteHelloWorld()
         {
-            ScriptTestRunner.ExecuteFixtureInProcess("HelloWorld", "--no-cache");
-            // var (output, _) = ScriptTestRunner.Default.ExecuteFixture("HelloWorld", "--no-cache");
-            // Assert.Contains("Hello World", output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("HelloWorld", "--no-cache");
+            Assert.Contains("Hello World", output);
         }
 
         [Fact]
