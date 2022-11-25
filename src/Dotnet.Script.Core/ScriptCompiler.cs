@@ -39,6 +39,7 @@ namespace Dotnet.Script.Core
             });
         }
 
+        //Note: We should set this according to the SDK being used                
         protected virtual IEnumerable<string> ImportedNamespaces => new[]
         {
             "System",
@@ -94,7 +95,7 @@ namespace Dotnet.Script.Core
         {
             var scriptMap = runtimeDependencies.ToDictionary(rdt => rdt.Name, rdt => rdt.Scripts);
             var opts = ScriptOptions.Default.AddImports(ImportedNamespaces)
-                .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory),scriptMap))
+                .WithSourceResolver(new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, context.WorkingDirectory), scriptMap))
                 .WithMetadataResolver(new NuGetMetadataReferenceResolver(ScriptMetadataResolver.Default.WithBaseDirectory(context.WorkingDirectory)))
                 .WithEmitDebugInformation(true)
                 .WithLanguageVersion(LanguageVersion.Preview)
@@ -200,7 +201,7 @@ namespace Dotnet.Script.Core
                 Assembly loadedAssembly = null;
                 if (homogenization)
                     loadedAssembliesMap.TryGetValue(runtimeAssembly.Name.Name, out loadedAssembly);
-                
+
                 if (loadedAssembly == null)
                 {
                     _logger.Trace("Adding reference to a runtime dependency => " + runtimeAssembly);
@@ -290,7 +291,7 @@ namespace Dotnet.Script.Core
                 if (assemblyName.Version == null || runtimeAssembly.Name.Version > assemblyName.Version)
                 {
                     loadedAssemblyMap.TryGetValue(assemblyName.Name, out var loadedAssembly);
-                    if(loadedAssembly != null)
+                    if (loadedAssembly != null)
                     {
                         _logger.Trace($"Redirecting {assemblyName} to already loaded {loadedAssembly.GetName().Name}");
                         return loadedAssembly;
