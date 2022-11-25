@@ -8,19 +8,19 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ## NuGet Packages
 
-| Name                                  | Version                                                      | Framework(s)                     |
-| ------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
-| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/) | `net6.0`, `net5.0`, `netcoreapp3.1` |
-| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/) | `net6.0`, `net5.0`, `netcoreapp3.1` |
-| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/) | `netcoreapp3.1` , `netstandard2.0`                 |
-| `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/) | `netstandard2.0`                 |
-| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0`                 |
+| Name                                  | Version                                                                                                                                                             | Framework(s)                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `net6.0`, `net5.0`, `netcoreapp3.1` |
+| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `net6.0`, `net5.0`, `netcoreapp3.1` |
+| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `netcoreapp3.1` , `netstandard2.0`  |
+| `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0`                    |
+| `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0`                    |
 
 ## Installing
 
 ### Prerequisites
 
-The only thing we need to install is [.NET Core 3.1 or .NET 5.0 SDK](https://www.microsoft.com/net/download/core).
+The only thing we need to install is [.Net 6.0 or .Net 7.0](https://www.microsoft.com/net/download/core).
 
 ### .NET Core Global Tool
 
@@ -52,11 +52,7 @@ Tool 'dotnet-script' (version '0.22.0') was successfully uninstalled.
 
 ### Windows
 
-```powershell
-choco install dotnet.script
-```
-
-We also provide a PowerShell script for installation.
+PowerShell script for installation.
 
 ```powershell
 (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/dotnet-script/dotnet-script/master/install/install.ps1") | iex
@@ -569,6 +565,24 @@ We will also see this when working with scripts in VS Code under the problems pa
 
 ![image](https://user-images.githubusercontent.com/1034073/65727087-0e982600-e0b7-11e9-8fa0-d16331ab948a.png)
 
+## Specifying an SDK
+
+Starting with `dotnet-script` 1.4.0 we can now specify the SDK to be used for a script. 
+
+For instance, creating a web server in a script is now as simple as the following.
+
+```csharp
+#r "sdk:Microsoft.NET.Sdk.Web"
+
+using Microsoft.AspNetCore.Builder;
+
+var a = WebApplication.Create();
+a.MapGet("/", () => "Hello world");
+a.Run();
+```
+
+> Please note the the only SDK currently supported is `Microsoft.NET.Sdk.Web`
+ 
 ## Team
 
 - [Bernhard Richter](https://github.com/seesharper) ([@bernhardrichter](https://twitter.com/bernhardrichter))
