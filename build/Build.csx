@@ -1,7 +1,6 @@
 #load "nuget:Dotnet.Build, 0.7.1"
 #load "nuget:dotnet-steps, 0.0.1"
 #load "nuget:github-changelog, 0.1.5"
-#load "Choco.csx"
 #load "BuildContext.csx"
 
 using System.Xml.Linq;
@@ -17,7 +16,6 @@ Step pack = () =>
 {
     CreateGitHubReleaseAsset();
     CreateNuGetPackages();
-    CreateChocoPackage();
     CreateGlobalToolPackage();
 };
 
@@ -37,19 +35,6 @@ private void CreateGitHubReleaseAsset()
 {
     DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net6.0");
     Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
-}
-
-
-private void CreateChocoPackage()
-{
-    if (BuildEnvironment.IsWindows)
-    {
-        Choco.Pack(dotnetScriptProjectFolder, publishArtifactsFolder, chocolateyArtifactsFolder);
-    }
-    else
-    {
-        Logger.Log("The choco package is only built on Windows");
-    }
 }
 
 private void CreateGlobalToolPackage()
@@ -102,7 +87,6 @@ private async Task PublishRelease()
         await ReleaseManagerFor(owner, projectName, BuildEnvironment.GitHubAccessToken)
         .CreateRelease(Git.Default.GetLatestTag(), pathToReleaseNotes, new[] { new ZipReleaseAsset(pathToGitHubReleaseAsset) });
         NuGet.TryPush(nuGetArtifactsFolder);
-        Choco.TryPush(chocolateyArtifactsFolder, BuildEnvironment.ChocolateyApiKey);
     }
 }
 
