@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
-using Dotnet.Script.DependencyModel.Process;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
@@ -57,6 +54,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             }
 
             projectFile.TargetFramework = defaultTargetFramework;
+            projectFile.Sdk = parseResultFromCode.Sdk;
 
             projectFile.Save(pathToProjectFile);
 
@@ -116,16 +114,17 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         public ProjectFile CreateProjectFileFromScriptFiles(string defaultTargetFramework, string[] csxFiles)
         {
-            var parseresult = _scriptParser.ParseFromFiles(csxFiles);
+            var parseResult = _scriptParser.ParseFromFiles(csxFiles);
 
             var projectFile = new ProjectFile();
 
-            foreach (var packageReference in parseresult.PackageReferences)
+            foreach (var packageReference in parseResult.PackageReferences)
             {
                 projectFile.PackageReferences.Add(packageReference);
             }
 
             projectFile.TargetFramework = defaultTargetFramework;
+            projectFile.Sdk = parseResult.Sdk;
             return projectFile;
         }
 

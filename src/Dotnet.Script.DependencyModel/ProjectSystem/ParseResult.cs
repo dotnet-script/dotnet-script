@@ -10,5 +10,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         }
 
         public IReadOnlyCollection<PackageReference> PackageReferences { get; }
+
+        public string Sdk { get; set; }
     }
 }

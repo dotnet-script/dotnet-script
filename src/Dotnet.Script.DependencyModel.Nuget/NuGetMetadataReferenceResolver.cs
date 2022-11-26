@@ -21,7 +21,7 @@ namespace Dotnet.Script.DependencyModel.NuGet
         {
             _metadataReferenceResolver = metadataReferenceResolver;
         }
-        
+
         public override bool Equals(object other)
         {
             return _metadataReferenceResolver.Equals(other);
@@ -42,7 +42,7 @@ namespace Dotnet.Script.DependencyModel.NuGet
 
         public override ImmutableArray<PortableExecutableReference> ResolveReference(string reference, string baseFilePath, MetadataReferenceProperties properties)
         {
-            if (reference.StartsWith("nuget", StringComparison.OrdinalIgnoreCase))
+            if (reference.StartsWith("nuget", StringComparison.OrdinalIgnoreCase) || reference.StartsWith("sdk", StringComparison.OrdinalIgnoreCase))
             {
                 // HACK We need to return something here to "mark" the reference as resolved. 
                 // https://github.com/dotnet/roslyn/blob/master/src/Compilers/Core/Portable/ReferenceManager/CommonReferenceManager.Resolution.cs#L838

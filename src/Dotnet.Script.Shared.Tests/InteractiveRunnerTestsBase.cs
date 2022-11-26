@@ -17,7 +17,7 @@ namespace Dotnet.Script.Shared.Tests
             testOutputHelper.Capture();
         }
 
-        private class InteractiveTestContext
+        protected class InteractiveTestContext
         {
             public InteractiveTestContext(ScriptConsole console, InteractiveRunner runner)
             {
@@ -29,7 +29,7 @@ namespace Dotnet.Script.Shared.Tests
             public InteractiveRunner Runner { get; }
         }
 
-        private InteractiveTestContext GetRunner(params string[] commands)
+        protected InteractiveTestContext GetRunner(params string[] commands)
         {
             var reader = new StringReader(string.Join(Environment.NewLine, commands));
             var writer = new StringWriter();

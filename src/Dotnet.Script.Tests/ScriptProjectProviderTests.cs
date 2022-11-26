@@ -1,5 +1,7 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.ProjectSystem;
 using Dotnet.Script.Shared.Tests;
@@ -29,6 +31,14 @@ namespace Dotnet.Script.Tests
             var output = log.ToString();
 
             Assert.Contains("<Project Sdk=\"Microsoft.NET.Sdk\">", output);
+        }
+
+        [Fact]
+        public void ShouldUseSpecifiedSdk()
+        {
+            var provider = new ScriptProjectProvider(TestOutputHelper.CreateTestLogFactory());
+            var projectFileInfo = provider.CreateProject(TestPathUtils.GetPathToTestFixtureFolder("WebApi"), _scriptEnvironment.TargetFramework, true);
+            Assert.Equal("Microsoft.NET.Sdk.Web", XDocument.Load(projectFileInfo.Path).Descendants("Project").Single().Attributes("Sdk").Single().Value);
         }
     }
 }
