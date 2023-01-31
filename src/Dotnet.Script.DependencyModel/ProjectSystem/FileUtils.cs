@@ -54,6 +54,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             if (!string.IsNullOrEmpty(cachePath))
             {
+                // if the path is not absolute, make it relative to the current folder
                 if (!Path.IsPathRooted(cachePath)) 
                 {
                     cachePath = Path.Combine(Directory.GetCurrentDirectory(), cachePath);
