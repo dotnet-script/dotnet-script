@@ -1,9 +1,9 @@
-﻿using Dotnet.Script.DependencyModel.Environment;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using Dotnet.Script.DependencyModel.Environment;
 using SysEnvironment = System.Environment;
 
 namespace Dotnet.Script.DependencyModel.ProjectSystem
@@ -51,8 +51,13 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         {
             // prefer the custom env variable if set
             var cachePath = SysEnvironment.GetEnvironmentVariable("DOTNET_SCRIPT_CACHE_LOCATION");
+
             if (!string.IsNullOrEmpty(cachePath))
             {
+                if (!Path.IsPathRooted(cachePath)) 
+                {
+                    cachePath = Path.Combine(Directory.GetCurrentDirectory(), cachePath);
+                }
                 return cachePath;
             }
 
