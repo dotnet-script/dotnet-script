@@ -25,10 +25,10 @@ namespace Dotnet.Script
         private static SyntaxNode HandleSkippedTrivia(SyntaxNode node)
         {
             var skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();
-            if (skippedTrivia.Token.Kind() != SyntaxKind.None) 
+            if (!skippedTrivia.Token.IsKind(SyntaxKind.None)) 
             {
                 var firstToken = skippedTrivia.GetStructure().ChildTokens().FirstOrDefault();
-                if (firstToken.Kind() == SyntaxKind.BadToken && firstToken.ToFullString().Trim() == ";")
+                if (firstToken.IsKind(SyntaxKind.BadToken) && firstToken.ToFullString().Trim() == ";")
                 {
                     node = node.ReplaceToken(firstToken, SyntaxFactory.Token(SyntaxKind.None));
                     skippedTrivia = node.DescendantTrivia().Where(x => x.RawKind == (int)SyntaxKind.SkippedTokensTrivia).FirstOrDefault();

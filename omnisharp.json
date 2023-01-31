@@ -8,7 +8,7 @@
   },
   "script": {
     "enableScriptNuGetReferences": true,
-    "defaultTargetFramework": "net5.0"
+    "defaultTargetFramework": "net6.0"
   },
   "FormattingOptions": {
       "organizeImports": true,
