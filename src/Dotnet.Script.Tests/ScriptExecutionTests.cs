@@ -493,6 +493,13 @@ namespace Dotnet.Script.Tests
             Assert.StartsWith("The sdk 'Unsupported' is not supported", processResult.StandardError);
         }
 
+        [Fact]
+        public void ShouldRespectEnvironmentExitCodeOfTheScript()
+        {
+            var processResult = ScriptTestRunner.Default.ExecuteFixture("EnvironmentExitCode", "--no-cache");
+            Assert.Equal(0xA0, processResult.ExitCode);
+        }
+
         private static string CreateTestScript(string scriptFolder)
         {
             string script = @"
