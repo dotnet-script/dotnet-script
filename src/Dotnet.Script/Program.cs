@@ -258,7 +258,11 @@ namespace Dotnet.Script
                     };
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
-                    return await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
+                    var result = await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
+                    if (Environment.ExitCode != 0) return Environment.ExitCode;
+                    
+                    return result;
+
                 }
                 else
                 {
