@@ -21,11 +21,15 @@ namespace Dotnet.Script.Tests
             Assert.Contains(files, f => f.Contains("Foo.csx"));
             Assert.Contains(files, f => !f.Contains("Bar.csx"));
         }
-        [Fact]
-        public void ShouldResolveLoadedScriptInRootFolder()
+
+        [Theory]
+        [InlineData("#load \"Bar.csx\"")]
+        // See: https://github.com/dotnet-script/dotnet-script/issues/720 (1)
+        [InlineData("#load \"Bar.csx\"\n\n\"Hello world\".Dump();")]
+        public void ShouldResolveLoadedScriptInRootFolder(string rootScriptContent)
         {
             using var rootFolder = new DisposableFolder();
-            var rootScript = WriteScript("#load \"Bar.csx\"", rootFolder.Path, "Foo.csx");
+            var rootScript = WriteScript(rootScriptContent, rootFolder.Path, "Foo.csx");
             WriteScript(string.Empty, rootFolder.Path, "Bar.csx");
             var scriptFilesResolver = new ScriptFilesResolver();
 
