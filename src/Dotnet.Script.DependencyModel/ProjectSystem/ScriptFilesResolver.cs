@@ -61,7 +61,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         private static string[] GetLoadDirectives(string content)
         {
-            var matches = Regex.Matches(content, @"^\s*#load\s*""\s*(.+)\s*""", RegexOptions.Multiline);
+            var matches = Regex.Matches(content, @"^\s*#load\s*""\s*(.+?)\s*""", RegexOptions.Multiline);
             List<string> result = new List<string>();
             foreach (var match in matches.Cast<Match>())
             {
