@@ -17,6 +17,11 @@ namespace Dotnet.Script.Core.Commands
             _logFactory = logFactory;
         }
 
+        public void Execute(PublishCommandOptions options)
+        { 
+            Execute<int>(options);
+        }
+
         public void Execute<TReturn>(PublishCommandOptions options)
         {
             var absoluteFilePath = options.File.Path;
