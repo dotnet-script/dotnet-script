@@ -31,7 +31,7 @@ namespace Dotnet.Script.Core.Commands
                 return await DownloadAndRunCode<TReturn>(options);
             }
 
-            var pathToLibrary = GetLibrary(options);
+            var pathToLibrary = GetLibrary<TReturn>(options);
 
             var libraryOptions = new ExecuteLibraryCommandOptions(pathToLibrary, options.Arguments, options.NoCache)
             {
@@ -50,7 +50,7 @@ namespace Dotnet.Script.Core.Commands
             return await new ExecuteCodeCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
 
-        private string GetLibrary(ExecuteScriptCommandOptions executeOptions)
+        private string GetLibrary<TReturn>(ExecuteScriptCommandOptions executeOptions)
         {
             var projectFolder = FileUtils.GetPathToScriptTempFolder(executeOptions.File.Path);
             var executionCacheFolder = Path.Combine(projectFolder, "execution-cache");
@@ -70,7 +70,7 @@ namespace Dotnet.Script.Core.Commands
                 AssemblyLoadContext = executeOptions.AssemblyLoadContext
 #endif
             };
-            new PublishCommand(_scriptConsole, _logFactory).Execute(options);
+            new PublishCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
             if (hash != null)
             {
                 File.WriteAllText(Path.Combine(executionCacheFolder, "script.sha256"), hash);

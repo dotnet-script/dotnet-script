@@ -188,7 +188,7 @@ namespace Dotnet.Script
                     );
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    new PublishCommand(ScriptConsole.Default, logFactory).Execute(options);
+                    new PublishCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                     return 0;
                 });
             });

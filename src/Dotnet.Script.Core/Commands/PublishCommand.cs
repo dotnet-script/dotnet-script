@@ -18,6 +18,11 @@ namespace Dotnet.Script.Core.Commands
         }
 
         public void Execute(PublishCommandOptions options)
+        { 
+            Execute<int>(options);
+        }
+
+        public void Execute<TReturn>(PublishCommandOptions options)
         {
             var absoluteFilePath = options.File.Path;
 
@@ -41,11 +46,11 @@ namespace Dotnet.Script.Core.Commands
 
             if (options.PublishType == PublishType.Library)
             {
-                publisher.CreateAssembly<int, CommandLineScriptGlobals>(context, _logFactory, options.LibraryName);
+                publisher.CreateAssembly<TReturn, CommandLineScriptGlobals>(context, _logFactory, options.LibraryName);
             }
             else
             {
-                publisher.CreateExecutable<int, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier, options.LibraryName);
+                publisher.CreateExecutable<TReturn, CommandLineScriptGlobals>(context, _logFactory, options.RuntimeIdentifier, options.LibraryName);
             }
         }
     }
