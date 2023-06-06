@@ -103,6 +103,19 @@ That is all it takes and we can execute the script. Args are accessible via the 
 dotnet script helloworld.csx
 ```
 
+The following namespaces are available in the script implicitly and do not need to be imported explicitly:
+
+ - System
+ - System.IO
+ - System.Collections.Generic
+ - System.Console
+ - System.Diagnostics
+ - System.Dynamic
+ - System.Linq
+ - System.Linq.Expressions
+ - System.Text
+ - System.Threading.Tasks
+
 ### Scaffolding
 
 Simply create a folder somewhere on your system and issue the following command.
@@ -591,3 +604,4 @@ a.Run();
 ## License
 
 [MIT License](https://github.com/dotnet-script/dotnet-script/blob/master/LICENSE)
+ - 
