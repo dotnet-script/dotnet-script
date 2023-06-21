@@ -11,7 +11,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+#if NETCOREAPP
 using System.Runtime.Loader;
+#endif
 using System.Threading.Tasks;
 
 namespace Dotnet.Script
@@ -234,8 +236,10 @@ namespace Dotnet.Script
                 }
 
                 AssemblyLoadContext assemblyLoadContext = null;
+#if NETCOREAPP
                 if (isolatedLoadContext.HasValue())
                     assemblyLoadContext = new ScriptAssemblyLoadContext();
+#endif
 
                 if (scriptFile.HasValue)
                 {
@@ -254,7 +258,9 @@ namespace Dotnet.Script
                         nocache.HasValue()
                     )
                     {
+#if NETCOREAPP
                         AssemblyLoadContext = assemblyLoadContext
+#endif
                     };
 
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
@@ -278,7 +284,9 @@ namespace Dotnet.Script
         {
             var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources)
             {
+#if NETCOREAPP
                 AssemblyLoadContext = assemblyLoadContext
+#endif
             };
             await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
             return 0;
@@ -288,10 +296,16 @@ namespace Dotnet.Script
         {
             var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources)
             {
+#if NETCOREAPP
                 AssemblyLoadContext = assemblyLoadContext
+#endif
             };
             await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
             return 0;
         }
+
+#if !NETCOREAPP
+        private class AssemblyLoadContext { }
+#endif
     }
 }
