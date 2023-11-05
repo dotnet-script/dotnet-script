@@ -9,11 +9,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install .Net Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: |
             6.0.x
             7.0.x
+            8.0.x
           include-prerelease: true
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global
@@ -27,11 +28,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install .Net Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: |
             6.0.x
             7.0.x
+            8.0.x
           include-prerelease: true
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global
@@ -45,11 +47,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install .Net Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: |
             6.0.x
             7.0.x
+            8.0.x
           include-prerelease: true
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global
