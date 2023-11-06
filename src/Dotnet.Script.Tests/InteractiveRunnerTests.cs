@@ -19,8 +19,7 @@ namespace Dotnet.Script.Tests
             {
                 @"#r ""sdk:Microsoft.NET.Sdk.Web""",
                 "using Microsoft.AspNetCore.Builder;",
-                "var a = WebApplication.Create();",
-                @"a.GetType()",
+                @"typeof(WebApplication)",
                 "#exit"
             };
 

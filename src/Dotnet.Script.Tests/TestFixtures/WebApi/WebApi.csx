@@ -2,5 +2,7 @@
 
 using Microsoft.AspNetCore.Builder;
 
-var a = WebApplication.Create();
-a.MapGet("/", () => "Hello world");
+var builder = WebApplication.CreateBuilder();
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello World!");

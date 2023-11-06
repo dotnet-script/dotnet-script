@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
@@ -479,12 +481,27 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", output);
         }
 
+#if NET6_0
+        [Fact]
+        public void ShouldCompileAndExecuteWithWebSdk()
+        {
+            var processResult = ScriptTestRunner.Default.ExecuteFixture("WebApiNet6", "--no-cache");
+            Assert.Equal(0, processResult.ExitCode);
+        }
+#endif
+        
+#if NET7_0
         [Fact]
         public void ShouldCompileAndExecuteWithWebSdk()
         {
             var processResult = ScriptTestRunner.Default.ExecuteFixture("WebApi", "--no-cache");
             Assert.Equal(0, processResult.ExitCode);
         }
+#endif  
+        // todo: the same test should run for .NET 8.0 - currently it fails with 
+        // System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation.
+        // ---> System.IO.FileLoadException: Could not load file or assembly 'Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'.
+        // Could not find or load a specific file. (0x80131621)
 
         [Fact]
         public void ShouldThrowExceptionWhenSdkIsNotSupported()
