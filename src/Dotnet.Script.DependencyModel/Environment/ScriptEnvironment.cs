@@ -133,10 +133,16 @@ namespace Dotnet.Script.DependencyModel.Environment
         private static string GetRuntimeIdentifier()
         {
             var platformIdentifier = GetPlatformIdentifier();
+            
+#if NET8_0 
+            return $"{platformIdentifier}-{GetProcessArchitecture()}";
+#endif
+            
             if (platformIdentifier == "osx" || platformIdentifier == "linux")
             {
                 return $"{platformIdentifier}-{GetProcessArchitecture()}";
             }
+            
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
             return runtimeIdentifier;
         }

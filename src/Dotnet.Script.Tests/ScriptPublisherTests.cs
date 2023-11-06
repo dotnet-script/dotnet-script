@@ -49,7 +49,11 @@ namespace Dotnet.Script.Tests
         public void SimplePublishTestToDifferentRuntimeId()
         {
             using var workspaceFolder = new DisposableFolder();
+#if NET8_0 
+            var runtimeId = _scriptEnvironment.RuntimeIdentifier == "win-x64" ? "osx-x64" : "win10-x64";
+#else
             var runtimeId = _scriptEnvironment.RuntimeIdentifier == "win10-x64" ? "osx-x64" : "win10-x64";
+#endif
             var code = @"WriteLine(""hello world"");";
             var mainPath = Path.Combine(workspaceFolder.Path, "main.csx");
             File.WriteAllText(mainPath, code);
