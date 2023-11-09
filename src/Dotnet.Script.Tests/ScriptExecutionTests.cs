@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
@@ -479,13 +481,34 @@ namespace Dotnet.Script.Tests
             Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", output);
         }
 
+#if NET6_0
+        [Fact]
+        public void ShouldCompileAndExecuteWithWebSdk()
+        {
+            var processResult = ScriptTestRunner.Default.ExecuteFixture("WebApiNet6", "--no-cache");
+            Assert.Equal(0, processResult.ExitCode);
+        }
+#endif
+        
+#if NET7_0
         [Fact]
         public void ShouldCompileAndExecuteWithWebSdk()
         {
             var processResult = ScriptTestRunner.Default.ExecuteFixture("WebApi", "--no-cache");
             Assert.Equal(0, processResult.ExitCode);
         }
-
+#endif 
+        
+#if NET8_0
+        // .NET 8.0 only works with isolated load context
+        [Fact]
+        public void ShouldCompileAndExecuteWithWebSdk()
+        {
+            var processResult = ScriptTestRunner.Default.ExecuteFixture("WebApi", "--no-cache --isolated-load-context");
+            Assert.Equal(0, processResult.ExitCode);
+        }
+#endif 
+        
         [Fact]
         public void ShouldThrowExceptionWhenSdkIsNotSupported()
         {

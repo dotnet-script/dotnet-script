@@ -3,6 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <UseRidGraph>true</UseRidGraph>
   </PropertyGroup>
   <ItemGroup>
   </ItemGroup>
