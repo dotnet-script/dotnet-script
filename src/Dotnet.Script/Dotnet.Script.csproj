@@ -27,7 +27,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0-1.final" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0"
+                      Condition="'$(TargetFramework)' == 'net6.0' or '$(TargetFramework)' == 'net7.0'"/>
+    
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0-rc.2.23479.6"
+                      Condition="'$(TargetFramework)' == 'net8.0'"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
