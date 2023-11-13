@@ -234,8 +234,8 @@ namespace Dotnet.Script
                 }
 
                 AssemblyLoadContext assemblyLoadContext = null;
-                if (isolatedLoadContext.HasValue())
-                    assemblyLoadContext = new ScriptAssemblyLoadContext();
+                //if (isolatedLoadContext.HasValue())
+                assemblyLoadContext = new ScriptAssemblyLoadContext();
 
                 if (scriptFile.HasValue)
                 {
@@ -260,7 +260,7 @@ namespace Dotnet.Script
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
                     var result = await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
                     if (Environment.ExitCode != 0) return Environment.ExitCode;
-                    
+
                     return result;
 
                 }
