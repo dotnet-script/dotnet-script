@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0"
                       Condition="'$(TargetFramework)' == 'net6.0' or '$(TargetFramework)' == 'net7.0'"/>
     
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0-rc.2.23479.6"
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0"
                       Condition="'$(TargetFramework)' == 'net8.0'"/>
   </ItemGroup>
   <ItemGroup>
