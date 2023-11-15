@@ -26,7 +26,7 @@ namespace Dotnet.Script.Core
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole Console;
         private readonly string[] _packageSources;
-        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Latest, kind: SourceCodeKind.Script);
+        protected CSharpParseOptions ParseOptions = new CSharpParseOptions(LanguageVersion.Preview, kind: SourceCodeKind.Script);
         protected InteractiveCommandProvider InteractiveCommandParser = new InteractiveCommandProvider();
         protected string CurrentDirectory = Directory.GetCurrentDirectory();
 

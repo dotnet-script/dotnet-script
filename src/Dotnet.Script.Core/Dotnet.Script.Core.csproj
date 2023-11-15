@@ -26,7 +26,7 @@
   <ItemGroup>
     <PackageReference Include="Gapotchenko.FX" Version="2022.2.7" />
     <PackageReference Include="Gapotchenko.FX.Reflection.Loader" Version="2022.2.7" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.4.0-1.final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.8.0-3.final" />
     <PackageReference Include="ReadLine" Version="2.0.1" />
     <PackageReference Include="StrongNamer" Version="0.2.5" PrivateAssets="all" />
   </ItemGroup>
