@@ -10,9 +10,9 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 | Name                                  | Version                                                                                                                                                             | Framework(s)                |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `net6.0`, `net7.0`          |
-| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `net6.0`, `net7.0`          |
-| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `net6.0` , `netstandard2.0` |
+| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `net6.0`,`net7.0`,`net8.0`  |
+| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `net6.0`,`net7.0`,`net8.0`  |
+| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `net6.0`,`net7.0`,`net8.0`,`netstandard2.0` |
 | `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0`            |
 | `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0`            |
 
@@ -20,7 +20,7 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ### Prerequisites
 
-The only thing we need to install is [.Net 6.0 or .Net 7.0](https://www.microsoft.com/net/download/core).
+The only thing we need to install is [.NET 6.0, .NET 7.0 or .NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet).
 
 ### .NET Core Global Tool
 
