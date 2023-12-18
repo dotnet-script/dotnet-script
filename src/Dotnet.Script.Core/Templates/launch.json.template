@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "0.2.0",
     "configurations": [
         {
@@ -7,9 +7,8 @@
             "request": "launch",
             "program": "dotnet",
             "args": [
-                "exec",
-                "PATH_TO_DOTNET-SCRIPT",
-                "${file}"
+                "script",
+                "${relativeFile}"
             ],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false
