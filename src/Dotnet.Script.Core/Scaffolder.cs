@@ -141,7 +141,7 @@ namespace Dotnet.Script.Core
             _scriptConsole.WriteNormal("Creating VS Code launch configuration file");
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             string installLocation = _scriptEnvironment.InstallLocation;
-            bool isInstalledAsGlobalTool = installLocation.Contains(".dotnet/tools", StringComparison.OrdinalIgnoreCase);
+            bool isInstalledAsGlobalTool = installLocation.Contains($".dotnet{Path.DirectorySeparatorChar}tools", StringComparison.OrdinalIgnoreCase);
             string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
             string launchFileContent;
             if (!File.Exists(pathToLaunchFile))
