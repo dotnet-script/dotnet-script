@@ -179,7 +179,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldCreateUnifiedLaunchFileWhenInstalledAsGlobalTool()
         {
-            Scaffolder scaffolder = CreateTestScaffolder("somefolder/.dotnet/tools/dotnet-script");
+            Scaffolder scaffolder = CreateTestScaffolder($"somefolder{Path.DirectorySeparatorChar}.dotnet{Path.DirectorySeparatorChar}tools{Path.DirectorySeparatorChar}dotnet-script");
 
             using var scriptFolder = new DisposableFolder();
             scaffolder.InitializerFolder("main.csx", scriptFolder.Path);
@@ -191,7 +191,7 @@ namespace Dotnet.Script.Tests
         public void ShouldUpdateToUnifiedLaunchFileWhenInstalledAsGlobalTool()
         {
             Scaffolder scaffolder = CreateTestScaffolder("some-install-folder");
-            Scaffolder globalToolScaffolder = CreateTestScaffolder("somefolder/.dotnet/tools/dotnet-script");
+            Scaffolder globalToolScaffolder = CreateTestScaffolder($"somefolder{Path.DirectorySeparatorChar}.dotnet{Path.DirectorySeparatorChar}tools{Path.DirectorySeparatorChar}dotnet-script");
             using var scriptFolder = new DisposableFolder();
             scaffolder.InitializerFolder("main.csx", scriptFolder.Path);
             var fileContent = File.ReadAllText(Path.Combine(scriptFolder.Path, ".vscode", "launch.json"));

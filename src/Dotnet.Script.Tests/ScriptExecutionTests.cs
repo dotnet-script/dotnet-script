@@ -250,21 +250,15 @@ namespace Dotnet.Script.Tests
 
         [Theory]
         [InlineData("https://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx",
-                    "Hello World")]
+            "Hello World")]
+        [InlineData("http://gist.githubusercontent.com/seesharper/5d6859509ea8364a1fdf66bbf5b7923d/raw/0a32bac2c3ea807f9379a38e251d93e39c8131cb/HelloWorld.csx",
+            "Hello World")]
         [InlineData("https://github.com/dotnet-script/dotnet-script/files/5035247/hello.csx.gz",
                     "Hello, world!")]
         public void ShouldExecuteRemoteScript(string url, string output)
         {
             var result = ScriptTestRunner.Default.Execute(url);
             Assert.Contains(output, result.Output);
-        }
-
-        [Fact]
-        public void ShouldExecuteRemoteScriptUsingTinyUrl()
-        {
-            var url = "https://tinyurl.com/y8cda9zt";
-            var (output, _) = ScriptTestRunner.Default.Execute(url);
-            Assert.Contains("Hello World", output);
         }
 
         [Fact]

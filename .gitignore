@@ -266,3 +266,4 @@ project.json
 /dotnet-script
 /.vscode
 /src/Dotnet.Script/Properties/launchSettings.json
+.DS_Store
