@@ -22,6 +22,9 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 The only thing we need to install is [.NET 6.0, .NET 7.0 or .NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet).
 
+[Note](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#manual-install):
+> If you install the .NET SDK to a non-default location, you need to set the environment variable `DOTNET_ROOT` to the directory that contains the dotnet executable
+
 ### .NET Core Global Tool
 
 .NET Core 2.1 introduced the concept of global tools meaning that you can install `dotnet-script` using nothing but the .NET CLI.
