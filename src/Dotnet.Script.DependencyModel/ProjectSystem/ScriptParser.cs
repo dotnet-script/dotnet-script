@@ -53,7 +53,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         private static string ReadSdkFromReferenceDirective(string fileContent)
         {
             const string pattern = DirectivePatternPrefix + "r" + SdkDirectivePatternSuffix;
-            var match = Regex.Match(fileContent, pattern);
+            var match = Regex.Match(fileContent, pattern, RegexOptions.Multiline);
             if (match.Success)
             {
                 var sdk = match.Groups[1].Value;
