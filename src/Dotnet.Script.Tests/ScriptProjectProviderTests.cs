@@ -40,5 +40,17 @@ namespace Dotnet.Script.Tests
             var projectFileInfo = provider.CreateProject(TestPathUtils.GetPathToTestFixtureFolder("WebApi"), _scriptEnvironment.TargetFramework, true);
             Assert.Equal("Microsoft.NET.Sdk.Web", XDocument.Load(projectFileInfo.Path).Descendants("Project").Single().Attributes("Sdk").Single().Value);
         }
+
+        // See: https://github.com/dotnet-script/dotnet-script/issues/723
+        [Theory]
+        [InlineData("#!/usr/bin/env dotnet-script\n#r \"sdk:Microsoft.NET.Sdk.Web\"")]
+        [InlineData("#!/usr/bin/env dotnet-script\n\n#r \"sdk:Microsoft.NET.Sdk.Web\"")]
+        public void ShouldHandleShebangBeforeSdk(string code)
+        {
+            var parser = new ScriptParser(TestOutputHelper.CreateTestLogFactory());
+            var result = parser.ParseFromCode(code);
+
+            Assert.Equal("Microsoft.NET.Sdk.Web", result.Sdk);
+        }
     }
 }
