@@ -5,7 +5,7 @@
     <VersionPrefix>1.5.0</VersionPrefix>
     <Authors>filipw</Authors>
     <PackageId>Dotnet.Script</PackageId>
-    <TargetFrameworks>net8.0;net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>dotnet-script</AssemblyName>
     <OutputType>Exe</OutputType>
@@ -27,11 +27,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0-3.final" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0"
-                      Condition="'$(TargetFramework)' == 'net6.0' or '$(TargetFramework)' == 'net7.0'"/>
-    
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0"
-                      Condition="'$(TargetFramework)' == 'net8.0'"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0-rc.2.24473.5" Condition="'$(TargetFramework)' == 'net9.0'"/>
+
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
