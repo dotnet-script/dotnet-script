@@ -86,7 +86,8 @@ private async Task PublishRelease()
         Git.Default.RequireCleanWorkingTree();
         await ReleaseManagerFor(owner, projectName, BuildEnvironment.GitHubAccessToken)
         .CreateRelease(Git.Default.GetLatestTag(), pathToReleaseNotes, new[] { new ZipReleaseAsset(pathToGitHubReleaseAsset) });
-        NuGet.TryPush(nuGetArtifactsFolder);
+
+        DotNet.TryPush(nuGetArtifactsFolder);
     }
 }
 

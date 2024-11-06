@@ -1,4 +1,4 @@
-#load "nuget:Dotnet.Build, 0.7.1"
+#load "nuget:Dotnet.Build, 0.23.0"
 using static FileUtils;
 using System.Xml.Linq;
 
@@ -7,7 +7,7 @@ const string GlobalToolPackageId = "dotnet-script";
 var owner = "filipw";
 var projectName = "dotnet-script";
 var root = FileUtils.GetScriptFolder();
-var solutionFolder = Path.Combine(root,"..","src");
+var solutionFolder = Path.Combine(root, "..", "src");
 var dotnetScriptProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script");
 var dotnetScriptCoreProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Core");
 var dotnetScriptDependencyModelProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel");
