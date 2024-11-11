@@ -1,4 +1,4 @@
-#load "nuget:Dotnet.Build, 0.23.0   "
+#load "nuget:Dotnet.Build, 0.23.0"
 #load "nuget:dotnet-steps, 0.0.1"
 #load "nuget:github-changelog, 0.1.5"
 #load "BuildContext.csx"
@@ -33,7 +33,7 @@ await StepRunner.Execute(Args);
 
 private void CreateGitHubReleaseAsset()
 {
-    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net6.0");
+    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net8.0");
     Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
 }
 
