@@ -54,6 +54,9 @@ jobs:
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global
 
+      - name: Run tests
+        run: dotnet test -c release src/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj
+
       - name: Run build script
         run: dotnet-script build/Build.csx
         env: # Or as an environment variable
