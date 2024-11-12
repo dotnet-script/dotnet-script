@@ -58,8 +58,8 @@ private void CreateNuGetPackages()
 
 private void RunTests()
 {
-    Command.Execute("dotnet", "test -c release -f net8.0", testProjectFolder);
-    Command.Execute("dotnet", "test -c release -f net9.0", testProjectFolder);
+    Command.Execute("dotnet", "test -c Release -f net8.0", testProjectFolder);
+    Command.Execute("dotnet", "test -c Release -f net9.0", testProjectFolder);
     if (BuildEnvironment.IsWindows)
     {
         DotNet.Test(testDesktopProjectFolder);
