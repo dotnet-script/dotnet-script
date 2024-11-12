@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Authors>dotnet-script</Authors>
@@ -16,24 +16,19 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-
   <ItemGroup>
     <None Remove="NuGet\NuGet430.exe" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="ProjectSystem\ScriptParserInternal.cs">
       <DependentUpon>ScriptParser.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="ProjectSystem\csproj.template" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="NuGet.ProjectModel" Version="6.2.0" />
+    <PackageReference Include="NuGet.ProjectModel" Version="6.10.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="3.1.6" />
   </ItemGroup>
-
 </Project>

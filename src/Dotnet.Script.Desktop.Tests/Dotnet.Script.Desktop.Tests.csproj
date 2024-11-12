@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <SignAssembly>true</SignAssembly>
@@ -16,17 +16,14 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="StrongNamer" Version="0.2.5" PrivateAssets="all" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
     <ProjectReference Include="..\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj" />
     <ProjectReference Include="..\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
 </Project>
