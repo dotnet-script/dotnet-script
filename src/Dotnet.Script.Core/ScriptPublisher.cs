@@ -11,7 +11,7 @@ namespace Dotnet.Script.Core
 {
     public class ScriptPublisher
     {
-        private const string ScriptingVersion = "4.8.0-3.final";
+        private const string ScriptingVersion = "4.11.0";
 
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptEmitter _scriptEmitter;
@@ -57,7 +57,7 @@ namespace Dotnet.Script.Core
             // only display published if we aren't auto publishing to temp folder
             if (!scriptAssemblyPath.StartsWith(FileUtils.GetTempPath()))
             {
-                _scriptConsole.WriteSuccess($"Published {context.FilePath} to { scriptAssemblyPath}");
+                _scriptConsole.WriteSuccess($"Published {context.FilePath} to {scriptAssemblyPath}");
             }
         }
 
