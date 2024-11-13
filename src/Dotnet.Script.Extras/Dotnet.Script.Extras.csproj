@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Extensions and add ons to C# scripting</Description>
-    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.3.0</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dotnet.Script.Extras</AssemblyName>
     <PackageId>Dotnet.Script.Extras</PackageId>
