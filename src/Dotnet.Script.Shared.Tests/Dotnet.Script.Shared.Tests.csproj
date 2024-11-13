@@ -1,18 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
     <ProjectReference Include="..\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj" />
   </ItemGroup>
-
 </Project>

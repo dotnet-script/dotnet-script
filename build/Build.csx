@@ -1,4 +1,4 @@
-#load "nuget:Dotnet.Build, 0.7.1"
+#load "nuget:Dotnet.Build, 0.23.0"
 #load "nuget:dotnet-steps, 0.0.1"
 #load "nuget:github-changelog, 0.1.5"
 #load "BuildContext.csx"
@@ -33,7 +33,7 @@ await StepRunner.Execute(Args);
 
 private void CreateGitHubReleaseAsset()
 {
-    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net6.0");
+    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net8.0");
     Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
 }
 
@@ -58,7 +58,8 @@ private void CreateNuGetPackages()
 
 private void RunTests()
 {
-    DotNet.Test(testProjectFolder);
+    Command.Execute("dotnet", "test -c Release -f net8.0", testProjectFolder);
+    Command.Execute("dotnet", "test -c Release -f net9.0", testProjectFolder);
     if (BuildEnvironment.IsWindows)
     {
         DotNet.Test(testDesktopProjectFolder);
@@ -86,7 +87,8 @@ private async Task PublishRelease()
         Git.Default.RequireCleanWorkingTree();
         await ReleaseManagerFor(owner, projectName, BuildEnvironment.GitHubAccessToken)
         .CreateRelease(Git.Default.GetLatestTag(), pathToReleaseNotes, new[] { new ZipReleaseAsset(pathToGitHubReleaseAsset) });
-        NuGet.TryPush(nuGetArtifactsFolder);
+
+        DotNet.TryPush(nuGetArtifactsFolder);
     }
 }
 
