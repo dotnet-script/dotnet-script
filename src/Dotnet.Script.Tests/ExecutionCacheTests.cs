@@ -151,7 +151,7 @@ namespace Dotnet.Script.Tests
 
         private static string GetPathToExecutionCache(string pathToScript)
         {
-            var pathToTempFolder = Dotnet.Script.DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript);
+            var pathToTempFolder = Dotnet.Script.DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript, cachePath: null);
             var pathToExecutionCache = Path.Combine(pathToTempFolder, "execution-cache");
             return pathToExecutionCache;
         }

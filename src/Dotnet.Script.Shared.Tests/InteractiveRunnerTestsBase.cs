@@ -39,7 +39,7 @@ namespace Dotnet.Script.Shared.Tests
 
             var logFactory = TestOutputHelper.CreateTestLogFactory();
 
-            var compiler = new ScriptCompiler(logFactory, useRestoreCache: false);
+            var compiler = new ScriptCompiler(logFactory, cachePath: null, useRestoreCache: false);
             var runner = new InteractiveRunner(compiler, logFactory, console, Array.Empty<string>());
             return new InteractiveTestContext(console, runner);
         }

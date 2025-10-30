@@ -26,10 +26,10 @@ namespace Dotnet.Script.Core
             _scriptEnvironment = ScriptEnvironment.Default;
         }
 
-        public ScriptPublisher(LogFactory logFactory, ScriptEmitter scriptEmitter)
+        public ScriptPublisher(LogFactory logFactory, ScriptEmitter scriptEmitter, string cachePath)
             : this
             (
-                new ScriptProjectProvider(logFactory),
+                new ScriptProjectProvider(logFactory, cachePath),
                 scriptEmitter,
                 ScriptConsole.Default
             )
@@ -43,7 +43,7 @@ namespace Dotnet.Script.Core
 
             assemblyFileName = assemblyFileName ?? Path.GetFileNameWithoutExtension(context.FilePath);
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, context.WorkingDirectory, assemblyFileName);
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework);
+            var tempProjectPath = _scriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), ScriptEnvironment.Default.TargetFramework);
             var tempProjectDirecory = Path.GetDirectoryName(tempProjectPath);
 
             var sourceProjectAssetsPath = Path.Combine(tempProjectDirecory, "obj", "project.assets.json");
@@ -55,7 +55,7 @@ namespace Dotnet.Script.Core
             File.Copy(sourceNugetPropsPath, destinationNugetPropsPath, overwrite: true);
 
             // only display published if we aren't auto publishing to temp folder
-            if (!scriptAssemblyPath.StartsWith(FileUtils.GetTempPath()))
+            if (!_scriptProjectProvider.IsTempPath(scriptAssemblyPath))
             {
                 _scriptConsole.WriteSuccess($"Published {context.FilePath} to {scriptAssemblyPath}");
             }
@@ -71,8 +71,8 @@ namespace Dotnet.Script.Core
             executableFileName ??= Path.GetFileNameWithoutExtension(context.FilePath);
             const string AssemblyName = "scriptAssembly";
 
-            var tempProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), _scriptEnvironment.TargetFramework);
-            var renamedProjectPath = ScriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), _scriptEnvironment.TargetFramework, executableFileName);
+            var tempProjectPath = _scriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), _scriptEnvironment.TargetFramework);
+            var renamedProjectPath = _scriptProjectProvider.GetPathToProjectFile(Path.GetDirectoryName(context.FilePath), _scriptEnvironment.TargetFramework, executableFileName);
             var tempProjectDirectory = Path.GetDirectoryName(tempProjectPath);
 
             var scriptAssemblyPath = CreateScriptAssembly<TReturn, THost>(context, tempProjectDirectory, AssemblyName);

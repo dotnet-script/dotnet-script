@@ -25,7 +25,7 @@ namespace Dotnet.Script.Core.Commands
             }
 
             var absoluteFilePath = options.LibraryPath.GetRootedPath();
-            var compiler = new ScriptCompiler(_logFactory, !options.NoCache)
+            var compiler = new ScriptCompiler(_logFactory, options.CachePath, !options.NoCache)
             {
 #if NETCOREAPP
                 AssemblyLoadContext = options.AssemblyLoadContext

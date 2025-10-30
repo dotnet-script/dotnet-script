@@ -16,7 +16,7 @@ namespace Dotnet.Script.Shared.Tests
 
         public static string GetPathToTempFolder(string path)
         {
-            return DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(path);
+            return DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(path, cachePath: null);
         }
 
         public static string GetPathToScriptPackages(string fixture)

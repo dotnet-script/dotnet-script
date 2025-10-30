@@ -33,14 +33,14 @@ namespace Dotnet.Script.Core.Commands
                 (options.PublishType == PublishType.Library ? Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish") : Path.Combine(Path.GetDirectoryName(absoluteFilePath), "publish", options.RuntimeIdentifier));
 
             var absolutePublishDirectory = publishDirectory.GetRootedPath();
-            var compiler = new ScriptCompiler(_logFactory, !options.NoCache)
+            var compiler = new ScriptCompiler(_logFactory, options.CachePath, !options.NoCache)
             {
 #if NETCOREAPP
                 AssemblyLoadContext = options.AssemblyLoadContext
 #endif
             };
             var scriptEmitter = new ScriptEmitter(_scriptConsole, compiler);
-            var publisher = new ScriptPublisher(_logFactory, scriptEmitter);
+            var publisher = new ScriptPublisher(_logFactory, scriptEmitter, options.CachePath);
             var code = absoluteFilePath.ToSourceText();
             var context = new ScriptContext(code, absolutePublishDirectory, Enumerable.Empty<string>(), absoluteFilePath, options.OptimizationLevel, packageSources: options.PackageSources);
 

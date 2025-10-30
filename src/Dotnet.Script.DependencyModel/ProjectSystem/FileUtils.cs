@@ -10,9 +10,9 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 {
     public static class FileUtils
     {
-        public static string CreateTempFolder(string targetDirectory, string targetFramework)
+        public static string CreateTempFolder(string targetDirectory, string cachePath, string targetFramework)
         {
-            string pathToProjectDirectory = Path.Combine(GetPathToScriptTempFolder(targetDirectory), targetFramework);
+            string pathToProjectDirectory = Path.Combine(GetPathToScriptTempFolder(targetDirectory, cachePath), targetFramework);
 
             if (!Directory.Exists(pathToProjectDirectory))
             {
@@ -22,14 +22,18 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             return pathToProjectDirectory;
         }
 
-        public static string GetPathToScriptTempFolder(string targetDirectory)
+        public static string GetPathToScriptTempFolder(string targetDirectory, string cachePath)
         {
             if (!Path.IsPathRooted(targetDirectory))
             {
                 throw new ArgumentOutOfRangeException(nameof(targetDirectory), "Must be a root path");
             }
 
-            var tempDirectory = GetTempPath();
+            var tempDirectory =
+                string.IsNullOrEmpty(cachePath) ? GetTempPath() :
+                Path.IsPathRooted(cachePath) ? cachePath :
+                Path.Combine(Directory.GetCurrentDirectory(), cachePath);
+
             var pathRoot = Path.GetPathRoot(targetDirectory);
             var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
             if (pathRoot.Length > 0 && ScriptEnvironment.Default.IsWindows)

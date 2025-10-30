@@ -11,17 +11,19 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         private readonly ScriptParser _scriptParser;
         private readonly ScriptFilesResolver _scriptFilesResolver;
         private readonly ScriptEnvironment _scriptEnvironment;
+        private readonly string _cachePath;
         private readonly Logger _logger;
 
-        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, ScriptEnvironment scriptEnvironment)
+        private ScriptProjectProvider(ScriptParser scriptParser, ScriptFilesResolver scriptFilesResolver, LogFactory logFactory, string cachePath, ScriptEnvironment scriptEnvironment)
         {
             _logger = logFactory.CreateLogger<ScriptProjectProvider>();
+            _cachePath = cachePath;
             _scriptParser = scriptParser;
             _scriptFilesResolver = scriptFilesResolver;
             _scriptEnvironment = scriptEnvironment;
         }
 
-        public ScriptProjectProvider(LogFactory logFactory) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, ScriptEnvironment.Default)
+        public ScriptProjectProvider(LogFactory logFactory, string cachePath) : this(new ScriptParser(logFactory), new ScriptFilesResolver(), logFactory, cachePath, ScriptEnvironment.Default)
         {
         }
 
@@ -129,13 +131,18 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         }
 
 
-        public static string GetPathToProjectFile(string targetDirectory, string targetFramework, string projectName = null)
+        public string GetPathToProjectFile(string targetDirectory, string targetFramework, string projectName = null)
         {
             projectName ??= "script";
             var projectFileName = projectName + ".csproj";
-            var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory, targetFramework);
+            var pathToProjectDirectory = FileUtils.CreateTempFolder(targetDirectory, _cachePath, targetFramework);
             var pathToProjectFile = Path.Combine(pathToProjectDirectory, projectFileName);
             return pathToProjectFile;
+        }
+
+        public bool IsTempPath(string path)
+        {
+            return path.StartsWith(FileUtils.GetTempPath()) || path.StartsWith(_cachePath);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Dotnet.Script.Core.Commands
         {
             var sourceText = SourceText.From(options.Code);
             var context = new ScriptContext(sourceText, options.WorkingDirectory ?? Directory.GetCurrentDirectory(), options.Arguments, null, options.OptimizationLevel, ScriptMode.Eval, options.PackageSources);
-            var compiler = new ScriptCompiler(_logFactory, !options.NoCache)
+            var compiler = new ScriptCompiler(_logFactory, options.CachePath, !options.NoCache)
             {
 #if NETCOREAPP
                 AssemblyLoadContext = options.AssemblyLoadContext

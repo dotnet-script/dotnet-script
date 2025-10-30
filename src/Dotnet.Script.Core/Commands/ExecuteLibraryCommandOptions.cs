@@ -6,15 +6,17 @@ namespace Dotnet.Script.Core.Commands
 {
     public class ExecuteLibraryCommandOptions
     {
-        public ExecuteLibraryCommandOptions(string libraryPath, string[] arguments, bool noCache)
+        public ExecuteLibraryCommandOptions(string libraryPath, string[] arguments, string cachePath, bool noCache)
         {
             LibraryPath = libraryPath;
             Arguments = arguments;
+            CachePath = cachePath;
             NoCache = noCache;
         }
 
         public string LibraryPath { get; }
         public string[] Arguments { get; }
+        public string CachePath { get; }
         public bool NoCache { get; }
 
 #if NETCOREAPP
