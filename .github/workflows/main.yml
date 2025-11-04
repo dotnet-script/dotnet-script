@@ -40,7 +40,7 @@ jobs:
         run: dotnet-script build/Build.csx
 
   build-mac-arm:
-    runs-on: macos-26-arm64
+    runs-on: macos-26
 
     steps:
       - uses: actions/checkout@v3
