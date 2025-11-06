@@ -1,4 +1,4 @@
-using Dotnet.Script.Shared.Tests;
+﻿using Dotnet.Script.Shared.Tests;
 using System;
 using System.IO;
 using Xunit;
@@ -131,6 +131,34 @@ namespace Dotnet.Script.Tests
             Assert.Contains(idScriptB, thirdResultOfScriptB.Output);
             Assert.Contains(idScriptB2, thirdResultOfScriptB.Output);
             Assert.False(thirdResultOfScriptB.Cached);
+        }
+
+        [Fact]
+        public void ShouldUseCachePathWhenProvided()
+        {
+            using var scriptFolder = new DisposableFolder();
+            var pathToScript = Path.Combine(scriptFolder.Path, "script.csx");
+
+            var executionPathA = DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript, cachePath: null);
+            Assert.True(Path.IsPathFullyQualified(executionPathA));
+            Assert.Contains("script.csx", executionPathA);
+
+            var fullCachePath = Path.Combine(scriptFolder.Path, "AlternateCachePath");
+            var fullCachePathNoRoot = fullCachePath.Substring(Path.GetPathRoot(fullCachePath).Length);
+            Assert.True(Path.IsPathFullyQualified(fullCachePath));
+
+            var executionPathB = DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript, cachePath: fullCachePath);
+            Assert.True(Path.IsPathFullyQualified(executionPathB));
+            Assert.Contains("script.csx", executionPathB);
+            Assert.Contains(fullCachePathNoRoot, executionPathB);
+
+            var relativeCachePath = Path.Combine("Relative", "CachePath");
+            Assert.False(Path.IsPathRooted(relativeCachePath));
+
+            var executionPathC = DependencyModel.ProjectSystem.FileUtils.GetPathToScriptTempFolder(pathToScript, cachePath: relativeCachePath);
+            Assert.True(Path.IsPathFullyQualified(executionPathC));
+            Assert.Contains("script.csx", executionPathC);
+            Assert.Contains(relativeCachePath, executionPathC);
         }
 
         private (string output, string hash) Execute(string pathToScript)
