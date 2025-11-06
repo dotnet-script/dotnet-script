@@ -142,7 +142,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
         public bool IsTempPath(string path)
         {
-            return path.StartsWith(FileUtils.GetTempPath()) || path.StartsWith(_cachePath);
+            return path.StartsWith(FileUtils.GetTempPath()) || (!string.IsNullOrEmpty(_cachePath) && path.StartsWith(_cachePath));
         }
     }
 }
