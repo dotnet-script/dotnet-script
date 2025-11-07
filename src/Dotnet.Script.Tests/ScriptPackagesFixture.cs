@@ -35,22 +35,13 @@ namespace Dotnet.Script.Tests
             RemoveDirectory(pathToPackagesOutputFolder);
             Directory.CreateDirectory(pathToPackagesOutputFolder);
             var specFiles = GetSpecFiles();
-            _ = AppDomain.CurrentDomain.BaseDirectory;
-            var pathtoNuget430 = Path.Combine("../../../NuGet/NuGet430.exe");
             foreach (var specFile in specFiles)
             {
-                string command;
-                if (_scriptEnvironment.IsWindows)
+                var result  = ProcessHelper.RunAndCaptureOutput("dotnet", $"pack \"{specFile}\" -o \"{pathToPackagesOutputFolder}\"");
+                if (result.ExitCode != 0)
                 {
-                    command = pathtoNuget430;
-                    _ = ProcessHelper.RunAndCaptureOutput(command, $"pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
+                    throw new InvalidOperationException($"Failed to pack {specFile}: {result.Output}");
                 }
-                else
-                {
-                    command = "mono";
-                    _ = ProcessHelper.RunAndCaptureOutput(command, $"\"{pathtoNuget430}\" pack \"{specFile}\" -OutputDirectory \"{pathToPackagesOutputFolder}\"");
-                }
-
             }
         }
 
@@ -91,7 +82,8 @@ namespace Dotnet.Script.Tests
         {
             var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             var pathToScriptPackages = Path.Combine(baseDirectory, "..", "..", "..", "ScriptPackages");
-            return Directory.GetFiles(pathToScriptPackages, "*.nuspec", SearchOption.AllDirectories);
+            // The csproj files contains the nuspec references
+            return Directory.GetFiles(pathToScriptPackages, "*.csproj", SearchOption.AllDirectories);
         }
     }
 }
