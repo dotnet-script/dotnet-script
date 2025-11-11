@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ProjectFileTests
     {
         [Fact]
@@ -26,12 +27,12 @@ namespace Dotnet.Script.Tests
         public void ShouldBeEqualWhenPackagesAreEqual()
         {
             var firstFile = new ProjectFile();
-            firstFile.PackageReferences.Add(new PackageReference("SomePackage","1.2.3"));
-            firstFile.PackageReferences.Add(new PackageReference("AnotherPackage","3.2.1"));
+            firstFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
+            firstFile.PackageReferences.Add(new PackageReference("AnotherPackage", "3.2.1"));
 
             var secondFile = new ProjectFile();
-            secondFile.PackageReferences.Add(new PackageReference("SomePackage","1.2.3"));
-            secondFile.PackageReferences.Add(new PackageReference("AnotherPackage","3.2.1"));
+            secondFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
+            secondFile.PackageReferences.Add(new PackageReference("AnotherPackage", "3.2.1"));
 
             Assert.Equal(firstFile, secondFile);
         }
@@ -40,11 +41,11 @@ namespace Dotnet.Script.Tests
         public void ShouldNotBeEqualWhenPackagesAreDifferent()
         {
             var firstFile = new ProjectFile();
-            firstFile.PackageReferences.Add(new PackageReference("SomePackage","1.2.3"));
-            firstFile.PackageReferences.Add(new PackageReference("AnotherPackage","3.2.1"));
+            firstFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
+            firstFile.PackageReferences.Add(new PackageReference("AnotherPackage", "3.2.1"));
 
             var secondFile = new ProjectFile();
-            secondFile.PackageReferences.Add(new PackageReference("SomePackage","1.2.3"));
+            secondFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
 
             Assert.NotEqual(firstFile, secondFile);
         }
@@ -80,8 +81,8 @@ namespace Dotnet.Script.Tests
         public void ShouldBeCacheableWhenPackagesArePinned()
         {
             var projectFile = new ProjectFile();
-            projectFile.PackageReferences.Add(new PackageReference("SomePackage","1.2.3"));
-            projectFile.PackageReferences.Add(new PackageReference("AnotherPackage","3.2.1"));
+            projectFile.PackageReferences.Add(new PackageReference("SomePackage", "1.2.3"));
+            projectFile.PackageReferences.Add(new PackageReference("AnotherPackage", "3.2.1"));
 
         }
     }

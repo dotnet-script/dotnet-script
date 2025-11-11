@@ -6,6 +6,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ExecutionCacheTests
     {
         private readonly ITestOutputHelper testOutputHelper;

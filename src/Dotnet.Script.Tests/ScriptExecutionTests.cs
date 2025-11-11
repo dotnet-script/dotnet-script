@@ -11,6 +11,7 @@ using Xunit.Abstractions;
 namespace Dotnet.Script.Tests
 {
     [Collection("IntegrationTests")]
+    // Removed duplicate
     public class ScriptExecutionTests
     {
         public ScriptExecutionTests(ITestOutputHelper testOutputHelper)
@@ -59,10 +60,8 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldHandlePackageWithNativeLibraries()
         {
-            var res = ScriptTestRunner.ExecuteFixtureInProcess("NativeLibrary");
-            
-            // var (output, _) = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary");
-            // Assert.Contains("Connection successful", output);
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("NativeLibrary", "--no-cache");
+            Assert.Contains("Connection successful", output);
         }
 
         [Fact]

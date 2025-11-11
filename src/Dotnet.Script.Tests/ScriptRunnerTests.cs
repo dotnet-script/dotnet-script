@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptRunnerTests
     {
         [Fact]
@@ -26,7 +27,7 @@ namespace Dotnet.Script.Tests
         {
             var logFactory = TestOutputHelper.CreateTestLogFactory();
             var scriptCompiler = new ScriptCompiler(logFactory, false);
-            
+
             return new ScriptRunner(scriptCompiler, logFactory, ScriptConsole.Default);
         }
     }

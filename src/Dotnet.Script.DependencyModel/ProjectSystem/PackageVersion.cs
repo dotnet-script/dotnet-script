@@ -47,6 +47,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
         /// <param name="version">The string representation of the package version.</param>
         public PackageVersion(string version)
         {
+            version = string.IsNullOrWhiteSpace(version) ? "*" : version;
             Value = version;
             IsPinned = IsPinnedRegex.IsMatch(version);
         }

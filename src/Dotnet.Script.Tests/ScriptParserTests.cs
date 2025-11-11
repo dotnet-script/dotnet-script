@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptParserTests
     {
         private readonly ScriptEnvironment _scriptEnvironment;
@@ -41,7 +42,7 @@ namespace Dotnet.Script.Tests
 
             Assert.Equal(1, result.PackageReferences.Count);
             Assert.Equal("Package", result.PackageReferences.Single().Id.Value);
-            Assert.Equal(string.Empty, result.PackageReferences.Single().Version.Value);
+            Assert.Equal("*", result.PackageReferences.Single().Version.Value);
         }
 
         [Fact]

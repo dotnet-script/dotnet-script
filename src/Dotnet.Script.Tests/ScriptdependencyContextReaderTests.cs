@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptDependencyContextReaderTests
     {
         public ScriptDependencyContextReaderTests(ITestOutputHelper testOutputHelper)
@@ -22,6 +23,7 @@ namespace Dotnet.Script.Tests
             ProcessHelper.RunAndCaptureOutput("dotnet", "new console -n SampleLibrary", projectFolder.Path);
             ProcessHelper.RunAndCaptureOutput("dotnet", "restore", projectFolder.Path);
             var pathToAssetsFile = Path.Combine(projectFolder.Path, "SampleLibrary", "obj", "project.assets.json");
+            TestOutputHelper.Current.TestOutputHelper.WriteLine($"Path to assets file: {pathToAssetsFile}");
             var dependencyResolver = new ScriptDependencyContextReader(TestOutputHelper.CreateTestLogFactory());
 
             var exception = Assert.Throws<InvalidOperationException>(() => dependencyResolver.ReadDependencyContext(pathToAssetsFile));
@@ -31,7 +33,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldThrowMeaningfulExceptionWhenPassingAnInvalidAssetsFile()
         {
-            var pathToAssetsFile = Path.Combine(Path.GetTempPath(),"project.assets.json");
+            var pathToAssetsFile = Path.Combine(Path.GetTempPath(), "project.assets.json");
             var dependencyResolver = new ScriptDependencyContextReader(TestOutputHelper.CreateTestLogFactory());
             var exception = Assert.Throws<InvalidOperationException>(() => dependencyResolver.ReadDependencyContext(pathToAssetsFile));
             Assert.Contains("Make sure that the file exists and that it is a valid 'project.assets.json' file.", exception.Message);

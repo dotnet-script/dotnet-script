@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.Shared.Tests;
+using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptTestRunner
     {
         public static readonly ScriptTestRunner Default = new ScriptTestRunner();

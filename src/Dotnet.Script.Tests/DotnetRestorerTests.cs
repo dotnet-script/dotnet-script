@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class DotnetRestorerTests
     {
         private static PackageReference ValidPackageReferenceA => new PackageReference("Newtonsoft.Json", "12.0.3");

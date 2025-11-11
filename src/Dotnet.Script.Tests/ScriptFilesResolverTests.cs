@@ -5,6 +5,7 @@ using Dotnet.Script.DependencyModel.ProjectSystem;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptFilesResolverTests
     {
         [Fact]

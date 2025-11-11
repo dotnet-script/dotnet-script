@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class VersioningTests
     {
         public VersioningTests(ITestOutputHelper testOutputHelper) => testOutputHelper.Capture();
@@ -20,7 +21,7 @@ namespace Dotnet.Script.Tests
         public void ShouldGetCurrentVersion()
         {
             var versionProvider = new LoggedVersionProvider(TestOutputHelper.CreateTestLogFactory());
-            
+
             var result = versionProvider.GetCurrentVersion();
 
             Assert.NotNull(result);
@@ -30,7 +31,7 @@ namespace Dotnet.Script.Tests
         public async Task ShouldGetLatestVersion()
         {
             var versionProvider = new LoggedVersionProvider(TestOutputHelper.CreateTestLogFactory());
-            
+
             var result = await versionProvider.GetLatestVersion();
 
             Assert.NotNull(result);
@@ -39,14 +40,14 @@ namespace Dotnet.Script.Tests
         [Fact]
         public async Task ShouldReportAboutNewVersion()
         {
-            var output = await ReportWith("X","Y");
+            var output = await ReportWith("X", "Y");
             Assert.Contains("Version Y is now available", output.ToString());
         }
 
         [Fact]
         public async Task ShouldNotReportLatestVersionWhenAlreayRunningLatest()
         {
-            var output = await ReportWith("Y","Y");
+            var output = await ReportWith("Y", "Y");
             Assert.DoesNotContain("Version Y is now available", output.ToString());
         }
 
@@ -57,9 +58,9 @@ namespace Dotnet.Script.Tests
             versionProviderMock.Setup(m => m.GetLatestVersion()).ReturnsAsync(new VersionInfo(latestVersion, true));
 
             StringWriter output = new StringWriter();
-            StringWriter error = new StringWriter();                        
-            ScriptConsole scriptConsole = new ScriptConsole(output,  StringReader.Null, error);
-            var reporter = new EnvironmentReporter(versionProviderMock.Object,scriptConsole,ScriptEnvironment.Default);
+            StringWriter error = new StringWriter();
+            ScriptConsole scriptConsole = new ScriptConsole(output, StringReader.Null, error);
+            var reporter = new EnvironmentReporter(versionProviderMock.Object, scriptConsole, ScriptEnvironment.Default);
 
             await reporter.ReportInfo();
 
@@ -87,6 +88,6 @@ namespace Dotnet.Script.Tests
             await reporter.ReportInfo();
 
             Assert.Contains("Failed to retrieve information about the latest version", log.ToString());
-        } 
+        }
     }
 }
