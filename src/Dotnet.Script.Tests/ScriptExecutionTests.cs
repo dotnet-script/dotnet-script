@@ -465,14 +465,14 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldIsolateScriptAssemblies()
         {
-            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Isolation", "--isolated-load-context");
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Isolation");
             Assert.Contains("2.0.0.0", output);
         }
 
         [Fact]
         public void ShouldSetCurrentContextualReflectionContext()
         {
-            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("CurrentContextualReflectionContext", "--isolated-load-context");
+            var (output, _) = ScriptTestRunner.Default.ExecuteFixture("CurrentContextualReflectionContext");
             Assert.Contains("Dotnet.Script.Core.ScriptAssemblyLoadContext", output);
         }
 
