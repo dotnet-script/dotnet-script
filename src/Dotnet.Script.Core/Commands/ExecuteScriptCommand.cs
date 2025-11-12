@@ -33,7 +33,7 @@ namespace Dotnet.Script.Core.Commands
 
             var pathToLibrary = GetLibrary<TReturn>(options);
 
-            var libraryOptions = new ExecuteLibraryCommandOptions(pathToLibrary, options.Arguments, options.NoCache)
+            var libraryOptions = new ExecuteLibraryCommandOptions(pathToLibrary, options.Arguments, options.CachePath, options.NoCache)
             {
 #if NETCOREAPP
                 AssemblyLoadContext = options.AssemblyLoadContext
@@ -46,13 +46,13 @@ namespace Dotnet.Script.Core.Commands
         {
             var downloader = new ScriptDownloader();
             var code = await downloader.Download(executeOptions.File.Path);
-            var options = new ExecuteCodeCommandOptions(code, Directory.GetCurrentDirectory(), executeOptions.Arguments, executeOptions.OptimizationLevel, executeOptions.NoCache, executeOptions.PackageSources);
+            var options = new ExecuteCodeCommandOptions(code, Directory.GetCurrentDirectory(), executeOptions.Arguments, executeOptions.OptimizationLevel, executeOptions.CachePath, executeOptions.NoCache, executeOptions.PackageSources);
             return await new ExecuteCodeCommand(_scriptConsole, _logFactory).Execute<TReturn>(options);
         }
 
         private string GetLibrary<TReturn>(ExecuteScriptCommandOptions executeOptions)
         {
-            var projectFolder = FileUtils.GetPathToScriptTempFolder(executeOptions.File.Path);
+            var projectFolder = FileUtils.GetPathToScriptTempFolder(executeOptions.File.Path, executeOptions.CachePath);
             var executionCacheFolder = Path.Combine(projectFolder, "execution-cache");
             var pathToLibrary = Path.Combine(executionCacheFolder, "script.dll");
 
@@ -64,7 +64,7 @@ namespace Dotnet.Script.Core.Commands
                 return pathToLibrary;
             }
 
-            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.NoCache)
+            var options = new PublishCommandOptions(executeOptions.File, executionCacheFolder, "script", PublishType.Library, executeOptions.OptimizationLevel, executeOptions.PackageSources, null, executeOptions.CachePath, executeOptions.NoCache)
             {
 #if NETCOREAPP
                 AssemblyLoadContext = executeOptions.AssemblyLoadContext
@@ -89,7 +89,7 @@ namespace Dotnet.Script.Core.Commands
 
             var scriptFilesProvider = new ScriptFilesResolver();
             var allScriptFiles = scriptFilesProvider.GetScriptFiles(options.File.Path);
-            var projectFile = new ScriptProjectProvider(_logFactory).CreateProjectFileFromScriptFiles(ScriptEnvironment.Default.TargetFramework, allScriptFiles.ToArray());
+            var projectFile = new ScriptProjectProvider(_logFactory, options.CachePath).CreateProjectFileFromScriptFiles(ScriptEnvironment.Default.TargetFramework, allScriptFiles.ToArray());
 
             if (!projectFile.IsCacheable)
             {

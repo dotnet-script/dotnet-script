@@ -26,8 +26,8 @@ namespace Dotnet.Script.Tests
         private static ScriptRunner CreateScriptRunner()
         {
             var logFactory = TestOutputHelper.CreateTestLogFactory();
-            var scriptCompiler = new ScriptCompiler(logFactory, false);
-
+            var scriptCompiler = new ScriptCompiler(logFactory, null, false);
+            
             return new ScriptRunner(scriptCompiler, logFactory, ScriptConsole.Default);
         }
     }

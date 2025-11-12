@@ -25,7 +25,7 @@ namespace Dotnet.Script.Tests
         public void ShouldLogProjectFileContent()
         {
             StringBuilder log = new StringBuilder();
-            var provider = new ScriptProjectProvider(type => ((level, message, exception) => log.AppendLine(message)));
+            var provider = new ScriptProjectProvider(type => ((level, message, exception) => log.AppendLine(message)), null);
 
             provider.CreateProject(TestPathUtils.GetPathToTestFixtureFolder("HelloWorld"), _scriptEnvironment.TargetFramework, true);
             var output = log.ToString();
@@ -36,7 +36,7 @@ namespace Dotnet.Script.Tests
         [Fact]
         public void ShouldUseSpecifiedSdk()
         {
-            var provider = new ScriptProjectProvider(TestOutputHelper.CreateTestLogFactory());
+            var provider = new ScriptProjectProvider(TestOutputHelper.CreateTestLogFactory(), null);
             var projectFileInfo = provider.CreateProject(TestPathUtils.GetPathToTestFixtureFolder("WebApi"), _scriptEnvironment.TargetFramework, true);
             Assert.Equal("Microsoft.NET.Sdk.Web", XDocument.Load(projectFileInfo.Path).Descendants("Project").Single().Attributes("Sdk").Single().Value);
         }

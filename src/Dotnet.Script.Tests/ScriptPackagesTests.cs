@@ -112,7 +112,7 @@ namespace Dotnet.Script.Tests
 
         private RuntimeDependencyResolver CreateRuntimeDependencyResolver()
         {
-            var resolver = new RuntimeDependencyResolver(TestOutputHelper.CreateTestLogFactory(), useRestoreCache: false);
+            var resolver = new RuntimeDependencyResolver(TestOutputHelper.CreateTestLogFactory(), cachePath: null, useRestoreCache: false);
             return resolver;
         }
 

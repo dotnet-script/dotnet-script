@@ -29,7 +29,7 @@ namespace Dotnet.Script.Desktop.Tests
 
         private CompilationDependencyResolver CreateResolver()
         {
-            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
+            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory(), cachePath: null);
             return resolver;
         }
     }

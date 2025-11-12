@@ -18,7 +18,7 @@ namespace Dotnet.Script.DependencyModel.Compilation
 
         private readonly IRestorer _restorer;
 
-        public CompilationDependencyResolver(LogFactory logFactory) : this(new ScriptProjectProvider(logFactory), new ScriptDependencyContextReader(logFactory), new CompilationReferencesReader(logFactory), logFactory)
+        public CompilationDependencyResolver(LogFactory logFactory, string cachePath) : this(new ScriptProjectProvider(logFactory, cachePath), new ScriptDependencyContextReader(logFactory), new CompilationReferencesReader(logFactory), logFactory)
         {
         }
 

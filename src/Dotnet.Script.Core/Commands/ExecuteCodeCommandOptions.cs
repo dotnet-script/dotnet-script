@@ -7,12 +7,13 @@ namespace Dotnet.Script.Core.Commands
 {
     public class ExecuteCodeCommandOptions
     {
-        public ExecuteCodeCommandOptions(string code, string workingDirectory, string[] arguments, OptimizationLevel optimizationLevel, bool noCache, string[] packageSources)
+        public ExecuteCodeCommandOptions(string code, string workingDirectory, string[] arguments, OptimizationLevel optimizationLevel, string cachePath, bool noCache, string[] packageSources)
         {
             Code = code;
             WorkingDirectory = workingDirectory;
             Arguments = arguments;
             OptimizationLevel = optimizationLevel;
+			CachePath = cachePath;
             NoCache = noCache;
             PackageSources = packageSources;
         }
@@ -21,6 +22,7 @@ namespace Dotnet.Script.Core.Commands
         public string WorkingDirectory { get; }
         public string[] Arguments { get; }
         public OptimizationLevel OptimizationLevel { get; }
+        public string CachePath { get; }
         public bool NoCache { get; }
         public string[] PackageSources { get; }
 

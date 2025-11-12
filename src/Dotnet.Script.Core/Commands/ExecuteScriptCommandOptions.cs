@@ -7,13 +7,14 @@ namespace Dotnet.Script.Core.Commands
 {
     public class ExecuteScriptCommandOptions
     {
-        public ExecuteScriptCommandOptions(ScriptFile file, string[] arguments, OptimizationLevel optimizationLevel, string[] packageSources, bool isInteractive ,bool noCache)
+        public ExecuteScriptCommandOptions(ScriptFile file, string[] arguments, OptimizationLevel optimizationLevel, string[] packageSources, bool isInteractive, string cachePath, bool noCache)
         {
             File = file;
             Arguments = arguments;
             OptimizationLevel = optimizationLevel;
             PackageSources = packageSources;
             IsInteractive = isInteractive;
+            CachePath = cachePath;
             NoCache = noCache;
         }
 
@@ -22,6 +23,7 @@ namespace Dotnet.Script.Core.Commands
         public OptimizationLevel OptimizationLevel { get; }
         public string[] PackageSources { get; }
         public bool IsInteractive { get; }
+        public string CachePath { get; }
         public bool NoCache { get; }
 
 #if NETCOREAPP

@@ -8,7 +8,7 @@ namespace Dotnet.Script.Core.Commands
 {
     public class PublishCommandOptions
     {
-        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, bool noCache)
+        public PublishCommandOptions(ScriptFile file, string outputDirectory, string libraryName, PublishType publishType, OptimizationLevel optimizationLevel, string[] packageSources, string runtimeIdentifier, string cachePath, bool noCache)
         {
             File = file;
             OutputDirectory = outputDirectory;
@@ -17,6 +17,7 @@ namespace Dotnet.Script.Core.Commands
             OptimizationLevel = optimizationLevel;
             PackageSources = packageSources;
             RuntimeIdentifier = runtimeIdentifier ?? ScriptEnvironment.Default.RuntimeIdentifier;
+            CachePath = cachePath;
             NoCache = noCache;
         }
 
@@ -27,6 +28,7 @@ namespace Dotnet.Script.Core.Commands
         public OptimizationLevel OptimizationLevel { get; }
         public string[] PackageSources { get; }
         public string RuntimeIdentifier { get; }
+        public string CachePath { get; }
         public bool NoCache { get; }
 
 #if NETCOREAPP

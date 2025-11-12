@@ -6,16 +6,18 @@ namespace Dotnet.Script.Core.Commands
 {
     public class ExecuteInteractiveCommandOptions
     {
-        public ExecuteInteractiveCommandOptions(ScriptFile scriptFile, string[] arguments, string[] packageSources)
+        public ExecuteInteractiveCommandOptions(ScriptFile scriptFile, string[] arguments, string[] packageSources, string cachePath)
         {
             ScriptFile = scriptFile;
             Arguments = arguments;
             PackageSources = packageSources;
+            CachePath = cachePath;
         }
 
         public ScriptFile ScriptFile { get; }
         public string[] Arguments { get; }
         public string[] PackageSources { get; }
+        public string CachePath { get; }
 
 #if NETCOREAPP
 #nullable enable
