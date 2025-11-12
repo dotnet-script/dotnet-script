@@ -91,7 +91,7 @@ namespace Dotnet.Script.Tests
         {
             var result = ScriptTestRunner.Default.ExecuteFixture(fixture: "CompilationWarning", "--no-cache");
             Assert.True(string.IsNullOrWhiteSpace(result.StandardOut));
-            Assert.Contains("CS1998", result.StandardError, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("CS0162", result.StandardError, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
