@@ -14,6 +14,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
           include-prerelease: true
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global
@@ -22,7 +23,7 @@ jobs:
         run: dotnet-script build/Build.csx
 
   build-mac:
-    runs-on: macos-13
+    runs-on: macos-15
 
     steps:
       - uses: actions/checkout@v3
@@ -32,6 +33,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
           include-prerelease: true
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global
@@ -50,6 +52,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
           include-prerelease: true
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global
@@ -68,6 +71,7 @@ jobs:
           dotnet-version: |
             8.0.x
             9.0.x
+            10.0.x
           include-prerelease: true
       - name: Install dotnet-script
         run: dotnet tool install dotnet-script --global

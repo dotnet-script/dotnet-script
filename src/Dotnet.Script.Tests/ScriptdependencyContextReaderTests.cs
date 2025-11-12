@@ -20,9 +20,17 @@ namespace Dotnet.Script.Tests
         public void ShouldThrowMeaningfulExceptionWhenRuntimeTargetIsMissing()
         {
             using var projectFolder = new DisposableFolder();
-            ProcessHelper.RunAndCaptureOutput("dotnet", "new console -n SampleLibrary", projectFolder.Path);
-            ProcessHelper.RunAndCaptureOutput("dotnet", "restore", projectFolder.Path);
             var pathToAssetsFile = Path.Combine(projectFolder.Path, "SampleLibrary", "obj", "project.assets.json");
+            var result = ProcessHelper.RunAndCaptureOutput("dotnet", "new console -n SampleLibrary", projectFolder.Path);
+            //Assert.Equal(0, result.ExitCode);
+            //result = ProcessHelper.RunAndCaptureOutput("dotnet", "restore", projectFolder.Path);
+            //Assert.Equal(0, result.ExitCode);
+
+            if (!File.Exists(pathToAssetsFile))
+            {
+                throw new InvalidOperationException($"Expected assets file to be present at '{pathToAssetsFile}' but it was not found. Command output: {result.Output}");
+            }
+
             TestOutputHelper.Current.TestOutputHelper.WriteLine($"Path to assets file: {pathToAssetsFile}");
             var dependencyResolver = new ScriptDependencyContextReader(TestOutputHelper.CreateTestLogFactory());
 
