@@ -18,7 +18,7 @@ namespace Dotnet.Script.Core.Commands
 
         public async Task<int> Execute(ExecuteInteractiveCommandOptions options)
         {
-            var compiler = new ScriptCompiler(_logFactory, useRestoreCache: false)
+            var compiler = new ScriptCompiler(_logFactory, options.CachePath, useRestoreCache: false)
             {
 #if NETCOREAPP
                 AssemblyLoadContext = options.AssemblyLoadContext

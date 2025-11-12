@@ -24,7 +24,7 @@ namespace Dotnet.Script.DependencyModel.Runtime
             _restorer = CreateRestorer(logFactory, useRestoreCache);
         }
 
-        public RuntimeDependencyResolver(LogFactory logFactory, bool useRestoreCache) : this(new ScriptProjectProvider(logFactory), logFactory, useRestoreCache)
+        public RuntimeDependencyResolver(LogFactory logFactory, string cachePath, bool useRestoreCache) : this(new ScriptProjectProvider(logFactory, cachePath), logFactory, useRestoreCache)
         {
         }
 

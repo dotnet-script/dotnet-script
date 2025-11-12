@@ -65,7 +65,8 @@ namespace Dotnet.Script
             var interactive = app.Option("-i | --interactive", "Execute a script and drop into the interactive mode afterwards.", CommandOptionType.NoValue);
             var configuration = app.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
             var packageSources = app.Option("-s | --sources <SOURCE>", "Specifies a NuGet package source to use when resolving NuGet packages.", CommandOptionType.MultipleValue);
-            var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
+            var cachePath = app.Option("-p | --cache-path <PATH>", "Specify the temporary directory that the script is built in.", CommandOptionType.SingleValue);
+			var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
             var nocache = app.Option("--no-cache", "Disable caching (Restore and Dll cache)", CommandOptionType.NoValue);
             var isolatedLoadContext = app.Option("--isolated-load-context", "Use isolated assembly load context", CommandOptionType.NoValue);
@@ -101,7 +102,7 @@ namespace Dotnet.Script
                     }
 
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
-                    var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, nocache.HasValue(), packageSources.Values?.ToArray());
+                    var options = new ExecuteCodeCommandOptions(source, cwd.Value(), app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(), configuration.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug, cachePath.Value(), nocache.HasValue(), packageSources.Values?.ToArray());
                     return await new ExecuteCodeCommand(ScriptConsole.Default, logFactory).Execute<int>(options);
                 });
             });
@@ -184,6 +185,7 @@ namespace Dotnet.Script
                         commandConfig.ValueEquals("release", StringComparison.OrdinalIgnoreCase) ? OptimizationLevel.Release : OptimizationLevel.Debug,
                         packageSources.Values?.ToArray(),
                         runtime.Value() ?? ScriptEnvironment.Default.RuntimeIdentifier,
+                        cachePath.Value(),
                         nocache.HasValue()
                     );
 
@@ -211,6 +213,7 @@ namespace Dotnet.Script
                     (
                         dllPath.Value,
                         app.RemainingArguments.Concat(argsAfterDoubleHyphen).ToArray(),
+                        cachePath.Value(),
                         nocache.HasValue()
                     );
                     var logFactory = CreateLogFactory(verbosity.Value(), debugMode.HasValue());
@@ -241,7 +244,7 @@ namespace Dotnet.Script
                 {
                     if (interactive.HasValue())
                     {
-                        return await RunInteractiveWithSeed(file.Value, logFactory, scriptArguments, packageSources.Values?.ToArray(), assemblyLoadContext);
+                        return await RunInteractiveWithSeed(file.Value, logFactory, scriptArguments, packageSources.Values?.ToArray(), cachePath.Value(), assemblyLoadContext);
                     }
 
                     var fileCommandOptions = new ExecuteScriptCommandOptions
@@ -251,6 +254,7 @@ namespace Dotnet.Script
                         optimizationLevel,
                         packageSources.Values?.ToArray(),
                         interactive.HasValue(),
+						cachePath.Value(),
                         nocache.HasValue()
                     )
                     {
@@ -266,7 +270,7 @@ namespace Dotnet.Script
                 }
                 else
                 {
-                    await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray(), assemblyLoadContext);
+                    await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray(), cachePath.Value(), assemblyLoadContext);
                 }
                 return exitCode;
             });
@@ -274,9 +278,9 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);
         }
 
-        private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources, AssemblyLoadContext assemblyLoadContext)
+        private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources, string cachePath, AssemblyLoadContext assemblyLoadContext)
         {
-            var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources)
+            var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources, cachePath)
             {
                 AssemblyLoadContext = assemblyLoadContext
             };
@@ -284,9 +288,9 @@ namespace Dotnet.Script
             return 0;
         }
 
-        private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources, AssemblyLoadContext assemblyLoadContext)
+        private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources, string cachePath, AssemblyLoadContext assemblyLoadContext)
         {
-            var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources)
+            var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources, cachePath)
             {
                 AssemblyLoadContext = assemblyLoadContext
             };

@@ -38,7 +38,7 @@ namespace Dotnet.Script.Tests.Commands
             };
 
             var ctx = GetExecuteInteractiveCommand(commands);
-            await ctx.Command.Execute(new ExecuteInteractiveCommandOptions(null, null, null));
+            await ctx.Command.Execute(new ExecuteInteractiveCommandOptions(null, null, null, null));
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("2", result);
@@ -56,7 +56,7 @@ namespace Dotnet.Script.Tests.Commands
             };
 
             var ctx = GetExecuteInteractiveCommand(commands);
-            await ctx.Command.Execute(new ExecuteInteractiveCommandOptions(new ScriptFile(pathToFixture), null, null));
+            await ctx.Command.Execute(new ExecuteInteractiveCommandOptions(new ScriptFile(pathToFixture), null, null, null));
 
             var result = ctx.Console.Out.ToString();
             Assert.Contains("500", result);

@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Dotnet CLI tool allowing you to run C# (CSX) scripts.</Description>
-    <VersionPrefix>1.6.0</VersionPrefix>
+    <VersionPrefix>1.7.0</VersionPrefix>
     <Authors>filipw</Authors>
     <PackageId>Dotnet.Script</PackageId>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>

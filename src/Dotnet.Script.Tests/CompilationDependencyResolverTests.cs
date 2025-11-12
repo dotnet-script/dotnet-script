@@ -84,7 +84,7 @@ namespace Dotnet.Script.Tests
 
         private CompilationDependencyResolver CreateResolver()
         {
-            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory());
+            var resolver = new CompilationDependencyResolver(TestOutputHelper.CreateTestLogFactory(), null);
             return resolver;
         }
     }
