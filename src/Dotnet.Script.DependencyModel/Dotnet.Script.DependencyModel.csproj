@@ -11,7 +11,7 @@
     <RepositoryUrl>https://github.com/dotnet-script/dotnet-script.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>script;csx;csharp;roslyn;omnisharp</PackageTags>
-    <Version>1.7.0</Version>
+    <Version>2.0.0</Version>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
