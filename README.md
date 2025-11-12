@@ -20,7 +20,7 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ### Prerequisites
 
-The only thing we need to install is [.NET 8.0 or .NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet).
+The only thing we need to install is [.NET 8.0, .NET 9.0 or .NET10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet).
 
 [Note](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#manual-install):
 > If you install the .NET SDK to a non-default location, you need to set the environment variable `DOTNET_ROOT` to the directory that contains the dotnet executable
@@ -266,6 +266,12 @@ The executable you can run directly independent of dotnet install, while the DLL
 ```shell
 dotnet script exec {path_to_dll} -- arg1 arg2
 ```
+
+### Assembly Load Context 
+Starting with version 2.0.0, `Dotnet-Script` will use an isolated load context for loading assemblies. This means that when a script is compiled and executed, 
+it will run in total isolation from the script host. There are some edge cases where we might want to opt out of this default. For instance if the script or any 
+of its dependencies does a `Assembly.Load`. In that case the isolated load context used by `Dotnet-Script` will not be able to use that assembly. 
+To opt out of the isolated load context, pass the `--disable-isolated-load-context` flag when executing the script.  
 
 ### Caching
 
