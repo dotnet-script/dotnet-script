@@ -11,6 +11,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class CachedRestorerTests
     {
         private static readonly string[] NoPackageSources = Array.Empty<string>();

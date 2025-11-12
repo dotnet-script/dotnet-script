@@ -66,10 +66,10 @@ namespace Dotnet.Script
             var configuration = app.Option("-c | --configuration <configuration>", "Configuration to use for running the script [Release/Debug] Default is \"Debug\"", CommandOptionType.SingleValue);
             var packageSources = app.Option("-s | --sources <SOURCE>", "Specifies a NuGet package source to use when resolving NuGet packages.", CommandOptionType.MultipleValue);
             var cachePath = app.Option("-p | --cache-path <PATH>", "Specify the temporary directory that the script is built in.", CommandOptionType.SingleValue);
-			var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
+            var debugMode = app.Option(DebugFlagShort + " | " + DebugFlagLong, "Enables debug output.", CommandOptionType.NoValue);
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
             var nocache = app.Option("--no-cache", "Disable caching (Restore and Dll cache)", CommandOptionType.NoValue);
-            var isolatedLoadContext = app.Option("--isolated-load-context", "Use isolated assembly load context", CommandOptionType.NoValue);
+            var disableIsolatedLoadContext = app.Option("--disable-isolated-load-context", "Disables isolated assembly load context", CommandOptionType.NoValue);
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
@@ -237,7 +237,9 @@ namespace Dotnet.Script
                 }
 
                 AssemblyLoadContext assemblyLoadContext = null;
-                if (isolatedLoadContext.HasValue())
+
+
+                if (!disableIsolatedLoadContext.HasValue())
                     assemblyLoadContext = new ScriptAssemblyLoadContext();
 
                 if (scriptFile.HasValue)
@@ -254,7 +256,7 @@ namespace Dotnet.Script
                         optimizationLevel,
                         packageSources.Values?.ToArray(),
                         interactive.HasValue(),
-						cachePath.Value(),
+                        cachePath.Value(),
                         nocache.HasValue()
                     )
                     {
@@ -264,7 +266,7 @@ namespace Dotnet.Script
                     var fileCommand = new ExecuteScriptCommand(ScriptConsole.Default, logFactory);
                     var result = await fileCommand.Run<int, CommandLineScriptGlobals>(fileCommandOptions);
                     if (Environment.ExitCode != 0) return Environment.ExitCode;
-                    
+
                     return result;
 
                 }

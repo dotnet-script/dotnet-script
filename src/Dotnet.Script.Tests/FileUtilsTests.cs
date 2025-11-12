@@ -5,19 +5,20 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class FileUtilsTests
     {
         [Fact]
         public void GetTempPathCanBeOverridenWithAbsolutePathViaEnvVar()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            try 
+            try
             {
                 Environment.SetEnvironmentVariable("DOTNET_SCRIPT_CACHE_LOCATION", path);
                 var tempPath = FileUtils.GetTempPath();
                 Assert.Equal(path, tempPath);
-            } 
-            finally 
+            }
+            finally
             {
                 Environment.SetEnvironmentVariable("DOTNET_SCRIPT_CACHE_LOCATION", null);
             }
@@ -27,13 +28,13 @@ namespace Dotnet.Script.Tests
         public void GetTempPathCanBeOverridenWithRelativePathViaEnvVar()
         {
             var path = "foo";
-            try 
+            try
             {
                 Environment.SetEnvironmentVariable("DOTNET_SCRIPT_CACHE_LOCATION", path);
                 var tempPath = FileUtils.GetTempPath();
                 Assert.Equal(Path.Combine(Directory.GetCurrentDirectory(), path), tempPath);
-            } 
-            finally 
+            }
+            finally
             {
                 Environment.SetEnvironmentVariable("DOTNET_SCRIPT_CACHE_LOCATION", null);
             }

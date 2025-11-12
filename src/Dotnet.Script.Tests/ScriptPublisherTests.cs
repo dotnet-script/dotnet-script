@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptPublisherTests
     {
         private readonly ScriptEnvironment _scriptEnvironment;

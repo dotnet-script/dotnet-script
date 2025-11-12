@@ -1,4 +1,4 @@
-﻿#r "nuget:Microsoft.Data.SQLite, 2.0.0"
+﻿#r "nuget:Microsoft.Data.SQLite, 9.0.10"
 using Microsoft.Data.Sqlite;
 
 

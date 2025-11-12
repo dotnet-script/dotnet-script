@@ -7,6 +7,7 @@ namespace Dotnet.Script.Tests
     /// Tests based on https://docs.microsoft.com/en-us/nuget/reference/package-versioning
     /// Semantically versioned packages following the Major.Minor.Revision pattern are also considered "pinned"
     /// </summary>
+    [Collection("IntegrationTests")]
     public class PackageVersionTests
     {
         [Theory]

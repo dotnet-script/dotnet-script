@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class ScriptRunnerTests
     {
         [Fact]

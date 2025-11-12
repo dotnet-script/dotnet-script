@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class NuGetSourceReferenceResolverTests
     {
         [Fact]
@@ -16,6 +17,6 @@ namespace Dotnet.Script.Tests
             Dictionary<string, IReadOnlyList<string>> scriptMap = new Dictionary<string, IReadOnlyList<string>>();
             NuGetSourceReferenceResolver resolver = new NuGetSourceReferenceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, Directory.GetCurrentDirectory()), scriptMap);
             resolver.ResolveReference("nuget:InvalidPackage, 1.2.3", Directory.GetCurrentDirectory());
-        }        
+        }
     }
 }

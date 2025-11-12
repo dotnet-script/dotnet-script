@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Dotnet.Script.Tests
 {
+    [Collection("IntegrationTests")]
     public class EnvironmentTests
     {
         [Theory]
