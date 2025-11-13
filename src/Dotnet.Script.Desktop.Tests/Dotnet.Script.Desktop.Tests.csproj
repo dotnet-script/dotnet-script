@@ -1,34 +1,31 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>net472</TargetFramework>
-		<SignAssembly>true</SignAssembly>
-		<AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
-		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-		<ImmutablePkgVersion>9.0.0</ImmutablePkgVersion>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-		<PackageReference Include="xunit" Version="2.9.2" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
-		<PackageReference Include="System.Collections.Immutable" Version="$(ImmutablePkgVersion)" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
-		<ProjectReference Include="..\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj" />
-		<ProjectReference Include="..\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj" />
-	</ItemGroup>
-
-	<!-- overwrite output for Immutable to ensure netstandard2.0 asset! -->
-	<Target Name="ForceNetStandardAssets" AfterTargets="Build">
-		<Copy SourceFiles="$(NuGetPackageRoot)system.collections.immutable\$(ImmutablePkgVersion)\lib\netstandard2.0\System.Collections.Immutable.dll"
-			  DestinationFolder="$(OutDir)" OverWriteReadOnlyFiles="true" />
-	</Target>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <ImmutablePkgVersion>9.0.0</ImmutablePkgVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(ImmutablePkgVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
+    <ProjectReference Include="..\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj" />
+    <ProjectReference Include="..\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj" />
+  </ItemGroup>
+  <!-- overwrite output for Immutable to ensure netstandard2.0 asset! -->
+  <Target Name="ForceNetStandardAssets" AfterTargets="Build">
+    <Copy SourceFiles="$(NuGetPackageRoot)system.collections.immutable\$(ImmutablePkgVersion)\lib\netstandard2.0\System.Collections.Immutable.dll" DestinationFolder="$(OutDir)" OverWriteReadOnlyFiles="true" />
+  </Target>
 </Project>
