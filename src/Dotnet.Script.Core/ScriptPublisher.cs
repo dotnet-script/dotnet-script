@@ -11,7 +11,7 @@ namespace Dotnet.Script.Core
 {
     public class ScriptPublisher
     {
-        private const string ScriptingVersion = "4.11.0";
+        private const string ScriptingVersion = "5.0.0-2.final";
 
         private readonly ScriptProjectProvider _scriptProjectProvider;
         private readonly ScriptEmitter _scriptEmitter;
