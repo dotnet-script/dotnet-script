@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using RL = System.ReadLine;
 
@@ -7,7 +8,11 @@ namespace Dotnet.Script.Core
 {
     public class ScriptConsole
     {
-        public static readonly ScriptConsole Default = new ScriptConsole(Console.Out, Console.In, Console.Error);
+        // Lazy to avoid touching anything during type initialization
+        private static readonly Lazy<ScriptConsole> s_default =
+            new Lazy<ScriptConsole>(() => new ScriptConsole(Console.Out, Console.In, Console.Error));
+
+        public static ScriptConsole Default => s_default.Value;
 
         public virtual TextWriter Error { get; }
         public virtual TextWriter Out { get; }
@@ -69,19 +74,59 @@ namespace Dotnet.Script.Core
 
         public virtual string ReadLine()
         {
-            return In == null ? RL.Read() : In.ReadLine();
+            if (In != null)
+                return In.ReadLine();
+
+            return ReadLineInteractive();
         }
 
         public ScriptConsole(TextWriter output, TextReader input, TextWriter error)
         {
             if (input == null)
             {
-                RL.HistoryEnabled = true;
+                TryEnableReadLineHistory();
             }
 
             Out = output;
             Error = error;
             In = input;
+        }
+
+        // Isolate the ReadLine reference so JIT does not resolve it unless called.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static string ReadLineInteractive()
+        {
+            try
+            {
+                return RL.Read();
+            }
+            catch (System.IO.FileLoadException)
+            {
+                // ReadLine is not strongly named or not resolvable on netfx test hosts; fallback to Console.ReadLine.
+                return Console.ReadLine();
+            }
+            catch (TypeInitializationException tie) when (tie.InnerException is System.IO.FileLoadException)
+            {
+                return Console.ReadLine();
+            }
+        }
+
+        // Isolate the ReadLine reference so JIT does not resolve it unless called.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void TryEnableReadLineHistory()
+        {
+            try
+            {
+                RL.HistoryEnabled = true;
+            }
+            catch (System.IO.FileLoadException)
+            {
+                // netfx may require a strong-named dependency chain; ignore for tests.
+            }
+            catch (TypeInitializationException tie) when (tie.InnerException is System.IO.FileLoadException)
+            {
+                // Same case wrapped by a type initializer; ignore.
+            }
         }
     }
 }
