@@ -10,9 +10,9 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 | Name                                  | Version                                                                                                                                                             | Framework(s)                       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `net8.0`,`net9.0`                  |
-| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `net8.0`,`net9.0`                  |
-| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `net8.0`,`net9.0`,`netstandard2.0` |
+| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `net8.0`,`net9.0`,`net10.0`                  |
+| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `net8.0`,`net9.0`,`net10.0`                  |
+| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `net8.0`,`net9.0`,`net10.0`,`netstandard2.0` |
 | `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0`                   |
 | `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0`                   |
 
