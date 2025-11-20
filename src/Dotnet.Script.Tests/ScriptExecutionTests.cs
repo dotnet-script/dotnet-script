@@ -102,6 +102,14 @@ namespace Dotnet.Script.Tests
         }
 
         [Fact]
+        public void ShouldHandleScriptThatReadsAsynchronouslyFromStandardOut()
+        {
+            var result = ScriptTestRunner.Default.ExecuteFixture(fixture: "StandardOut", "--no-cache");
+            Assert.True(result.ExitCode == 0);
+        }
+
+
+        [Fact]
         public void ShouldHandleIssue166()
         {
             var (output, _) = ScriptTestRunner.Default.ExecuteFixture("Issue166", "--no-cache");
