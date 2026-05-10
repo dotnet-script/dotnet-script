@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -41,7 +41,32 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 var driveLetter = pathRoot.Substring(0, 1);
                 if (driveLetter == "\\")
                 {
+                    // UNC path: \\server\share\... -> extract server name for cache isolation
+                    // Before: server-dev\SHARE\Projects\app
+                    // After trimming \: SHARE\Projects\app
                     targetDirectoryWithoutRoot = targetDirectoryWithoutRoot.TrimStart(new char[] { '\\' });
+
+                    // Split on backslash to get server name (first component) and rest
+                    var slashIndex = targetDirectoryWithoutRoot.IndexOf('\\');
+                    string serverName;
+                    string remainder;
+                    if (slashIndex >= 0)
+                    {
+                        serverName = targetDirectoryWithoutRoot.Substring(0, slashIndex);
+                        remainder = targetDirectoryWithoutRoot.Substring(slashIndex + 1);
+                    }
+                    else
+                    {
+                        // No backslash at all — bare UNC root like \\server\share (without trailing slash)
+                        serverName = targetDirectoryWithoutRoot;
+                        remainder = "";
+                    }
+
+                    // Use server name as the cache path root so different servers get different caches
+                    // e.g. server-dev and server-prod produce distinct cache trees
+                    targetDirectoryWithoutRoot = remainder.Length > 0
+                        ? Path.Combine(serverName, remainder)
+                        : serverName;
                     driveLetter = "UNC";
                 }
 
