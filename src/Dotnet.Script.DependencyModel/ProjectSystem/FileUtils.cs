@@ -36,7 +36,7 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
 
             var pathRoot = Path.GetPathRoot(targetDirectory);
             var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
-            if (pathRoot.Length > 0 && ScriptEnvironment.Default.IsWindows)
+            if (pathRoot.Length > 0 && (ScriptEnvironment.Default.IsWindows || RuntimeInformation.IsOSPlatform(OSPlatform.Windows)))
             {
                 var driveLetter = pathRoot.Substring(0, 1);
                 if (driveLetter == "\\")
