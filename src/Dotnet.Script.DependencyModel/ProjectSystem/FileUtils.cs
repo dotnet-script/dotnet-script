@@ -38,15 +38,16 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
             var targetDirectoryWithoutRoot = targetDirectory.Substring(pathRoot.Length);
             if (pathRoot.Length > 0 && (ScriptEnvironment.Default.IsWindows || RuntimeInformation.IsOSPlatform(OSPlatform.Windows)))
             {
-                var driveLetter = pathRoot.Substring(0, 1);
-                if (driveLetter == "\\")
+                var driveLetter = pathRoot;
+                if (pathRoot.StartsWith(@"\\"))
                 {
                     // UNC path: \\server\share\... -> extract server name for cache isolation
-                    // Before: server-dev\SHARE\Projects\app
-                    // After trimming \: SHARE\Projects\app
+                    // pathRoot = \\server-dev\\SHARE\\  (on Windows, GetPathRoot returns the full UNC root)
+                    // targetDirectoryWithoutRoot = Projects\\app  (everything after the root)
+                    // Strip leading \\ from targetDirectoryWithoutRoot so we can re-extract server name
                     targetDirectoryWithoutRoot = targetDirectoryWithoutRoot.TrimStart(new char[] { '\\' });
 
-                    // Split on backslash to get server name (first component) and rest
+                    // Split on next \\ to get server name (first component) and the rest
                     var slashIndex = targetDirectoryWithoutRoot.IndexOf('\\');
                     string serverName;
                     string remainder;
@@ -57,17 +58,22 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                     }
                     else
                     {
-                        // No backslash at all — bare UNC root like \\server\share (without trailing slash)
+                        // No backslash at all — bare UNC root like \\server\share (no trailing slash)
                         serverName = targetDirectoryWithoutRoot;
                         remainder = "";
                     }
 
-                    // Use server name as the cache path root so different servers get different caches
-                    // e.g. server-dev and server-prod produce distinct cache trees
+                    // Use server name as cache path root so different servers get distinct cache trees
+                    // e.g. server-dev and server-prod no longer collide
                     targetDirectoryWithoutRoot = remainder.Length > 0
                         ? Path.Combine(serverName, remainder)
                         : serverName;
                     driveLetter = "UNC";
+                }
+                else
+                {
+                    // Regular drive letter: strip trailing backslash so Path.Combine works correctly
+                    driveLetter = driveLetter.TrimEnd(new char[] { '\\' });
                 }
 
                 targetDirectoryWithoutRoot = Path.Combine(driveLetter, targetDirectoryWithoutRoot);
