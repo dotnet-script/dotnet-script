@@ -41,33 +41,25 @@ namespace Dotnet.Script.DependencyModel.ProjectSystem
                 var driveLetter = pathRoot;
                 if (pathRoot.StartsWith(@"\\"))
                 {
-                    // UNC path: \\server\share\... -> extract server name for cache isolation
-                    // pathRoot = \\server-dev\\SHARE\\  (on Windows, GetPathRoot returns the full UNC root)
-                    // targetDirectoryWithoutRoot = Projects\\app  (everything after the root)
-                    // Strip leading \\ from targetDirectoryWithoutRoot so we can re-extract server name
-                    targetDirectoryWithoutRoot = targetDirectoryWithoutRoot.TrimStart(new char[] { '\\' });
+                    // UNC path: \\server\share\... -> extract server name from pathRoot for cache isolation
+                    // pathRoot on Windows = \\server-dev\SHARE\ (full UNC root)
+                    // We must extract the server name from pathRoot, not from targetDirectoryWithoutRoot
+                    // (which contains the path after the share, e.g. "Projects\app").
+                    // Example: targetDirectory = \\server-dev\SHARE\Projects\app
+                    //   pathRoot                     = \\server-dev\SHARE\
+                    //   targetDirectoryWithoutRoot   = Projects\app
+                    //   serverName                   = server-dev (extracted from pathRoot)
+                    // Final cache path uses serverName as the root so \\server-dev and \\server-prod
+                    // no longer collide in the cache.
+                    var uncWithoutLeadingSlashes = pathRoot.TrimStart('\\');
+                    var serverNameEnd = uncWithoutLeadingSlashes.IndexOf('\\');
+                    var serverName = serverNameEnd >= 0
+                        ? uncWithoutLeadingSlashes.Substring(0, serverNameEnd)
+                        : uncWithoutLeadingSlashes;
 
-                    // Split on next \\ to get server name (first component) and the rest
-                    var slashIndex = targetDirectoryWithoutRoot.IndexOf('\\');
-                    string serverName;
-                    string remainder;
-                    if (slashIndex >= 0)
-                    {
-                        serverName = targetDirectoryWithoutRoot.Substring(0, slashIndex);
-                        remainder = targetDirectoryWithoutRoot.Substring(slashIndex + 1);
-                    }
-                    else
-                    {
-                        // No backslash at all — bare UNC root like \\server\share (no trailing slash)
-                        serverName = targetDirectoryWithoutRoot;
-                        remainder = "";
-                    }
-
-                    // Use server name as cache path root so different servers get distinct cache trees
-                    // e.g. server-dev and server-prod no longer collide
-                    targetDirectoryWithoutRoot = remainder.Length > 0
-                        ? Path.Combine(serverName, remainder)
-                        : serverName;
+                    // Re-root the path with the server name. targetDirectoryWithoutRoot is preserved
+                    // (e.g. "Projects\app") — it already excludes pathRoot.
+                    targetDirectoryWithoutRoot = Path.Combine(serverName, targetDirectoryWithoutRoot);
                     driveLetter = "UNC";
                 }
                 else
