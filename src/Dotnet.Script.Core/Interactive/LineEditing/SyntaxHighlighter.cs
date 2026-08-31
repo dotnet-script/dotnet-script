@@ -8,7 +8,7 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
     /// Classifies REPL input using the Roslyn lexer. Only <c>Microsoft.CodeAnalysis.CSharp</c>
     /// is required, so no additional (heavy) workspace packages are pulled in.
     /// </summary>
-    public sealed class SyntaxHighlighter
+    public sealed class SyntaxHighlighter : ISyntaxClassifier
     {
         private static readonly CSharpParseOptions ParseOptions =
             new CSharpParseOptions(LanguageVersion.Preview, kind: SourceCodeKind.Script);

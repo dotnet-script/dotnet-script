@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Roslyn powered editor services (completion, classification and quick info) for the dotnet-script REPL.</Description>
+    <VersionPrefix>2.0.1</VersionPrefix>
+    <Authors>filipw</Authors>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <AssemblyName>Dotnet.Script.LanguageServices</AssemblyName>
+    <PackageId>Dotnet.Script.LanguageServices</PackageId>
+    <PackageTags>script;csx;csharp;roslyn;repl;completion</PackageTags>
+    <PackageIconUrl>https://avatars.githubusercontent.com/u/113979420</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/dotnet-script/dotnet-script</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dotnet-script/dotnet-script.git</RepositoryUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <LangVersion>9.0</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../dotnet-script.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="5.0.0-2.final" />
+    <PackageReference Include="StrongNamer" Version="0.2.5" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
+  </ItemGroup>
+</Project>

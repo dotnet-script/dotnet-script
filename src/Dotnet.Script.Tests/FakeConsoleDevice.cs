@@ -67,6 +67,12 @@ namespace Dotnet.Script.Tests
             }
         }
 
+        /// <summary>
+        /// Stops the read loop while leaving the last rendered frame on screen, so that rendering which
+        /// only happens mid-edit can be asserted on.
+        /// </summary>
+        public void EnqueueStop() => _keys.Enqueue(new PendingKey(default, isPasted: false, isStop: true));
+
         public ConsoleKeyInfo ReadKey()
         {
             if (_keys.Count == 0)
@@ -74,7 +80,14 @@ namespace Dotnet.Script.Tests
                 throw new InvalidOperationException("The test did not provide enough key strokes.");
             }
 
-            return _keys.Dequeue().Key;
+            var pending = _keys.Dequeue();
+
+            return pending.IsStop ? throw new StopReadingException() : pending.Key;
+        }
+
+        /// <summary>Thrown by <see cref="ReadKey"/> in response to <see cref="EnqueueStop"/>.</summary>
+        public sealed class StopReadingException : Exception
+        {
         }
 
         public void Write(string value)
@@ -148,15 +161,18 @@ namespace Dotnet.Script.Tests
 
         private readonly struct PendingKey
         {
-            public PendingKey(ConsoleKeyInfo key, bool isPasted)
+            public PendingKey(ConsoleKeyInfo key, bool isPasted, bool isStop = false)
             {
                 Key = key;
                 IsPasted = isPasted;
+                IsStop = isStop;
             }
 
             public ConsoleKeyInfo Key { get; }
 
             public bool IsPasted { get; }
+
+            public bool IsStop { get; }
         }
 
         public static class Key

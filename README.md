@@ -458,7 +458,9 @@ Aside from the regular C# script code, you can invoke the following commands (di
 
 The REPL uses a built-in line editor with C# syntax highlighting, matching bracket highlighting, automatic indentation inside blocks and tab completion. Command history is kept for the duration of the session.
 
-<kbd>Tab</kbd> completes REPL directives, file paths inside `#load "..."` and `#r "..."`, variables that are currently in scope, members of a known type (for example `x.` or `Console.`) and C# keywords. When several candidates match, repeated <kbd>Tab</kbd> presses cycle through them.
+Completion, colorization and quick info are powered by Roslyn and see the same code your session does, so members, extension methods, types coming from `#r "nuget: ..."` packages and anything declared in an earlier submission are all offered. Pass `--no-language-services` to fall back to a lightweight built-in provider.
+
+<kbd>Tab</kbd> completes at the cursor; it also completes REPL directives and file paths inside `#load "..."` and `#r "..."`. When several candidates match, repeated <kbd>Tab</kbd> presses cycle through them. Typing `(` or pressing <kbd>Ctrl</kbd>+<kbd>Space</kbd> shows a one line description of the symbol below the prompt.
 
 | Key                                                          | Action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -467,6 +469,7 @@ The REPL uses a built-in line editor with C# syntax highlighting, matching brack
 | <kbd>↑</kbd> / <kbd>↓</kbd>                                  | Move within a multiline block, otherwise browse history       |
 | <kbd>Ctrl</kbd>+<kbd>R</kbd>                                 | Search history backwards                                      |
 | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd>             | Complete, or cycle through candidates                         |
+| <kbd>Ctrl</kbd>+<kbd>Space</kbd>                             | Show quick info for the symbol at the cursor                  |
 | <kbd>←</kbd> / <kbd>→</kbd>                                  | Move by character (add <kbd>Ctrl</kbd> to move by word)       |
 | <kbd>Home</kbd> / <kbd>End</kbd>                             | Jump to start/end of line (add <kbd>Ctrl</kbd> for the whole block) |
 | <kbd>Ctrl</kbd>+<kbd>W</kbd>                                 | Delete the word before the cursor                             |

@@ -33,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
+    <ProjectReference Include="..\Dotnet.Script.LanguageServices\Dotnet.Script.LanguageServices.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="dotnet-script.cmd">

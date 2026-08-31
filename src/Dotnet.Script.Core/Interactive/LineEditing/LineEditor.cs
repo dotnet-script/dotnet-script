@@ -13,7 +13,6 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
 
         private readonly IConsoleDevice _device;
         private readonly LineRenderer _renderer;
-        private readonly SyntaxHighlighter _highlighter = new SyntaxHighlighter();
         private readonly LineBuffer _buffer = new LineBuffer();
 
         private string _cachedText;
@@ -22,6 +21,9 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
 
         private CompletionState _completion;
         private bool _escapeArmed;
+        private bool _quickInfoArmed;
+        private string _quickInfoText;
+        private string _quickInfoKey;
         private bool _searchActive;
         private string _searchTerm;
         private int _searchIndex;
@@ -41,6 +43,10 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
 
         public ICompletionProvider CompletionProvider { get; set; }
 
+        public ISyntaxClassifier Classifier { get; set; } = new SyntaxHighlighter();
+
+        public IQuickInfoProvider QuickInfoProvider { get; set; }
+
         public bool EnableSyntaxHighlighting { get; set; } = true;
 
         public int IndentSize { get; set; } = 4;
@@ -57,6 +63,8 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             _buffer.Clear();
             _completion = null;
             _escapeArmed = false;
+            _quickInfoArmed = false;
+            _quickInfoKey = null;
             _searchActive = false;
             History.ResetNavigation();
 
@@ -112,6 +120,7 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
                             {
                                 var submission = _buffer.Text;
                                 _buffer.MoveToEnd();
+                                _quickInfoArmed = false;
                                 Render(prompt, continuationPrompt);
                                 _renderer.Finish();
                                 History.Add(submission);
@@ -223,7 +232,11 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
                             // so clearing the line takes a deliberate second press.
                             if (!completionWasActive)
                             {
-                                if (escapeWasArmed)
+                                if (_quickInfoArmed)
+                                {
+                                    _quickInfoArmed = false;
+                                }
+                                else if (escapeWasArmed)
                                 {
                                     Modify(() => _buffer.KillAll());
                                     _escapeArmed = false;
@@ -303,6 +316,7 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
 
                         case ConsoleKey.C when control:
                             _buffer.MoveToEnd();
+                            _quickInfoArmed = false;
                             Render(prompt, continuationPrompt);
                             _renderer.Finish("^C");
                             return string.Empty;
@@ -314,6 +328,10 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
                                 return null;
                             }
                             Modify(() => _buffer.Delete());
+                            break;
+
+                        case ConsoleKey.Spacebar when control:
+                            _quickInfoArmed = true;
                             break;
 
                         default:
@@ -357,6 +375,15 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             if (value == '}' && !IsPasting && CurrentLineIsBlank())
             {
                 Dedent();
+            }
+
+            if (value == '(')
+            {
+                _quickInfoArmed = true;
+            }
+            else if (value == ')')
+            {
+                _quickInfoArmed = false;
             }
 
             _buffer.Insert(value);
@@ -615,7 +642,34 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             var text = _buffer.Text;
             var spans = EnableSyntaxHighlighting ? Classify(text) : NoSpans;
             var brackets = FindBracketPair(text, _buffer.Caret);
-            _renderer.Render(prompt, continuationPrompt, text, _buffer.Caret, spans, brackets.Item1, brackets.Item2);
+            _renderer.Render(prompt, continuationPrompt, text, _buffer.Caret, spans, brackets.Item1, brackets.Item2, GetQuickInfo(text));
+        }
+
+        private string GetQuickInfo(string text)
+        {
+            if (!_quickInfoArmed || QuickInfoProvider == null)
+            {
+                return null;
+            }
+
+            var key = _buffer.Caret + ":" + text;
+            if (string.Equals(_quickInfoKey, key, StringComparison.Ordinal))
+            {
+                return _quickInfoText;
+            }
+
+            _quickInfoKey = key;
+            try
+            {
+                _quickInfoText = QuickInfoProvider.GetQuickInfo(text, _buffer.Caret);
+            }
+            catch (Exception)
+            {
+                // Quick info is a convenience - a broken provider must not end the session.
+                _quickInfoText = null;
+            }
+
+            return _quickInfoText;
         }
 
         private IReadOnlyList<ClassifiedSpan> Classify(string text)
@@ -623,11 +677,24 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             if (!ReferenceEquals(_cachedText, text) && !string.Equals(_cachedText, text, StringComparison.Ordinal))
             {
                 _cachedText = text;
-                _cachedSpans = _highlighter.Classify(text);
+                _cachedSpans = ClassifySafely(text);
                 _cachedMask = null;
             }
 
             return _cachedSpans ?? NoSpans;
+        }
+
+        private IReadOnlyList<ClassifiedSpan> ClassifySafely(string text)
+        {
+            try
+            {
+                return Classifier?.Classify(text);
+            }
+            catch (Exception)
+            {
+                // Classification is cosmetic - never let it break the editor.
+                return NoSpans;
+            }
         }
 
         private bool[] GetCodeMask(string text)

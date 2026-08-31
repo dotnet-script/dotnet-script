@@ -9,7 +9,9 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
         Number,
         Comment,
         Directive,
-        Punctuation
+        Punctuation,
+        Type,
+        Method
     }
 
     public readonly struct ClassifiedSpan

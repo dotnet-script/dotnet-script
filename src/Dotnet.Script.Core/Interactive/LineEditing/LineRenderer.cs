@@ -48,7 +48,8 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             int caret,
             IReadOnlyList<ClassifiedSpan> spans,
             int highlightA = -1,
-            int highlightB = -1)
+            int highlightB = -1,
+            string info = null)
         {
             var width = UsableWidth();
             if (width != _lastWidth)
@@ -58,7 +59,7 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
                 _lastWidth = width;
             }
 
-            var layout = BuildLayout(prompt, continuationPrompt, text ?? string.Empty, caret, spans, highlightA, highlightB, width);
+            var layout = BuildLayout(prompt, continuationPrompt, text ?? string.Empty, caret, spans, highlightA, highlightB, info, width);
 
             EnsureRoomFor(layout.Rows.Count);
 
@@ -185,6 +186,7 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             IReadOnlyList<ClassifiedSpan> spans,
             int highlightA,
             int highlightB,
+            string info,
             int width)
         {
             var useColors = _device.SupportsColors;
@@ -227,7 +229,22 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             }
 
             layout.EnsureCaretRowExists();
+
+            // Appended after the caret is placed, so the info row never steals it.
+            if (!string.IsNullOrEmpty(info))
+            {
+                layout.AppendRow();
+                layout.Append(Truncate(info, width), useColors ? _colors.QuickInfo : (ConsoleColor?)null);
+            }
+
             return layout;
+        }
+
+        private static string Truncate(string value, int width)
+        {
+            var single = value.Replace('\n', ' ').Replace('\r', ' ').Replace('\t', ' ');
+
+            return single.Length <= width ? single : single.Substring(0, Math.Max(0, width - 1)) + "\u2026";
         }
 
         private ConsoleColor?[] BuildCharColors(

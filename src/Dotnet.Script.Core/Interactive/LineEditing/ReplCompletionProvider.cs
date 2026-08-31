@@ -72,6 +72,22 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             return CompleteIdentifier(text, caret);
         }
 
+        /// <summary>
+        /// Directives are REPL specific - a language service knows nothing about <c>#exit</c> and friends.
+        /// </summary>
+        public static bool IsDirectiveLine(string text, int caret)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return false;
+            }
+
+            caret = Math.Max(0, Math.Min(caret, text.Length));
+            var lineStart = caret > 0 ? text.LastIndexOf('\n', caret - 1) + 1 : 0;
+
+            return text.Substring(lineStart, caret - lineStart).TrimStart().StartsWith("#", StringComparison.Ordinal);
+        }
+
         private CompletionResult CompleteDirective(int lineStart, string line, string trimmed, int caret)
         {
             // An odd number of quotes means the caret sits inside an unclosed argument.

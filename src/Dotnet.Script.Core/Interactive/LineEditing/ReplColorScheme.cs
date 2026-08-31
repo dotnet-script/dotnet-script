@@ -24,7 +24,13 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
 
         public ConsoleColor Punctuation { get; set; } = ConsoleColor.DarkGray;
 
+        public ConsoleColor Type { get; set; } = ConsoleColor.DarkCyan;
+
+        public ConsoleColor Method { get; set; } = ConsoleColor.Yellow;
+
         public ConsoleColor MatchingBracket { get; set; } = ConsoleColor.White;
+
+        public ConsoleColor QuickInfo { get; set; } = ConsoleColor.DarkGray;
 
         public virtual ConsoleColor? For(ClassificationKind kind)
         {
@@ -36,6 +42,8 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
                 case ClassificationKind.Comment: return Comment;
                 case ClassificationKind.Directive: return Directive;
                 case ClassificationKind.Punctuation: return Punctuation;
+                case ClassificationKind.Type: return Type;
+                case ClassificationKind.Method: return Method;
                 default: return null;
             }
         }

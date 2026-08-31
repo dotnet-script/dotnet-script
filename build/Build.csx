@@ -51,6 +51,7 @@ private void CreateNuGetPackages()
 {
     Command.Execute("dotnet", $"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptProjectFolder);
     Command.Execute("dotnet", $"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptCoreProjectFolder);
+    Command.Execute("dotnet", $"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptLanguageServicesProjectFolder);
     Command.Execute("dotnet", $"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptDependencyModelProjectFolder);
     Command.Execute("dotnet", $"pack --configuration release --output {nuGetArtifactsFolder}", dotnetScriptDependencyModelNuGetProjectFolder);
 }
