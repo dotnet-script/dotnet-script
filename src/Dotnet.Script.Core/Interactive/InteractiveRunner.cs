@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dotnet.Script.Core.Interactive.LineEditing;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.NuGet;
@@ -18,6 +20,9 @@ namespace Dotnet.Script.Core
 {
     public class InteractiveRunner
     {
+        private const string Prompt = "> ";
+        private const string ContinuationPrompt = "* ";
+
         private bool _shouldExit = false;
         private ScriptState<object> _scriptState;
         private ScriptOptions _scriptOptions;
@@ -37,14 +42,30 @@ namespace Dotnet.Script.Core
             Console = console;
             _packageSources = packageSources ?? Array.Empty<string>();
             _globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+
+            if (Console.LineEditor != null)
+            {
+                Console.LineEditor.CompletionProvider =
+                    new ReplCompletionProvider(GetVariableNames, ResolveVariableType, () => CurrentDirectory);
+            }
         }
 
         public virtual async Task RunLoop()
         {
             while (!_shouldExit)
             {
-                Console.Out.Write("> ");
                 var input = ReadInput();
+
+                if (input == null)
+                {
+                    Exit();
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    continue;
+                }
 
                 if (InteractiveCommandParser.TryProvideCommand(input, out var command))
                 {
@@ -130,26 +151,48 @@ namespace Dotnet.Script.Core
 
         private string ReadInput()
         {
-            var input = new StringBuilder();
+            var editor = Console.LineEditor;
+            return editor != null
+                ? editor.Read(Prompt, ContinuationPrompt, IsCompleteSubmission)
+                : ReadInputFromReader();
+        }
 
+        private string ReadInputFromReader()
+        {
+            Console.Out.Write(Prompt);
+
+            var submission = new StringBuilder();
             while (true)
             {
                 var line = Console.ReadLine();
-                input.AppendLine(line);
+                if (line == null)
+                {
+                    return submission.Length == 0 ? null : submission.ToString();
+                }
 
-                var syntaxTree = SyntaxFactory.ParseSyntaxTree(input.ToString(), ParseOptions);
-                if (!SyntaxFactory.IsCompleteSubmission(syntaxTree))
+                if (submission.Length > 0)
                 {
-                    Console.Out.Write("* ");
+                    submission.Append('\n');
                 }
-                else
+                submission.Append(line);
+
+                if (IsCompleteSubmission(submission.ToString()))
                 {
-                    break;
+                    return submission.ToString();
                 }
+
+                Console.Out.Write(ContinuationPrompt);
             }
-
-            return input.ToString();
         }
+
+        private bool IsCompleteSubmission(string input) =>
+            SyntaxFactory.IsCompleteSubmission(SyntaxFactory.ParseSyntaxTree(input, ParseOptions));
+
+        private IEnumerable<string> GetVariableNames() =>
+            _scriptState?.Variables.Select(variable => variable.Name) ?? Enumerable.Empty<string>();
+
+        private Type ResolveVariableType(string name) =>
+            _scriptState?.Variables.FirstOrDefault(variable => variable.Name == name)?.Type;
 
         private async Task<object> HandleScriptErrors(Func<Task> doWork)
         {

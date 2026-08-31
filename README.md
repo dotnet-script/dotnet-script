@@ -454,6 +454,33 @@ Aside from the regular C# script code, you can invoke the following commands (di
 | `#cls`   | Clear the console screen without resetting the REPL state    |
 | `#exit`  | Exits the REPL                                               |
 
+### Editing and key bindings
+
+The REPL uses a built-in line editor with C# syntax highlighting, matching bracket highlighting, automatic indentation inside blocks and tab completion. Command history is kept for the duration of the session.
+
+<kbd>Tab</kbd> completes REPL directives, file paths inside `#load "..."` and `#r "..."`, variables that are currently in scope, members of a known type (for example `x.` or `Console.`) and C# keywords. When several candidates match, repeated <kbd>Tab</kbd> presses cycle through them.
+
+| Key                                                          | Action                                                       |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| <kbd>Enter</kbd>                                             | Submit, or start a new line when the code block is incomplete |
+| <kbd>Shift</kbd>+<kbd>Enter</kbd>                            | Always start a new line                                       |
+| <kbd>↑</kbd> / <kbd>↓</kbd>                                  | Move within a multiline block, otherwise browse history       |
+| <kbd>Ctrl</kbd>+<kbd>R</kbd>                                 | Search history backwards                                      |
+| <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd>             | Complete, or cycle through candidates                         |
+| <kbd>←</kbd> / <kbd>→</kbd>                                  | Move by character (add <kbd>Ctrl</kbd> to move by word)       |
+| <kbd>Home</kbd> / <kbd>End</kbd>                             | Jump to start/end of line (add <kbd>Ctrl</kbd> for the whole block) |
+| <kbd>Ctrl</kbd>+<kbd>W</kbd>                                 | Delete the word before the cursor                             |
+| <kbd>Ctrl</kbd>+<kbd>U</kbd> / <kbd>Ctrl</kbd>+<kbd>K</kbd>  | Delete to start/end of line                                   |
+| <kbd>Ctrl</kbd>+<kbd>Y</kbd>                                 | Paste back the most recently deleted text                     |
+| <kbd>Ctrl</kbd>+<kbd>G</kbd> or <kbd>Esc</kbd> <kbd>Esc</kbd> | Clear the current input (recoverable with <kbd>Ctrl</kbd>+<kbd>Y</kbd>) |
+| <kbd>Ctrl</kbd>+<kbd>L</kbd>                                 | Clear the screen, keeping the current input                   |
+| <kbd>Ctrl</kbd>+<kbd>C</kbd>                                 | Abandon the current input and start over                      |
+| <kbd>Ctrl</kbd>+<kbd>D</kbd>                                 | Exit the REPL when the input is empty (same as `#exit`)       |
+
+Readline style alternatives are also available: <kbd>Ctrl</kbd>+<kbd>A</kbd>/<kbd>Ctrl</kbd>+<kbd>E</kbd> for start/end of line, <kbd>Ctrl</kbd>+<kbd>B</kbd>/<kbd>Ctrl</kbd>+<kbd>F</kbd> to move by character, <kbd>Alt</kbd>+<kbd>B</kbd>/<kbd>Alt</kbd>+<kbd>F</kbd> to move by word and <kbd>Ctrl</kbd>+<kbd>P</kbd>/<kbd>Ctrl</kbd>+<kbd>N</kbd> to browse history.
+
+Colors are disabled automatically when the output is redirected, when `NO_COLOR` is set or when `TERM` is `dumb`. When input is piped into `dotnet-script`, the line editor is bypassed entirely and each line is read as-is.
+
 ### Seeding REPL with a script
 
 You can execute a CSX script and, at the end of it, drop yourself into the context of the REPL. This way, the REPL becomes "seeded" with your code - all the classes, methods or variables are available in the REPL context. This is achieved by running a script with an `-i` flag.
