@@ -243,10 +243,44 @@ namespace Dotnet.Script.Tests
             using var workspace = CreateWorkspace("var ignored = 1;");
             const string text = "Console.WriteLine(";
 
+            var overloads = new RoslynQuickInfoProvider(workspace).GetQuickInfo(text, text.Length);
+
+            Assert.Contains(overloads, signature => signature.Contains("Console.WriteLine(string"));
+        }
+
+        [Fact]
+        public void ShouldListEveryOverloadOfTheMemberBeingInvoked()
+        {
+            using var workspace = CreateWorkspace("var ignored = 1;");
+            const string text = "Console.WriteLine(";
+
+            var overloads = new RoslynQuickInfoProvider(workspace).GetQuickInfo(text, text.Length);
+
+            Assert.True(overloads.Count > 1, $"expected several overloads, got {overloads.Count}");
+            Assert.Equal(overloads.Count, overloads.Distinct().Count());
+            Assert.Contains(overloads, signature => signature.Contains("()"));
+        }
+
+        [Fact]
+        public void ShouldDescribeTheConstructorBeingInvoked()
+        {
+            using var workspace = CreateWorkspace("var ignored = 1;");
+            const string text = "new List<int>(";
+
+            var overloads = new RoslynQuickInfoProvider(workspace).GetQuickInfo(text, text.Length);
+
+            Assert.Contains(overloads, signature => signature.Contains("List"));
+        }
+
+        [Fact]
+        public void ShouldDescribeASymbolOutsideAnArgumentList()
+        {
+            using var workspace = CreateWorkspace("var greeting = \"hello\";");
+            const string text = "greeting";
+
             var info = new RoslynQuickInfoProvider(workspace).GetQuickInfo(text, text.Length);
 
-            Assert.NotNull(info);
-            Assert.Contains("WriteLine", info);
+            Assert.Contains(info, line => line.Contains("greeting"));
         }
 
         [Fact]
@@ -254,7 +288,7 @@ namespace Dotnet.Script.Tests
         {
             using var workspace = new ReplWorkspace();
 
-            Assert.Null(new RoslynQuickInfoProvider(workspace).GetQuickInfo("Console.WriteLine(", 18));
+            Assert.Empty(new RoslynQuickInfoProvider(workspace).GetQuickInfo("Console.WriteLine(", 18));
         }
 
         [Fact]
@@ -278,17 +312,71 @@ namespace Dotnet.Script.Tests
         public void ShouldShowQuickInfoBelowTheInput()
         {
             using var workspace = CreateWorkspace("var ignored = 1;");
-            var device = new FakeConsoleDevice();
+
+            Assert.Contains("WriteLine", RenderQuickInfo(workspace, "Console.WriteLine("));
+        }
+
+        [Fact]
+        public void ShouldCycleThroughOverloadsOnRepeatedCtrlT()
+        {
+            using var workspace = CreateWorkspace("var ignored = 1;");
+
+            var first = RenderQuickInfo(workspace, "Console.WriteLine(");
+            var second = RenderQuickInfo(workspace, "Console.WriteLine(", cycles: 1);
+            var third = RenderQuickInfo(workspace, "Console.WriteLine(", cycles: 2);
+
+            Assert.StartsWith("[1/", first);
+            Assert.StartsWith("[2/", second);
+            Assert.StartsWith("[3/", third);
+            Assert.NotEqual(first, second);
+        }
+
+        [Fact]
+        public void ShouldWrapAroundAfterTheLastOverload()
+        {
+            using var workspace = CreateWorkspace("var ignored = 1;");
+            var count = new RoslynQuickInfoProvider(workspace).GetQuickInfo("Console.WriteLine(", 18).Count;
+
+            var first = RenderQuickInfo(workspace, "Console.WriteLine(");
+            var wrapped = RenderQuickInfo(workspace, "Console.WriteLine(", cycles: count);
+
+            Assert.Equal(first, wrapped);
+        }
+
+        [Fact]
+        public void ShouldAlsoAcceptCtrlSpaceWhereTheTerminalDeliversIt()
+        {
+            using var workspace = CreateWorkspace("var ignored = 1;");
+
+            var stepped = RenderQuickInfo(workspace, "Console.WriteLine(", cycles: 1, key: ConsoleKey.Spacebar);
+
+            Assert.StartsWith("[2/", stepped);
+        }
+
+        /// <summary>
+        /// Renders a session on a screen of its own and returns the info row. The stop sentinel leaves the
+        /// frame mid-edit, which is the only point at which quick info is on screen.
+        /// </summary>
+        private static string RenderQuickInfo(ReplWorkspace workspace, string input, int cycles = 0, ConsoleKey key = ConsoleKey.T)
+        {
+            var device = new FakeConsoleDevice(width: 120);
             var editor = new LineEditor(device, ReplColorScheme.Default, new ReplHistory())
             {
                 QuickInfoProvider = new RoslynQuickInfoProvider(workspace)
             };
 
-            device.Enqueue(FakeConsoleDevice.Key.Type("Console.WriteLine("));
+            device.Enqueue(FakeConsoleDevice.Key.Type(input));
+
+            for (var i = 0; i < cycles; i++)
+            {
+                device.Enqueue(FakeConsoleDevice.Key.Ctrl(key));
+            }
+
             device.EnqueueStop();
 
             Assert.Throws<FakeConsoleDevice.StopReadingException>(() => editor.Read("> ", "* ", null));
-            Assert.Contains("WriteLine", device.GetRow(1));
+
+            return device.GetRow(1);
         }
 
         [Fact]

@@ -40,9 +40,8 @@ namespace Dotnet.Script.LanguageServices
         public IReadOnlyList<ClassifiedSpan> Classify(string text) =>
             Guarded(() => _classifier.Classify(text), () => _lexer.Classify(text));
 
-        public string GetQuickInfo(string text, int caret) =>
+        public IReadOnlyList<string> GetQuickInfo(string text, int caret) =>
             Guarded(() => _quickInfo.GetQuickInfo(text, caret), () => null);
-
         public void ScriptOptionsChanged(ScriptOptions scriptOptions)
         {
             // A new reference set is quite likely to be what fixes whatever failed before.

@@ -460,7 +460,14 @@ The REPL uses a built-in line editor with C# syntax highlighting, matching brack
 
 Completion, colorization and quick info are powered by Roslyn and see the same code your session does, so members, extension methods, types coming from `#r "nuget: ..."` packages and anything declared in an earlier submission are all offered. Pass `--no-language-services` to fall back to a lightweight built-in provider.
 
-<kbd>Tab</kbd> completes at the cursor; it also completes REPL directives and file paths inside `#load "..."` and `#r "..."`. When several candidates match, repeated <kbd>Tab</kbd> presses cycle through them. Typing `(` or pressing <kbd>Ctrl</kbd>+<kbd>Space</kbd> shows a one line description of the symbol below the prompt.
+<kbd>Tab</kbd> completes at the cursor; it also completes REPL directives and file paths inside `#load "..."` and `#r "..."`. When several candidates match, repeated <kbd>Tab</kbd> presses cycle through them. Typing `(` or pressing <kbd>Ctrl</kbd>+<kbd>T</kbd> shows the signature of the symbol below the prompt; when it has overloads they are numbered, and further <kbd>Ctrl</kbd>+<kbd>T</kbd> presses step through them, wrapping around at the end.
+
+```
+> Console.WriteLine(
+[3/20] void Console.WriteLine(char value)
+```
+
+<kbd>Ctrl</kbd>+<kbd>Space</kbd> does the same and may be the more familiar binding, but macOS assigns it to switching input sources by default, so it never reaches the terminal there.
 
 | Key                                                          | Action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -469,7 +476,7 @@ Completion, colorization and quick info are powered by Roslyn and see the same c
 | <kbd>↑</kbd> / <kbd>↓</kbd>                                  | Move within a multiline block, otherwise browse history       |
 | <kbd>Ctrl</kbd>+<kbd>R</kbd>                                 | Search history backwards                                      |
 | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd>             | Complete, or cycle through candidates                         |
-| <kbd>Ctrl</kbd>+<kbd>Space</kbd>                             | Show quick info for the symbol at the cursor                  |
+| <kbd>Ctrl</kbd>+<kbd>T</kbd>                                 | Show quick info, or step through overloads (also <kbd>Ctrl</kbd>+<kbd>Space</kbd>, except on macOS) |
 | <kbd>←</kbd> / <kbd>→</kbd>                                  | Move by character (add <kbd>Ctrl</kbd> to move by word)       |
 | <kbd>Home</kbd> / <kbd>End</kbd>                             | Jump to start/end of line (add <kbd>Ctrl</kbd> for the whole block) |
 | <kbd>Ctrl</kbd>+<kbd>W</kbd>                                 | Delete the word before the cursor                             |

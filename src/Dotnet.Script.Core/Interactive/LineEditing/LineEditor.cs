@@ -22,7 +22,8 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
         private CompletionState _completion;
         private bool _escapeArmed;
         private bool _quickInfoArmed;
-        private string _quickInfoText;
+        private IReadOnlyList<string> _quickInfoItems;
+        private int _quickInfoIndex;
         private string _quickInfoKey;
         private bool _searchActive;
         private string _searchTerm;
@@ -64,6 +65,8 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             _completion = null;
             _escapeArmed = false;
             _quickInfoArmed = false;
+            _quickInfoItems = null;
+            _quickInfoIndex = 0;
             _quickInfoKey = null;
             _searchActive = false;
             History.ResetNavigation();
@@ -330,8 +333,11 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
                             Modify(() => _buffer.Delete());
                             break;
 
+                        // Ctrl+Space is the familiar binding but macOS claims it for input sources, so
+                        // Ctrl+T is offered as one that reaches the terminal everywhere.
+                        case ConsoleKey.T when control:
                         case ConsoleKey.Spacebar when control:
-                            _quickInfoArmed = true;
+                            StepQuickInfo(back: (key.Modifiers & ConsoleModifiers.Shift) != 0);
                             break;
 
                         default:
@@ -645,6 +651,21 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             _renderer.Render(prompt, continuationPrompt, text, _buffer.Caret, spans, brackets.Item1, brackets.Item2, GetQuickInfo(text));
         }
 
+        /// <summary>
+        /// Shows quick info, or moves to the next overload when it is already showing. Terminals send the
+        /// same code for Ctrl and Ctrl+Shift with a letter, so <paramref name="back"/> only has an effect
+        /// where the terminal reports the modifier; stepping forward always wraps.
+        /// </summary>
+        private void StepQuickInfo(bool back)
+        {
+            if (_quickInfoArmed)
+            {
+                _quickInfoIndex += back ? -1 : 1;
+            }
+
+            _quickInfoArmed = true;
+        }
+
         private string GetQuickInfo(string text)
         {
             if (!_quickInfoArmed || QuickInfoProvider == null)
@@ -653,23 +674,31 @@ namespace Dotnet.Script.Core.Interactive.LineEditing
             }
 
             var key = _buffer.Caret + ":" + text;
-            if (string.Equals(_quickInfoKey, key, StringComparison.Ordinal))
+            if (!string.Equals(_quickInfoKey, key, StringComparison.Ordinal))
             {
-                return _quickInfoText;
+                _quickInfoKey = key;
+                _quickInfoIndex = 0;
+
+                try
+                {
+                    _quickInfoItems = QuickInfoProvider.GetQuickInfo(text, _buffer.Caret);
+                }
+                catch (Exception)
+                {
+                    // Quick info is a convenience - a broken provider must not end the session.
+                    _quickInfoItems = null;
+                }
             }
 
-            _quickInfoKey = key;
-            try
+            if (_quickInfoItems == null || _quickInfoItems.Count == 0)
             {
-                _quickInfoText = QuickInfoProvider.GetQuickInfo(text, _buffer.Caret);
-            }
-            catch (Exception)
-            {
-                // Quick info is a convenience - a broken provider must not end the session.
-                _quickInfoText = null;
+                return null;
             }
 
-            return _quickInfoText;
+            var count = _quickInfoItems.Count;
+            var index = ((_quickInfoIndex % count) + count) % count;
+
+            return count > 1 ? $"[{index + 1}/{count}] {_quickInfoItems[index]}" : _quickInfoItems[index];
         }
 
         private IReadOnlyList<ClassifiedSpan> Classify(string text)
