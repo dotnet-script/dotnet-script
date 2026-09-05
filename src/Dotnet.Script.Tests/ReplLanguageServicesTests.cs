@@ -62,8 +62,16 @@ namespace Dotnet.Script.Tests
         private static void WarmUp(ReplWorkspace workspace) =>
             workspace.WarmUpAsync(CancellationToken.None).GetAwaiter().GetResult();
 
-        private static IReadOnlyList<string> Complete(ReplWorkspace workspace, string text) =>
-            new RoslynCompletionProvider(workspace).GetCompletions(text, text.Length).Items;
+        private static IReadOnlyList<string> Complete(ReplWorkspace workspace, string text)
+        {
+            var result = new RoslynCompletionProvider(workspace).GetCompletions(text, text.Length);
+
+            // Null means Roslyn did not answer within the bounded wait, which is worth saying out loud
+            // rather than failing later with a null reference.
+            Assert.NotNull(result);
+
+            return result.Items;
+        }
 
         [Fact]
         public void ShouldCompleteMembersOfALocalFromAPreviousSubmission()

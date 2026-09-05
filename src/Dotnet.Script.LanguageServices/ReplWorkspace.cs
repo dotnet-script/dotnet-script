@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dotnet.Script.DependencyModel.Logging;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
+using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Text;
 
@@ -130,12 +131,13 @@ namespace Dotnet.Script.LanguageServices
         }
 
         /// <summary>
-        /// Forces the compilation and a first classification so that neither the cost of reading metadata
-        /// nor the one-off cost of spinning up the classifier lands on a key stroke.
+        /// Forces the compilation, a first classification and a first completion so that neither the cost of
+        /// reading metadata nor the one-off cost of spinning up the classifier and the completion providers
+        /// lands on a key stroke.
         /// </summary>
         public async Task WarmUpAsync(CancellationToken cancellationToken)
         {
-            const string sample = "var warmUp = 1;";
+            const string sample = "var warmUp = 1; warmUp.";
 
             var document = GetDocument(sample);
             if (document == null)
@@ -145,6 +147,14 @@ namespace Dotnet.Script.LanguageServices
 
             await document.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
             await Classifier.GetClassifiedSpansAsync(document, new TextSpan(0, sample.Length), cancellationToken).ConfigureAwait(false);
+
+            // The first completion of a session costs an order of magnitude more than the ones after it,
+            // which is more than the bounded wait a key stroke is given.
+            var completionService = CompletionService.GetService(document);
+            if (completionService != null)
+            {
+                await completionService.GetCompletionsAsync(document, sample.Length, CompletionTrigger.Invoke, cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
         }
 
         public void Dispose()
