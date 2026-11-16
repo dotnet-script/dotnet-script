@@ -494,8 +494,8 @@ namespace Dotnet.Script.Tests
         }
 #endif
 
-#if NET8_0
-        // .NET 8.0 only works with isolated load context
+#if NET10_0_OR_GREATER
+        // Supported runtimes only work with isolated load context
         [Fact]
         public void ShouldCompileAndExecuteWithWebSdk()
         {
