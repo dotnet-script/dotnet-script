@@ -33,7 +33,7 @@ await StepRunner.Execute(Args);
 
 private void CreateGitHubReleaseAsset()
 {
-    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net8.0");
+    DotNet.Publish(dotnetScriptProjectFolder, publishArtifactsFolder, "net10.0");
     Zip(publishArchiveFolder, pathToGitHubReleaseAsset);
 }
 
@@ -58,7 +58,6 @@ private void CreateNuGetPackages()
 
 private void RunTests()
 {
-    Command.Execute("dotnet", "test -c Release -f net8.0", testProjectFolder);
     Command.Execute("dotnet", "test -c Release -f net10.0", testProjectFolder);
     Command.Execute("dotnet", "test -c Release -f net11.0", testProjectFolder);
     if (BuildEnvironment.IsWindows)
