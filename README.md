@@ -10,9 +10,9 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 | Name                                  | Version                                                                                                                                                             | Framework(s)                       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `net8.0`,`net9.0`,`net10.0`,`net11.0`                  |
-| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `net8.0`,`net9.0`,`net10.0`,`net11.0`                  |
-| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `net8.0`,`net9.0`,`net10.0`,`net11.0`,`netstandard2.0` |
+| `dotnet-script` (global tool)         | [![Nuget](http://img.shields.io/nuget/v/dotnet-script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet-script/)                                             | `net8.0`,`net10.0`,`net11.0`                  |
+| `Dotnet.Script` (CLI as Nuget)        | [![Nuget](http://img.shields.io/nuget/v/dotnet.script.svg?maxAge=10800)](https://www.nuget.org/packages/dotnet.script/)                                             | `net8.0`,`net10.0`,`net11.0`                  |
+| `Dotnet.Script.Core`                  | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.Core.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.Core/)                                   | `net8.0`,`net10.0`,`net11.0`,`netstandard2.0` |
 | `Dotnet.Script.DependencyModel`       | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel/)             | `netstandard2.0`                   |
 | `Dotnet.Script.DependencyModel.Nuget` | [![Nuget](http://img.shields.io/nuget/v/Dotnet.Script.DependencyModel.Nuget.svg?maxAge=10800)](https://www.nuget.org/packages/Dotnet.Script.DependencyModel.Nuget/) | `netstandard2.0`                   |
 
@@ -20,9 +20,9 @@ Run C# scripts from the .NET CLI, define NuGet packages inline and edit/debug th
 
 ### Prerequisites
 
-The only thing we need to install is a [.NET 8.0, .NET 9.0, .NET 10.0 or .NET 11.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet).
+The only thing we need to install is a [.NET 8.0, .NET 10.0 or .NET 11.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet).
 
-Building this repository requires the .NET 11 SDK. Running the full test suite also requires the .NET 8, 9, 10 and 11 runtimes (including ASP.NET Core).
+Building this repository requires the .NET 11 SDK. Running the full test suite also requires the .NET 8, 10 and 11 runtimes (including ASP.NET Core).
 
 [Note](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#manual-install):
 > If you install the .NET SDK to a non-default location, you need to set the environment variable `DOTNET_ROOT` to the directory that contains the dotnet executable
