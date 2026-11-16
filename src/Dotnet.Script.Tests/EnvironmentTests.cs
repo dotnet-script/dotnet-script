@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using System.Text.RegularExpressions;
+using Dotnet.Script.DependencyModel.Environment;
+using System.Runtime.InteropServices;
 
 
 namespace Dotnet.Script.Tests
@@ -33,6 +35,22 @@ namespace Dotnet.Script.Tests
             Assert.Contains(".NET Core version", output);
             Assert.Contains("Platform identifier", output);
             Assert.Contains("Runtime identifier", output);
+            Assert.Contains($"Target framework    : net{System.Environment.Version.Major}.{System.Environment.Version.Minor}", output);
+            Assert.Contains($".NET Core version   : {System.Environment.Version}", output);
+            var platform = OperatingSystem.IsWindows() ? "win" : OperatingSystem.IsMacOS() ? "osx" : "linux";
+            Assert.Contains($"Runtime identifier  : {platform}-{RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant()}", output);
+        }
+
+        [Theory]
+        [InlineData("8.0.0", "net8.0")]
+        [InlineData("10.0.0", "net10.0")]
+        [InlineData("11.0.0", "net11.0")]
+        [InlineData("11.0.1", "net11.0")]
+        [InlineData("11.0.0-preview.1", "net11.0")]
+        public void ShouldResolveTargetFrameworkFromRuntimeVersion(string version, string targetFramework)
+        {
+            var dotnetVersion = new DotnetVersion(version, "unused");
+            Assert.Equal(targetFramework, dotnetVersion.Tfm);
         }
 
     }

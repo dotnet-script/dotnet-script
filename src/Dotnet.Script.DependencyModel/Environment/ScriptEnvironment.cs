@@ -134,9 +134,12 @@ namespace Dotnet.Script.DependencyModel.Environment
         {
             var platformIdentifier = GetPlatformIdentifier();
             
-#if NET8_0 
-            return $"{platformIdentifier}-{GetProcessArchitecture()}";
-#endif
+            // This library targets netstandard2.0, so use the host runtime version
+            // rather than target-framework compilation symbols.
+            if (Default.NetCoreVersion.Major >= 8)
+            {
+                return $"{platformIdentifier}-{GetProcessArchitecture()}";
+            }
             
             if (platformIdentifier == "osx" || platformIdentifier == "linux")
             {
