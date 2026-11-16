@@ -1,4 +1,4 @@
 {
   "coverage-gutters.lcovname": "coverage.info",
-  "dotnetCoreExplorer.searchpatterns": "**/bin/Debug/net5.0/Dotnet.Script.Tests.dll"
+  "dotnetCoreExplorer.searchpatterns": "**/bin/Debug/net11.0/Dotnet.Script.Tests.dll"
 }

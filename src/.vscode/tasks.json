@@ -46,8 +46,8 @@
         "-c",
         "release",
         "-f",
-        "net9.0",
-        "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
+        "net11.0",
+        "${workspaceFolder}/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj"
       ],
       "problemMatcher": "$msCompile",
       "group": {
@@ -64,11 +64,11 @@
         "-c",
         "release",
         "-f",
-        "netcoreapp3.1",
+        "net11.0",
         "/p:CollectCoverage=true",
         "/p:Exclude=\"[xunit*]*\"",
         "/p:CoverletOutputFormat=lcov",
-        "${workspaceFolder}/Dotnet.Script.Tests/DotNet.Script.Tests.csproj"
+        "${workspaceFolder}/Dotnet.Script.Tests/Dotnet.Script.Tests.csproj"
       ],
       "problemMatcher": "$msCompile",
       "group": {
