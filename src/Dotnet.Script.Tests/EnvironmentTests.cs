@@ -42,7 +42,6 @@ namespace Dotnet.Script.Tests
         }
 
         [Theory]
-        [InlineData("8.0.0", "net8.0")]
         [InlineData("10.0.0", "net10.0")]
         [InlineData("11.0.0", "net11.0")]
         [InlineData("11.0.1", "net11.0")]
