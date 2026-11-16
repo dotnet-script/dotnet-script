@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dotnet.Script.Core.Interactive.LineEditing;
 using Dotnet.Script.DependencyModel.Context;
 using Dotnet.Script.DependencyModel.Logging;
 using Dotnet.Script.DependencyModel.NuGet;
@@ -18,10 +20,14 @@ namespace Dotnet.Script.Core
 {
     public class InteractiveRunner
     {
+        private const string Prompt = "> ";
+        private const string ContinuationPrompt = "* ";
+
         private bool _shouldExit = false;
         private ScriptState<object> _scriptState;
         private ScriptOptions _scriptOptions;
         private readonly InteractiveScriptGlobals _globals;
+        private readonly IReplLanguageService _languageService;
         protected Logger Logger;
         protected ScriptCompiler ScriptCompiler;
         protected ScriptConsole Console;
@@ -31,20 +37,48 @@ namespace Dotnet.Script.Core
         protected string CurrentDirectory = Directory.GetCurrentDirectory();
 
         public InteractiveRunner(ScriptCompiler scriptCompiler, LogFactory logFactory, ScriptConsole console, string[] packageSources)
+            : this(scriptCompiler, logFactory, console, packageSources, null)
+        {
+        }
+
+        public InteractiveRunner(ScriptCompiler scriptCompiler, LogFactory logFactory, ScriptConsole console, string[] packageSources, IReplLanguageService languageService)
         {
             Logger = logFactory.CreateLogger<InteractiveRunner>();
             ScriptCompiler = scriptCompiler;
             Console = console;
             _packageSources = packageSources ?? Array.Empty<string>();
+            _languageService = languageService;
             _globals = new InteractiveScriptGlobals(Console.Out, CSharpObjectFormatter.Instance);
+
+            if (Console.LineEditor != null)
+            {
+                var builtIn = new ReplCompletionProvider(GetVariableNames, ResolveVariableType, () => CurrentDirectory);
+                Console.LineEditor.CompletionProvider = new CompositeCompletionProvider(_languageService, builtIn);
+
+                if (_languageService != null)
+                {
+                    Console.LineEditor.Classifier = _languageService;
+                    Console.LineEditor.QuickInfoProvider = _languageService;
+                }
+            }
         }
 
         public virtual async Task RunLoop()
         {
             while (!_shouldExit)
             {
-                Console.Out.Write("> ");
                 var input = ReadInput();
+
+                if (input == null)
+                {
+                    Exit();
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    continue;
+                }
 
                 if (InteractiveCommandParser.TryProvideCommand(input, out var command))
                 {
@@ -92,8 +126,11 @@ namespace Dotnet.Script.Core
                             Logger.Debug("Adding reference to a runtime dependency => " + runtimeDependency);
                             _scriptOptions = _scriptOptions.AddReferences(MetadataReference.CreateFromFile(runtimeDependency.Path));
                         }
+
+                        _languageService?.ScriptOptionsChanged(_scriptOptions);
                     }
                     _scriptState = await _scriptState.ContinueWithAsync(input, _scriptOptions, ex => true);
+                    _languageService?.SubmissionExecuted(input);
                 }
             });
         }
@@ -102,6 +139,7 @@ namespace Dotnet.Script.Core
         {
             _scriptState = null;
             _scriptOptions = null;
+            _languageService?.Reset();
         }
 
         public virtual void Exit()
@@ -126,30 +164,55 @@ namespace Dotnet.Script.Core
 
             _scriptState = await compilationContext.Script.RunAsync(_globals, ex => true).ConfigureAwait(false);
             _scriptOptions = compilationContext.ScriptOptions;
+
+            _languageService?.ScriptOptionsChanged(_scriptOptions);
+            _languageService?.SubmissionExecuted(scriptContext.Code.ToString());
         }
 
         private string ReadInput()
         {
-            var input = new StringBuilder();
+            var editor = Console.LineEditor;
+            return editor != null
+                ? editor.Read(Prompt, ContinuationPrompt, IsCompleteSubmission)
+                : ReadInputFromReader();
+        }
 
+        private string ReadInputFromReader()
+        {
+            Console.Out.Write(Prompt);
+
+            var submission = new StringBuilder();
             while (true)
             {
                 var line = Console.ReadLine();
-                input.AppendLine(line);
+                if (line == null)
+                {
+                    return submission.Length == 0 ? null : submission.ToString();
+                }
 
-                var syntaxTree = SyntaxFactory.ParseSyntaxTree(input.ToString(), ParseOptions);
-                if (!SyntaxFactory.IsCompleteSubmission(syntaxTree))
+                if (submission.Length > 0)
                 {
-                    Console.Out.Write("* ");
+                    submission.Append('\n');
                 }
-                else
+                submission.Append(line);
+
+                if (IsCompleteSubmission(submission.ToString()))
                 {
-                    break;
+                    return submission.ToString();
                 }
+
+                Console.Out.Write(ContinuationPrompt);
             }
-
-            return input.ToString();
         }
+
+        private bool IsCompleteSubmission(string input) =>
+            SyntaxFactory.IsCompleteSubmission(SyntaxFactory.ParseSyntaxTree(input, ParseOptions));
+
+        private IEnumerable<string> GetVariableNames() =>
+            _scriptState?.Variables.Select(variable => variable.Name) ?? Enumerable.Empty<string>();
+
+        private Type ResolveVariableType(string name) =>
+            _scriptState?.Variables.FirstOrDefault(variable => variable.Name == name)?.Type;
 
         private async Task<object> HandleScriptErrors(Func<Task> doWork)
         {

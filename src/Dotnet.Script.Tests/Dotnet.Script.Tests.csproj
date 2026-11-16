@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Dotnet.Script.Core\Dotnet.Script.Core.csproj" />
     <ProjectReference Include="..\Dotnet.Script.DependencyModel\Dotnet.Script.DependencyModel.csproj" />
+    <ProjectReference Include="..\Dotnet.Script.LanguageServices\Dotnet.Script.LanguageServices.csproj" />
     <ProjectReference Include="..\Dotnet.Script.Shared.Tests\Dotnet.Script.Shared.Tests.csproj" />
     <ProjectReference Include="..\Dotnet.Script\Dotnet.Script.csproj" />
   </ItemGroup>

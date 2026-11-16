@@ -10,6 +10,7 @@ var root = FileUtils.GetScriptFolder();
 var solutionFolder = Path.Combine(root, "..", "src");
 var dotnetScriptProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script");
 var dotnetScriptCoreProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Core");
+var dotnetScriptLanguageServicesProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.LanguageServices");
 var dotnetScriptDependencyModelProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel");
 var dotnetScriptDependencyModelNuGetProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.DependencyModel.Nuget");
 var testProjectFolder = Path.Combine(root, "..", "src", "Dotnet.Script.Tests");

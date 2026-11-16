@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
+using Dotnet.Script.Core.Interactive.LineEditing;
 using Microsoft.CodeAnalysis;
-using RL = System.ReadLine;
 
 namespace Dotnet.Script.Core
 {
@@ -11,6 +10,8 @@ namespace Dotnet.Script.Core
         // Lazy to avoid touching anything during type initialization
         private static readonly Lazy<ScriptConsole> s_default =
             new Lazy<ScriptConsole>(() => new ScriptConsole(Console.Out, Console.In, Console.Error));
+
+        private readonly LineEditor _lineEditor;
 
         public static ScriptConsole Default => s_default.Value;
 
@@ -72,60 +73,44 @@ namespace Dotnet.Script.Core
             }
         }
 
-        public virtual string ReadLine()
-        {
-            if (In != null)
-                return In.ReadLine();
+        public virtual string ReadLine() => In?.ReadLine();
 
-            return ReadLineInteractive();
-        }
+        /// <summary>
+        /// The interactive line editor, or <c>null</c> when this console is not attached to a terminal.
+        /// </summary>
+        public virtual LineEditor LineEditor => _lineEditor;
 
         public ScriptConsole(TextWriter output, TextReader input, TextWriter error)
         {
-            if (input == null)
-            {
-                TryEnableReadLineHistory();
-            }
-
             Out = output;
             Error = error;
             In = input;
+            _lineEditor = TryCreateLineEditor(input);
         }
 
-        // Isolate the ReadLine reference so JIT does not resolve it unless called.
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static string ReadLineInteractive()
+        /// <summary>
+        /// The line editor is only used when reading from a real, non redirected terminal.
+        /// Piped input and in-memory readers keep using plain line reads.
+        /// </summary>
+        private static LineEditor TryCreateLineEditor(TextReader input)
         {
             try
             {
-                return RL.Read();
-            }
-            catch (System.IO.FileLoadException)
-            {
-                // ReadLine is not strongly named or not resolvable on netfx test hosts; fallback to Console.ReadLine.
-                return Console.ReadLine();
-            }
-            catch (TypeInitializationException tie) when (tie.InnerException is System.IO.FileLoadException)
-            {
-                return Console.ReadLine();
-            }
-        }
+                if (input == null || !ReferenceEquals(input, Console.In))
+                {
+                    return null;
+                }
 
-        // Isolate the ReadLine reference so JIT does not resolve it unless called.
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void TryEnableReadLineHistory()
-        {
-            try
-            {
-                RL.HistoryEnabled = true;
+                if (Console.IsInputRedirected || Console.IsOutputRedirected)
+                {
+                    return null;
+                }
+
+                return new LineEditor();
             }
-            catch (System.IO.FileLoadException)
+            catch (Exception)
             {
-                // netfx may require a strong-named dependency chain; ignore for tests.
-            }
-            catch (TypeInitializationException tie) when (tie.InnerException is System.IO.FileLoadException)
-            {
-                // Same case wrapped by a type initializer; ignore.
+                return null;
             }
         }
     }

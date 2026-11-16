@@ -3,6 +3,7 @@ using Dotnet.Script.Core.Commands;
 using Dotnet.Script.Core.Versioning;
 using Dotnet.Script.DependencyModel.Environment;
 using Dotnet.Script.DependencyModel.Logging;
+using Dotnet.Script.LanguageServices;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
@@ -70,6 +71,7 @@ namespace Dotnet.Script
             var verbosity = app.Option("--verbosity", " Set the verbosity level of the command. Allowed values are t[trace], d[ebug], i[nfo], w[arning], e[rror], and c[ritical].", CommandOptionType.SingleValue);
             var nocache = app.Option("--no-cache", "Disable caching (Restore and Dll cache)", CommandOptionType.NoValue);
             var disableIsolatedLoadContext = app.Option("--disable-isolated-load-context", "Disables isolated assembly load context", CommandOptionType.NoValue);
+            var disableLanguageServices = app.Option("--no-language-services", "Disables Roslyn powered completion, colorization and quick info in the REPL.", CommandOptionType.NoValue);
             var infoOption = app.Option("--info", "Displays environmental information", CommandOptionType.NoValue);
 
             var argsBeforeDoubleHyphen = args.TakeWhile(a => a != "--").ToArray();
@@ -246,7 +248,7 @@ namespace Dotnet.Script
                 {
                     if (interactive.HasValue())
                     {
-                        return await RunInteractiveWithSeed(file.Value, logFactory, scriptArguments, packageSources.Values?.ToArray(), cachePath.Value(), assemblyLoadContext);
+                        return await RunInteractiveWithSeed(file.Value, logFactory, scriptArguments, packageSources.Values?.ToArray(), cachePath.Value(), assemblyLoadContext, !disableLanguageServices.HasValue());
                     }
 
                     var fileCommandOptions = new ExecuteScriptCommandOptions
@@ -272,7 +274,7 @@ namespace Dotnet.Script
                 }
                 else
                 {
-                    await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray(), cachePath.Value(), assemblyLoadContext);
+                    await RunInteractive(!nocache.HasValue(), logFactory, packageSources.Values?.ToArray(), cachePath.Value(), assemblyLoadContext, !disableLanguageServices.HasValue());
                 }
                 return exitCode;
             });
@@ -280,24 +282,27 @@ namespace Dotnet.Script
             return app.Execute(argsBeforeDoubleHyphen);
         }
 
-        private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources, string cachePath, AssemblyLoadContext assemblyLoadContext)
+        private static async Task<int> RunInteractive(bool useRestoreCache, LogFactory logFactory, string[] packageSources, string cachePath, AssemblyLoadContext assemblyLoadContext, bool enableLanguageServices)
         {
             var options = new ExecuteInteractiveCommandOptions(null, Array.Empty<string>(), packageSources, cachePath)
             {
                 AssemblyLoadContext = assemblyLoadContext
             };
-            await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
+            await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory, CreateLanguageServiceFactory(enableLanguageServices)).Execute(options);
             return 0;
         }
 
-        private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources, string cachePath, AssemblyLoadContext assemblyLoadContext)
+        private async static Task<int> RunInteractiveWithSeed(string file, LogFactory logFactory, string[] arguments, string[] packageSources, string cachePath, AssemblyLoadContext assemblyLoadContext, bool enableLanguageServices)
         {
             var options = new ExecuteInteractiveCommandOptions(new ScriptFile(file), arguments, packageSources, cachePath)
             {
                 AssemblyLoadContext = assemblyLoadContext
             };
-            await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory).Execute(options);
+            await new ExecuteInteractiveCommand(ScriptConsole.Default, logFactory, CreateLanguageServiceFactory(enableLanguageServices)).Execute(options);
             return 0;
         }
+
+        private static Func<LogFactory, IReplLanguageService> CreateLanguageServiceFactory(bool enabled) =>
+            enabled ? factory => new ReplLanguageService(factory) : (Func<LogFactory, IReplLanguageService>)null;
     }
 }
